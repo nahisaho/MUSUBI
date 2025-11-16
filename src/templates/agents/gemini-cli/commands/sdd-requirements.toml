@@ -1,0 +1,291 @@
+name = "sdd-requirements"
+description = "Create EARS-format requirements specification for a feature"
+
+[[instructions]]
+role = "system"
+content = """
+You are executing the /sdd-requirements command to create a requirements specification using EARS format.
+
+# Command Format
+
+/sdd-requirements <feature-name>
+
+Example: /sdd-requirements authentication
+
+# Your Task
+
+Create a comprehensive requirements specification for the given feature using EARS (Easy Approach to Requirements Syntax) format.
+
+# Step 1: Read Project Memory (IMPORTANT)
+
+**ALWAYS read steering files FIRST to understand project context:**
+
+- Read `steering/structure.md` (English) - Architecture patterns
+- Read `steering/tech.md` (English) - Technology stack
+- Read `steering/product.md` (English) - Product context
+
+**Note**: Japanese versions (.ja.md) are translations only. Always use English versions (.md) for all work.
+
+# Step 2: Understand the Feature
+
+1. Ask user for feature details if needed
+2. Understand the business goal
+3. Identify affected components (based on steering/structure.md)
+4. Consider technical constraints (based on steering/tech.md)
+5. Align with product vision (based on steering/product.md)
+
+# Step 3: Generate EARS Requirements
+
+Use the 5 EARS patterns:
+
+## 1. Ubiquitous Requirements
+Format: The [system] SHALL [requirement]
+
+Example:
+- The system SHALL authenticate users via email and password
+- The authentication service SHALL hash passwords using bcrypt
+
+## 2. Event-Driven Requirements
+Format: WHEN [event], the [system] SHALL [response]
+
+Example:
+- WHEN user submits valid credentials, the system SHALL create a session
+- WHEN login fails 5 times, the system SHALL lock the account for 30 minutes
+
+## 3. State-Driven Requirements
+Format: WHILE [state], the [system] SHALL [response]
+
+Example:
+- WHILE user is authenticated, the system SHALL display user profile
+- WHILE session is active, the system SHALL refresh token every 15 minutes
+
+## 4. Unwanted Behavior
+Format: IF [condition], THEN the [system] SHALL [response]
+
+Example:
+- IF password is invalid, THEN the system SHALL return 401 error
+- IF session expires, THEN the system SHALL redirect to login
+
+## 5. Optional Features
+Format: WHERE [feature enabled], the [system] SHALL [requirement]
+
+Example:
+- WHERE 2FA is enabled, the system SHALL require OTP code
+- WHERE social login is configured, the system SHALL offer OAuth options
+
+# Step 4: Requirement Structure
+
+For each requirement:
+
+1. **Requirement ID**: REQ-<FEATURE>-NNN
+   Example: REQ-AUTH-001, REQ-AUTH-002
+
+2. **Title**: Clear, descriptive name
+
+3. **EARS Statement**: Using one of the 5 patterns
+
+4. **Acceptance Criteria**: Testable conditions
+   - GIVEN [context]
+   - WHEN [action]
+   - THEN [expected result]
+
+5. **Priority**: Must-Have / Should-Have / Nice-to-Have
+
+6. **Dependencies**: Links to other requirements
+
+# Step 5: Document Structure
+
+Create a requirements document with:
+
+## Header
+- Feature Name
+- Version
+- Date
+- Author
+- Status
+
+## 1. Overview
+- Feature description
+- Business value
+- Affected components (from steering/structure.md)
+
+## 2. Functional Requirements
+Group by category:
+- User Management
+- Authentication
+- Authorization
+- Error Handling
+- etc.
+
+For each requirement:
+- ID: REQ-<FEATURE>-NNN
+- Title
+- EARS statement
+- Acceptance criteria
+- Priority
+- Dependencies
+
+## 3. Non-Functional Requirements
+- Performance (response time, throughput)
+- Security (based on Constitutional Article - OWASP Top 10)
+- Reliability (uptime, error rates)
+- Scalability
+- Maintainability
+
+## 4. Technical Constraints
+Based on steering/tech.md:
+- Technology stack alignment
+- Framework requirements
+- Database requirements
+- API design (REST/GraphQL/gRPC)
+
+## 5. Constitutional Compliance
+
+Ensure requirements align with Constitutional Articles:
+
+- **Article I: Library-First** - Feature implemented as library in lib/
+- **Article II: CLI Interface** - Library exposes CLI interface
+- **Article III: Test-First** - Requirements include test scenarios
+- **Article IV: EARS Format** - All requirements in EARS format
+- **Article V: Traceability** - Each requirement traceable to code and tests
+
+## 6. Dependencies
+- Other features required
+- External services
+- Infrastructure needs
+
+## 7. Risks & Assumptions
+- Technical risks
+- Business assumptions
+- Dependencies on external factors
+
+# Step 6: Bilingual Output
+
+**IMPORTANT**: Create BOTH English and Japanese versions.
+
+**English version (Primary/Reference)**:
+Save to: `storage/specs/{{feature-name}}-requirements.md`
+
+**Japanese version (Translation)**:
+Save to: `storage/specs/{{feature-name}}-requirements.ja.md`
+
+Translation rules:
+- Keep requirement IDs in English (REQ-AUTH-001)
+- Keep EARS keywords in English (WHEN, SHALL, IF, THEN, etc.)
+- Keep technical terms in English (API, REST, JWT, etc.)
+- Translate explanations and descriptions to Japanese
+
+# Example Output
+
+```markdown
+# Feature Requirements: User Authentication
+
+**Version**: 1.0
+**Date**: 2025-11-17
+**Status**: Draft
+
+## 1. Overview
+
+This feature provides secure user authentication for the application.
+
+**Business Value**: Enable users to securely access the platform
+**Affected Components**: lib/auth/, app/api/auth/
+
+## 2. Functional Requirements
+
+### User Registration
+
+#### REQ-AUTH-001: Email Registration
+**EARS**: The system SHALL allow users to register using email and password.
+
+**Acceptance Criteria**:
+- GIVEN user provides valid email and password
+- WHEN user submits registration form
+- THEN system SHALL create user account
+- AND system SHALL send verification email
+
+**Priority**: Must-Have
+**Dependencies**: None
+
+#### REQ-AUTH-002: Password Validation
+**EARS**: The system SHALL enforce password requirements.
+
+**Acceptance Criteria**:
+- GIVEN user provides password
+- WHEN password is validated
+- THEN system SHALL reject if length < 8 characters
+- AND system SHALL reject if no special characters
+
+**Priority**: Must-Have
+**Dependencies**: REQ-AUTH-001
+
+### User Login
+
+#### REQ-AUTH-003: Email Login
+**EARS**: WHEN user provides valid credentials, the system SHALL authenticate the user AND create a session.
+
+**Acceptance Criteria**:
+- GIVEN user has registered account
+- WHEN user submits correct email and password
+- THEN system SHALL verify credentials
+- AND system SHALL create session token
+- AND system SHALL return JWT token
+
+**Priority**: Must-Have
+**Dependencies**: REQ-AUTH-001
+
+## 3. Non-Functional Requirements
+
+### Security
+- Passwords SHALL be hashed using bcrypt (cost factor 10)
+- Sessions SHALL expire after 24 hours
+- JWT tokens SHALL use RS256 algorithm
+
+### Performance
+- Login response time SHALL be < 500ms
+- Registration SHALL complete < 1 second
+
+## 4. Constitutional Compliance
+
+- ✅ Article I: Implemented as lib/auth/
+- ✅ Article II: CLI interface for user management
+- ✅ Article III: Test scenarios defined
+- ✅ Article IV: All requirements in EARS format
+- ✅ Article V: Traceability matrix included
+```
+
+# Validation
+
+Before finalizing:
+
+1. **EARS Compliance**:
+   - All requirements use EARS patterns
+   - Keywords correct (WHEN, SHALL, IF, THEN, WHERE, WHILE)
+   - Requirements are unambiguous
+
+2. **Constitutional Compliance**:
+   - Library-first approach documented
+   - CLI interface requirements included
+   - Test scenarios defined
+   - Traceability considered
+
+3. **Completeness**:
+   - Functional requirements covered
+   - Non-functional requirements included
+   - Dependencies identified
+   - Acceptance criteria defined
+
+4. **Bilingual**:
+   - Both English and Japanese versions created
+   - Technical terms consistent
+   - Requirements IDs identical
+
+# Next Steps
+
+After requirements are complete:
+1. User reviews and approves
+2. Proceed to design: /sdd-design {{feature-name}}
+3. Or validate compliance: /sdd-validate {{feature-name}}
+
+**Execute requirements generation now.**
+"""

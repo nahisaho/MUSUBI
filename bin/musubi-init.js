@@ -3,12 +3,19 @@
 /**
  * MUSUBI Initialization Script
  *
- * Initializes a new project with MUSUBI SDD tools:
- * - Creates .claude/skills/ with 25 specialized skills
- * - Creates .claude/commands/ with slash commands
- * - Creates steering/ directory with project memory
- * - Creates templates/ for documents
- * - Sets up constitutional governance
+ * Initializes a new project with MUSUBI SDD tools for various AI coding agents:
+ * - Claude Code: .claude/skills/ (25 skills) + .claude/commands/
+ * - GitHub Copilot: .github/prompts/
+ * - Cursor: .cursor/commands/
+ * - Gemini CLI: .gemini/commands/
+ * - Codex CLI: .codex/prompts/
+ * - Qwen Code: .qwen/commands/
+ * - Windsurf: .windsurf/workflows/
+ *
+ * All agents get:
+ * - steering/ directory with project memory
+ * - templates/ for documents
+ * - Constitutional governance
  */
 
 const fs = require('fs-extra');
@@ -17,17 +24,33 @@ const chalk = require('chalk');
 const inquirer = require('inquirer');
 
 const TEMPLATE_DIR = path.join(__dirname, '..', 'src', 'templates');
+const SHARED_TEMPLATE_DIR = path.join(TEMPLATE_DIR, 'shared');
+const AGENTS_TEMPLATE_DIR = path.join(TEMPLATE_DIR, 'agents');
 
-async function main() {
+/**
+ * Main initialization function
+ * @param {object} agent - Agent definition from registry
+ * @param {string} agentKey - Agent key (e.g., 'claude-code', 'cursor')
+ */
+async function main(agent, agentKey) {
+  // If called directly without agent parameter, default to Claude Code
+  if (!agent) {
+    const { getAgentDefinition } = require('../src/agents/registry');
+    agent = getAgentDefinition('claude-code');
+    agentKey = 'claude-code';
+  }
+
   console.log(chalk.blue.bold('\n🎯 MUSUBI - Ultimate Specification Driven Development\n'));
+  console.log(chalk.white(`Initializing for: ${chalk.bold(agent.label)}\n`));
 
-  // Check if already initialized
-  if (fs.existsSync('.claude/skills')) {
+  // Check if already initialized for this agent
+  const agentDir = agent.layout.agentDir;
+  if (fs.existsSync(agentDir)) {
     const { overwrite } = await inquirer.prompt([
       {
         type: 'confirm',
         name: 'overwrite',
-        message: 'MUSUBI is already initialized. Overwrite?',
+        message: `MUSUBI for ${agent.label} is already initialized. Overwrite?`,
         default: false
       }
     ]);
@@ -39,7 +62,7 @@ async function main() {
   }
 
   // Collect project information
-  const answers = await inquirer.prompt([
+  const prompts = [
     {
       type: 'input',
       name: 'projectName',
@@ -57,8 +80,12 @@ async function main() {
       name: 'projectType',
       message: 'Project type:',
       choices: ['Greenfield (0→1)', 'Brownfield (1→n)', 'Both']
-    },
-    {
+    }
+  ];
+
+  // Skills selection is only for Claude Code (Skills API exclusive)
+  if (agent.features.hasSkills) {
+    prompts.push({
       type: 'checkbox',
       name: 'skills',
       message: 'Select skills to install (all recommended):',
@@ -72,7 +99,10 @@ async function main() {
         { name: 'Infrastructure (devops-engineer, cloud-architect, database-administrator, site-reliability-engineer, release-coordinator)', value: 'infrastructure', checked: true },
         { name: 'Documentation (technical-writer, ai-ml-engineer)', value: 'documentation', checked: true }
       ]
-    },
+    });
+  }
+
+  prompts.push(
     {
       type: 'confirm',
       name: 'createSteering',
@@ -85,14 +115,14 @@ async function main() {
       message: 'Create constitutional governance?',
       default: true
     }
-  ]);
+  );
+
+  const answers = await inquirer.prompt(prompts);
 
   console.log(chalk.green('\n✨ Initializing MUSUBI...\n'));
 
-  // Create directory structure
+  // Create directory structure (agent-specific + shared)
   const dirs = [
-    '.claude/skills',
-    '.claude/commands',
     'steering',
     'steering/rules',
     'templates',
@@ -101,36 +131,53 @@ async function main() {
     'storage/features'
   ];
 
+  // Add agent-specific directories
+  if (agent.layout.skillsDir) {
+    dirs.unshift(agent.layout.skillsDir);
+  }
+  if (agent.layout.commandsDir) {
+    dirs.unshift(agent.layout.commandsDir);
+  }
+  if (agent.layout.agentDir && !dirs.includes(agent.layout.agentDir)) {
+    dirs.unshift(agent.layout.agentDir);
+  }
+
   for (const dir of dirs) {
     await fs.ensureDir(dir);
     console.log(chalk.gray(`  Created ${dir}/`));
   }
 
-  // Copy skills based on selection
-  const skillGroups = {
-    core: ['orchestrator', 'steering', 'constitution-enforcer'],
-    requirements: ['requirements-analyst', 'project-manager', 'change-impact-analyzer'],
-    architecture: ['system-architect', 'api-designer', 'database-schema-designer', 'ui-ux-designer'],
-    development: ['software-developer'],
-    quality: ['test-engineer', 'code-reviewer', 'bug-hunter', 'quality-assurance', 'traceability-auditor'],
-    security: ['security-auditor', 'performance-optimizer'],
-    infrastructure: ['devops-engineer', 'cloud-architect', 'database-administrator', 'site-reliability-engineer', 'release-coordinator'],
-    documentation: ['technical-writer', 'ai-ml-engineer']
-  };
+  // Install skills (Claude Code only)
+  if (agent.features.hasSkills && answers.skills) {
+    const skillGroups = {
+      core: ['orchestrator', 'steering', 'constitution-enforcer'],
+      requirements: ['requirements-analyst', 'project-manager', 'change-impact-analyzer'],
+      architecture: ['system-architect', 'api-designer', 'database-schema-designer', 'ui-ux-designer'],
+      development: ['software-developer'],
+      quality: ['test-engineer', 'code-reviewer', 'bug-hunter', 'quality-assurance', 'traceability-auditor'],
+      security: ['security-auditor', 'performance-optimizer'],
+      infrastructure: ['devops-engineer', 'cloud-architect', 'database-administrator', 'site-reliability-engineer', 'release-coordinator'],
+      documentation: ['technical-writer', 'ai-ml-engineer']
+    };
 
-  let skillCount = 0;
-  for (const group of answers.skills) {
-    for (const skill of skillGroups[group]) {
-      await copySkill(skill);
-      skillCount++;
+    let skillCount = 0;
+    for (const group of answers.skills) {
+      for (const skill of skillGroups[group]) {
+        await copySkill(skill, agent);
+        skillCount++;
+      }
     }
+
+    console.log(chalk.green(`\n  Installed ${skillCount} skills`));
   }
 
-  console.log(chalk.green(`\n  Installed ${skillCount} skills`));
-
-  // Copy slash commands
-  await copyCommands();
-  console.log(chalk.green('  Installed slash commands'));
+  // Install commands/prompts/workflows
+  if (agent.features.hasCommands) {
+    await copyCommands(agent, agentKey);
+    const commandType = agentKey === 'github-copilot' || agentKey === 'codex' ? 'prompts' :
+                        agentKey === 'windsurf' ? 'workflows' : 'commands';
+    console.log(chalk.green(`  Installed ${commandType}`));
+  }
 
   // Generate steering context
   if (answers.createSteering) {
@@ -145,33 +192,47 @@ async function main() {
   }
 
   // Create README
-  await createReadme(answers);
-  console.log(chalk.green('  Created MUSUBI.md guide'));
+  await createReadme(answers, agent, agentKey);
+  console.log(chalk.green(`  Created ${agent.layout.docFile || 'MUSUBI.md'} guide`));
 
   // Success message
-  console.log(chalk.blue.bold('\n✅ MUSUBI initialization complete!\n'));
+  console.log(chalk.blue.bold(`\n✅ MUSUBI initialization complete for ${agent.label}!\n`));
   console.log(chalk.white('Next steps:'));
   console.log(chalk.gray('  1. Review steering/ context files'));
   console.log(chalk.gray('  2. Review steering/rules/constitution.md'));
-  console.log(chalk.gray('  3. Start using Claude Code with MUSUBI skills'));
-  console.log(chalk.gray('  4. Try slash commands: /sdd-requirements, /sdd-design\n'));
+
+  if (agent.features.hasSkills) {
+    console.log(chalk.gray(`  3. Start using ${agent.label} with MUSUBI skills`));
+  } else {
+    console.log(chalk.gray(`  3. Start using ${agent.label} with MUSUBI`));
+  }
+
+  const cmdExample = agent.commands.requirements.replace(' <feature>', ' authentication');
+  console.log(chalk.gray(`  4. Try commands: ${cmdExample}\n`));
   console.log(chalk.cyan('Learn more: https://github.com/your-org/musubi\n'));
 }
 
-async function copySkill(skillName) {
-  const srcDir = path.join(TEMPLATE_DIR, 'skills', skillName);
-  const destDir = path.join('.claude', 'skills', skillName);
+async function copySkill(skillName, agent) {
+  const srcDir = path.join(AGENTS_TEMPLATE_DIR, 'claude-code', 'skills', skillName);
+  const destDir = path.join(agent.layout.skillsDir, skillName);
   await fs.copy(srcDir, destDir);
 }
 
-async function copyCommands() {
-  const srcDir = path.join(TEMPLATE_DIR, 'commands');
-  const destDir = path.join('.claude', 'commands');
-  await fs.copy(srcDir, destDir);
+async function copyCommands(agent, agentKey) {
+  const srcDir = path.join(AGENTS_TEMPLATE_DIR, agentKey, 'commands');
+  const destDir = agent.layout.commandsDir;
+
+  // If agent-specific templates don't exist yet, fall back to Claude Code templates
+  if (!fs.existsSync(srcDir)) {
+    const fallbackSrc = path.join(AGENTS_TEMPLATE_DIR, 'claude-code', 'commands');
+    await fs.copy(fallbackSrc, destDir);
+  } else {
+    await fs.copy(srcDir, destDir);
+  }
 }
 
 async function generateSteering(answers) {
-  const steeringTemplates = path.join(TEMPLATE_DIR, 'steering');
+  const steeringTemplates = path.join(SHARED_TEMPLATE_DIR, 'steering');
 
   // Copy and customize steering files
   const files = ['structure.md', 'tech.md', 'product.md'];
@@ -188,31 +249,41 @@ async function generateSteering(answers) {
 }
 
 async function createConstitution() {
-  const constitutionTemplate = path.join(TEMPLATE_DIR, 'constitution', 'constitution.md');
+  const constitutionTemplate = path.join(SHARED_TEMPLATE_DIR, 'constitution', 'constitution.md');
   await fs.copy(constitutionTemplate, 'steering/rules/constitution.md');
 }
 
-async function createReadme(answers) {
+async function createReadme(answers, agent, agentKey) {
+  const skillsSection = agent.features.hasSkills && answers.skills
+    ? `This project uses **MUSUBI** (Ultimate Specification Driven Development) with ${answers.skills.length} skill groups.
+
+### Available Skills
+
+Check \`${agent.layout.skillsDir}/\` directory for all installed skills.
+
+`
+    : `This project uses **MUSUBI** (Ultimate Specification Driven Development).
+
+`;
+
+  const commandType = agentKey === 'github-copilot' || agentKey === 'codex' ? 'Prompts' :
+                      agentKey === 'windsurf' ? 'Workflows' : 'Commands';
+
   const readme = `# MUSUBI - ${answers.projectName}
 
 ${answers.description}
 
-## Initialized with MUSUBI SDD
+## Initialized with MUSUBI SDD for ${agent.label}
 
-This project uses **MUSUBI** (Ultimate Specification Driven Development) with ${answers.skills.length} skill groups.
+${skillsSection}
+### ${commandType}
 
-### Available Skills
-
-Check \`.claude/skills/\` directory for all installed skills.
-
-### Slash Commands
-
-- \`/sdd-steering\` - Generate/update project memory
-- \`/sdd-requirements\` - Create EARS requirements
-- \`/sdd-design\` - Generate C4 + ADR design
-- \`/sdd-tasks\` - Break down into tasks
-- \`/sdd-implement\` - Execute implementation
-- \`/sdd-validate\` - Validate constitutional compliance
+- \`${agent.commands.steering}\` - Generate/update project memory
+- \`${agent.commands.requirements}\` - Create EARS requirements
+- \`${agent.commands.design}\` - Generate C4 + ADR design
+- \`${agent.commands.tasks}\` - Break down into tasks
+- \`${agent.commands.implement}\` - Execute implementation
+- \`${agent.commands.validate}\` - Validate constitutional compliance
 
 ### Project Memory
 
@@ -229,14 +300,22 @@ Check \`.claude/skills/\` directory for all installed skills.
 
 ---
 
+**Agent**: ${agent.label}
 **Initialized**: ${new Date().toISOString().split('T')[0]}
 **MUSUBI Version**: 0.1.0
 `;
 
-  await fs.writeFile('MUSUBI.md', readme);
+  const filename = agent.layout.docFile || 'MUSUBI.md';
+  await fs.writeFile(filename, readme);
 }
 
-main().catch(err => {
-  console.error(chalk.red('\n❌ Initialization failed:'), err.message);
-  process.exit(1);
-});
+// Export for use from musubi.js
+module.exports = main;
+
+// Allow direct execution for backward compatibility
+if (require.main === module) {
+  main().catch(err => {
+    console.error(chalk.red('\n❌ Initialization failed:'), err.message);
+    process.exit(1);
+  });
+}

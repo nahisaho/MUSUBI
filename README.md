@@ -1,44 +1,89 @@
 # MUSUBI
 
-**Ultimate Specification Driven Development Tool with 25 Claude Code Skills**
+**Ultimate Specification Driven Development Tool for 7 AI Coding Agents**
 
-MUSUBI is a comprehensive SDD (Specification Driven Development) framework that synthesizes the best features from 6 leading frameworks into a production-ready tool for Claude Code.
+MUSUBI is a comprehensive SDD (Specification Driven Development) framework that synthesizes the best features from 6 leading frameworks into a production-ready tool for multiple AI coding agents.
 
 ## Features
 
-- 🎯 **25 Specialized Claude Code Skills** - Orchestrator, Steering, Requirements, Architecture, Development, Quality, Security, Infrastructure, and more
+- 🤖 **Multi-Agent Support** - Works with 7 AI coding agents (Claude Code, GitHub Copilot, Cursor, Gemini CLI, Codex CLI, Qwen Code, Windsurf)
+- 📄 **Flexible Command Formats** - Supports both Markdown and TOML formats (Gemini CLI uses TOML)
+- 🎯 **25 Specialized Claude Code Skills** - Orchestrator, Steering, Requirements, Architecture, Development, Quality, Security, Infrastructure (Claude Code exclusive)
 - 📋 **Constitutional Governance** - 9 immutable articles + Phase -1 Gates for quality enforcement
 - 📝 **EARS Requirements Format** - Unambiguous requirements with complete traceability
 - 🔄 **Delta Specifications** - Brownfield and greenfield project support
 - 🧭 **Auto-Updating Project Memory** - Steering system maintains architecture, tech stack, and product context
 - ✅ **Complete Traceability** - Requirements → Design → Code → Tests mapping
-- 🤖 **Multi-Agent Orchestration** - 5 orchestration patterns for complex workflows
+- 🌐 **Bilingual Documentation** - All agent-generated documents created in both English and Japanese
+
+## Supported AI Coding Agents
+
+MUSUBI supports 7 AI coding agents, each with tailored configurations:
+
+| Agent | Skills API | Command Format | Command File Format | Installation Directory |
+|-------|-----------|----------------|---------------------|----------------------|
+| **Claude Code** | ✅ (25 skills) | `/sdd-*` | Markdown | `.claude/skills/`, `.claude/commands/` |
+| **GitHub Copilot** | ❌ | `#sdd-*` | Markdown | `.github/prompts/` |
+| **Cursor IDE** | ❌ | `/sdd-*` | Markdown | `.cursor/commands/` |
+| **Gemini CLI** | ❌ | `/sdd-*` | **TOML** | `.gemini/commands/` |
+| **Codex CLI** | ❌ | `/prompts:sdd-*` | Markdown | `.codex/prompts/` |
+| **Qwen Code** | ❌ | `/sdd-*` | Markdown | `.qwen/commands/` |
+| **Windsurf IDE** | ❌ | `/sdd-*` | Markdown | `.windsurf/workflows/` |
+
+**Notes**:
+- Skills API is exclusive to Claude Code
+- Gemini CLI uses TOML format instead of Markdown
+- All other agents use Markdown format for commands/prompts
 
 ## Quick Start
 
 ### Installation via npx
 
 ```bash
-# Initialize MUSUBI in your project
+# Initialize MUSUBI for your preferred agent
+
+# Claude Code (default) - with 25 skills
 npx musubi-sdd init
+npx musubi-sdd init --claude
+
+# GitHub Copilot
+npx musubi-sdd init --copilot
+
+# Cursor IDE
+npx musubi-sdd init --cursor
+
+# Gemini CLI
+npx musubi-sdd init --gemini
+
+# Codex CLI
+npx musubi-sdd init --codex
+
+# Qwen Code
+npx musubi-sdd init --qwen
+
+# Windsurf IDE
+npx musubi-sdd init --windsurf
 
 # Or install globally
 npm install -g musubi-sdd
-musubi init
+musubi init --claude    # or --copilot, --cursor, etc.
 ```
 
 ### What Gets Installed
 
+#### Claude Code (default)
+
 ```
 your-project/
 ├── .claude/
-│   ├── skills/              # 25 specialized skills
+│   ├── skills/              # 25 specialized skills (Claude Code exclusive)
 │   │   ├── orchestrator/
 │   │   ├── steering/
 │   │   ├── requirements-analyst/
 │   │   └── ... (22 more)
-│   └── commands/            # Slash commands (/sdd-*)
-├── steering/
+│   ├── commands/            # Slash commands (/sdd-*)
+│   └── CLAUDE.md            # Claude Code guide
+├── steering/                # Project memory (all agents)
 │   ├── structure.md         # Architecture patterns
 │   ├── tech.md              # Technology stack
 │   ├── product.md           # Product context
@@ -46,13 +91,114 @@ your-project/
 │       ├── constitution.md  # 9 Constitutional Articles
 │       ├── workflow.md      # 8-Stage SDD workflow
 │       └── ears-format.md   # EARS syntax guide
-├── templates/               # Document templates
-└── storage/                 # Specs, changes, features
+├── templates/               # Document templates (all agents)
+└── storage/                 # Specs, changes, features (all agents)
 ```
+
+#### Other Agents (GitHub Copilot, Cursor, Gemini, etc.)
+
+```
+your-project/
+├── .github/prompts/         # For GitHub Copilot (#sdd-*, Markdown)
+│   OR
+├── .cursor/commands/        # For Cursor (/sdd-*, Markdown)
+│   OR
+├── .gemini/commands/        # For Gemini CLI (/sdd-*, TOML)
+│   │   ├── sdd-steering.toml
+│   │   ├── sdd-requirements.toml
+│   │   └── ... (6 TOML files)
+│   OR
+├── .codex/prompts/          # For Codex CLI (/prompts:sdd-*, Markdown)
+│   OR
+├── .qwen/commands/          # For Qwen Code (/sdd-*, Markdown)
+│   OR
+├── .windsurf/workflows/     # For Windsurf (/sdd-*, Markdown)
+│
+├── AGENTS.md (or GEMINI.md/QWEN.md)  # Agent-specific guide
+├── steering/                # Project memory (same for all)
+├── templates/               # Document templates (same for all)
+└── storage/                 # Specs, changes, features (same for all)
+```
+
+**Key Differences**:
+- Claude Code gets 25 skills + commands (Markdown)
+- Gemini CLI uses TOML format for commands (unique)
+- Other agents use Markdown for commands/prompts
 
 ## Usage
 
-### Slash Commands
+### CLI Commands
+
+MUSUBI provides several CLI commands for project management:
+
+```bash
+# Show version
+musubi --version
+musubi -v
+
+# Show help
+musubi --help
+
+# Show comprehensive info
+musubi info
+
+# Check project status
+musubi status
+
+# Validate constitutional compliance
+musubi validate
+musubi validate --verbose    # Detailed output
+musubi validate --all        # Validate all features
+
+# Initialize MUSUBI (interactive)
+musubi init
+```
+
+#### musubi status
+
+Shows the current state of your MUSUBI project:
+
+```
+📊 MUSUBI Project Status
+
+✅ MUSUBI is initialized
+
+📁 Claude Code Skills: 25 installed
+   Location: .claude/skills/
+
+🧭 Steering Context:
+   ✅ structure.md (updated: 2025-11-16)
+   ✅ tech.md (updated: 2025-11-16)
+   ✅ product.md (updated: 2025-11-16)
+
+✅ Constitutional Governance: Enabled
+
+📄 Specifications: 3 documents
+   Latest specs:
+   - auth-requirements.md
+   - auth-design.md
+   - auth-tasks.md
+
+💡 Next steps:
+   - Review steering files in steering/
+   - Create requirements: /sdd-requirements [feature]
+   - Validate compliance: musubi validate
+```
+
+#### musubi validate
+
+Performs quick constitutional compliance checks:
+
+- **Article I**: Library-First Principle (checks `lib/` directory)
+- **Article II**: CLI Interface Mandate (checks for `cli.ts` files)
+- **Article IV**: EARS Requirements Format (validates EARS patterns)
+- **Article VI**: Project Memory (checks steering files)
+
+For comprehensive validation, use your agent's `/sdd-validate` (or equivalent) command.
+
+### Agent-Specific Commands
+
+#### Claude Code
 
 ```bash
 # Generate project memory
@@ -74,14 +220,60 @@ your-project/
 /sdd-validate authentication
 ```
 
-### Skills (Auto-Invoked by Claude)
-
-Claude Code will automatically select the appropriate skill based on your request:
-
+**Skills (Auto-Invoked)**: Claude Code automatically selects the appropriate skill:
 - "Review my code" → `code-reviewer` skill
 - "Create requirements for user login" → `requirements-analyst` skill
 - "Design API for payment" → `api-designer` skill
-- "Set up monitoring" → `site-reliability-engineer` skill
+
+#### GitHub Copilot
+
+```bash
+# Use # prefix for custom prompts
+#sdd-steering
+#sdd-requirements authentication
+#sdd-design authentication
+#sdd-tasks authentication
+#sdd-implement authentication
+#sdd-validate authentication
+```
+
+#### Gemini CLI
+
+```bash
+# Use / prefix for commands (TOML format)
+/sdd-steering
+/sdd-requirements authentication
+/sdd-design authentication
+/sdd-tasks authentication
+/sdd-implement authentication
+/sdd-validate authentication
+```
+
+**Note**: Gemini CLI commands are defined in TOML format (`.toml` files) instead of Markdown.
+
+#### Cursor IDE, Qwen Code, Windsurf
+
+```bash
+# Use / prefix for commands (Markdown format)
+/sdd-steering
+/sdd-requirements authentication
+/sdd-design authentication
+/sdd-tasks authentication
+/sdd-implement authentication
+/sdd-validate authentication
+```
+
+#### Codex CLI
+
+```bash
+# Use /prompts: prefix
+/prompts:sdd-steering
+/prompts:sdd-requirements authentication
+/prompts:sdd-design authentication
+/prompts:sdd-tasks authentication
+/prompts:sdd-implement authentication
+/prompts:sdd-validate authentication
+```
 
 ## 25 Skills Overview
 
@@ -167,6 +359,36 @@ AND the system SHALL create a session.
 - THEN system SHALL verify credentials
 - AND system SHALL redirect to dashboard
 ```
+
+## Bilingual Documentation
+
+**All agent-generated documents are created in both English and Japanese.**
+
+### Language Policy
+
+- **English**: Reference/source documents (`.md`)
+- **Japanese**: Translations (`.ja.md`)
+- **Skills**: Always read English versions for work
+- **Code References**: Requirement IDs, technical terms stay in English
+
+### Files Generated Bilingually
+
+**Steering Context**:
+- `steering/structure.md` + `steering/structure.ja.md`
+- `steering/tech.md` + `steering/tech.ja.md`
+- `steering/product.md` + `steering/product.ja.md`
+
+**Specifications**:
+- `storage/specs/auth-requirements.md` + `storage/specs/auth-requirements.ja.md`
+- `storage/specs/auth-design.md` + `storage/specs/auth-design.ja.md`
+- `storage/specs/auth-tasks.md` + `storage/specs/auth-tasks.ja.md`
+
+### Generation Order
+
+1. **English version generated FIRST** (reference/source)
+2. **Japanese version generated SECOND** (translation)
+3. Technical terms (REQ-XXX-NNN, EARS keywords, API endpoints) remain in English
+4. Both versions maintained in sync
 
 ## Delta Specifications (Brownfield)
 

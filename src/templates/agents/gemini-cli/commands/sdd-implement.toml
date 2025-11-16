@@ -1,0 +1,484 @@
+name = "sdd-implement"
+description = "Execute implementation based on tasks following test-first approach"
+
+[[instructions]]
+role = "system"
+content = """
+You are executing the /sdd-implement command to implement a feature following test-first development.
+
+# Command Format
+
+/sdd-implement <feature-name>
+
+Example: /sdd-implement authentication
+
+# Your Task
+
+Implement the feature by executing tasks in the task breakdown document, following RED-GREEN-BLUE test-first approach.
+
+# Step 1: Read All Context
+
+**IMPORTANT: Read these files FIRST (English versions only):**
+
+1. **Steering Context**:
+   - `steering/structure.md` - Architecture patterns
+   - `steering/tech.md` - Technology stack
+   - `steering/product.md` - Product context
+
+2. **Requirements**:
+   - `storage/specs/{{feature-name}}-requirements.md`
+
+3. **Design**:
+   - `storage/specs/{{feature-name}}-design.md`
+
+4. **Tasks**:
+   - `storage/specs/{{feature-name}}-tasks.md`
+
+**Note**: Always read English versions (.md), not Japanese translations (.ja.md)
+
+# Step 2: Task Execution Strategy
+
+## Constitutional Article III: Test-First Imperative
+
+Follow RED-GREEN-BLUE cycle for EVERY task:
+
+### 🔴 RED Phase
+1. Write test that fails
+2. Run test to confirm failure
+3. Commit: "test: add failing test for [feature]"
+
+### 🟢 GREEN Phase
+1. Write minimal code to pass test
+2. Run test to confirm pass
+3. Commit: "feat: implement [feature]"
+
+### 🔵 BLUE Phase
+1. Refactor and improve code
+2. Run tests to ensure still passing
+3. Commit: "refactor: improve [feature]"
+
+## Task Execution Order
+
+Execute tasks in order based on dependency graph from tasks.md:
+1. Setup & Infrastructure tasks first
+2. Core library implementation (Article I: Library-First)
+3. CLI interface (Article II)
+4. API integration
+5. Testing & quality
+6. Documentation
+
+# Step 3: Implementation Guidelines
+
+## Code Quality Standards
+
+1. **SOLID Principles**:
+   - Single Responsibility
+   - Open/Closed
+   - Liskov Substitution
+   - Interface Segregation
+   - Dependency Inversion
+
+2. **Clean Code**:
+   - Meaningful names
+   - Small functions
+   - Clear comments
+   - DRY (Don't Repeat Yourself)
+   - Error handling
+
+3. **Type Safety**:
+   - TypeScript strict mode
+   - Explicit types
+   - No `any` types
+   - Proper generics
+
+## Constitutional Compliance
+
+Ensure implementation follows all Constitutional Articles:
+
+### Article I: Library-First Principle
+- Implement core logic in `lib/{{feature-name}}/`
+- Library is framework-agnostic
+- No framework coupling in lib/
+
+### Article II: CLI Interface Mandate
+- Create `lib/{{feature-name}}/cli.ts`
+- Expose all major functions via CLI
+- Use commander.js or similar
+
+### Article III: Test-First Imperative
+- Tests written BEFORE implementation
+- RED-GREEN-BLUE for every component
+- No code without tests
+
+### Article IV: EARS Requirements Format
+- Every function maps to EARS requirement
+- Traceability maintained
+
+### Article V: Traceability Mandate
+- Comment requirement IDs in code
+- Update traceability matrix
+
+### Article VI: Project Memory
+- Follow patterns from steering/structure.md
+- Use stack from steering/tech.md
+- Align with steering/product.md
+
+### Article VIII: Anti-Abstraction Gate
+- Use framework features directly
+- No custom wrappers without justification
+- Document why if abstraction needed
+
+### Article IX: Integration-First Testing
+- Use real services in tests
+- Minimize mocks
+- Test with actual database
+
+# Step 4: Implementation Process
+
+## For Each Task
+
+### 1. Read Task Details
+- Understand requirements
+- Review acceptance criteria
+- Check dependencies
+
+### 2. RED Phase - Write Failing Test
+
+Example for TASK-003 (PasswordValidator):
+
+```typescript
+// lib/auth/__tests__/password-validator.test.ts
+
+import { PasswordValidator } from '../password-validator';
+
+describe('PasswordValidator', () => {
+  let validator: PasswordValidator;
+
+  beforeEach(() => {
+    validator = new PasswordValidator();
+  });
+
+  // REQ-AUTH-002: Password validation
+  describe('validate', () => {
+    it('should reject passwords shorter than 8 characters', () => {
+      const result = validator.validate('short');
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain('Password must be at least 8 characters');
+    });
+
+    it('should reject passwords without special characters', () => {
+      const result = validator.validate('password123');
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain('Password must contain special characters');
+    });
+
+    it('should accept valid passwords', () => {
+      const result = validator.validate('SecureP@ss123');
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+  });
+
+  // REQ-AUTH-001: Password hashing
+  describe('hash and verify', () => {
+    it('should hash password with bcrypt', async () => {
+      const password = 'MySecureP@ss123';
+      const hash = await validator.hash(password);
+
+      expect(hash).toBeDefined();
+      expect(hash).not.toBe(password);
+      expect(hash.startsWith('$2b$')).toBe(true); // bcrypt prefix
+    });
+
+    it('should verify correct password', async () => {
+      const password = 'MySecureP@ss123';
+      const hash = await validator.hash(password);
+
+      const isValid = await validator.verify(password, hash);
+      expect(isValid).toBe(true);
+    });
+
+    it('should reject incorrect password', async () => {
+      const password = 'MySecureP@ss123';
+      const hash = await validator.hash(password);
+
+      const isValid = await validator.verify('WrongP@ss123', hash);
+      expect(isValid).toBe(false);
+    });
+  });
+});
+```
+
+Run test: `npm test` → Should FAIL (test is red)
+
+Commit: `git commit -m "test: add password validator tests (REQ-AUTH-001, REQ-AUTH-002)"`
+
+### 3. GREEN Phase - Implement Code
+
+```typescript
+// lib/auth/password-validator.ts
+
+import bcrypt from 'bcrypt';
+
+export interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+}
+
+/**
+ * Password validation and hashing service
+ *
+ * Requirements:
+ * - REQ-AUTH-001: Password hashing with bcrypt
+ * - REQ-AUTH-002: Password validation rules
+ */
+export class PasswordValidator {
+  private readonly MIN_LENGTH = 8;
+  private readonly BCRYPT_ROUNDS = 10;
+
+  /**
+   * Validate password against requirements
+   * @param password - Password to validate
+   * @returns Validation result
+   * @requirement REQ-AUTH-002
+   */
+  validate(password: string): ValidationResult {
+    const errors: string[] = [];
+
+    if (password.length < this.MIN_LENGTH) {
+      errors.push(`Password must be at least ${this.MIN_LENGTH} characters`);
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      errors.push('Password must contain special characters');
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      errors.push('Password must contain uppercase letters');
+    }
+
+    if (!/[a-z]/.test(password)) {
+      errors.push('Password must contain lowercase letters');
+    }
+
+    if (!/[0-9]/.test(password)) {
+      errors.push('Password must contain numbers');
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
+  }
+
+  /**
+   * Hash password using bcrypt
+   * @param password - Plain text password
+   * @returns Hashed password
+   * @requirement REQ-AUTH-001
+   */
+  async hash(password: string): Promise<string> {
+    return bcrypt.hash(password, this.BCRYPT_ROUNDS);
+  }
+
+  /**
+   * Verify password against hash
+   * @param password - Plain text password
+   * @param hash - Hashed password
+   * @returns True if password matches
+   * @requirement REQ-AUTH-001
+   */
+  async verify(password: string, hash: string): Promise<boolean> {
+    return bcrypt.compare(password, hash);
+  }
+}
+```
+
+Run test: `npm test` → Should PASS (test is green)
+
+Commit: `git commit -m "feat: implement password validator (REQ-AUTH-001, REQ-AUTH-002)"`
+
+### 4. BLUE Phase - Refactor
+
+Improve code quality:
+- Extract magic numbers to constants
+- Add error handling
+- Improve type safety
+- Add JSDoc comments
+
+Run test: `npm test` → Should still PASS
+
+Commit: `git commit -m "refactor: improve password validator error messages"`
+
+### 5. Update Progress
+
+Mark task as complete in tasks.md:
+- TASK-003: ✅ Complete
+
+# Step 5: Testing Requirements
+
+## Test Coverage
+
+Minimum requirements:
+- **Unit Tests**: 80%+ code coverage
+- **Integration Tests**: All API endpoints
+- **E2E Tests**: Critical user flows
+
+## Test Types
+
+1. **Unit Tests**: Test individual functions/classes
+2. **Integration Tests**: Test component interactions
+3. **E2E Tests**: Test complete user workflows
+4. **Security Tests**: OWASP Top 10 validation
+
+## Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm test -- --coverage
+
+# Run specific test file
+npm test password-validator.test.ts
+
+# Run in watch mode
+npm test -- --watch
+```
+
+# Step 6: Git Workflow
+
+## Commit Message Format
+
+```
+<type>: <description> (<requirement-ids>)
+
+<optional body>
+```
+
+Types:
+- `feat`: New feature
+- `fix`: Bug fix
+- `test`: Add/update tests
+- `refactor`: Code refactoring
+- `docs`: Documentation
+- `chore`: Maintenance
+
+Examples:
+- `test: add password validator tests (REQ-AUTH-001, REQ-AUTH-002)`
+- `feat: implement password validator (REQ-AUTH-001, REQ-AUTH-002)`
+- `refactor: extract validation rules to constants`
+
+## Branch Strategy
+
+- Feature branch: `feature/{{feature-name}}`
+- Commits follow RED-GREEN-BLUE pattern
+- Squash before merge (optional)
+
+# Step 7: Documentation
+
+## Code Documentation
+
+1. **JSDoc Comments**:
+   - Every public function
+   - Include requirement IDs
+   - Parameter descriptions
+   - Return value description
+
+2. **README Updates**:
+   - Update lib/{{feature-name}}/README.md
+   - Usage examples
+   - API documentation
+
+3. **Traceability Matrix**:
+   - Update requirements mapping
+   - Link code to requirements
+
+# Step 8: Validation
+
+Before marking implementation complete:
+
+1. **All Tests Pass**:
+   - Unit tests: 80%+ coverage
+   - Integration tests: All passing
+   - E2E tests: Critical flows work
+
+2. **Constitutional Compliance**:
+   - Library-first: Code in lib/
+   - CLI interface: cli.ts exists
+   - Test-first: RED-GREEN-BLUE followed
+   - Requirements mapped: IDs in code
+
+3. **Code Quality**:
+   - No linting errors
+   - Type-safe (no any)
+   - SOLID principles followed
+   - Clean code standards met
+
+4. **Documentation**:
+   - JSDoc complete
+   - README updated
+   - Traceability matrix updated
+
+# Step 9: Implementation Summary
+
+After completing all tasks, create summary:
+
+```markdown
+## ✅ Implementation Complete: {{feature-name}}
+
+### Tasks Completed
+- ✅ TASK-001: Database schema migration
+- ✅ TASK-002: Environment configuration
+- ✅ TASK-003: PasswordValidator library
+- ✅ TASK-004: AuthService library
+- ✅ TASK-005: CLI interface
+- ✅ TASK-006: Register API endpoint
+- ✅ TASK-007: Login API endpoint
+- ✅ TASK-008: Integration tests
+- ✅ TASK-009: Security audit
+- ✅ TASK-010: API documentation
+
+### Requirements Fulfilled
+- ✅ REQ-AUTH-001: User registration
+- ✅ REQ-AUTH-002: Password validation
+- ✅ REQ-AUTH-003: User login
+
+### Test Coverage
+- Unit Tests: 85%
+- Integration Tests: 100%
+- E2E Tests: Critical flows covered
+
+### Constitutional Compliance
+- ✅ Article I: Library-first (lib/auth/)
+- ✅ Article II: CLI interface (lib/auth/cli.ts)
+- ✅ Article III: Test-first (RED-GREEN-BLUE followed)
+- ✅ Article IV: EARS requirements mapped
+- ✅ Article V: Traceability maintained
+
+### Files Created/Modified
+- lib/auth/password-validator.ts
+- lib/auth/auth-service.ts
+- lib/auth/cli.ts
+- app/api/auth/register/route.ts
+- app/api/auth/login/route.ts
+- (+ 15 test files)
+
+### Next Steps
+1. Review implementation
+2. Validate: /sdd-validate {{feature-name}}
+3. Deploy to staging
+4. Create pull request
+```
+
+# Next Steps
+
+After implementation:
+1. User reviews code
+2. Run validation: /sdd-validate {{feature-name}}
+3. Create pull request
+4. Deploy to staging
+
+**Execute implementation now, following RED-GREEN-BLUE for every task.**
+"""

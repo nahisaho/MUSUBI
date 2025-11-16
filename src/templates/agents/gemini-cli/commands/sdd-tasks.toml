@@ -1,0 +1,441 @@
+name = "sdd-tasks"
+description = "Break down design into implementation tasks with test-first approach"
+
+[[instructions]]
+role = "system"
+content = """
+You are executing the /sdd-tasks command to create an implementation task plan.
+
+# Command Format
+
+/sdd-tasks <feature-name>
+
+Example: /sdd-tasks authentication
+
+# Your Task
+
+Create a detailed implementation task breakdown following test-first development approach.
+
+# Step 1: Read Project Context
+
+**IMPORTANT: Read these files FIRST (English versions only):**
+
+1. **Steering Context**:
+   - `steering/structure.md` - Architecture patterns
+   - `steering/tech.md` - Technology stack
+
+2. **Requirements**:
+   - `storage/specs/{{feature-name}}-requirements.md`
+
+3. **Design**:
+   - `storage/specs/{{feature-name}}-design.md`
+
+**Note**: Always read English versions (.md), not Japanese translations (.ja.md)
+
+# Step 2: Task Breakdown Methodology
+
+Follow Constitutional Article III: Test-First Imperative (Red-Green-Blue):
+
+For each component:
+1. **RED**: Write failing test
+2. **GREEN**: Implement minimal code to pass test
+3. **BLUE**: Refactor and improve
+
+# Step 3: Task Document Structure
+
+## 1. Overview
+- Feature name
+- Total estimated tasks
+- Dependencies
+- Prerequisites
+
+## 2. Task Breakdown
+
+Group tasks by phase:
+
+### Phase 1: Setup & Infrastructure
+- Database migrations
+- Environment configuration
+- CI/CD setup
+
+### Phase 2: Core Libraries (Article I: Library-First)
+- Implement feature in lib/ directory
+- Test-first development
+- CLI interface (Article II)
+
+### Phase 3: API Integration
+- API routes
+- Request/response handling
+- Validation
+
+### Phase 4: Testing & Quality
+- Integration tests
+- E2E tests
+- Security testing
+
+### Phase 5: Documentation & Deployment
+- API documentation
+- User documentation
+- Deployment configuration
+
+## 3. Task Template
+
+For each task:
+
+**TASK-NNN: [Task Title]**
+
+- **Phase**: Setup / Implementation / Testing / Documentation
+- **Type**: Database / Backend / Frontend / Testing / DevOps
+- **Description**: What needs to be done
+- **Test-First Steps**:
+  1. RED: Write test that fails
+  2. GREEN: Implement code to pass test
+  3. BLUE: Refactor and improve
+- **Requirements**: Links to REQ-XXX-NNN
+- **Design Reference**: Links to design sections
+- **Estimated Effort**: S / M / L / XL
+- **Dependencies**: Other tasks that must complete first
+- **Acceptance Criteria**: How to verify completion
+- **Files to Create/Modify**: Specific file paths
+
+# Step 4: Example Task Breakdown
+
+## Phase 1: Setup & Infrastructure
+
+### TASK-001: Database Schema Migration
+- **Phase**: Setup
+- **Type**: Database
+- **Description**: Create users and sessions tables
+- **Test-First Steps**:
+  1. RED: Write migration test that checks table structure
+  2. GREEN: Create Prisma schema and generate migration
+  3. BLUE: Add indexes and constraints
+- **Requirements**: REQ-AUTH-001, REQ-AUTH-003
+- **Design Reference**: Section 6 (Data Model)
+- **Estimated Effort**: M
+- **Dependencies**: None
+- **Acceptance Criteria**:
+  - Tables created successfully
+  - Indexes present on email, user_id
+  - Constraints enforce data integrity
+- **Files**:
+  - `prisma/schema.prisma` (modify)
+  - `prisma/migrations/` (create)
+
+### TASK-002: Environment Configuration
+- **Phase**: Setup
+- **Type**: DevOps
+- **Description**: Configure environment variables
+- **Test-First Steps**:
+  1. RED: Write test that validates env vars
+  2. GREEN: Create .env.example
+  3. BLUE: Add validation logic
+- **Requirements**: All
+- **Design Reference**: Section 13 (Deployment)
+- **Estimated Effort**: S
+- **Dependencies**: None
+- **Acceptance Criteria**:
+  - .env.example complete
+  - Environment validation works
+  - Documentation updated
+- **Files**:
+  - `.env.example` (create)
+  - `lib/auth/config.ts` (create)
+
+## Phase 2: Core Libraries
+
+### TASK-003: PasswordValidator Library (RED-GREEN-BLUE)
+- **Phase**: Implementation
+- **Type**: Backend
+- **Description**: Implement password validation and hashing
+- **Test-First Steps**:
+  1. RED: Write tests for PasswordValidator class
+     ```typescript
+     // lib/auth/__tests__/password-validator.test.ts
+     describe('PasswordValidator', () => {
+       it('should reject passwords < 8 characters', () => {
+         // REQ-AUTH-002
+       });
+       it('should hash passwords with bcrypt', () => {
+         // REQ-AUTH-001
+       });
+     });
+     ```
+  2. GREEN: Implement PasswordValidator
+     ```typescript
+     // lib/auth/password-validator.ts
+     export class PasswordValidator {
+       validate(password: string): ValidationResult
+       hash(password: string): Promise<string>
+       verify(password: string, hash: string): Promise<boolean>
+     }
+     ```
+  3. BLUE: Add edge case handling, improve error messages
+- **Requirements**: REQ-AUTH-001, REQ-AUTH-002
+- **Design Reference**: Section 7 (Component Design)
+- **Estimated Effort**: M
+- **Dependencies**: TASK-001
+- **Acceptance Criteria**:
+  - All tests pass (100% coverage)
+  - Password validation enforces requirements
+  - Hashing uses bcrypt cost factor 10
+  - Requirement REQ-AUTH-002 fully implemented
+- **Files**:
+  - `lib/auth/password-validator.ts` (create)
+  - `lib/auth/__tests__/password-validator.test.ts` (create)
+
+### TASK-004: AuthService Library (RED-GREEN-BLUE)
+- **Phase**: Implementation
+- **Type**: Backend
+- **Description**: Implement authentication service
+- **Test-First Steps**:
+  1. RED: Write tests for AuthService
+     ```typescript
+     // lib/auth/__tests__/auth-service.test.ts
+     describe('AuthService', () => {
+       describe('register', () => {
+         it('should create user account', () => {
+           // REQ-AUTH-001
+         });
+       });
+       describe('login', () => {
+         it('should authenticate valid credentials', () => {
+           // REQ-AUTH-003
+         });
+         it('should reject invalid credentials', () => {
+           // Error handling
+         });
+       });
+     });
+     ```
+  2. GREEN: Implement AuthService
+     ```typescript
+     // lib/auth/auth-service.ts
+     export class AuthService {
+       async register(email: string, password: string): Promise<User>
+       async login(email: string, password: string): Promise<AuthToken>
+       async logout(userId: string): Promise<void>
+     }
+     ```
+  3. BLUE: Add error handling, logging, metrics
+- **Requirements**: REQ-AUTH-001, REQ-AUTH-003
+- **Design Reference**: Section 7 (Component Design)
+- **Estimated Effort**: L
+- **Dependencies**: TASK-003
+- **Acceptance Criteria**:
+  - All tests pass (80%+ coverage)
+  - Registration creates user and sends email
+  - Login returns JWT token
+  - Error cases handled properly
+  - Requirements REQ-AUTH-001, REQ-AUTH-003 fully implemented
+- **Files**:
+  - `lib/auth/auth-service.ts` (create)
+  - `lib/auth/__tests__/auth-service.test.ts` (create)
+  - `lib/auth/types.ts` (create)
+
+### TASK-005: CLI Interface (Article II)
+- **Phase**: Implementation
+- **Type**: Backend
+- **Description**: Create CLI interface for auth library
+- **Test-First Steps**:
+  1. RED: Write CLI integration tests
+  2. GREEN: Implement CLI commands
+  3. BLUE: Add help text, improve UX
+- **Requirements**: Article II (CLI Interface Mandate)
+- **Design Reference**: Constitutional compliance
+- **Estimated Effort**: M
+- **Dependencies**: TASK-004
+- **Acceptance Criteria**:
+  - CLI can create users
+  - CLI can list users
+  - CLI can reset passwords
+  - Help text complete
+- **Files**:
+  - `lib/auth/cli.ts` (create)
+  - `lib/auth/__tests__/cli.test.ts` (create)
+
+## Phase 3: API Integration
+
+### TASK-006: Register API Endpoint (RED-GREEN-BLUE)
+- **Phase**: Implementation
+- **Type**: Backend
+- **Description**: Create /api/auth/register endpoint
+- **Test-First Steps**:
+  1. RED: Write API integration test
+  2. GREEN: Implement route handler
+  3. BLUE: Add validation, error handling
+- **Requirements**: REQ-AUTH-001, REQ-AUTH-002
+- **Design Reference**: Section 5 (API Design)
+- **Estimated Effort**: M
+- **Dependencies**: TASK-004
+- **Acceptance Criteria**:
+  - POST /api/auth/register works
+  - Returns 201 on success
+  - Returns 400 on validation error
+  - Returns 409 on duplicate email
+- **Files**:
+  - `app/api/auth/register/route.ts` (create)
+  - `app/api/auth/register/route.test.ts` (create)
+
+### TASK-007: Login API Endpoint (RED-GREEN-BLUE)
+- **Phase**: Implementation
+- **Type**: Backend
+- **Description**: Create /api/auth/login endpoint
+- **Test-First Steps**:
+  1. RED: Write API integration test
+  2. GREEN: Implement route handler
+  3. BLUE: Add rate limiting, logging
+- **Requirements**: REQ-AUTH-003
+- **Design Reference**: Section 5 (API Design)
+- **Estimated Effort**: M
+- **Dependencies**: TASK-004
+- **Acceptance Criteria**:
+  - POST /api/auth/login works
+  - Returns JWT token on success
+  - Returns 401 on invalid credentials
+  - Rate limiting enforced
+- **Files**:
+  - `app/api/auth/login/route.ts` (create)
+  - `app/api/auth/login/route.test.ts` (create)
+
+## Phase 4: Testing & Quality
+
+### TASK-008: Integration Tests
+- **Phase**: Testing
+- **Type**: Testing
+- **Description**: Write integration tests for complete flow
+- **Test-First Steps**: Already test-first from previous tasks
+- **Requirements**: All REQ-AUTH-*
+- **Design Reference**: Section 12 (Testing Strategy)
+- **Estimated Effort**: L
+- **Dependencies**: TASK-007
+- **Acceptance Criteria**:
+  - Complete registration → login flow tested
+  - Error cases covered
+  - 80%+ overall code coverage
+  - All EARS requirements tested
+- **Files**:
+  - `tests/integration/auth.test.ts` (create)
+
+### TASK-009: Security Audit
+- **Phase**: Testing
+- **Type**: Security
+- **Description**: Verify OWASP Top 10 compliance
+- **Requirements**: Security requirements
+- **Design Reference**: Section 9 (Security Design)
+- **Estimated Effort**: M
+- **Dependencies**: TASK-008
+- **Acceptance Criteria**:
+  - No SQL injection vulnerabilities
+  - Passwords properly hashed
+  - JWT tokens properly signed
+  - Rate limiting works
+- **Files**:
+  - `tests/security/auth-security.test.ts` (create)
+
+## Phase 5: Documentation & Deployment
+
+### TASK-010: API Documentation
+- **Phase**: Documentation
+- **Type**: Documentation
+- **Description**: Create OpenAPI/Swagger documentation
+- **Requirements**: All API requirements
+- **Design Reference**: Section 5 (API Design)
+- **Estimated Effort**: S
+- **Dependencies**: TASK-007
+- **Acceptance Criteria**:
+  - All endpoints documented
+  - Request/response examples provided
+  - Error codes documented
+- **Files**:
+  - `docs/api/auth.yaml` (create)
+
+## 4. Requirements Coverage Matrix
+
+Map tasks to requirements:
+
+| Requirement | Tasks | Status |
+|-------------|-------|--------|
+| REQ-AUTH-001 | TASK-003, TASK-004, TASK-006 | Pending |
+| REQ-AUTH-002 | TASK-003, TASK-006 | Pending |
+| REQ-AUTH-003 | TASK-004, TASK-007 | Pending |
+
+## 5. Dependency Graph
+
+```
+TASK-001 (DB Schema)
+  └─> TASK-003 (PasswordValidator)
+      └─> TASK-004 (AuthService)
+          ├─> TASK-005 (CLI)
+          ├─> TASK-006 (Register API)
+          └─> TASK-007 (Login API)
+              └─> TASK-008 (Integration Tests)
+                  └─> TASK-009 (Security Audit)
+                      └─> TASK-010 (Documentation)
+
+TASK-002 (Env Config) ──> All tasks
+```
+
+## 6. Estimation Summary
+
+- **Small (S)**: 2-4 hours
+- **Medium (M)**: 4-8 hours
+- **Large (L)**: 1-2 days
+- **Extra Large (XL)**: 2-5 days
+
+**Total Estimate**: 3-5 days
+
+# Step 5: Bilingual Output
+
+**IMPORTANT**: Create BOTH English and Japanese versions.
+
+**English version (Primary/Reference)**:
+Save to: `storage/specs/{{feature-name}}-tasks.md`
+
+**Japanese version (Translation)**:
+Save to: `storage/specs/{{feature-name}}-tasks.ja.md`
+
+Translation rules:
+- Keep task IDs in English (TASK-001)
+- Keep requirement IDs in English (REQ-AUTH-001)
+- Keep file paths in English
+- Keep code examples unchanged
+- Translate descriptions and criteria to Japanese
+
+# Validation Checklist
+
+Before finalizing:
+
+1. **Requirements Coverage**:
+   - All requirements from requirements.md have tasks
+   - No missing functionality
+
+2. **Test-First Compliance**:
+   - Each task follows RED-GREEN-BLUE
+   - Tests written before implementation
+   - Acceptance criteria testable
+
+3. **Constitutional Compliance**:
+   - Library-first: Core logic in lib/
+   - CLI interface: Task for CLI created
+   - Test-first: RED-GREEN-BLUE for all tasks
+
+4. **Dependencies**:
+   - Task order logical
+   - No circular dependencies
+   - Prerequisites clear
+
+5. **Bilingual**:
+   - Both English and Japanese versions created
+   - Technical terms consistent
+   - Task IDs identical
+
+# Next Steps
+
+After tasks are complete:
+1. User reviews and adjusts task breakdown
+2. Proceed to implementation: /sdd-implement {{feature-name}}
+3. Or validate compliance: /sdd-validate {{feature-name}}
+
+**Execute task breakdown now.**
+"""

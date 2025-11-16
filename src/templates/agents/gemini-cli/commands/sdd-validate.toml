@@ -1,0 +1,553 @@
+name = "sdd-validate"
+description = "Validate constitutional compliance and requirements coverage"
+
+[[instructions]]
+role = "system"
+content = """
+You are executing the /sdd-validate command to validate constitutional compliance.
+
+# Command Format
+
+/sdd-validate <feature-name>
+
+Example: /sdd-validate authentication
+
+# Your Task
+
+Validate that the implementation follows all Constitutional Articles and meets requirements.
+
+# Step 1: Read All Context
+
+**IMPORTANT: Read these files FIRST (English versions only):**
+
+1. **Constitutional Governance**:
+   - `steering/rules/constitution.md` - 9 Constitutional Articles
+
+2. **Steering Context**:
+   - `steering/structure.md` - Architecture patterns
+   - `steering/tech.md` - Technology stack
+
+3. **Feature Documentation**:
+   - `storage/specs/{{feature-name}}-requirements.md`
+   - `storage/specs/{{feature-name}}-design.md`
+   - `storage/specs/{{feature-name}}-tasks.md`
+
+4. **Implementation**:
+   - Read lib/{{feature-name}}/ directory
+   - Read app/api/{{feature-name}}/ directory (if applicable)
+   - Read test files
+
+**Note**: Always read English versions (.md), not Japanese translations (.ja.md)
+
+# Step 2: Validation Checklist
+
+## Article I: Library-First Principle
+
+**Rule**: Features start as libraries in lib/ directory
+
+**Validation**:
+- [ ] Core implementation in `lib/{{feature-name}}/`
+- [ ] Library is framework-agnostic
+- [ ] No framework coupling in lib/
+- [ ] Exports clean public API
+
+**Evidence to Check**:
+```bash
+# Directory structure
+ls lib/{{feature-name}}/
+
+# Check for framework imports in lib/
+grep -r "from 'next" lib/{{feature-name}}/
+grep -r "from 'react" lib/{{feature-name}}/
+```
+
+**Pass Criteria**: No framework dependencies in lib/
+
+## Article II: CLI Interface Mandate
+
+**Rule**: All libraries expose CLI interfaces
+
+**Validation**:
+- [ ] `lib/{{feature-name}}/cli.ts` exists
+- [ ] CLI exposes major functions
+- [ ] Help text provided
+- [ ] Can be invoked from command line
+
+**Evidence to Check**:
+```bash
+# CLI file exists
+ls lib/{{feature-name}}/cli.ts
+
+# CLI can be invoked
+node lib/{{feature-name}}/cli.ts --help
+```
+
+**Pass Criteria**: CLI interface complete and functional
+
+## Article III: Test-First Imperative
+
+**Rule**: Tests before code (RED-GREEN-BLUE)
+
+**Validation**:
+- [ ] Test files exist for all modules
+- [ ] Test coverage >= 80%
+- [ ] Tests written before implementation (check git history)
+- [ ] RED-GREEN-BLUE pattern followed
+
+**Evidence to Check**:
+```bash
+# Test files exist
+find lib/{{feature-name}} -name "*.test.ts"
+
+# Coverage report
+npm test -- --coverage
+
+# Git history shows test-first
+git log --oneline lib/{{feature-name}}/ | grep "test:"
+```
+
+**Pass Criteria**: 80%+ coverage, test-first followed
+
+## Article IV: EARS Requirements Format
+
+**Rule**: All requirements use EARS patterns
+
+**Validation**:
+- [ ] All requirements in requirements.md use EARS
+- [ ] Keywords present: WHEN, SHALL, IF, THEN, WHERE, WHILE
+- [ ] Requirements are unambiguous
+- [ ] Each requirement testable
+
+**Evidence to Check**:
+```bash
+# Check for EARS keywords
+grep -E "(WHEN|SHALL|IF|THEN|WHERE|WHILE)" storage/specs/{{feature-name}}-requirements.md
+```
+
+**Pass Criteria**: All requirements use EARS format
+
+## Article V: Traceability Mandate
+
+**Rule**: 100% requirements → design → code → tests traceability
+
+**Validation**:
+- [ ] Every requirement has design
+- [ ] Every design has code
+- [ ] Every code has tests
+- [ ] Requirement IDs in code comments
+- [ ] Traceability matrix complete
+
+**Evidence to Check**:
+```bash
+# Check requirement IDs in code
+grep -r "REQ-" lib/{{feature-name}}/
+
+# Check requirement IDs in tests
+grep -r "REQ-" lib/{{feature-name}}/__tests__/
+```
+
+**Pass Criteria**: All requirements traceable to code and tests
+
+### Traceability Matrix Verification
+
+Create matrix:
+
+| Requirement | Design | Implementation | Tests | Status |
+|-------------|--------|----------------|-------|--------|
+| REQ-AUTH-001 | Section 7 | AuthService.register() | auth-service.test.ts:L25 | ✅ |
+| REQ-AUTH-002 | Section 7 | PasswordValidator.validate() | password-validator.test.ts:L15 | ✅ |
+| REQ-AUTH-003 | Section 7 | AuthService.login() | auth-service.test.ts:L45 | ✅ |
+
+## Article VI: Project Memory
+
+**Rule**: All agents consult steering before decisions
+
+**Validation**:
+- [ ] Implementation follows steering/structure.md patterns
+- [ ] Uses tech stack from steering/tech.md
+- [ ] Aligns with steering/product.md goals
+- [ ] Steering consulted during development
+
+**Evidence to Check**:
+- Directory structure matches steering/structure.md
+- Dependencies match steering/tech.md
+- Feature aligns with steering/product.md
+
+**Pass Criteria**: Implementation consistent with steering
+
+## Article VII: Simplicity Gate
+
+**Rule**: Start with max 3 libraries initially
+
+**Validation**:
+- [ ] Feature count reasonable
+- [ ] No premature complexity
+- [ ] Dependencies justified
+
+**Evidence to Check**:
+```bash
+# Count libraries
+ls -d lib/*/ | wc -l
+```
+
+**Pass Criteria**: Complexity justified
+
+## Article VIII: Anti-Abstraction Gate
+
+**Rule**: Use framework features directly, no unnecessary wrappers
+
+**Validation**:
+- [ ] No custom ORM wrapper (use Prisma directly)
+- [ ] No custom React wrapper
+- [ ] No custom Next.js wrapper
+- [ ] Abstractions have documented justification
+
+**Evidence to Check**:
+```bash
+# Check for custom wrappers
+grep -r "class.*Wrapper" lib/{{feature-name}}/
+grep -r "class.*Adapter" lib/{{feature-name}}/
+```
+
+**Pass Criteria**: No unnecessary abstractions
+
+## Article IX: Integration-First Testing
+
+**Rule**: Use real services, minimize mocks
+
+**Validation**:
+- [ ] Tests use real database (test DB)
+- [ ] Minimal mocking
+- [ ] Integration tests present
+- [ ] E2E tests for critical flows
+
+**Evidence to Check**:
+```bash
+# Check for mocks
+grep -r "jest.mock" lib/{{feature-name}}/__tests__/
+grep -r "vi.mock" lib/{{feature-name}}/__tests__/
+
+# Count integration tests
+find tests/integration -name "*{{feature-name}}*.test.ts"
+```
+
+**Pass Criteria**: Real services used, mocks justified
+
+# Step 3: Security Validation (OWASP Top 10)
+
+## A01: Broken Access Control
+- [ ] Authorization checks present
+- [ ] User permissions verified
+- [ ] No direct object references
+
+## A02: Cryptographic Failures
+- [ ] Passwords hashed (bcrypt/argon2)
+- [ ] Sensitive data encrypted
+- [ ] TLS/HTTPS enforced
+
+## A03: Injection
+- [ ] Parameterized queries (Prisma ORM)
+- [ ] Input validation
+- [ ] No string concatenation in SQL
+
+## A05: Security Misconfiguration
+- [ ] Secrets in environment variables
+- [ ] No hardcoded credentials
+- [ ] Secure headers configured
+
+## A07: Authentication Failures
+- [ ] Rate limiting implemented
+- [ ] Account lockout after failed attempts
+- [ ] Session management secure
+
+**Evidence to Check**:
+```typescript
+// Check password hashing
+grep -r "bcrypt\\|argon2" lib/{{feature-name}}/
+
+// Check for hardcoded secrets
+grep -rE "(password|secret|api_key)\\s*=\\s*['\"]" lib/{{feature-name}}/
+
+// Check for SQL injection
+grep -r "query.*+.*params" lib/{{feature-name}}/
+```
+
+# Step 4: Code Quality Validation
+
+## SOLID Principles
+
+**S - Single Responsibility**: Each class has one reason to change
+**O - Open/Closed**: Open for extension, closed for modification
+**L - Liskov Substitution**: Subtypes substitutable for base types
+**I - Interface Segregation**: Many specific interfaces > one general
+**D - Dependency Inversion**: Depend on abstractions, not concretions
+
+**Evidence to Check**: Code review
+
+## Clean Code
+
+- [ ] Meaningful variable names
+- [ ] Functions < 50 lines
+- [ ] Classes < 300 lines
+- [ ] No code duplication
+- [ ] Proper error handling
+
+**Evidence to Check**:
+```bash
+# Check function length
+grep -A 50 "function\\|=>" lib/{{feature-name}}/*.ts
+
+# Check for duplication
+npx jscpd lib/{{feature-name}}/
+```
+
+## Type Safety
+
+- [ ] TypeScript strict mode enabled
+- [ ] No `any` types
+- [ ] Explicit return types
+- [ ] Proper generics
+
+**Evidence to Check**:
+```bash
+# Check for any types
+grep -r ": any" lib/{{feature-name}}/
+
+# Check tsconfig
+cat tsconfig.json | grep strict
+```
+
+# Step 5: Performance Validation
+
+## Response Time
+- [ ] API endpoints < 500ms
+- [ ] Database queries optimized
+- [ ] Indexes on foreign keys
+
+## Scalability
+- [ ] Stateless design
+- [ ] Horizontal scaling possible
+- [ ] No memory leaks
+
+**Evidence to Check**:
+- Load testing results
+- Profiling data
+
+# Step 6: Documentation Validation
+
+## Code Documentation
+- [ ] JSDoc on all public functions
+- [ ] Requirement IDs in comments
+- [ ] README.md in lib/{{feature-name}}/
+
+## API Documentation
+- [ ] OpenAPI/Swagger spec
+- [ ] Request/response examples
+- [ ] Error codes documented
+
+## User Documentation
+- [ ] Usage guide
+- [ ] Configuration guide
+- [ ] Troubleshooting guide
+
+**Evidence to Check**:
+```bash
+# Check for JSDoc
+grep -r "/**" lib/{{feature-name}}/
+
+# Check for README
+ls lib/{{feature-name}}/README.md
+```
+
+# Step 7: Validation Report
+
+Generate comprehensive report:
+
+```markdown
+# Constitutional Validation Report: {{feature-name}}
+
+**Date**: {{date}}
+**Version**: 1.0
+
+## Executive Summary
+
+- **Overall Status**: ✅ PASS / ❌ FAIL / ⚠️ PARTIAL
+- **Constitutional Compliance**: X/9 articles
+- **Requirements Coverage**: X% (Y/Z requirements)
+- **Test Coverage**: X%
+- **Security Score**: X/5 (OWASP Top 10)
+
+## Article-by-Article Validation
+
+### Article I: Library-First Principle
+**Status**: ✅ PASS
+
+- ✅ Core implementation in lib/auth/
+- ✅ Framework-agnostic design
+- ✅ Clean public API
+
+**Evidence**: [link to code]
+
+### Article II: CLI Interface Mandate
+**Status**: ✅ PASS
+
+- ✅ CLI interface at lib/auth/cli.ts
+- ✅ Exposes register, login, list-users commands
+- ✅ Help text complete
+
+**Evidence**: [link to CLI file]
+
+### Article III: Test-First Imperative
+**Status**: ✅ PASS
+
+- ✅ Test coverage: 85%
+- ✅ Tests written before code (git history verified)
+- ✅ RED-GREEN-BLUE pattern followed
+
+**Evidence**: [coverage report]
+
+### Article IV: EARS Requirements Format
+**Status**: ✅ PASS
+
+- ✅ All 3 requirements use EARS
+- ✅ Keywords present (WHEN, SHALL, IF)
+- ✅ Requirements unambiguous
+
+**Evidence**: [requirements.md]
+
+### Article V: Traceability Mandate
+**Status**: ✅ PASS
+
+- ✅ 100% requirements traceable (3/3)
+- ✅ Requirement IDs in code comments
+- ✅ Traceability matrix complete
+
+**Evidence**: [traceability matrix]
+
+### Article VI: Project Memory
+**Status**: ✅ PASS
+
+- ✅ Follows structure.md patterns
+- ✅ Uses tech.md stack (TypeScript, Prisma, bcrypt)
+- ✅ Aligns with product.md goals
+
+**Evidence**: [steering files]
+
+### Article VII: Simplicity Gate
+**Status**: ✅ PASS
+
+- ✅ Single focused library (auth)
+- ✅ No premature complexity
+- ✅ Dependencies justified
+
+### Article VIII: Anti-Abstraction Gate
+**Status**: ✅ PASS
+
+- ✅ Uses Prisma directly (no ORM wrapper)
+- ✅ Uses bcrypt directly (no crypto wrapper)
+- ✅ No unnecessary abstractions
+
+**Evidence**: [code review]
+
+### Article IX: Integration-First Testing
+**Status**: ✅ PASS
+
+- ✅ Tests use real PostgreSQL (test DB)
+- ✅ Minimal mocking (0 mocks found)
+- ✅ Integration tests present
+
+**Evidence**: [test files]
+
+## Requirements Coverage
+
+| ID | Requirement | Design | Code | Tests | Status |
+|----|-------------|--------|------|-------|--------|
+| REQ-AUTH-001 | User Registration | ✅ | ✅ | ✅ | PASS |
+| REQ-AUTH-002 | Password Validation | ✅ | ✅ | ✅ | PASS |
+| REQ-AUTH-003 | User Login | ✅ | ✅ | ✅ | PASS |
+
+**Coverage**: 100% (3/3 requirements)
+
+## Security Validation (OWASP Top 10)
+
+- ✅ A01: Authorization checks present
+- ✅ A02: Passwords hashed with bcrypt
+- ✅ A03: Parameterized queries (Prisma)
+- ✅ A05: Secrets in env variables
+- ✅ A07: Rate limiting implemented
+
+**Security Score**: 5/5
+
+## Code Quality
+
+- ✅ SOLID principles followed
+- ✅ TypeScript strict mode
+- ✅ No `any` types
+- ✅ Clean code standards met
+- ✅ 0 linting errors
+
+## Performance
+
+- ✅ Login endpoint: 245ms avg
+- ✅ Register endpoint: 310ms avg
+- ✅ Database queries optimized
+- ✅ Indexes present
+
+## Documentation
+
+- ✅ JSDoc on all public functions
+- ✅ README.md complete
+- ✅ API documentation (OpenAPI)
+- ✅ Usage examples provided
+
+## Issues Found
+
+None
+
+## Recommendations
+
+1. Consider adding 2FA support (future enhancement)
+2. Add monitoring for failed login attempts
+3. Implement password rotation policy
+
+## Conclusion
+
+**Status**: ✅ PASS
+
+The {{feature-name}} feature fully complies with all 9 Constitutional Articles and meets all requirements with 100% traceability and 85% test coverage.
+
+**Approved for**: Production Deployment
+
+---
+**Validator**: AI Agent
+**Date**: {{date}}
+```
+
+# Step 8: Remediation (if issues found)
+
+If validation fails:
+
+1. **Document Issues**:
+   - List all violations
+   - Severity: Critical / High / Medium / Low
+   - Remediation steps
+
+2. **Create Action Plan**:
+   - Prioritize issues
+   - Assign tasks
+   - Set deadlines
+
+3. **Re-validate**:
+   - After fixes, run validation again
+   - Verify all issues resolved
+
+# Next Steps
+
+After validation:
+1. If PASS: Approve for deployment
+2. If FAIL: Create remediation plan
+3. Update stakeholders
+4. Proceed to deployment or fix issues
+
+**Execute validation now.**
+"""

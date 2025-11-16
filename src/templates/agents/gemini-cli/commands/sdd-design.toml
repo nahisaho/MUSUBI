@@ -1,0 +1,359 @@
+name = "sdd-design"
+description = "Generate technical design with C4 model and ADR based on requirements"
+
+[[instructions]]
+role = "system"
+content = """
+You are executing the /sdd-design command to create a technical design specification.
+
+# Command Format
+
+/sdd-design <feature-name>
+
+Example: /sdd-design authentication
+
+# Your Task
+
+Create a comprehensive technical design for the given feature based on requirements.
+
+# Step 1: Read Project Memory and Requirements
+
+**IMPORTANT: Read these files FIRST (English versions only):**
+
+1. **Steering Context**:
+   - `steering/structure.md` - Architecture patterns
+   - `steering/tech.md` - Technology stack
+   - `steering/product.md` - Product context
+
+2. **Requirements**:
+   - `storage/specs/{{feature-name}}-requirements.md` - Feature requirements
+
+**Note**: Always read English versions (.md), not Japanese translations (.ja.md)
+
+# Step 2: Design Approach
+
+Follow this design methodology:
+
+1. **Understand Requirements**: Map all EARS requirements
+2. **Align with Architecture**: Follow patterns from steering/structure.md
+3. **Technology Alignment**: Use stack from steering/tech.md
+4. **C4 Model**: Create architecture diagrams
+5. **ADR**: Document architectural decisions
+6. **API Design**: Define interfaces
+7. **Data Model**: Design database schema
+8. **Integration**: Define component interactions
+
+# Step 3: Design Document Structure
+
+## 1. Overview
+- Feature name and version
+- Link to requirements document
+- Design goals
+- Constraints from steering
+
+## 2. Architecture (C4 Model)
+
+### Context Diagram (Level 1)
+- System boundary
+- External actors
+- External systems
+
+### Container Diagram (Level 2)
+- Application components
+- Databases
+- Message queues
+- External services
+
+### Component Diagram (Level 3)
+- Internal components
+- Responsibilities
+- Dependencies
+- Communication patterns
+
+### Code Organization (Level 4)
+- Directory structure (aligned with steering/structure.md)
+- Key classes/modules
+- File organization
+
+## 3. Architectural Decision Records (ADRs)
+
+For each major decision:
+
+**ADR-NNN: [Decision Title]**
+
+- **Status**: Proposed / Accepted / Deprecated
+- **Context**: What problem are we solving?
+- **Decision**: What did we decide?
+- **Consequences**: What are the trade-offs?
+- **Alternatives Considered**: What other options were evaluated?
+
+Example:
+```
+ADR-001: Use JWT for Authentication Tokens
+
+Status: Accepted
+Context: Need stateless authentication mechanism for API
+Decision: Use JWT (RS256) with 24-hour expiry
+Consequences:
+  + Stateless, scales horizontally
+  + Standard, well-supported
+  - Cannot revoke tokens before expiry
+  - Larger token size than session IDs
+Alternatives: Session cookies, OAuth tokens
+```
+
+## 4. Requirements Mapping
+
+Map each requirement to design components:
+
+| Requirement ID | Component | Implementation |
+|---------------|-----------|----------------|
+| REQ-AUTH-001  | AuthService | EmailRegistration class |
+| REQ-AUTH-002  | PasswordValidator | validatePassword() |
+| REQ-AUTH-003  | AuthService | login() method |
+
+## 5. API Design
+
+### Endpoints
+
+For each API endpoint:
+
+**POST /api/auth/register**
+- Request: { email: string, password: string }
+- Response: { userId: string, status: string }
+- Errors: 400 (validation), 409 (conflict)
+- Requirements: REQ-AUTH-001, REQ-AUTH-002
+
+**POST /api/auth/login**
+- Request: { email: string, password: string }
+- Response: { token: string, expiresAt: string }
+- Errors: 401 (unauthorized), 429 (rate limit)
+- Requirements: REQ-AUTH-003
+
+### GraphQL Schema (if applicable)
+```graphql
+type User {
+  id: ID!
+  email: String!
+  createdAt: DateTime!
+}
+
+type Mutation {
+  register(email: String!, password: String!): User!
+  login(email: String!, password: String!): AuthPayload!
+}
+```
+
+## 6. Data Model
+
+### Database Schema
+
+**users table**
+```sql
+CREATE TABLE users (
+  id UUID PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+**sessions table**
+```sql
+CREATE TABLE sessions (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES users(id),
+  token VARCHAR(512) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+### ER Diagram
+```
+[User] 1 ---- * [Session]
+[User] 1 ---- * [RefreshToken]
+```
+
+## 7. Component Design
+
+### AuthService
+```typescript
+class AuthService {
+  async register(email: string, password: string): Promise<User>
+  async login(email: string, password: string): Promise<AuthToken>
+  async logout(userId: string): Promise<void>
+  async refreshToken(token: string): Promise<AuthToken>
+}
+```
+
+### PasswordValidator
+```typescript
+class PasswordValidator {
+  validate(password: string): ValidationResult
+  hash(password: string): Promise<string>
+  verify(password: string, hash: string): Promise<boolean>
+}
+```
+
+## 8. Integration Points
+
+### Internal Dependencies
+- UserRepository (lib/users/)
+- EmailService (lib/notifications/)
+- TokenService (lib/auth/tokens/)
+
+### External Dependencies
+- PostgreSQL database
+- Redis cache (for rate limiting)
+- Email SMTP service
+
+## 9. Security Design
+
+Based on Constitutional Article (OWASP Top 10):
+
+- **A01: Broken Access Control**: JWT validation on all protected routes
+- **A02: Cryptographic Failures**: bcrypt for passwords, RS256 for JWT
+- **A03: Injection**: Parameterized queries with Prisma ORM
+- **A05: Security Misconfiguration**: Environment variables for secrets
+- **A07: Authentication Failures**: Rate limiting, account lockout
+
+## 10. Performance Considerations
+
+- **Caching**: Cache user sessions in Redis
+- **Database**: Index on email, user_id
+- **Rate Limiting**: 5 login attempts per IP per minute
+- **Async Operations**: Email sending via background queue
+
+## 11. Error Handling
+
+### Error Codes
+- AUTH_001: Invalid credentials
+- AUTH_002: Account locked
+- AUTH_003: Token expired
+- AUTH_004: Validation failed
+
+### Error Response Format
+```json
+{
+  "error": {
+    "code": "AUTH_001",
+    "message": "Invalid credentials",
+    "details": { ... }
+  }
+}
+```
+
+## 12. Testing Strategy
+
+### Unit Tests
+- PasswordValidator.validate()
+- AuthService.register()
+- AuthService.login()
+
+### Integration Tests
+- POST /api/auth/register
+- POST /api/auth/login
+- Token validation flow
+
+### Test Coverage Requirements
+- Minimum 80% code coverage
+- All EARS requirements tested
+- All error paths tested
+
+## 13. Deployment
+
+### Environment Variables
+- DATABASE_URL
+- JWT_SECRET
+- JWT_EXPIRES_IN
+- REDIS_URL
+
+### Infrastructure
+- Database migrations (Prisma)
+- Redis for sessions
+- SMTP configuration
+
+## 14. Constitutional Compliance
+
+Verify alignment with Constitutional Articles:
+
+- ✅ **Article I: Library-First**: Implemented in lib/auth/
+- ✅ **Article II: CLI Interface**: CLI tool for user management
+- ✅ **Article III: Test-First**: Test strategy defined
+- ✅ **Article IV: EARS Format**: All requirements mapped
+- ✅ **Article V: Traceability**: Requirements → Design mapping complete
+- ✅ **Article VIII: Anti-Abstraction**: Use Prisma directly, no custom ORM wrapper
+
+# Step 4: Bilingual Output
+
+**IMPORTANT**: Create BOTH English and Japanese versions.
+
+**English version (Primary/Reference)**:
+Save to: `storage/specs/{{feature-name}}-design.md`
+
+**Japanese version (Translation)**:
+Save to: `storage/specs/{{feature-name}}-design.ja.md`
+
+Translation rules:
+- Keep technical terms in English (API, JWT, bcrypt, etc.)
+- Keep code examples unchanged
+- Keep requirement IDs in English (REQ-AUTH-001)
+- Keep ADR numbers in English (ADR-001)
+- Translate explanations and descriptions to Japanese
+
+# Example C4 Diagrams
+
+Use Mermaid or ASCII art:
+
+```mermaid
+graph TB
+    User[User] --> WebApp[Web Application]
+    WebApp --> AuthAPI[Auth API]
+    AuthAPI --> DB[(PostgreSQL)]
+    AuthAPI --> Cache[(Redis)]
+    AuthAPI --> EmailService[Email Service]
+```
+
+# Validation Checklist
+
+Before finalizing:
+
+1. **Requirements Coverage**:
+   - All requirements from requirements.md mapped
+   - No missing functionality
+
+2. **Architecture Alignment**:
+   - Follows patterns from steering/structure.md
+   - Uses tech stack from steering/tech.md
+   - Aligns with product goals from steering/product.md
+
+3. **Constitutional Compliance**:
+   - Library-first approach
+   - CLI interface designed
+   - Test strategy defined
+   - EARS requirements mapped
+   - No unnecessary abstractions
+
+4. **Completeness**:
+   - All major components designed
+   - API contracts defined
+   - Data model complete
+   - Security considerations included
+   - Performance strategy defined
+
+5. **Bilingual**:
+   - Both English and Japanese versions created
+   - Technical terms consistent
+   - Diagrams identical
+
+# Next Steps
+
+After design is complete:
+1. User reviews and approves design
+2. Proceed to tasks: /sdd-tasks {{feature-name}}
+3. Or validate compliance: /sdd-validate {{feature-name}}
+
+**Execute design generation now.**
+"""

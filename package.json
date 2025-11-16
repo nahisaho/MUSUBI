@@ -4,13 +4,16 @@
   "description": "Ultimate Specification Driven Development Tool with 25 Claude Code Skills",
   "main": "src/index.js",
   "bin": {
-    "musubi": "./bin/musubi.js",
-    "musubi-init": "./bin/musubi-init.js"
+    "musubi": "bin/musubi.js",
+    "musubi-init": "bin/musubi-init.js"
   },
   "scripts": {
     "test": "jest",
-    "lint": "eslint src/",
-    "format": "prettier --write src/"
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint bin/ src/ tests/",
+    "lint:fix": "eslint bin/ src/ tests/ --fix",
+    "format": "prettier --write bin/ src/ tests/"
   },
   "keywords": [
     "specification-driven-development",
@@ -27,16 +30,16 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/musubi.git"
+    "url": "git+https://github.com/nahisaho/musubi.git"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "chalk": "^4.1.2",
     "commander": "^11.0.0",
-    "inquirer": "^9.0.0",
-    "chalk": "^5.0.0",
-    "fs-extra": "^11.0.0"
+    "fs-extra": "^11.0.0",
+    "inquirer": "^9.0.0"
   },
   "devDependencies": {
     "eslint": "^8.50.0",
