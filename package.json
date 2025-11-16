@@ -4,6 +4,7 @@
   "description": "Ultimate Specification Driven Development Tool with 25 Claude Code Skills",
   "main": "src/index.js",
   "bin": {
+    "musubi-sdd": "bin/musubi.js",
     "musubi": "bin/musubi.js",
     "musubi-init": "bin/musubi-init.js"
   },
