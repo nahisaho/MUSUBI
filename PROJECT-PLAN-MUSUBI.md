@@ -605,10 +605,52 @@ Low Power   │ [Open Source Community]      │ [Development Team]
 
 ### 4.1 System Components
 
-**Directory Structure**:
+**npm Package Structure**:
+
+MUSUBI is distributed as an npm package (`musubi-sdd`) for easy installation and project initialization.
+
+**Installation Methods**:
+1. **npx (one-time use)**: `npx musubi-sdd init`
+2. **Global install**: `npm install -g musubi-sdd`
+3. **Local project dependency**: `npm install --save-dev musubi-sdd`
+
+**Package Directory Structure** (npm package repository):
 
 ```
-musubi/
+musubi/  (npm package repository)
+├── package.json                   # npm package manifest
+├── bin/                           # CLI executables
+│   ├── musubi.js                  # Main CLI entry point
+│   └── musubi-init.js             # Project initialization CLI
+│
+├── src/                           # Template sources
+│   └── templates/                 # Templates to copy to user projects
+│       ├── .claude/
+│       │   ├── skills/            # 25 Claude Code Skills
+│       │   └── commands/          # Slash commands
+│       ├── steering/              # Steering templates
+│       ├── templates/             # Document templates
+│       ├── orchestration/         # Orchestration patterns
+│       └── validators/            # Python validation scripts
+│
+├── tests/                         # npm package tests
+├── docs/                          # Documentation website
+│   ├── analysis/                  # Framework analysis docs
+│   ├── getting-started.md
+│   ├── user-guide/
+│   ├── skill-reference/           # 25 skill docs
+│   ├── examples/
+│   └── api/
+│
+├── README.md                      # User-facing documentation
+├── .gitignore
+└── Ultimate-SDD-Tool-Blueprint-v3-25-Skills.md  # Primary reference
+```
+
+**User Project Structure** (after running `musubi init`):
+
+```
+user-project/
 ├── .claude/
 │   ├── skills/                    # 25 Claude Code Skills (model-invoked)
 │   │   ├── orchestrator/          # Master coordinator
@@ -687,22 +729,10 @@ musubi/
 │   ├── delta-format.py            # Delta spec validation
 │   └── consistency.py             # Cross-artifact analysis
 │
-├── storage/                       # Project data structure
-│   ├── specs/                     # Current truth
-│   ├── changes/                   # Proposals + archive
-│   └── features/                  # Feature branches
-│
-├── cli/                           # Optional CLI tool (Python)
-│   ├── musubi.py                  # Main entry point
-│   ├── commands/
-│   └── utils/
-│
-└── docs/                          # Documentation website
-    ├── getting-started.md
-    ├── user-guide/
-    ├── skill-reference/           # 25 skill docs
-    ├── examples/
-    └── api/
+└── storage/                       # Project data structure
+    ├── specs/                     # Current truth
+    ├── changes/                   # Proposals + archive
+    └── features/                  # Feature branches
 ```
 
 ### 4.2 25 Skills Architecture
@@ -746,17 +776,25 @@ Output: storage/features/[feature]/requirements.md
 - **Skills Platform**: Claude Code Skills API (Markdown + YAML)
 - **Specification Format**: Markdown (EARS format for requirements)
 - **Configuration**: YAML (skill frontmatter, templates)
-- **Validation**: Python 3.11+ (validators/, CLI)
+- **npm Package**: Node.js >=18.0.0 (CLI, project initialization)
+- **Validation**: Python 3.11+ (validators/)
 - **Version Control**: Git + GitHub
 - **CI/CD**: GitHub Actions
 - **Documentation**: MkDocs or Docusaurus (Markdown-based)
 
+**npm Package Dependencies**:
+- **commander**: ^11.0.0 (CLI framework)
+- **inquirer**: ^9.0.0 (Interactive prompts)
+- **chalk**: ^5.0.0 (Terminal styling)
+- **fs-extra**: ^11.0.0 (File operations)
+
 **Development Tools**:
 - **IDE**: VS Code (with Claude Code extension)
-- **Python Package Manager**: uv or Poetry
-- **Linting**: Ruff (Python), markdownlint (Markdown)
-- **Testing**: pytest (Python validators), Bash integration tests
-- **Code Coverage**: pytest-cov (target: ≥80%)
+- **Node.js**: >=18.0.0 (npm package runtime)
+- **Python Package Manager**: uv or Poetry (for validators)
+- **Linting**: Ruff (Python), markdownlint (Markdown), ESLint (JavaScript)
+- **Testing**: pytest (Python validators), Jest (npm package), Bash integration tests
+- **Code Coverage**: pytest-cov (Python, target: ≥80%), Jest coverage (JavaScript)
 
 **Infrastructure** (Staging/Demo Only):
 - **Hosting**: GitHub Pages (docs), Railway/Render (demo instances)
@@ -866,12 +904,18 @@ Output: storage/features/[feature]/requirements.md
    - `templates/constitution.md`
    - `templates/research.md`
 
-4. **Basic CLI**
-   - `musubi init <project>` - Initialize SDD project
-   - `musubi constitution` - Generate constitution.md
-   - `musubi steering` - Bootstrap project memory
-   - `musubi validate <item>` - Run validation scripts
-   - `musubi list` - List features and changes
+4. **npm Package and CLI**
+   - `package.json` with proper dependencies and bin configuration
+   - `bin/musubi.js` - Main CLI entry point
+   - `bin/musubi-init.js` - Project initialization CLI
+   - `src/templates/` - Template sources to copy to user projects
+   - CLI commands:
+     - `npx musubi-sdd init` or `musubi init <project>` - Initialize SDD project
+     - `musubi constitution` - Generate constitution.md
+     - `musubi steering` - Bootstrap project memory
+     - `musubi validate <item>` - Run validation scripts
+     - `musubi list` - List features and changes
+   - npm registry publishing configuration
 
 5. **Documentation (Phase 1)**
    - README with getting started guide
@@ -2122,6 +2166,7 @@ M6.1 (Multi-Platform) → M6.2 (CI/CD) → M6.3 (Docs) → M6.4 (Launch)
 |----------|--------------|----------------|-------|
 | GitHub Enterprise | $210 (10 users × $21) | $3,780 | Open source pricing |
 | CI/CD Credits | $2,000 | $36,000 | GitHub Actions, generous buffer |
+| npm Registry | $0 | $0 | Free for public packages |
 | Cloud Hosting (Staging/Demo) | $1,500 | $27,000 | Railway/Render for demo instances |
 | Documentation Hosting | $500 | $9,000 | MkDocs Material + custom domain |
 | Development Tools | $235 | $4,220 | Licenses, subscriptions |
@@ -2130,6 +2175,7 @@ M6.1 (Multi-Platform) → M6.2 (CI/CD) → M6.3 (Docs) → M6.4 (Launch)
 **Infrastructure Notes**:
 - GitHub Enterprise: Includes Advanced Security (free for public repos), GitHub Actions, GitHub Discussions
 - CI/CD: GitHub Actions generous free tier for open source, paid buffer for heavy usage
+- npm Registry: Free for public packages (musubi-sdd distribution)
 - Cloud Hosting: For staging, demo instances, and documentation only (not production SaaS)
 - No database costs (file-based storage)
 - No API costs beyond Claude (covered by developer tools)
