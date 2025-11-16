@@ -21,7 +21,6 @@
 const fs = require('fs-extra');
 const path = require('path');
 const chalk = require('chalk');
-const inquirer = require('inquirer');
 
 const TEMPLATE_DIR = path.join(__dirname, '..', 'src', 'templates');
 const SHARED_TEMPLATE_DIR = path.join(TEMPLATE_DIR, 'shared');
@@ -33,6 +32,9 @@ const AGENTS_TEMPLATE_DIR = path.join(TEMPLATE_DIR, 'agents');
  * @param {string} agentKey - Agent key (e.g., 'claude-code', 'cursor')
  */
 async function main(agent, agentKey) {
+  // Dynamic import for inquirer (ESM module)
+  const inquirer = await import('inquirer');
+  
   // If called directly without agent parameter, default to Claude Code
   if (!agent) {
     const { getAgentDefinition } = require('../src/agents/registry');
@@ -46,7 +48,7 @@ async function main(agent, agentKey) {
   // Check if already initialized for this agent
   const agentDir = agent.layout.agentDir;
   if (fs.existsSync(agentDir)) {
-    const { overwrite } = await inquirer.prompt([
+    const { overwrite } = await inquirer.default.prompt([
       {
         type: 'confirm',
         name: 'overwrite',
@@ -117,7 +119,7 @@ async function main(agent, agentKey) {
     }
   );
 
-  const answers = await inquirer.prompt(prompts);
+  const answers = await inquirer.default.prompt(prompts);
 
   console.log(chalk.green('\n✨ Initializing MUSUBI...\n'));
 
