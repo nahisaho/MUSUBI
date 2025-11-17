@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2025-11-17
+
+### Fixed
+- **Skills API initialization fix** - Fixed TypeError when initializing GitHub Copilot and other non-Claude Code platforms
+  - Added skillsDir existence check in copySkill() function
+  - Restricted skill selection prompt to Claude Code only (Skills API exclusive)
+  - Fixed async/await handling in musubi.js init command
+  - Only Claude Code supports Skills API (.claude/skills/), other platforms use AGENTS.md
+- **Test verification** - All platforms (Claude Code, GitHub Copilot, Cursor, Gemini CLI, Windsurf, Codex, Qwen Code) now initialize correctly
+
+### Technical Details
+- Skills API is exclusive to Claude Code platform
+- Other 6 platforms use AGENTS.md for 25 agent definitions (OpenAI specification)
+- copySkill() now returns early if agent.layout.skillsDir is undefined
+- Skill installation logic now checks `agentKey === 'claude-code'` before proceeding
+
 ## [0.1.3] - 2025-01-17
 
 ### Added
