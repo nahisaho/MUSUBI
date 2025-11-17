@@ -177,7 +177,7 @@ async function main(agent, agentKey) {
   if (agent.features.hasCommands) {
     await copyCommands(agent, agentKey);
     const commandType = agentKey === 'github-copilot' || agentKey === 'codex' ? 'prompts' :
-                        agentKey === 'windsurf' ? 'workflows' : 'commands';
+      agentKey === 'windsurf' ? 'workflows' : 'commands';
     console.log(chalk.green(`  Installed ${commandType}`));
   }
 
@@ -259,9 +259,9 @@ async function copyAgentsFile(agent) {
     if (fs.existsSync(geminiTemplate)) {
       geminiContent = await fs.readFile(geminiTemplate, 'utf8');
     } else {
-      geminiContent = `# Gemini CLI - MUSUBI Configuration\n\n` +
-                      `This file configures Gemini CLI for MUSUBI SDD.\n\n` +
-                      `---\n\n`;
+      geminiContent = '# Gemini CLI - MUSUBI Configuration\n\n' +
+                      'This file configures Gemini CLI for MUSUBI SDD.\n\n' +
+                      '---\n\n';
     }
     
     // Append AGENTS.md content
@@ -309,7 +309,7 @@ Check \`${agent.layout.skillsDir}/\` directory for all installed skills.
 `;
 
   const commandType = agentKey === 'github-copilot' || agentKey === 'codex' ? 'Prompts' :
-                      agentKey === 'windsurf' ? 'Workflows' : 'Commands';
+    agentKey === 'windsurf' ? 'Workflows' : 'Commands';
 
   const readme = `# MUSUBI - ${answers.projectName}
 

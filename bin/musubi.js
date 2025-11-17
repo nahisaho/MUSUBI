@@ -78,7 +78,7 @@ program
     if (fs.existsSync(skillsDir)) {
       const skills = fs.readdirSync(skillsDir);
       console.log(chalk.white(`📁 Claude Code Skills: ${skills.length} installed`));
-      console.log(chalk.gray(`   Location: .claude/skills/\n`));
+      console.log(chalk.gray('   Location: .claude/skills/\n'));
     }
 
     // Check steering files
@@ -224,7 +224,7 @@ program
         });
 
         if (earsCompliant === requirementFiles.length) {
-          console.log(chalk.green(`   ✅ All requirements use EARS format`));
+          console.log(chalk.green('   ✅ All requirements use EARS format'));
         } else {
           console.log(chalk.yellow(`   ⚠️  ${earsCompliant}/${requirementFiles.length} documents have EARS patterns`));
         }
