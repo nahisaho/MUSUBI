@@ -1,0 +1,191 @@
+name = "sdd-change-archive"
+description = "Archive a completed change proposal"
+
+[[instructions]]
+role = "system"
+content = """
+You are executing the /sdd-change-archive command to archive a completed change.
+
+# Command Format
+
+/sdd-change-archive <change-name>
+
+Examples:
+- /sdd-change-archive add-2fa
+- /sdd-change-archive migrate-to-graphql
+
+# Your Task
+
+Archive the change proposal and implementation, update documentation, and clean up temporary resources.
+
+# Step 1: Verify Change Completion
+
+Read implementation report:
+- `storage/changes/<change-name>-implementation.md`
+
+Verify status:
+- Implementation report exists
+- All requirements implemented
+- Tests passing
+- Feature deployed to production
+- Feature flag enabled (or deprecated feature removed)
+- Monitoring shows stable metrics (2+ weeks)
+
+If not complete, abort and notify user.
+
+# Step 2: Collect Final Metrics
+
+Gather success metrics:
+- Deployment dates
+- Performance metrics (P95 latency, error rate, throughput)
+- Adoption metrics (user adoption %, usage count)
+- Quality metrics (bugs found, incidents, rollbacks)
+- Cost metrics (dev time, infrastructure cost, ROI)
+
+# Step 3: Update Change Status
+
+Update change proposal:
+- Status: Proposed → Approved → Implemented → **Archived**
+- Add archival date
+
+Update change log:
+- Mark as Archived in `storage/changes/change-log.md`
+
+# Step 4: Clean Up Feature Flag
+
+If feature stable for 2+ weeks:
+
+1. Remove feature flag definition from `lib/feature-flags/flags.ts`
+2. Remove feature flag checks from code
+3. Create cleanup PR: "chore: remove <feature> feature flag"
+
+# Step 5: Archive Deprecated Code
+
+If REMOVED requirements exist:
+
+1. Verify deprecation period passed
+2. Send final communication to users
+3. Create archive branch: `archive/<deprecated-feature>`
+4. Remove deprecated code
+5. Document removal in `storage/archive/<feature>-removal.md`
+
+# Step 6: Update Documentation
+
+Update main documentation:
+- README.md changelog
+- API documentation (if applicable)
+- User guides
+
+# Step 7: Update Steering Files
+
+Update steering files with final state:
+
+`steering/structure.md`:
+- Mark component as Production
+- Add implementation date
+
+`steering/tech.md`:
+- Document final dependencies
+
+`steering/product.md`:
+- Update feature list
+- Add adoption metrics
+
+# Step 8: Create Archive Report (Bilingual)
+
+Generate comprehensive archive report with:
+
+## Metadata
+- Change ID
+- Status: Archived
+- Lifecycle dates (proposed, approved, implemented, deployed, archived)
+- Total duration
+
+## Summary
+- What was changed (ADDED/MODIFIED/REMOVED)
+- Final metrics (performance, adoption, quality, cost)
+- Lessons learned (what went well, what could improve, recommendations)
+
+## Files
+- Created files list
+- Modified files list
+- Deleted files list
+
+## Archival Actions
+- Completed checklist
+- Backup/recovery information
+
+## Constitutional Compliance
+- Final verification of all 9 articles
+
+## Sign-Off
+- Engineering lead approval
+- Product lead approval
+- QA lead approval
+
+Save to:
+1. English: `storage/changes/<change-name>-archive.md`
+2. Japanese: `storage/changes/<change-name>-archive.ja.md`
+
+# Step 9: Move Files to Archive Directory
+
+Organize files:
+
+```bash
+mkdir -p storage/archive/<YEAR>/<change-name>/
+
+# Move change documents
+mv storage/changes/<change-name>-proposal.md storage/archive/<YEAR>/<change-name>/
+mv storage/changes/<change-name>-implementation.md storage/archive/<YEAR>/<change-name>/
+mv storage/changes/<change-name>-archive.md storage/archive/<YEAR>/<change-name>/
+
+# Move Japanese versions
+mv storage/changes/<change-name>-proposal.ja.md storage/archive/<YEAR>/<change-name>/
+mv storage/changes/<change-name>-implementation.ja.md storage/archive/<YEAR>/<change-name>/
+mv storage/changes/<change-name>-archive.ja.md storage/archive/<YEAR>/<change-name>/
+
+# Create index README
+```
+
+# Step 10: Generate Final Summary
+
+Present to user:
+- Change name and ID
+- Lifecycle timeline
+- Final status checklist
+- Final metrics
+- Files archived location
+- Top lessons learned
+
+# Validation Checklist
+
+Before completing:
+- Implementation report exists
+- Feature deployed to production
+- Feature stable for 2+ weeks
+- Final metrics collected
+- Change status updated to Archived
+- Change log updated
+- Feature flag removed (if applicable)
+- Deprecated code removed (if applicable)
+- Documentation updated
+- Steering files updated
+- Archive report created (bilingual)
+- Files moved to archive directory
+- Lessons learned documented
+- Summary presented
+
+# Edge Cases
+
+If change not deployed:
+- Cannot archive
+- Show current status
+- List what needs completion
+
+If metrics below target:
+- Cannot archive
+- Show failing metrics
+- Recommend investigation
+
+Execute the change archival now.
+"""

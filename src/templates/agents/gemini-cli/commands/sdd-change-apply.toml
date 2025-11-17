@@ -1,0 +1,220 @@
+name = "sdd-change-apply"
+description = "Apply a change proposal to the codebase"
+
+[[instructions]]
+role = "system"
+content = """
+You are executing the /sdd-change-apply command to implement an approved change proposal.
+
+# Command Format
+
+/sdd-change-apply <change-name>
+
+Examples:
+- /sdd-change-apply add-2fa
+- /sdd-change-apply migrate-to-graphql
+
+# Your Task
+
+Implement the changes defined in the change proposal, following constitutional governance and best practices.
+
+# Step 1: Read Change Proposal
+
+Read the approved proposal:
+- `storage/changes/<change-name>-proposal.md`
+
+Extract:
+- ADDED requirements
+- MODIFIED requirements  
+- REMOVED requirements
+- Implementation plan
+- Testing requirements
+- Success metrics
+
+Verify proposal status is "Approved" (not "Proposed" or "Rejected")
+
+# Step 2: Read Project Memory
+
+Read steering files:
+- `steering/structure.md` - Architecture patterns
+- `steering/tech.md` - Technology stack
+- `steering/product.md` - Product context
+
+# Step 3: Set Up Feature Flag
+
+Create feature flag for gradual rollout:
+
+```typescript
+// lib/feature-flags/flags.ts
+export const FEATURE_FLAGS = {
+  enable_<feature>: {
+    enabled: false,  // Start disabled
+    description: '<DESCRIPTION>',
+    rolloutPercentage: 0,
+  },
+} as const;
+```
+
+# Step 4: Implement ADDED Requirements (Library-First)
+
+For each new requirement:
+
+1. Create library directory: `lib/<feature>/`
+
+2. Create core files:
+   - `lib/<feature>/index.ts`
+   - `lib/<feature>/types.ts`
+   - `lib/<feature>/<feature>.ts`
+   - `lib/<feature>/<feature>.test.ts`
+   - `lib/<feature>/cli.ts` (Article II)
+
+3. Write tests FIRST (RED-GREEN-BLUE):
+   - RED: Write failing test
+   - GREEN: Implement to pass
+   - BLUE: Refactor
+
+4. Create CLI interface:
+   - Executable CLI in `lib/<feature>/cli.ts`
+   - Add to package.json bin section
+
+5. Integration layer (use framework directly):
+   - API route in `app/api/<feature>/route.ts`
+   - Use Next.js features directly (no wrappers)
+   - Check feature flag before executing
+
+# Step 5: Modify Existing Code
+
+For each MODIFIED requirement:
+
+1. Find current implementation
+2. Write tests for new behavior
+3. Update implementation
+4. Maintain backward compatibility (if needed)
+5. Update tests
+
+# Step 6: Remove Deprecated Code
+
+For each REMOVED requirement:
+
+1. Mark as deprecated FIRST (with warning)
+2. Add deprecation notice
+3. Create migration guide
+4. Wait for deprecation period
+5. Remove after period expires
+
+# Step 7: Database Migrations
+
+If schema changes needed:
+
+1. Create migration: `npx prisma migrate dev --name <change-name>`
+2. Write migration SQL
+3. Write rollback SQL
+4. Test migration forward and backward
+
+# Step 8: Write Tests (80%+ Coverage)
+
+Required tests:
+- Unit tests for each function
+- Integration tests (use REAL database - Article IX)
+- E2E tests for user workflows
+
+Integration test example:
+```typescript
+describe('<Feature> Integration', () => {
+  let prisma: PrismaClient;
+  
+  beforeAll(() => {
+    prisma = new PrismaClient({
+      datasources: { db: { url: process.env.TEST_DATABASE_URL } }
+    });
+  });
+  
+  it('should work with real database', async () => {
+    // Use REAL services, not mocks
+  });
+});
+```
+
+# Step 9: Update Traceability Matrix
+
+Create/update traceability document:
+
+| Requirement ID | Design | Implementation | Tests | Status |
+|----------------|--------|----------------|-------|--------|
+| REQ-NEW-001 | Section X | lib/file.ts:L25 | test.ts:L40 | ✅ |
+
+Verify:
+- All requirements mapped
+- Code coverage >= 80%
+- All tests passing
+
+# Step 10: Constitutional Validation
+
+Verify compliance:
+- Article I: Code in lib/ ✓
+- Article II: CLI exists ✓
+- Article III: Tests written first ✓
+- Article III: Coverage >= 80% ✓
+- Article IV: EARS format used ✓
+- Article V: Traceability complete ✓
+- Article VIII: No unnecessary abstractions ✓
+- Article IX: Integration tests exist ✓
+
+# Step 11: Update Steering
+
+Update steering files with new information:
+
+`steering/structure.md`:
+- Add new component
+- Document architecture pattern
+
+`steering/tech.md`:
+- Add new dependencies
+- Document technology choices
+
+# Step 12: Save Implementation Report (Bilingual)
+
+Create TWO files:
+
+1. English: `storage/changes/<change-name>-implementation.md`
+2. Japanese: `storage/changes/<change-name>-implementation.ja.md`
+
+Include:
+- Metadata (Change ID, status, dates)
+- Changes applied (ADDED/MODIFIED/REMOVED)
+- Test results (coverage, performance)
+- Constitutional compliance checklist
+- Deployment readiness checklist
+- Next steps
+
+# Step 13: Generate Summary
+
+Present to user:
+- Change name and ID
+- Files added/modified/deprecated counts
+- Test results and coverage
+- Constitutional compliance status
+- Quality metrics
+- Deployment status
+- Next steps (merge PR, deploy to staging, etc.)
+
+# Validation Checklist
+
+Before completing:
+- Change proposal read
+- Approval verified
+- Steering context applied
+- Feature flag created
+- Library-first implementation (Article I)
+- CLI interface provided (Article II)
+- Tests written first (Article III)
+- Test coverage >= 80%
+- Integration tests included (Article IX)
+- Traceability matrix updated
+- Constitutional compliance verified
+- Steering files updated
+- Implementation report saved (bilingual)
+- Summary presented
+
+Execute the change implementation now.
+"""

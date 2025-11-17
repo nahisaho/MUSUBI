@@ -54,9 +54,9 @@
 
 **目的**: [役割]として、[機能]がほしい。なぜなら[利点]だから
 
-- **優先度**: [Critical | High | Medium | Low]
-- **複雑度**: [High | Medium | Low]
-- **依存関係**: [依存関係をリスト]
+**優先度**: [Critical | High | Medium | Low]
+**複雑度**: [High | Medium | Low]
+**依存関係**: [依存関係をリスト]
 
 #### 受入基準
 

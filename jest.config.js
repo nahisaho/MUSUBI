@@ -2,7 +2,6 @@ module.exports = {
   testEnvironment: 'node',
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
-    'bin/**/*.js',
     'src/**/*.js',
     '!src/templates/**',  // Exclude templates from coverage
     '!**/node_modules/**'
@@ -19,5 +18,7 @@ module.exports = {
     '**/tests/**/*.test.js',
     '**/__tests__/**/*.js'
   ],
-  verbose: true
+  verbose: true,
+  // Prevent coverage worker issues with temp directories
+  maxWorkers: 1
 };

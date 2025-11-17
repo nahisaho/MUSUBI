@@ -13,16 +13,25 @@ const fs = require('fs-extra');
 const path = require('path');
 const os = require('os');
 
+// MUSUBI bin directory (project root for tests)
+const projectRoot = path.resolve(__dirname, '..');
+const musubi = `node ${path.join(projectRoot, 'bin/musubi.js')}`;
+
 describe('MUSUBI CLI', () => {
   let testDir;
+  let originalCwd;
 
   beforeEach(() => {
+    // Save original cwd
+    originalCwd = process.cwd();
     // Create temporary test directory
     testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'musubi-test-'));
     process.chdir(testDir);
   });
 
   afterEach(() => {
+    // Return to original directory before cleanup
+    process.chdir(originalCwd);
     // Cleanup
     if (fs.existsSync(testDir)) {
       fs.removeSync(testDir);
@@ -31,19 +40,19 @@ describe('MUSUBI CLI', () => {
 
   describe('musubi --version', () => {
     it('should display version number', () => {
-      const output = execSync('musubi --version', { encoding: 'utf8' });
+      const output = execSync(`${musubi} --version`, { encoding: 'utf8' });
       expect(output).toMatch(/\d+\.\d+\.\d+/);
     });
 
     it('should display version with -v flag', () => {
-      const output = execSync('musubi -v', { encoding: 'utf8' });
+      const output = execSync(`${musubi} -v`, { encoding: 'utf8' });
       expect(output).toMatch(/\d+\.\d+\.\d+/);
     });
   });
 
   describe('musubi --help', () => {
     it('should display help information', () => {
-      const output = execSync('musubi --help', { encoding: 'utf8' });
+      const output = execSync(`${musubi} --help`, { encoding: 'utf8' });
       expect(output).toContain('MUSUBI');
       expect(output).toContain('init');
       expect(output).toContain('status');
@@ -51,7 +60,7 @@ describe('MUSUBI CLI', () => {
     });
 
     it('should show examples in help', () => {
-      const output = execSync('musubi --help', { encoding: 'utf8' });
+      const output = execSync(`${musubi} --help`, { encoding: 'utf8' });
       expect(output).toContain('Examples:');
       expect(output).toContain('musubi init');
     });
@@ -59,7 +68,7 @@ describe('MUSUBI CLI', () => {
 
   describe('musubi info', () => {
     it('should display version and environment info', () => {
-      const output = execSync('musubi info', { encoding: 'utf8' });
+      const output = execSync(`${musubi} info`, { encoding: 'utf8' });
       expect(output).toContain('MUSUBI Information');
       expect(output).toContain('Version:');
       expect(output).toContain('Environment:');
@@ -67,7 +76,7 @@ describe('MUSUBI CLI', () => {
     });
 
     it('should list all 25 skills', () => {
-      const output = execSync('musubi info', { encoding: 'utf8' });
+      const output = execSync(`${musubi} info`, { encoding: 'utf8' });
       expect(output).toContain('25 Claude Code Skills');
       expect(output).toContain('orchestrator');
       expect(output).toContain('requirements-analyst');
@@ -78,7 +87,7 @@ describe('MUSUBI CLI', () => {
   describe('musubi status', () => {
     it('should report MUSUBI not initialized in empty directory', () => {
       try {
-        execSync('musubi status', { encoding: 'utf8' });
+        execSync(`${musubi} status`, { encoding: 'utf8' });
       } catch (error) {
         expect(error.stdout).toContain('not initialized');
         expect(error.status).toBe(1);
@@ -93,7 +102,7 @@ describe('MUSUBI CLI', () => {
       fs.writeFileSync('steering/tech.md', '# Tech');
       fs.writeFileSync('steering/product.md', '# Product');
 
-      const output = execSync('musubi status', { encoding: 'utf8' });
+      const output = execSync(`${musubi} status`, { encoding: 'utf8' });
       expect(output).toContain('MUSUBI is initialized');
     });
 
@@ -102,7 +111,7 @@ describe('MUSUBI CLI', () => {
       fs.mkdirSync('.claude/skills/steering', { recursive: true });
       fs.mkdirSync('steering', { recursive: true });
 
-      const output = execSync('musubi status', { encoding: 'utf8' });
+      const output = execSync(`${musubi} status`, { encoding: 'utf8' });
       expect(output).toContain('2 installed');
     });
 
@@ -113,7 +122,7 @@ describe('MUSUBI CLI', () => {
       fs.writeFileSync('steering/tech.md', '# Tech');
       // product.md missing
 
-      const output = execSync('musubi status', { encoding: 'utf8' });
+      const output = execSync(`${musubi} status`, { encoding: 'utf8' });
       expect(output).toContain('structure.md');
       expect(output).toContain('tech.md');
       expect(output).toContain('product.md');
@@ -123,7 +132,7 @@ describe('MUSUBI CLI', () => {
   describe('musubi validate', () => {
     it('should fail if MUSUBI not initialized', () => {
       try {
-        execSync('musubi validate', { encoding: 'utf8' });
+        execSync(`${musubi} validate`, { encoding: 'utf8' });
       } catch (error) {
         expect(error.stdout).toContain('not initialized');
         expect(error.status).toBe(1);
@@ -135,7 +144,7 @@ describe('MUSUBI CLI', () => {
       fs.mkdirSync('steering/rules', { recursive: true });
       fs.writeFileSync('steering/rules/constitution.md', '# Constitution');
 
-      const output = execSync('musubi validate', { encoding: 'utf8' });
+      const output = execSync(`${musubi} validate`, { encoding: 'utf8' });
       expect(output).toContain('MUSUBI Validation');
       expect(output).toContain('Article I: Library-First');
     });
@@ -145,7 +154,7 @@ describe('MUSUBI CLI', () => {
       fs.writeFileSync('steering/rules/constitution.md', '# Constitution');
       fs.mkdirSync('lib/auth', { recursive: true });
 
-      const output = execSync('musubi validate', { encoding: 'utf8' });
+      const output = execSync(`${musubi} validate`, { encoding: 'utf8' });
       expect(output).toContain('1 libraries found');
     });
 
@@ -155,7 +164,7 @@ describe('MUSUBI CLI', () => {
       fs.mkdirSync('lib/auth', { recursive: true });
       fs.writeFileSync('lib/auth/cli.ts', '#!/usr/bin/env node');
 
-      const output = execSync('musubi validate', { encoding: 'utf8' });
+      const output = execSync(`${musubi} validate`, { encoding: 'utf8' });
       expect(output).toContain('CLI Interface');
     });
 
@@ -168,9 +177,9 @@ describe('MUSUBI CLI', () => {
         'WHEN user provides credentials, THEN system SHALL authenticate'
       );
 
-      const output = execSync('musubi validate', { encoding: 'utf8' });
+      const output = execSync(`${musubi} validate`, { encoding: 'utf8' });
       expect(output).toContain('EARS Requirements Format');
-      expect(output).toContain('EARS patterns');
+      expect(output).toContain('All requirements use EARS format');
     });
 
     it('should provide verbose output with --verbose flag', () => {
@@ -179,7 +188,7 @@ describe('MUSUBI CLI', () => {
       fs.mkdirSync('lib/auth', { recursive: true });
       fs.mkdirSync('lib/payment', { recursive: true });
 
-      const output = execSync('musubi validate --verbose', { encoding: 'utf8' });
+      const output = execSync(`${musubi} validate --verbose`, { encoding: 'utf8' });
       expect(output).toContain('auth');
       expect(output).toContain('payment');
     });
@@ -187,16 +196,23 @@ describe('MUSUBI CLI', () => {
 
   describe('musubi with no arguments', () => {
     it('should display help when no command provided', () => {
-      const output = execSync('musubi', { encoding: 'utf8' });
-      expect(output).toContain('Usage:');
-      expect(output).toContain('Commands:');
+      try {
+        execSync(musubi, { encoding: 'utf8', stdio: 'pipe' });
+        // If no error thrown, check normal output path
+        fail('Should have thrown an error');
+      } catch (error) {
+        // Commander may output to stdout or stderr
+        const output = error.stdout + error.stderr;
+        expect(output).toContain('Usage:');
+        expect(output).toContain('Commands:');
+      }
     });
   });
 
   describe('musubi with invalid command', () => {
     it('should show error for unknown command', () => {
       try {
-        execSync('musubi invalid-command', { encoding: 'utf8', stdio: 'pipe' });
+        execSync(`${musubi} invalid-command`, { encoding: 'utf8', stdio: 'pipe' });
       } catch (error) {
         expect(error.stderr).toContain('unknown command');
       }

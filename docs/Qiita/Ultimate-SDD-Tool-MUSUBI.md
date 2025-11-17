@@ -17,13 +17,15 @@
    - Claude Code、GitHub Copilot、Cursor、Gemini CLI、Codex CLI、Qwen Code、Windsurf
    - 7つの主要AIエージェントで動作
 
-🎯 25の専門スキル（Claude Code専用）
+🎯 25の専門エージェント（全プラットフォーム対応）
    - オーケストレーション、要件、アーキテクチャ、開発、品質、セキュリティ、インフラ
+   - Claude Code: Skills API、他6エージェント: AGENTS.md
    - 完全なSDDワークフローカバレッジ
 
 📄 柔軟なコマンド形式
    - Markdown形式（6エージェント）
    - TOML形式（Gemini CLI専用）
+   - AGENTS.md形式（OpenAI仕様準拠）
 
 📋 憲法ガバナンス
    - 9つの不変条項
@@ -38,9 +40,9 @@
    - アーキテクチャ、技術スタック、製品コンテキストを維持
 ```
 
-## 進化の歴史:spec-copilot → MUSUHI → MUSUBI
+## 進化の歴史: spec-copilot → MUSUHI → MUSUBI
 
-### 第1世代:spec-copilot(19エージェント)
+### 第1世代： spec-copilot(19エージェント)
 
 **spec-copilot**（"specification driven development を支援する copilot" - 仕様駆動開発を支援するAIペアプログラマーという意味）は、GitHub Copilot向けの19種類の専門AIエージェント群として誕生しました。
 
@@ -53,9 +55,9 @@
 - ❌ **プロジェクトメモリなし**
 - ❌ **要件形式の標準化なし**
 
-### 第2世代：MUSUHI（20エージェント）
+### 第2世代： MUSUHI（20エージェント）
 
-**MUSUHI**（"むすひ（産霊）" - 日本の古語や神道の概念で、**「結び」「生み出す力」**を意味する。仕様から実装を生み出す力を表現）は、spec-copilotを拡張し、マルチエージェント対応とプロジェクトメモリシステムを導入しました。
+**MUSUHI**（"むすひ（産霊）" - 日本の古語や神道の概念で、**「結び」「生み出す力」** を意味する。仕様から実装を生み出す力を表現）は、spec-copilotを拡張し、マルチエージェント対応とプロジェクトメモリシステムを導入しました。
 
 **追加機能**：
 - ✅ **マルチプラットフォーム対応**（Claude Code、GitHub Copilot、Cursor、Windsurf、Gemini、Codex、Qwen）
@@ -69,12 +71,15 @@
 - ❌ **Claude Code専用機能なし**
 - ❌ **憲法ガバナンスなし**
 
-### 第3世代：MUSUBI（25スキル + 完全SDD対応）
+### 第3世代： MUSUBI（25スキル + 完全SDD対応）
 
 **MUSUBI**（"むすび（結び）" - 仕様、設計、コードを結びつけるという本質的な役割を表現）は、MUSUHIをベースに、6つの主要SDDフレームワークの機能を統合した究極形態です。
 
 **革新的機能**：
-- ✅ **25の専門Claude Codeスキル**（Skills API活用）
+- ✅ **25の専門エージェント（全7プラットフォーム対応）**
+  - Claude Code: Skills API（25スキル）
+  - GitHub Copilot & Cursor: AGENTS.md（公式サポート）
+  - その他4エージェント: AGENTS.md（互換形式）
 - ✅ **憲法ガバナンス**（9つの不変条項）
 - ✅ **フェーズ-1ゲート**（品質保証の事前チェック）
 - ✅ **差分仕様（Delta Specs）**（ブラウンフィールド対応）
@@ -231,9 +236,21 @@ AND システムSHALLセッションを作成する。
 - ✅ モック数最小限
 - ✅ 統合テスト存在
 
-## Claude Code専用：25の専門スキル
+## 全プラットフォーム対応：25の専門エージェント
 
-MUSUBIの最大の特徴は、**Claude Code Skills API**を活用した25の専門スキルです。
+MUSUBIの最大の特徴は、**7つのAIコーディングエージェント全てで利用できる25の専門エージェント**です。
+
+### 実装形式
+
+- **Claude Code**: Skills API（モデルが自動起動）
+- **GitHub Copilot**: `.github/AGENTS.md`（公式サポート）
+- **Cursor**: `.cursor/AGENTS.md`（公式サポート）
+- **Gemini CLI**: `GEMINI.md`（既存ファイルに統合）
+- **Windsurf**: `.windsurf/AGENTS.md`
+- **Codex**: `.codex/AGENTS.md`
+- **Qwen Code**: `.qwen/AGENTS.md`
+
+### 25エージェント一覧
 
 ### オーケストレーションと管理（3スキル）
 
@@ -317,26 +334,25 @@ MUSUBIは、完全な8段階ワークフローをサポートします。
 ### グリーンフィールドプロジェクト（0→1）
 
 ```bash
-# 1. 初期化（Claude Code向け）
-npx musubi-sdd init --claude
+# 1. 初期化（任意のエージェント向け）
+npx musubi-sdd init --claude      # Claude Code (Skills API)
+npx musubi-sdd init --copilot     # GitHub Copilot (AGENTS.md)
+npx musubi-sdd init --cursor      # Cursor (AGENTS.md)
+# その他: --gemini, --windsurf, --codex, --qwen
 
 # 2. プロジェクトメモリ生成
-/sdd-steering
+# Claude Code: /sdd-steering
+# GitHub Copilot/Cursor: @steering または自然言語で参照
 
 # 3. 要件作成（EARS形式）
-/sdd-requirements user-authentication
+# Claude Code: /sdd-requirements user-authentication
+# その他: @requirements-analyst を参照して対話
 
 # 4. アーキテクチャ設計
-/sdd-design user-authentication
+# Claude Code: /sdd-design user-authentication
+# その他: @system-architect を参照して対話
 
-# 5. タスク分解
-/sdd-tasks user-authentication
-
-# 6. 実装（テストファースト）
-/sdd-implement user-authentication
-
-# 7. 憲法準拠検証
-/sdd-validate user-authentication
+# 5-7. 以下同様にエージェントを活用
 ```
 
 ### ブラウンフィールドプロジェクト（1→n）
@@ -367,8 +383,9 @@ npx musubi-sdd init --claude
 
 | 機能 | spec-copilot | MUSUHI | MUSUBI | cc-sdd | OpenSpec | spec-kit |
 |------|--------------|--------|--------|--------|----------|----------|
-| **エージェント数** | 19 | 20 | **25スキル** | 10 | 5 | 8 |
+| **エージェント数** | 19 | 20 | **25エージェント** | 10 | 5 | 8 |
 | **マルチプラットフォーム** | ❌（Copilotのみ） | ✅（7エージェント） | ✅（**7エージェント**） | ✅（5エージェント） | ❌ | ❌ |
+| **25エージェント全対応** | ❌ | ❌ | ✅（**全7プラットフォーム**） | ❌ | ❌ | ❌ |
 | **プロジェクトメモリ** | ❌ | ✅ | ✅（**自動更新**） | ❌ | ❌ | ❌ |
 | **EARS要件形式** | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ |
 | **憲法ガバナンス** | ❌ | ❌ | ✅（**9条項**） | ❌ | ❌ | ✅（基本） |
@@ -376,15 +393,17 @@ npx musubi-sdd init --claude
 | **トレーサビリティ** | 手動 | 自動参照 | **自動監査** | 手動 | 手動 | 手動 |
 | **SDDワークフロー** | 6段階 | 8段階 | **8段階（完全）** | 4段階 | 3段階 | 5段階 |
 | **Skills API対応** | ❌ | ❌ | ✅（**Claude Code**） | ❌ | ❌ | ❌ |
+| **AGENTS.md対応** | ❌ | ❌ | ✅（**6エージェント**） | ❌ | ❌ | ❌ |
 | **バイリンガル** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
 
 ### MUSUBIの優位性
 
-#### 1. **最も包括的なスキルセット（25スキル）**
+#### 1. **最も包括的なエージェントセット（25エージェント × 7プラットフォーム）**
 
-- ✅ spec-copilot（19）、MUSUHI（20）を超える最大スキル数
+- ✅ spec-copilot（19）、MUSUHI（20）を超える最大エージェント数
+- ✅ **全7プラットフォームで25エージェント利用可能**（業界初）
 - ✅ SDD全ステージ（調査→モニタリング）を100%カバー
-- ✅ Claude Code Skills API活用でモデル自動起動
+- ✅ Claude Code Skills API + AGENTS.md（OpenAI仕様準拠）のハイブリッド対応
 
 #### 2. **唯一の完全憲法ガバナンス**
 
@@ -432,26 +451,26 @@ musubi init
 ### エージェント別インストール
 
 ```bash
-# Claude Code（デフォルト） - 25スキル付き
+# Claude Code - 25 Skills API
 npx musubi-sdd init --claude
 
-# GitHub Copilot
+# GitHub Copilot - 25エージェント（AGENTS.md、公式サポート）
 npx musubi-sdd init --copilot
 
-# Cursor IDE
+# Cursor IDE - 25エージェント（AGENTS.md、公式サポート）
 npx musubi-sdd init --cursor
 
-# Gemini CLI（TOML形式）
+# Gemini CLI - 25エージェント（GEMINI.md統合）+ TOML形式
 npx musubi-sdd init --gemini
 
-# Codex CLI
+# Windsurf IDE - 25エージェント（AGENTS.md）
+npx musubi-sdd init --windsurf
+
+# Codex CLI - 25エージェント（AGENTS.md）
 npx musubi-sdd init --codex
 
-# Qwen Code
+# Qwen Code - 25エージェント（AGENTS.md）
 npx musubi-sdd init --qwen
-
-# Windsurf IDE
-npx musubi-sdd init --windsurf
 ```
 
 ### CLIコマンド
@@ -473,11 +492,12 @@ musubi info
 
 ### MUSUBIを選ぶべき理由
 
-1. ✅ **最も包括的**：25スキル、8段階ワークフロー、9憲法条項
-2. ✅ **最も柔軟**：7つのAIエージェント対応、Markdown/TOML両形式
+1. ✅ **最も包括的**：25エージェント × 7プラットフォーム、8段階ワークフロー、9憲法条項
+2. ✅ **最も柔軟**：7つのAIエージェント全対応、Skills API + AGENTS.md
 3. ✅ **最も堅牢**：憲法ガバナンス、完全トレーサビリティ、自動検証
 4. ✅ **最も実践的**：グリーンフィールド/ブラウンフィールド両対応
-5. ✅ **最も先進的**：Claude Code Skills API、自動ステアリング更新
+5. ✅ **最も先進的**：Claude Code Skills API、OpenAI AGENTS.md仕様準拠、自動ステアリング更新
+6. ✅ **業界初**：全7プラットフォームで25エージェント完全平等対応
 
 ### 6つのフレームワークの良いとこ取り
 
@@ -491,8 +511,13 @@ musubi info
 ### 今すぐ始める
 
 ```bash
-npx musubi-sdd init --claude
-/sdd-steering
+# あなたのAIエージェントを選択
+npx musubi-sdd init --claude     # Claude Code (Skills API)
+npx musubi-sdd init --copilot    # GitHub Copilot (AGENTS.md)
+npx musubi-sdd init --cursor     # Cursor (AGENTS.md)
+# その他: --gemini, --windsurf, --codex, --qwen
+
+# どのエージェントでも25の専門エージェントが利用可能！
 # あなたの究極のSDD体験が始まります 🚀
 ```
 

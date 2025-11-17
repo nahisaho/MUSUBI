@@ -8,14 +8,15 @@
 const agentDefinitions = {
   'claude-code': {
     label: 'Claude Code',
-    description: 'Installs MUSUBI skills in `.claude/skills/`, commands in `.claude/commands/`, and steering in `steering/`',
+    description: 'Installs MUSUBI skills in `.claude/skills/`, commands in `.claude/commands/`, agents in `CLAUDE.md`, and steering in `steering/`',
     aliasFlags: ['--claude-code', '--claude'],
     recommendedModels: ['Claude Sonnet 4.5 or newer'],
     layout: {
-      skillsDir: '.claude/skills',      // MUSUBI-specific: 25 skills
+      skillsDir: '.claude/skills',      // MUSUBI-specific: 25 skills (Skills API)
       commandsDir: '.claude/commands',
       agentDir: '.claude',
       docFile: 'CLAUDE.md',
+      agentsFile: '.claude/AGENTS.md',  // 25 agents definition (shared format)
     },
     commands: {
       steering: '/sdd-steering',
@@ -33,13 +34,14 @@ const agentDefinitions = {
   },
   'github-copilot': {
     label: 'GitHub Copilot',
-    description: 'Installs MUSUBI prompts in `.github/prompts/` and steering in `steering/`',
+    description: 'Installs MUSUBI prompts in `.github/prompts/`, agents in `.github/AGENTS.md`, and steering in `steering/`',
     aliasFlags: ['--copilot', '--github-copilot'],
     recommendedModels: ['Claude Sonnet 4.5 or newer', 'GPT-4'],
     layout: {
       commandsDir: '.github/prompts',
       agentDir: '.github',
-      docFile: 'AGENTS.md',
+      docFile: 'AGENTS.md',            // Main doc file
+      agentsFile: '.github/AGENTS.md', // 25 agents definition
     },
     commands: {
       steering: '#sdd-steering',
@@ -50,20 +52,21 @@ const agentDefinitions = {
       validate: '#sdd-validate <feature>',
     },
     features: {
-      hasSkills: false,     // Copilot doesn't support Skills API
+      hasSkills: true,      // AGENTS.md provides 25 agents
       hasCommands: true,
       commandPrefix: '#',
     },
   },
   'cursor': {
     label: 'Cursor IDE',
-    description: 'Installs MUSUBI commands in `.cursor/commands/` and steering in `steering/`',
+    description: 'Installs MUSUBI commands in `.cursor/commands/`, agents in `.cursor/AGENTS.md`, and steering in `steering/`',
     aliasFlags: ['--cursor'],
     recommendedModels: ['Claude Sonnet 4.5 or newer', 'GPT-4'],
     layout: {
       commandsDir: '.cursor/commands',
       agentDir: '.cursor',
-      docFile: 'AGENTS.md',
+      docFile: 'AGENTS.md',            // Main doc file
+      agentsFile: '.cursor/AGENTS.md', // 25 agents definition
     },
     commands: {
       steering: '/sdd-steering',
@@ -74,20 +77,21 @@ const agentDefinitions = {
       validate: '/sdd-validate <feature>',
     },
     features: {
-      hasSkills: false,
+      hasSkills: true,      // AGENTS.md provides 25 agents
       hasCommands: true,
       commandPrefix: '/',
     },
   },
   'gemini-cli': {
     label: 'Gemini CLI',
-    description: 'Installs MUSUBI commands in `.gemini/commands/` (TOML format) and steering in `steering/`',
+    description: 'Installs MUSUBI commands in `.gemini/commands/` (TOML format), agents in `GEMINI.md`, and steering in `steering/`',
     aliasFlags: ['--gemini-cli', '--gemini'],
     recommendedModels: ['Gemini 2.0 Flash or newer'],
     layout: {
       commandsDir: '.gemini/commands',
       agentDir: '.gemini',
       docFile: 'GEMINI.md',
+      agentsFile: 'GEMINI.md',         // Agents embedded in GEMINI.md
     },
     commands: {
       steering: '/sdd-steering',
@@ -98,7 +102,7 @@ const agentDefinitions = {
       validate: '/sdd-validate <feature>',
     },
     features: {
-      hasSkills: false,
+      hasSkills: true,      // GEMINI.md provides 25 agents
       hasCommands: true,
       commandPrefix: '/',
       commandFormat: 'toml',  // Unique: Gemini uses TOML instead of Markdown
@@ -106,13 +110,14 @@ const agentDefinitions = {
   },
   'codex': {
     label: 'Codex CLI',
-    description: 'Installs MUSUBI prompts in `.codex/prompts/` and steering in `steering/`',
+    description: 'Installs MUSUBI prompts in `.codex/prompts/`, agents in `.codex/AGENTS.md`, and steering in `steering/`',
     aliasFlags: ['--codex', '--codex-cli'],
     recommendedModels: ['GPT-4 or newer'],
     layout: {
       commandsDir: '.codex/prompts',
       agentDir: '.codex',
-      docFile: 'AGENTS.md',
+      docFile: 'AGENTS.md',            // Main doc file
+      agentsFile: '.codex/AGENTS.md',  // 25 agents definition
     },
     commands: {
       steering: '/prompts:sdd-steering',
@@ -123,20 +128,21 @@ const agentDefinitions = {
       validate: '/prompts:sdd-validate <feature>',
     },
     features: {
-      hasSkills: false,
+      hasSkills: true,      // AGENTS.md provides 25 agents
       hasCommands: true,
       commandPrefix: '/prompts:',
     },
   },
   'qwen-code': {
     label: 'Qwen Code',
-    description: 'Installs MUSUBI commands in `.qwen/commands/` and steering in `steering/`',
+    description: 'Installs MUSUBI commands in `.qwen/commands/`, agents in `.qwen/AGENTS.md`, and steering in `steering/`',
     aliasFlags: ['--qwen-code', '--qwen'],
     recommendedModels: ['Qwen 2.5 Coder or newer'],
     layout: {
       commandsDir: '.qwen/commands',
       agentDir: '.qwen',
       docFile: 'QWEN.md',
+      agentsFile: '.qwen/AGENTS.md',   // 25 agents definition
     },
     commands: {
       steering: '/sdd-steering',
@@ -147,20 +153,21 @@ const agentDefinitions = {
       validate: '/sdd-validate <feature>',
     },
     features: {
-      hasSkills: false,
+      hasSkills: true,      // AGENTS.md provides 25 agents
       hasCommands: true,
       commandPrefix: '/',
     },
   },
   'windsurf': {
     label: 'Windsurf IDE',
-    description: 'Installs MUSUBI workflows in `.windsurf/workflows/` and steering in `steering/`',
+    description: 'Installs MUSUBI workflows in `.windsurf/workflows/`, agents in `.windsurf/AGENTS.md`, and steering in `steering/`',
     aliasFlags: ['--windsurf'],
     recommendedModels: ['Claude Sonnet 4.5 or newer', 'GPT-4'],
     layout: {
       commandsDir: '.windsurf/workflows',
       agentDir: '.windsurf',
-      docFile: 'AGENTS.md',
+      docFile: 'AGENTS.md',               // Main doc file
+      agentsFile: '.windsurf/AGENTS.md',  // 25 agents definition
     },
     commands: {
       steering: '/sdd-steering',
@@ -171,7 +178,7 @@ const agentDefinitions = {
       validate: '/sdd-validate <feature>',
     },
     features: {
-      hasSkills: false,
+      hasSkills: true,      // AGENTS.md provides 25 agents
       hasCommands: true,
       commandPrefix: '/',
     },
@@ -201,7 +208,9 @@ function detectAgentFromFlags(options) {
   for (const [agentKey, definition] of Object.entries(agentDefinitions)) {
     for (const flag of definition.aliasFlags) {
       const flagName = flag.replace(/^--/, '');
-      if (options[flagName]) {
+      // Convert kebab-case to camelCase for commander compatibility
+      const camelCaseFlagName = flagName.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+      if (options[flagName] || options[camelCaseFlagName]) {
         return agentKey;
       }
     }

@@ -3,259 +3,259 @@
 ## Overview
 This document defines the technology choices, framework decisions, and technical constraints for this project. All development must align with these technical decisions.
 
+**Last Updated**: 2025-01-16 by @steering
+
 ## Core Technologies
 
 ### Programming Languages
-**Primary Language**: [e.g., TypeScript, Python, Java]
-- **Version**: [e.g., TypeScript 5.x, Python 3.11+]
-- **Justification**: [Why this language was chosen]
+**Primary Language**: JavaScript (Node.js)
+- **Version**: Node.js >=18.0.0
+- **Module System**: CommonJS with dynamic ESM imports
+- **Justification**: 
+  - Universal availability in Node.js ecosystem
+  - CLI tools benefit from CommonJS compatibility
+  - Dynamic import() enables ESM dependency support (inquirer v9)
 
-**Additional Languages**: [e.g., JavaScript, SQL]
-- **Use Cases**: [When to use each language]
-
-Example:
-```
-- TypeScript: Primary language for all application code
-- JavaScript: Legacy code only (being migrated)
-- SQL: Database queries and migrations
-- Bash: Build scripts and automation
-```
+**No TypeScript**: JavaScript-only for maximum compatibility
+- CLI tools prioritize simplicity and distribution
+- No transpilation step required
+- Direct execution with Node.js
 
 ## Framework & Libraries
 
-### Frontend (if applicable)
-**Primary Framework**: [e.g., React, Vue.js, Angular, Svelte]
-- **Version**: [e.g., React 18.x]
-- **UI Library**: [e.g., Material-UI, Tailwind CSS, Chakra UI]
-- **State Management**: [e.g., Redux, Zustand, Jotai, Context API]
-- **Routing**: [e.g., React Router, Next.js Router]
+### CLI Framework
+**Primary Framework**: commander ^11.0.0
+- **Purpose**: Command-line interface parsing and routing
+- **Features**: Subcommands, flags, help text generation
+- **Usage**: `musubi init`, `musubi status`, `musubi validate`, `musubi info`
 
-Example:
-```
-- React 18.3.1 with TypeScript
-- Next.js 14 (App Router)
-- Tailwind CSS for styling
-- Zustand for state management
-- React Query for server state
-```
+### Terminal Styling
+**Library**: chalk ^4.1.2 (CommonJS version)
+- **Purpose**: Colored terminal output, ANSI formatting
+- **Why v4**: ESM-only v5 incompatible with CommonJS
+- **Usage**: Success (green), warnings (yellow), errors (red), info (blue)
 
-### Backend (if applicable)
-**Primary Framework**: [e.g., Express, NestJS, FastAPI, Django, Spring Boot]
-- **Version**: [e.g., NestJS 10.x]
-- **ORM/Database Client**: [e.g., Prisma, TypeORM, SQLAlchemy]
-- **API Style**: [REST, GraphQL, gRPC]
+### Interactive Prompts
+**Library**: inquirer ^9.0.0 (ESM-only)
+- **Purpose**: Interactive CLI prompts (agent selection, project type, skill selection)
+- **Import Pattern**: Dynamic ESM import
+  ```javascript
+  const inquirer = await import('inquirer');
+  await inquirer.default.prompt([...]);
+  ```
+- **Features**: Checkboxes, list selection, confirmation, input validation
 
-Example:
-```
-- NestJS 10.x with TypeScript
-- Prisma ORM for database access
-- REST API with OpenAPI documentation
-- Bull for background jobs
-```
-
-### Database
-**Primary Database**: [e.g., PostgreSQL, MySQL, MongoDB]
-- **Version**: [e.g., PostgreSQL 15+]
-- **Justification**: [Why this database]
-- **Cache Layer**: [e.g., Redis, Memcached]
-
-Example:
-```
-- PostgreSQL 15.x (primary data store)
-- Redis 7.x (caching and session storage)
-- Elasticsearch 8.x (full-text search)
-```
+### File System Utilities
+**Library**: fs-extra ^11.0.0
+- **Purpose**: Enhanced file operations (copy, ensure directories, JSON read/write)
+- **Usage**: Template copying from `src/templates/` to user projects
+- **Advantages**: Promise-based API, automatic directory creation
 
 ## Development Tools
 
 ### Package Management
-- **Package Manager**: [npm, yarn, pnpm, pip, maven]
-- **Version**: [e.g., npm 10.x, pnpm 8.x]
-- **Lock File**: [package-lock.json, pnpm-lock.yaml, requirements.txt]
+- **Package Manager**: npm (bundled with Node.js)
+- **Version**: npm 10.x (comes with Node.js 18+)
+- **Lock File**: package-lock.json (committed to repository)
+- **Registry**: npmjs.org (public npm registry)
 
 ### Build Tools
-- **Bundler**: [e.g., Webpack, Vite, Rollup, esbuild]
-- **Transpiler**: [e.g., Babel, tsc, swc]
-- **Task Runner**: [e.g., npm scripts, Make, Gradle]
+**No Build Step Required** - Direct JavaScript execution
+- No bundler (CLI tool, not web application)
+- No transpiler (JavaScript, not TypeScript)
+- **Task Runner**: npm scripts only
 
-Example:
-```
-- pnpm for package management
-- Vite for development and bundling
-- TypeScript compiler (tsc) for type checking
-- Turbo for monorepo builds
+```json
+{
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  }
+}
 ```
 
 ### Testing
-**Unit Testing**: [e.g., Jest, Vitest, Pytest, JUnit]
-**Integration Testing**: [e.g., Supertest, TestContainers]
-**E2E Testing**: [e.g., Playwright, Cypress, Selenium]
-**Test Coverage Target**: [e.g., 80% minimum]
+**Unit Testing**: jest ^29.0.0
+- **Test Files**: `tests/*.test.js`
+- **Test Coverage Target**: 80% (Constitutional Article III)
+- **Test Runner**: `npm test`
 
-Example:
-```
-- Vitest for unit tests
-- React Testing Library for component tests
-- Playwright for E2E tests
-- 80% code coverage target
-```
+**No Integration/E2E Tests Yet**
+- Future: Integration tests for full `musubi init` workflow
+- Future: Snapshot tests for template validation
 
 ### Code Quality
-- **Linter**: [e.g., ESLint, Pylint, Checkstyle]
-- **Formatter**: [e.g., Prettier, Black, Google Java Format]
-- **Type Checker**: [e.g., TypeScript, mypy, Flow]
-- **Pre-commit Hooks**: [e.g., Husky, pre-commit]
-
-Example:
-```
-- ESLint with TypeScript plugin
-- Prettier for code formatting
-- Husky for pre-commit hooks
-- lint-staged for staged files only
-```
+- **Linter**: eslint ^8.50.0
+  - JavaScript standard rules
+  - Node.js environment
+- **Formatter**: prettier ^3.0.0
+  - Single quotes, no semicolons
+  - 100 character line width
+- **Pre-commit Hooks**: Not configured yet (future: husky + lint-staged)
 
 ## Deployment & Infrastructure
 
 ### Hosting
-**Platform**: [e.g., Vercel, AWS, Google Cloud, Azure, Heroku]
-- **Environment**: [Serverless, Containers, VMs]
-- **Region**: [e.g., us-east-1, eu-west-1]
+**Platform**: npm Registry (npmjs.org)
+- **Package Name**: musubi-sdd
+- **Distribution**: Public npm package
+- **Installation**: `npx musubi-sdd` (on-demand) or `npm install -g musubi-sdd`
+- **Registry URL**: https://www.npmjs.com/package/musubi-sdd
 
-Example:
-```
-- Vercel for frontend (Next.js)
-- AWS ECS for backend services
-- CloudFront for CDN
-- Route53 for DNS
-```
+**No Application Hosting** - MUSUBI is a CLI tool, not a hosted service
+- Users run locally via npx/npm
+- No servers, containers, or cloud infrastructure
+- Distribution through npm ecosystem only
 
 ### CI/CD
-**Pipeline**: [e.g., GitHub Actions, GitLab CI, Jenkins]
-- **Stages**: [Build, Test, Deploy]
-- **Deployment Strategy**: [e.g., Blue-Green, Canary, Rolling]
-
-Example:
-```
-- GitHub Actions for CI/CD
-- Automatic preview deployments for PRs
-- Production deployment on main branch merge
-- Rollback capability via Git tags
-```
+**Pipeline**: GitHub Actions (future)
+- **Current**: Manual publish workflow
+  1. Update version in package.json
+  2. `npm publish`
+  3. `git tag vX.Y.Z`
+  4. `git push origin main --tags`
+- **Future**: Automated CI/CD pipeline
+  - Automated testing on PR
+  - Automated publish on version tag
+  - Automated changelog generation
 
 ### Monitoring & Logging
-- **Application Monitoring**: [e.g., Sentry, DataDog, New Relic]
-- **Logging**: [e.g., CloudWatch, ELK Stack, Splunk]
-- **Metrics**: [e.g., Prometheus, Grafana]
+**No Monitoring Infrastructure** - CLI tool runs locally
+- Users see output in their own terminals
+- No centralized logging
+- No application monitoring (Sentry, DataDog not applicable)
+- **Error handling**: All errors shown to user via chalk-colored output
 
 ## Technical Constraints
 
 ### Performance Requirements
-- **Page Load Time**: [e.g., < 3 seconds]
-- **API Response Time**: [e.g., < 200ms for 95th percentile]
-- **Concurrent Users**: [e.g., Support 10,000 concurrent users]
+**Not Applicable** - MUSUBI is a CLI tool for local file operations
+- Template copying: < 1 second (small files)
+- Interactive prompts: Instant user feedback
+- No network latency (except initial npx download from npm)
 
-### Browser/Platform Support
-- **Browsers**: [e.g., Chrome 90+, Firefox 88+, Safari 14+, Edge 90+]
-- **Mobile**: [iOS 14+, Android 10+]
-- **Node Version**: [e.g., Node.js 18.x LTS or higher]
+### Platform Support
+- **Node.js Version**: >=18.0.0 (engines requirement in package.json)
+- **Operating Systems**: Linux, macOS, Windows (wherever Node.js runs)
+- **Shell**: bash, zsh, PowerShell, cmd (any terminal)
+- **No Browser Requirement**: CLI tool, not web application
 
 ### Security Requirements
-- **Authentication**: [e.g., OAuth 2.0, JWT]
-- **Authorization**: [e.g., RBAC, ABAC]
-- **Data Encryption**: [e.g., TLS 1.3, AES-256]
-- **Secret Management**: [e.g., AWS Secrets Manager, Vault]
-
-Example:
-```
-- OAuth 2.0 with JWT tokens
-- RBAC for authorization
-- TLS 1.3 for all communications
-- AWS Secrets Manager for secrets
-- bcrypt for password hashing
-```
+**Minimal Security Concerns** - Local CLI tool
+- No authentication/authorization (local file operations)
+- No data encryption (templates are public)
+- No secret management (no secrets in MUSUBI itself)
+- Users manage their own project security after template installation
 
 ## Third-Party Services
 
 ### Required Services
-- **Service Name**: [Purpose and version/plan]
+**npm Registry** (npmjs.org)
+- **Purpose**: Package distribution and versioning
+- **Cost**: Free for public packages
+- **Dependency**: MUSUBI cannot function without npm ecosystem
 
-Example:
-```
-- Stripe: Payment processing (Standard plan)
-- SendGrid: Transactional emails
-- AWS S3: File storage
-- Auth0: User authentication (alternative to custom auth)
-```
+**No Other External Services**
+- No databases
+- No APIs
+- No cloud services
+- No authentication services
 
 ## Technology Decisions & ADRs
 
 ### Architecture Decision Records
-Document significant technical decisions:
-1. **Decision**: [Brief description]
-   - **Reason**: [Why this choice]
-   - **Alternatives Considered**: [Other options]
-   - **Date**: [When decided]
 
-Example:
-```
-1. Decision: Use Next.js App Router instead of Pages Router
-   - Reason: Better performance with React Server Components
-   - Alternatives: Pages Router, Remix, Pure React SPA
-   - Date: 2024-01-15
+1. **Decision**: Use CommonJS instead of ESM
+   - **Reason**: Better compatibility with older Node.js versions, simpler distribution
+   - **Alternatives**: Pure ESM (would require Node.js 14+, more breaking changes)
+   - **Date**: 2024 (original implementation)
+   - **Status**: Active
 
-2. Decision: PostgreSQL instead of MongoDB
-   - Reason: Relational data model fits our domain
-   - Alternatives: MongoDB, MySQL
-   - Date: 2024-01-10
-```
+2. **Decision**: Dynamic import() for inquirer v9
+   - **Reason**: inquirer v9 is ESM-only, but we want to keep CLI in CommonJS
+   - **Alternatives**: Downgrade to inquirer v8 (CommonJS), convert entire CLI to ESM
+   - **Date**: 2025-01 (v0.1.2 bug fix)
+   - **Status**: Active
+
+3. **Decision**: chalk v4 instead of v5
+   - **Reason**: v5 is pure ESM, incompatible with CommonJS CLI
+   - **Alternatives**: Migrate entire CLI to ESM
+   - **Date**: 2024 (original implementation)
+   - **Status**: Active
+
+4. **Decision**: Template-based distribution (copy, not symlink)
+   - **Reason**: Users need to customize templates after installation
+   - **Alternatives**: Symlink to node_modules (no customization), Git submodules (complex)
+   - **Date**: 2024 (original design)
+   - **Status**: Active
+
+5. **Decision**: Support both Markdown and TOML formats
+   - **Reason**: Gemini CLI requires TOML, others use Markdown
+   - **Alternatives**: Markdown-only (exclude Gemini CLI), generate TOML from Markdown
+   - **Date**: 2024 (Gemini CLI support)
+   - **Status**: Active
 
 ## Deprecated Technologies
 
-List technologies being phased out:
-- **Technology**: [Reason for deprecation]
-- **Migration Plan**: [How to migrate]
-- **Deadline**: [When to complete migration]
+**None Currently** - MUSUBI is a new project with deliberate technology choices.
 
-Example:
-```
-- Redux: Moving to Zustand for simpler state management
-  - Migration: Convert Redux stores to Zustand stores
-  - Deadline: Q2 2024
-
-- Webpack: Moving to Vite for faster builds
-  - Migration: Update build configuration
-  - Deadline: Q1 2024
-```
+Future considerations:
+- If migrating to TypeScript, document migration plan here
+- If upgrading to inquirer v10+, document ESM migration strategy
+- If adding new dependencies, document rationale and alternatives
 
 ## Development Environment Setup
 
 ### Prerequisites
 ```bash
 # Required installations
-Node.js 18+ (LTS)
-pnpm 8+
-PostgreSQL 15+
-Redis 7+
-Docker (optional, for local development)
+Node.js 18+ (LTS recommended)
+npm 10+ (bundled with Node.js 18)
+git (for version control)
 ```
 
-### Quick Start
+### Quick Start for MUSUBI Development
 ```bash
+# Clone repository
+git clone https://github.com/nahisaho/musubi.git
+cd musubi
+
 # Install dependencies
-pnpm install
+npm install
 
-# Setup environment
-cp .env.example .env
+# Run tests
+npm test
 
-# Run database migrations
-pnpm db:migrate
+# Try CLI locally
+node bin/musubi.js --version
+node bin/musubi-init.js  # Interactive prompts
 
-# Start development server
-pnpm dev
+# Link for global testing
+npm link
+musubi --version
+
+# Unlink when done
+npm unlink -g musubi-sdd
+```
+
+### Publishing Workflow
+```bash
+# 1. Update version
+npm version patch  # or minor, major
+
+# 2. Test locally
+npx . init --claude
+
+# 3. Publish to npm
+npm publish
+
+# 4. Push to GitHub
+git push origin main --tags
 ```
 
 ---
 
-**Note**: This document should be updated when technology choices change. Document decisions and their rationale to maintain institutional knowledge.
+**Note**: This document describes MUSUBI's technology stack - a Node.js CLI tool with minimal dependencies. Update when adding new dependencies or changing build processes.
 
-**Last Updated**: [Auto-generated by Steering Agent]
+**Last Updated**: 2025-01-16 by @steering

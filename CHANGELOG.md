@@ -1,0 +1,77 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.1.3] - 2025-01-17
+
+### Added
+- **Multi-platform 25-agent support via AGENTS.md** - Industry first: All 7 AI coding platforms now have equal access to 25 specialized agents
+- GitHub Copilot official AGENTS.md support (`.github/AGENTS.md`)
+- Cursor official AGENTS.md support (`.cursor/AGENTS.md`)
+- Gemini CLI integration via `GEMINI.md` (root level)
+- Windsurf support via `.windsurf/AGENTS.md`
+- Codex support via `.codex/AGENTS.md`
+- Qwen Code support via `.qwen/AGENTS.md`
+- Platform-specific agent file properties in registry (agentsFile)
+- Automated AGENTS.md file copying in musubi-init.js for all 7 platforms
+
+### Changed
+- **Documentation updates** - All documentation now reflects multi-platform equality
+  - Updated Qiita article (Ultimate-SDD-Tool-MUSUBI.md) with 7-platform support details
+  - Updated README.md with comprehensive multi-platform support table
+  - Updated README.ja.md with Japanese translations
+  - Added "25 Agents" column to support comparison table
+  - Emphasized "industry first" achievement across all documentation
+- **Registry updates** - All 7 platforms now have `hasSkills: true` and platform-specific `agentsFile` properties
+- **Test expectations** - Updated test suite to validate all platforms support agents (53/53 tests passing)
+
+### Fixed
+- Registry tests now correctly validate that all platforms have agent support (previously expected Claude Code only)
+- Test expectations updated from "only Claude Code should have skills" to "all platforms should have skills (AGENTS.md)"
+
+### Technical Details
+- **Implementation Strategy**: Skills API for Claude Code, AGENTS.md (OpenAI specification) for other 6 platforms
+- **Test Coverage**: Maintained 100% coverage (53/53 tests passing)
+- **AGENTS.md Format**: OpenAI specification standard with 25 agent definitions
+- **Feature Parity**: All 7 platforms now offer complete SDD workflow coverage
+
+### Migration Notes
+- Existing Claude Code projects: No changes required, Skills API continues to work
+- New projects: Use `npx musubi-sdd init --[platform]` to initialize with your preferred AI coding agent
+- Multi-platform projects: AGENTS.md files are automatically copied to appropriate locations
+
+## [0.1.2] - 2025-01-15
+
+### Added
+- Initial release of MUSUBI with 25 Claude Code Skills
+- Constitutional governance with 9 articles
+- EARS (Easy Approach to Requirements Syntax) format support
+- Steering system for project memory
+- 8-stage SDD workflow support
+- Traceability matrix support
+
+### Features
+- 25 specialized skills covering orchestration, requirements, architecture, development, quality, security, infrastructure, and documentation
+- Multi-language support (English and Japanese)
+- CLI tools for project initialization and status checking
+- Constitutional validation
+
+## [0.1.1] - 2025-01-10
+
+### Fixed
+- CLI initialization bug fixes
+- Documentation improvements
+
+## [0.1.0] - 2025-01-08
+
+### Added
+- Initial proof of concept
+- Basic skill structure
+- Project scaffolding
+
+---
+
+**Note**: v0.1.3 represents a major milestone - the transition from "Claude Code exclusive 25 skills" to "7 platforms with 25 universal agents", achieving industry-first multi-platform equality in SDD tooling.

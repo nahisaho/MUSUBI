@@ -181,6 +181,12 @@ async function main(agent, agentKey) {
     console.log(chalk.green(`  Installed ${commandType}`));
   }
 
+  // Install AGENTS.md (all platforms get 25 agent definitions)
+  if (agent.layout.agentsFile) {
+    await copyAgentsFile(agent);
+    console.log(chalk.green('  Installed 25 agent definitions (AGENTS.md)'));
+  }
+
   // Generate steering context
   if (answers.createSteering) {
     await generateSteering(answers);
@@ -230,6 +236,35 @@ async function copyCommands(agent, agentKey) {
     await fs.copy(fallbackSrc, destDir);
   } else {
     await fs.copy(srcDir, destDir);
+  }
+}
+
+async function copyAgentsFile(agent) {
+  const sharedAgentsFile = path.join(AGENTS_TEMPLATE_DIR, 'shared', 'AGENTS.md');
+  const destFile = agent.layout.agentsFile;
+
+  // For Gemini CLI, AGENTS.md is embedded in GEMINI.md
+  if (destFile === 'GEMINI.md') {
+    // Read shared AGENTS.md
+    const agentsContent = await fs.readFile(sharedAgentsFile, 'utf8');
+    
+    // Read existing GEMINI.md template if exists
+    const geminiTemplate = path.join(AGENTS_TEMPLATE_DIR, 'gemini-cli', 'GEMINI.md');
+    let geminiContent = '';
+    if (fs.existsSync(geminiTemplate)) {
+      geminiContent = await fs.readFile(geminiTemplate, 'utf8');
+    } else {
+      geminiContent = `# Gemini CLI - MUSUBI Configuration\n\n` +
+                      `This file configures Gemini CLI for MUSUBI SDD.\n\n` +
+                      `---\n\n`;
+    }
+    
+    // Append AGENTS.md content
+    geminiContent += agentsContent;
+    await fs.writeFile(destFile, geminiContent);
+  } else {
+    // For other platforms, copy AGENTS.md as-is
+    await fs.copy(sharedAgentsFile, destFile);
   }
 }
 

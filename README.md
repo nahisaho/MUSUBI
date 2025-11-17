@@ -7,8 +7,11 @@ MUSUBI is a comprehensive SDD (Specification Driven Development) framework that 
 ## Features
 
 - 🤖 **Multi-Agent Support** - Works with 7 AI coding agents (Claude Code, GitHub Copilot, Cursor, Gemini CLI, Codex CLI, Qwen Code, Windsurf)
-- 📄 **Flexible Command Formats** - Supports both Markdown and TOML formats (Gemini CLI uses TOML)
-- 🎯 **25 Specialized Claude Code Skills** - Orchestrator, Steering, Requirements, Architecture, Development, Quality, Security, Infrastructure (Claude Code exclusive)
+- 📄 **Flexible Command Formats** - Supports Markdown, TOML, and AGENTS.md formats
+- 🎯 **25 Specialized Agents (All Platforms)** - Orchestrator, Steering, Requirements, Architecture, Development, Quality, Security, Infrastructure
+  - Claude Code: Skills API (25 skills)
+  - GitHub Copilot & Cursor: AGENTS.md (official support)
+  - Other 4 agents: AGENTS.md (compatible format)
 - 📋 **Constitutional Governance** - 9 immutable articles + Phase -1 Gates for quality enforcement
 - 📝 **EARS Requirements Format** - Unambiguous requirements with complete traceability
 - 🔄 **Delta Specifications** - Brownfield and greenfield project support
@@ -20,20 +23,22 @@ MUSUBI is a comprehensive SDD (Specification Driven Development) framework that 
 
 MUSUBI supports 7 AI coding agents, each with tailored configurations:
 
-| Agent | Skills API | Command Format | Command File Format | Installation Directory |
-|-------|-----------|----------------|---------------------|----------------------|
-| **Claude Code** | ✅ (25 skills) | `/sdd-*` | Markdown | `.claude/skills/`, `.claude/commands/` |
-| **GitHub Copilot** | ❌ | `#sdd-*` | Markdown | `.github/prompts/` |
-| **Cursor IDE** | ❌ | `/sdd-*` | Markdown | `.cursor/commands/` |
-| **Gemini CLI** | ❌ | `/sdd-*` | **TOML** | `.gemini/commands/` |
-| **Codex CLI** | ❌ | `/prompts:sdd-*` | Markdown | `.codex/prompts/` |
-| **Qwen Code** | ❌ | `/sdd-*` | Markdown | `.qwen/commands/` |
-| **Windsurf IDE** | ❌ | `/sdd-*` | Markdown | `.windsurf/workflows/` |
+| Agent | Skills API | 25 Agents | Command Format | Command File Format | Installation Directory |
+|-------|-----------|-----------|----------------|---------------------|----------------------|
+| **Claude Code** | ✅ (25 skills) | ✅ | `/sdd-*` | Markdown | `.claude/skills/`, `.claude/commands/` |
+| **GitHub Copilot** | ❌ | ✅ (AGENTS.md) | `#sdd-*` | Markdown + AGENTS.md | `.github/prompts/`, `.github/AGENTS.md` |
+| **Cursor IDE** | ❌ | ✅ (AGENTS.md) | `/sdd-*` | Markdown + AGENTS.md | `.cursor/commands/`, `.cursor/AGENTS.md` |
+| **Gemini CLI** | ❌ | ✅ (GEMINI.md) | `/sdd-*` | TOML + GEMINI.md | `.gemini/commands/`, `GEMINI.md` |
+| **Codex CLI** | ❌ | ✅ (AGENTS.md) | `/prompts:sdd-*` | Markdown + AGENTS.md | `.codex/prompts/`, `.codex/AGENTS.md` |
+| **Qwen Code** | ❌ | ✅ (AGENTS.md) | `/sdd-*` | Markdown + AGENTS.md | `.qwen/commands/`, `.qwen/AGENTS.md` |
+| **Windsurf IDE** | ❌ | ✅ (AGENTS.md) | `/sdd-*` | Markdown + AGENTS.md | `.windsurf/workflows/`, `.windsurf/AGENTS.md` |
 
 **Notes**:
 - Skills API is exclusive to Claude Code
-- Gemini CLI uses TOML format instead of Markdown
-- All other agents use Markdown format for commands/prompts
+- **All 7 platforms now support 25 agents** via Skills API (Claude Code) or AGENTS.md (others)
+- AGENTS.md: OpenAI specification, officially supported by GitHub Copilot & Cursor
+- Gemini CLI uses TOML format + GEMINI.md integration
+- All other agents use Markdown format + AGENTS.md
 
 ## Quick Start
 
@@ -42,26 +47,26 @@ MUSUBI supports 7 AI coding agents, each with tailored configurations:
 ```bash
 # Initialize MUSUBI for your preferred agent
 
-# Claude Code (default) - with 25 skills
+# Claude Code (default) - 25 Skills API
 npx musubi-sdd init
 npx musubi-sdd init --claude
 
-# GitHub Copilot
+# GitHub Copilot - 25 agents (AGENTS.md, official support)
 npx musubi-sdd init --copilot
 
-# Cursor IDE
+# Cursor IDE - 25 agents (AGENTS.md, official support)
 npx musubi-sdd init --cursor
 
-# Gemini CLI
+# Gemini CLI - 25 agents (GEMINI.md integration)
 npx musubi-sdd init --gemini
 
-# Codex CLI
+# Codex CLI - 25 agents (AGENTS.md)
 npx musubi-sdd init --codex
 
-# Qwen Code
+# Qwen Code - 25 agents (AGENTS.md)
 npx musubi-sdd init --qwen
 
-# Windsurf IDE
+# Windsurf IDE - 25 agents (AGENTS.md)
 npx musubi-sdd init --windsurf
 
 # Or install globally
@@ -69,14 +74,78 @@ npm install -g musubi-sdd
 musubi init --claude    # or --copilot, --cursor, etc.
 ```
 
+### Project Types
+
+During initialization, MUSUBI asks you to select a **Project Type**. This determines the workflow and features available:
+
+#### Greenfield (0→1)
+- **What it is**: Starting a new project from scratch
+- **Use cases**: 
+  - New application development
+  - Proof-of-concept projects
+  - Greenfield microservices
+- **Features enabled**:
+  - Full 8-stage SDD workflow (Research → Monitoring)
+  - `/sdd-steering` - Generate initial project memory
+  - `/sdd-requirements` - Create new requirements from scratch
+  - `/sdd-design` - Design architecture (C4 model + ADR)
+  - `/sdd-tasks` - Break requirements into tasks
+  - `/sdd-implement` - Implement features (test-first)
+  - `/sdd-validate` - Constitutional compliance checks
+- **Benefits**:
+  - Clean start with best practices enforced
+  - Constitutional governance from day one
+  - Complete traceability from requirements to code
+
+#### Brownfield (1→n)
+- **What it is**: Working with existing codebases
+- **Use cases**:
+  - Adding features to existing applications
+  - Refactoring legacy code
+  - Migrating/modernizing systems
+- **Features enabled**:
+  - Delta Specifications (ADDED/MODIFIED/REMOVED)
+  - `/sdd-change-init` - Create change proposal
+  - `/sdd-change-apply` - Apply changes with impact analysis
+  - `/sdd-change-archive` - Archive completed changes
+  - `change-impact-analyzer` skill (Claude Code) - Automatic impact detection
+  - Reverse engineering: `/sdd-steering` analyzes existing code
+- **Benefits**:
+  - Safe incremental changes with impact analysis
+  - Preserves existing architecture while improving incrementally
+  - Full audit trail of what changed and why
+
+#### Both
+- **What it is**: Hybrid approach for complex scenarios
+- **Use cases**:
+  - Monolith → Microservices migration (brownfield + greenfield services)
+  - Platform modernization (keep some, rebuild others)
+  - Multi-component systems with mixed maturity
+- **Features enabled**:
+  - All Greenfield + Brownfield features
+  - Flexibility to choose workflow per component
+  - Mixed delta specs and greenfield specs in same project
+- **Benefits**:
+  - Maximum flexibility for complex transformation projects
+  - Unified steering/governance across all components
+  - Single tool for entire modernization journey
+
+**Example Selection**:
+```
+? Project type:
+❯ Greenfield (0→1)    ← New projects
+  Brownfield (1→n)    ← Existing codebases
+  Both                ← Complex/hybrid scenarios
+```
+
 ### What Gets Installed
 
-#### Claude Code (default)
+#### Claude Code (Skills API)
 
 ```
 your-project/
 ├── .claude/
-│   ├── skills/              # 25 specialized skills (Claude Code exclusive)
+│   ├── skills/              # 25 Skills API (Claude Code exclusive feature)
 │   │   ├── orchestrator/
 │   │   ├── steering/
 │   │   ├── requirements-analyst/
@@ -100,8 +169,10 @@ your-project/
 ```
 your-project/
 ├── .github/prompts/         # For GitHub Copilot (#sdd-*, Markdown)
+│   ├── AGENTS.md             # 25 agents definition (official support)
 │   OR
 ├── .cursor/commands/        # For Cursor (/sdd-*, Markdown)
+│   ├── AGENTS.md             # 25 agents definition (official support)
 │   OR
 ├── .gemini/commands/        # For Gemini CLI (/sdd-*, TOML)
 │   │   ├── sdd-steering.toml
@@ -109,21 +180,26 @@ your-project/
 │   │   └── ... (6 TOML files)
 │   OR
 ├── .codex/prompts/          # For Codex CLI (/prompts:sdd-*, Markdown)
+│   ├── AGENTS.md             # 25 agents definition
 │   OR
 ├── .qwen/commands/          # For Qwen Code (/sdd-*, Markdown)
+│   ├── AGENTS.md             # 25 agents definition
 │   OR
 ├── .windsurf/workflows/     # For Windsurf (/sdd-*, Markdown)
+│   ├── AGENTS.md             # 25 agents definition
 │
-├── AGENTS.md (or GEMINI.md/QWEN.md)  # Agent-specific guide
+├── GEMINI.md (root, for Gemini)  # 25 agents integrated into existing file
 ├── steering/                # Project memory (same for all)
 ├── templates/               # Document templates (same for all)
 └── storage/                 # Specs, changes, features (same for all)
 ```
 
 **Key Differences**:
-- Claude Code gets 25 skills + commands (Markdown)
-- Gemini CLI uses TOML format for commands (unique)
-- Other agents use Markdown for commands/prompts
+- **Claude Code**: 25 Skills API (exclusive) + commands (Markdown)
+- **GitHub Copilot & Cursor**: AGENTS.md (official support) + commands (Markdown)
+- **Gemini CLI**: GEMINI.md integration (25 agents) + TOML commands (unique)
+- **Others**: AGENTS.md (compatible) + Markdown commands
+- **All platforms**: Same 25 agents, different implementation formats
 
 ## Usage
 
@@ -275,7 +351,12 @@ For comprehensive validation, use your agent's `/sdd-validate` (or equivalent) c
 /prompts:sdd-validate authentication
 ```
 
-## 25 Skills Overview
+## 25 Agents Overview (All Platforms)
+
+**Available on all 7 platforms** via:
+- **Claude Code**: Skills API (automatic invocation)
+- **GitHub Copilot & Cursor**: AGENTS.md (official support, reference via `@agent-name`)
+- **Gemini, Windsurf, Codex, Qwen**: AGENTS.md (compatible format, natural language reference)
 
 ### Orchestration & Management (3)
 - **orchestrator** - Master coordinator for multi-skill workflows

@@ -1,0 +1,297 @@
+name = "sdd-change-init"
+description = "Initialize a change proposal for brownfield projects"
+
+[[instructions]]
+role = "system"
+content = """
+You are executing the /sdd-change-init command to create a change proposal for an existing codebase.
+
+# Command Format
+
+/sdd-change-init <change-name>
+
+Examples:
+- /sdd-change-init add-2fa
+- /sdd-change-init migrate-to-graphql
+- /sdd-change-init refactor-auth-service
+
+# Your Task
+
+Generate a change proposal specification that documents what will be added, modified, or removed in the existing system.
+
+# Step 1: Read Project Memory (IMPORTANT)
+
+**ALWAYS read steering files FIRST:**
+
+- Read `steering/structure.md` (English) - Current architecture
+- Read `steering/tech.md` (English) - Current technology stack
+- Read `steering/product.md` (English) - Current product context
+
+Extract:
+- Current architecture patterns
+- Existing components
+- Technology stack
+- Known constraints
+
+# Step 2: Analyze Existing System
+
+Research current implementation by:
+- Searching for related code
+- Finding existing requirements
+- Checking existing design documents
+- Identifying affected components
+
+Document current state:
+- What exists now?
+- What components are affected?
+- What dependencies exist?
+- What tests cover this area?
+
+# Step 3: Gather Change Requirements
+
+Ask user:
+- Why is this change needed?
+- What problem does it solve?
+- What are the business drivers?
+- What is the scope of the change?
+- What must NOT change (backward compatibility)?
+- What is the timeline/deadline?
+
+Identify affected areas:
+- Frontend components
+- Backend services
+- Database schema
+- APIs (internal/external)
+- Third-party integrations
+- Tests
+- Documentation
+
+# Step 4: Create Change Proposal
+
+Generate document with this structure:
+
+## Metadata
+- Change ID: CHG-XXX
+- Status: Proposed
+- Created: DATE
+- Priority: P0/P1/P2/P3
+- Type: Feature | Enhancement | Refactor | Bug Fix | Migration
+
+## Executive Summary
+2-3 sentences describing the change and business value
+
+## Current State
+- Existing functionality
+- Problems/limitations
+- Affected components
+
+## Proposed Change
+
+### ADDED Requirements
+For each new requirement:
+- Requirement ID: REQ-NEW-XXX
+- EARS format
+- Justification: Why needed
+- Impact: What components affected
+- Breaking Change: Yes/No
+
+### MODIFIED Requirements
+For each modified requirement:
+- Requirement ID: REQ-XXX-XXX (MODIFIED)
+- Previous Behavior: What it did before
+- New Behavior: What it will do after
+- Reason: Why changing
+- Breaking Change: Yes/No
+- Migration Path: How to migrate
+- Backward Compatibility: Details
+
+### REMOVED Requirements
+For each removed requirement:
+- Requirement ID: REQ-XXX-XXX (REMOVED)
+- Current Behavior: What it does now
+- Reason for Removal
+- Breaking Change: Yes
+- Deprecation Period: 30/60/90 days
+- Migration Path: Alternative approach
+- User Communication: Plan
+
+## Impact Analysis
+
+### Breaking Changes Table
+| Change | Component | Severity | Mitigation |
+|--------|-----------|----------|------------|
+| ... | ... | ... | ... |
+
+### Dependencies
+- Required library upgrades
+- New services required
+- Affected downstream systems
+
+### Risks
+| Risk | Probability | Impact | Mitigation |
+|------|-------------|--------|------------|
+| ... | ... | ... | ... |
+
+### Testing Requirements
+- Unit tests for new functions
+- Integration tests for modified APIs
+- E2E tests for user workflows
+- Performance tests
+- Security audit (if applicable)
+- Backward compatibility tests
+
+## Implementation Plan
+
+### Phase 1: Preparation
+- Create feature flag
+- Set up monitoring
+- Write migration scripts
+- Update CI/CD
+
+### Phase 2: Development
+- Implement new requirements
+- Modify existing code
+- Write tests (80%+ coverage)
+- Update documentation
+
+### Phase 3: Testing
+- QA testing
+- Performance testing
+- Security review
+- Stakeholder demo
+
+### Phase 4: Deployment
+- Deploy to staging
+- Run smoke tests
+- Deploy to production (canary)
+- Monitor metrics
+
+### Phase 5: Cleanup
+- Remove feature flag
+- Archive old code
+- Update steering
+
+## Rollback Plan
+
+### Trigger Conditions
+- Error rate > 1%
+- P95 latency > 500ms
+- Critical bug reported
+- Data inconsistency detected
+
+### Rollback Steps
+1. Disable feature flag
+2. Revert database migration
+3. Deploy previous version
+4. Verify system health
+5. Communicate to stakeholders
+
+### Rollback Time
+- Estimated: 15 minutes
+
+## Success Metrics
+
+### Acceptance Criteria
+- All requirements implemented
+- Test coverage ≥ 80%
+- No P0/P1 bugs
+- Performance within SLA
+- Security audit passed
+
+### KPIs
+- Response time: < 200ms (P95)
+- Error rate: < 0.1%
+- User adoption: X% within 1 month
+- Customer satisfaction: NPS > 8
+
+## Communication Plan
+
+### Stakeholders
+| Stakeholder | Communication | Timing |
+|-------------|---------------|--------|
+| Engineering | Kickoff meeting | Week 1 Day 1 |
+| Product | Weekly updates | Every Monday |
+| Customers | Email | 2 weeks before launch |
+| Support | Training | 1 week before launch |
+
+### Documentation Updates
+- API documentation
+- User guide
+- Migration guide
+- Changelog
+- Release notes
+
+## Constitutional Compliance
+
+- Article IV: All new requirements use EARS patterns
+- Article V: Change ID assigned, requirements have IDs
+- Article I & II: New features in lib/ with CLI
+
+# Step 5: Assign Change ID
+
+Format: CHG-XXX (sequential number starting from 001)
+
+# Step 6: Categorize Change
+
+Types:
+- Feature: New user-facing functionality
+- Enhancement: Improvement to existing feature
+- Refactor: Code restructuring
+- Bug Fix: Correcting incorrect behavior
+- Migration: Technology/platform upgrade
+- Performance: Optimization
+- Security: Security enhancement
+
+Priority:
+- P0: Critical, blocking
+- P1: High priority
+- P2: Medium priority
+- P3: Low priority
+
+# Step 7: Save Documents (Bilingual)
+
+Create TWO files:
+
+1. English (PRIMARY): `storage/changes/<change-name>-proposal.md`
+2. Japanese (TRANSLATION): `storage/changes/<change-name>-proposal.ja.md`
+
+Update change log: `storage/changes/change-log.md`
+
+# Step 8: Generate Summary
+
+Present summary to user with:
+- Change name and ID
+- Type and priority
+- Impact summary (ADDED/MODIFIED/REMOVED counts)
+- Timeline estimate
+- Risk assessment
+- Next steps
+
+# Validation Checklist
+
+Before completing:
+- Steering context read
+- Current system analyzed
+- Change ID assigned
+- ADDED/MODIFIED/REMOVED sections complete
+- Impact analysis done
+- Breaking changes identified
+- Migration path documented
+- Rollback plan defined
+- Timeline estimated
+- Documents saved (bilingual)
+- Change log updated
+- Summary presented
+
+# Edge Cases
+
+If no existing requirements found:
+- This may be greenfield, suggest using /sdd-requirements instead
+- Use change proposals only for modifying existing documented features
+
+If change proposal already exists:
+- Ask user: Update existing or create new version?
+- If update: Increment version number
+
+Execute the change proposal generation now.
+"""

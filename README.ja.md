@@ -7,8 +7,11 @@ MUSUBIは、6つの主要フレームワークのベスト機能を統合した�
 ## 特徴
 
 - 🤖 **マルチエージェント対応** - 7つのAIコーディングエージェントに対応（Claude Code、GitHub Copilot、Cursor、Gemini CLI、Codex CLI、Qwen Code、Windsurf）
-- 📄 **柔軟なコマンド形式** - MarkdownとTOML形式の両方に対応（Gemini CLIはTOMLを使用）
-- 🎯 **25の専門Claude Codeスキル** - オーケストレーター、ステアリング、要件、アーキテクチャ、開発、品質、セキュリティ、インフラ（Claude Code専用）
+- 📄 **柔軟なコマンド形式** - Markdown、TOML、AGENTS.md形式に対応
+- 🎯 **25の専門エージェント（全プラットフォーム対応）** - オーケストレーター、ステアリング、要件、アーキテクチャ、開発、品質、セキュリティ、インフラ
+  - Claude Code: Skills API（25スキル）
+  - GitHub Copilot & Cursor: AGENTS.md（公式サポート）
+  - その他4エージェント: AGENTS.md（互換形式）
 - 📋 **憲法ガバナンス** - 9つの不変条項 + フェーズ-1ゲートによる品質保証
 - 📝 **EARS要件形式** - 完全なトレーサビリティを持つ明確な要件
 - 🔄 **差分仕様** - ブラウンフィールドおよびグリーンフィールドプロジェクト対応
@@ -20,20 +23,22 @@ MUSUBIは、6つの主要フレームワークのベスト機能を統合した�
 
 MUSUBIは7つのAIコーディングエージェントに対応し、それぞれに最適化された設定を提供します。
 
-| エージェント | スキルAPI | コマンド形式 | コマンドファイル形式 | インストールディレクトリ |
-|-------|-----------|----------------|---------------------|----------------------|
-| **Claude Code** | ✅ (25スキル) | `/sdd-*` | Markdown | `.claude/skills/`, `.claude/commands/` |
-| **GitHub Copilot** | ❌ | `#sdd-*` | Markdown | `.github/prompts/` |
-| **Cursor IDE** | ❌ | `/sdd-*` | Markdown | `.cursor/commands/` |
-| **Gemini CLI** | ❌ | `/sdd-*` | **TOML** | `.gemini/commands/` |
-| **Codex CLI** | ❌ | `/prompts:sdd-*` | Markdown | `.codex/prompts/` |
-| **Qwen Code** | ❌ | `/sdd-*` | Markdown | `.qwen/commands/` |
-| **Windsurf IDE** | ❌ | `/sdd-*` | Markdown | `.windsurf/workflows/` |
+| エージェント | スキルAPI | 25エージェント | コマンド形式 | コマンドファイル形式 | インストールディレクトリ |
+|-------|-----------|-----------|----------------|---------------------|----------------------|
+| **Claude Code** | ✅ (25スキル) | ✅ | `/sdd-*` | Markdown | `.claude/skills/`, `.claude/commands/` |
+| **GitHub Copilot** | ❌ | ✅ (AGENTS.md) | `#sdd-*` | Markdown + AGENTS.md | `.github/prompts/`, `.github/AGENTS.md` |
+| **Cursor IDE** | ❌ | ✅ (AGENTS.md) | `/sdd-*` | Markdown + AGENTS.md | `.cursor/commands/`, `.cursor/AGENTS.md` |
+| **Gemini CLI** | ❌ | ✅ (GEMINI.md) | `/sdd-*` | TOML + GEMINI.md | `.gemini/commands/`, `GEMINI.md` |
+| **Codex CLI** | ❌ | ✅ (AGENTS.md) | `/prompts:sdd-*` | Markdown + AGENTS.md | `.codex/prompts/`, `.codex/AGENTS.md` |
+| **Qwen Code** | ❌ | ✅ (AGENTS.md) | `/sdd-*` | Markdown + AGENTS.md | `.qwen/commands/`, `.qwen/AGENTS.md` |
+| **Windsurf IDE** | ❌ | ✅ (AGENTS.md) | `/sdd-*` | Markdown + AGENTS.md | `.windsurf/workflows/`, `.windsurf/AGENTS.md` |
 
 **注意事項**：
 - スキルAPIはClaude Code専用です
-- Gemini CLIはMarkdownではなくTOML形式を使用します
-- その他のエージェントはすべてMarkdown形式のコマンド/プロンプトを使用します
+- **全7プラットフォームが25エージェントに対応**（Skills APIまたはAGENTS.md経由）
+- AGENTS.md: OpenAI仕様、GitHub Copilot & Cursorが公式サポート
+- Gemini CLIはTOML形式 + GEMINI.md統合を使用
+- その他のエージェントはMarkdown形式 + AGENTS.mdを使用
 
 ## クイックスタート
 
@@ -42,26 +47,26 @@ MUSUBIは7つのAIコーディングエージェントに対応し、それぞ�
 ```bash
 # 好みのエージェント向けにMUSUBIを初期化
 
-# Claude Code（デフォルト） - 25スキル付き
+# Claude Code（デフォルト） - 25 Skills API
 npx musubi-sdd init
 npx musubi-sdd init --claude
 
-# GitHub Copilot
+# GitHub Copilot - 25エージェント（AGENTS.md、公式サポート）
 npx musubi-sdd init --copilot
 
-# Cursor IDE
+# Cursor IDE - 25エージェント（AGENTS.md、公式サポート）
 npx musubi-sdd init --cursor
 
-# Gemini CLI
+# Gemini CLI - 25エージェント（GEMINI.md統合）
 npx musubi-sdd init --gemini
 
-# Codex CLI
+# Codex CLI - 25エージェント（AGENTS.md）
 npx musubi-sdd init --codex
 
-# Qwen Code
+# Qwen Code - 25エージェント（AGENTS.md）
 npx musubi-sdd init --qwen
 
-# Windsurf IDE
+# Windsurf IDE - 25エージェント（AGENTS.md）
 npx musubi-sdd init --windsurf
 
 # またはグローバルインストール
@@ -69,14 +74,78 @@ npm install -g musubi-sdd
 musubi init --claude    # または --copilot、--cursorなど
 ```
 
+### プロジェクトタイプ
+
+初期化時、MUSUBIは**プロジェクトタイプ**の選択を求めます。これにより、利用可能なワークフローと機能が決定されます。
+
+#### Greenfield（0→1）
+- **概要**: ゼロから新しいプロジェクトを開始
+- **使用例**: 
+  - 新規アプリケーション開発
+  - 概念実証プロジェクト
+  - グリーンフィールドマイクロサービス
+- **有効化される機能**:
+  - 完全な8段階SDDワークフロー（調査 → モニタリング）
+  - `/sdd-steering` - 初期プロジェクトメモリの生成
+  - `/sdd-requirements` - ゼロから新規要件を作成
+  - `/sdd-design` - アーキテクチャ設計（C4モデル + ADR）
+  - `/sdd-tasks` - 要件をタスクに分解
+  - `/sdd-implement` - 機能実装（テストファースト）
+  - `/sdd-validate` - 憲法準拠チェック
+- **メリット**:
+  - ベストプラクティスが最初から適用されたクリーンなスタート
+  - 初日から憲法ガバナンス
+  - 要件からコードまで完全なトレーサビリティ
+
+#### Brownfield（1→n）
+- **概要**: 既存のコードベースでの作業
+- **使用例**:
+  - 既存アプリケーションへの機能追加
+  - レガシーコードのリファクタリング
+  - システムの移行/モダナイゼーション
+- **有効化される機能**:
+  - 差分仕様（ADDED/MODIFIED/REMOVED）
+  - `/sdd-change-init` - 変更提案の作成
+  - `/sdd-change-apply` - 影響分析付き変更適用
+  - `/sdd-change-archive` - 完了した変更のアーカイブ
+  - `change-impact-analyzer`スキル（Claude Code） - 自動影響検出
+  - リバースエンジニアリング: `/sdd-steering`が既存コードを分析
+- **メリット**:
+  - 影響分析による安全な段階的変更
+  - 段階的改善を行いながら既存アーキテクチャを保持
+  - 変更内容と理由の完全な監査証跡
+
+#### Both（両方）
+- **概要**: 複雑なシナリオ向けハイブリッドアプローチ
+- **使用例**:
+  - モノリス → マイクロサービス移行（ブラウンフィールド + グリーンフィールドサービス）
+  - プラットフォームモダナイゼーション（一部保持、一部再構築）
+  - 成熟度が異なるマルチコンポーネントシステム
+- **有効化される機能**:
+  - すべてのGreenfield + Brownfield機能
+  - コンポーネントごとにワークフローを選択する柔軟性
+  - 同一プロジェクト内で差分仕様とグリーンフィールド仕様を混在
+- **メリット**:
+  - 複雑な変革プロジェクトのための最大限の柔軟性
+  - すべてのコンポーネント全体で統一されたステアリング/ガバナンス
+  - モダナイゼーション全体を単一ツールで実施
+
+**選択例**:
+```
+? Project type:
+❯ Greenfield (0→1)    ← 新規プロジェクト
+  Brownfield (1→n)    ← 既存コードベース
+  Both                ← 複雑/ハイブリッドシナリオ
+```
+
 ### インストールされる内容
 
-#### Claude Code（デフォルト）
+#### Claude Code（Skills API）
 
 ```
 your-project/
 ├── .claude/
-│   ├── skills/              # 25の専門スキル（Claude Code専用）
+│   ├── skills/              # 25 Skills API（Claude Code専用機能）
 │   │   ├── orchestrator/
 │   │   ├── steering/
 │   │   ├── requirements-analyst/
@@ -100,8 +169,10 @@ your-project/
 ```
 your-project/
 ├── .github/prompts/         # GitHub Copilot用（#sdd-*、Markdown）
+│   ├── AGENTS.md             # 25エージェント定義（公式サポート）
 │   または
 ├── .cursor/commands/        # Cursor用（/sdd-*、Markdown）
+│   ├── AGENTS.md             # 25エージェント定義（公式サポート）
 │   または
 ├── .gemini/commands/        # Gemini CLI用（/sdd-*、TOML）
 │   │   ├── sdd-steering.toml
@@ -109,21 +180,26 @@ your-project/
 │   │   └── ... (6つのTOMLファイル)
 │   または
 ├── .codex/prompts/          # Codex CLI用（/prompts:sdd-*、Markdown）
+│   ├── AGENTS.md             # 25エージェント定義
 │   または
 ├── .qwen/commands/          # Qwen Code用（/sdd-*、Markdown）
+│   ├── AGENTS.md             # 25エージェント定義
 │   または
 ├── .windsurf/workflows/     # Windsurf用（/sdd-*、Markdown）
+│   ├── AGENTS.md             # 25エージェント定義
 │
-├── AGENTS.md（またはGEMINI.md/QWEN.md）  # エージェント固有のガイド
+├── GEMINI.md（ルート、Gemini用）  # 25エージェントを既存ファイルに統合
 ├── steering/                # プロジェクトメモリ（全て共通）
 ├── templates/               # ドキュメントテンプレート（全て共通）
 └── storage/                 # 仕様、変更、機能（全て共通）
 ```
 
 **主な違い**：
-- Claude Codeは25スキル + コマンドを取得（Markdown）
-- Gemini CLIはコマンドにTOML形式を使用（ユニーク）
-- その他のエージェントはコマンド/プロンプトにMarkdownを使用
+- **Claude Code**: 25 Skills API（専用） + コマンド（Markdown）
+- **GitHub Copilot & Cursor**: AGENTS.md（公式サポート） + コマンド（Markdown）
+- **Gemini CLI**: GEMINI.md統合（25エージェント） + TOMLコマンド（ユニーク）
+- **その他**: AGENTS.md（互換） + Markdownコマンド
+- **全プラットフォーム**: 同じ25エージェント、異なる実装形式
 
 ## 使用方法
 
@@ -275,7 +351,12 @@ MUSUBIプロジェクトの現在の状態を表示します。
 /prompts:sdd-validate authentication
 ```
 
-## 25スキル概要
+## 25エージェント概要（全プラットフォーム対応）
+
+**全7プラットフォームで利用可能**：
+- **Claude Code**: Skills API（自動起動）
+- **GitHub Copilot & Cursor**: AGENTS.md（公式サポート、`@エージェント名`で参照）
+- **Gemini、Windsurf、Codex、Qwen**: AGENTS.md（互換形式、自然言語で参照）
 
 ### オーケストレーションと管理（3）
 - **orchestrator** - マルチスキルワークフローのマスターコーディネーター
