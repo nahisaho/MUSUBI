@@ -257,6 +257,25 @@ Ensure your PR:
 - [ ] Follows coding standards
 - [ ] Has descriptive commit messages
 
+**CI/CD Requirements**:
+
+All Pull Requests must pass the following CI checks before merging:
+
+1. **ESLint & Prettier** - Code style and quality
+2. **Jest Tests** - All tests passing with ≥80% coverage
+3. **Build Verification** - `npm pack` succeeds
+4. **Security Audit** - No moderate/high vulnerabilities
+5. **Platform Tests** - All 7 platform template validations pass:
+   - claude-code
+   - github-copilot
+   - cursor
+   - gemini-cli
+   - windsurf
+   - codex
+   - qwen-code
+
+These checks run automatically on every PR. The merge button will be disabled until all checks pass.
+
 ### PR Description Template
 
 ```markdown

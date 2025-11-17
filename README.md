@@ -1,5 +1,9 @@
 # MUSUBI
 
+[![CI](https://github.com/nahisaho/musubi/actions/workflows/ci.yml/badge.svg)](https://github.com/nahisaho/musubi/actions/workflows/ci.yml)
+[![npm version](https://badge.fury.io/js/musubi-sdd.svg)](https://www.npmjs.com/package/musubi-sdd)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 **Ultimate Specification Driven Development Tool for 7 AI Coding Agents**
 
 MUSUBI is a comprehensive SDD (Specification Driven Development) framework that synthesizes the best features from 6 leading frameworks into a production-ready tool for multiple AI coding agents.
@@ -566,9 +570,36 @@ steering/rules/constitution.md
 
 ## Development
 
+### Contributing Workflow
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Make your changes
+4. Run tests locally: `npm test`
+5. Run lint: `npm run lint`
+6. Commit with conventional commits: `git commit -m "feat: add new feature"`
+7. Push to your fork: `git push origin feature/your-feature`
+8. Create a Pull Request
+9. Wait for CI checks to pass (all checks must succeed)
+10. Request review
+11. Merge after approval
+
+### CI/CD Pipeline
+
+- **CI**: Runs on every PR and push to `main`
+  - ESLint & Prettier
+  - Jest Tests (80% coverage required)
+  - Build Verification
+  - Security Audit
+  - Platform Initialization Tests (7 platforms)
+- **Release**: Automated npm publish on version tags (`v*.*.*`)
+- **Dependabot**: Weekly dependency updates (Mondays 9:00 JST)
+
+### Local Testing
+
 ```bash
 # Clone repository
-git clone https://github.com/your-org/musubi.git
+git clone https://github.com/nahisaho/musubi.git
 cd musubi
 
 # Install dependencies
@@ -576,6 +607,12 @@ npm install
 
 # Run tests
 npm test
+
+# Run lint
+npm run lint
+
+# Check formatting
+npm run format:check
 
 # Link for local development
 npm link
