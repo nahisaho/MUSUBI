@@ -1,0 +1,421 @@
+# MUSUBI Project Configuration
+# This file defines project-wide settings, conventions, and agent behavior
+
+# ============================================================================
+# Project Metadata
+# ============================================================================
+
+project_name: "musubi-sdd"
+description: "Ultimate Specification Driven Development Tool with 25 Agents for 7 AI Coding Platforms"
+version: "0.1.7"
+
+# Target platforms
+platforms:
+  - claude-code
+  - github-copilot
+  - cursor
+  - gemini-cli
+  - windsurf
+  - codex
+  - qwen-code
+
+# ============================================================================
+# Languages and Frameworks
+# ============================================================================
+
+# Programming languages used in this project
+languages:
+  - javascript
+  - markdown
+  - yaml
+
+# Frameworks and libraries
+frameworks:
+  - name: "Node.js"
+    version: ">=18.0.0"
+    purpose: "runtime"
+  
+  - name: "Jest"
+    version: "^29.0.0"
+    purpose: "testing"
+  
+  - name: "ESLint"
+    version: "^8.50.0"
+    purpose: "linting"
+  
+  - name: "Prettier"
+    version: "^3.0.0"
+    purpose: "formatting"
+  
+  - name: "Commander"
+    version: "^11.0.0"
+    purpose: "CLI framework"
+  
+  - name: "Inquirer"
+    version: "^9.0.0"
+    purpose: "interactive prompts"
+
+# ============================================================================
+# Project Structure Conventions
+# ============================================================================
+
+conventions:
+  # Overall architecture pattern
+  architecture_pattern: "25 Specialized Agents + Constitutional Governance"
+  
+  # Directory structure patterns
+  directory_structure:
+    agents: "src/templates/agents/{platform}/skills/{agent-name}/"
+    templates: "src/templates/"
+    steering: "steering/"
+    memories: "steering/memories/"
+    docs: "docs/"
+    tests: "tests/"
+  
+  # Naming conventions
+  naming:
+    files: "kebab-case"           # example: agent-name.md
+    directories: "kebab-case"     # example: my-feature/
+    variables: "camelCase"        # example: myVariable
+    constants: "UPPER_SNAKE_CASE" # example: MAX_SIZE
+    classes: "PascalCase"         # example: MyClass
+  
+  # File patterns
+  file_patterns:
+    agent_skill: "SKILL.md"
+    agent_meta: "meta.json"
+    bilingual_docs: "{name}.md + {name}.ja.md"
+    tests: "*.test.js"
+
+# ============================================================================
+# Steering Configuration
+# ============================================================================
+
+steering:
+  # Auto-update settings
+  auto_update:
+    enabled: false              # Manual update for now
+    frequency: "on-demand"      # Options: daily, weekly, on-demand
+    
+  # Paths to exclude from analysis
+  excluded_paths:
+    - "node_modules/**"
+    - "dist/**"
+    - ".git/**"
+    - "References/**"          # Reference projects, not part of MUSUBI
+    - "orchestrator/reports/**"
+    - "*.log"
+  
+  # Steering documents
+  documents:
+    - name: "structure"
+      path: "steering/structure.md"
+      purpose: "Architecture patterns and directory structure"
+      bilingual: true
+    
+    - name: "tech"
+      path: "steering/tech.md"
+      purpose: "Technology stack and frameworks"
+      bilingual: true
+    
+    - name: "product"
+      path: "steering/product.md"
+      purpose: "Business context and product vision"
+      bilingual: true
+  
+  # Memory system configuration
+  memories:
+    enabled: true
+    path: "steering/memories/"
+    max_file_size_kb: 500       # Maximum size per memory file
+    retention_days: 365         # Keep memories for 1 year
+    
+    # Memory categories
+    categories:
+      - architecture_decisions   # ADR-style decision records
+      - development_workflow     # Build, test, deployment processes
+      - domain_knowledge         # Business logic, terminology
+      - suggested_commands       # Frequently used CLI commands
+      - lessons_learned          # Insights and best practices
+
+# ============================================================================
+# Agent Configuration
+# ============================================================================
+
+agents:
+  # Default language for agent interactions
+  default_language: "ja"
+  
+  # Bilingual output requirement
+  bilingual_output:
+    enabled: true
+    languages: ["en", "ja"]
+    naming_convention: "{name}.md (English), {name}.ja.md (Japanese)"
+  
+  # Output behavior
+  output:
+    gradual_generation: true     # File-by-file output with progress
+    progress_indicators: true    # Show [N/Total] counters
+    large_file_splitting: true   # Split files >300 lines
+    split_threshold_lines: 300   # Threshold for multi-part generation
+  
+  # Interactive dialogue
+  dialogue:
+    one_question_at_a_time: true
+    wait_for_user_response: true
+    show_response_prompt: true   # Display "👤 ユーザー: [回答待ち]"
+  
+  # Constitutional compliance
+  constitutional_governance:
+    enabled: true
+    articles: 9
+    enforce_compliance: true
+    validation_required: true
+
+# ============================================================================
+# Development Workflow
+# ============================================================================
+
+workflow:
+  # Testing requirements
+  testing:
+    required: true
+    coverage_threshold: 80      # Minimum test coverage percentage
+    run_before_commit: true
+  
+  # Code quality gates
+  quality_gates:
+    - name: "lint"
+      command: "npm run lint"
+      required: true
+    
+    - name: "format"
+      command: "npm run format:check"
+      required: true
+    
+    - name: "tests"
+      command: "npm test"
+      required: true
+  
+  # Commit conventions
+  commit:
+    format: "type: brief description"
+    types:
+      - feat      # New feature
+      - fix       # Bug fix
+      - docs      # Documentation only
+      - style     # Formatting changes
+      - refactor  # Code restructuring
+      - test      # Adding tests
+      - chore     # Maintenance tasks
+  
+  # Publishing workflow
+  publishing:
+    registry: "https://registry.npmjs.org/"
+    access: "public"
+    pre_publish_checks:
+      - "npm test"
+      - "npm run lint"
+      - "version bump in package.json"
+
+# ============================================================================
+# Custom Rules (Constitutional Articles)
+# ============================================================================
+
+custom_rules:
+  # Article 1: Specification First
+  - rule: "All development shall begin with clear, EARS-formatted specifications"
+    enforcement: "requirements-analyst validates"
+  
+  # Article 2: Constitutional Compliance
+  - rule: "All artifacts shall comply with Constitutional Articles"
+    enforcement: "constitution-enforcer validates"
+  
+  # Article 3: Traceability
+  - rule: "All artifacts shall maintain bidirectional traceability"
+    enforcement: "traceability-auditor validates"
+  
+  # Article 4: Bilingual Output
+  - rule: "All user-facing documentation shall be in English and Japanese"
+    enforcement: "Always generate both .md and .ja.md files"
+  
+  # Article 5: Quality Assurance
+  - rule: "All code shall meet quality standards before integration"
+    enforcement: "quality-assurance agent validates"
+  
+  # Article 6: Documentation Completeness
+  - rule: "All features shall be comprehensively documented"
+    enforcement: "technical-writer generates documentation"
+  
+  # Article 7: Security by Design
+  - rule: "Security considerations shall be integrated from the start"
+    enforcement: "security-auditor reviews all code"
+  
+  # Article 8: Performance Awareness
+  - rule: "Performance implications shall be considered in all decisions"
+    enforcement: "performance-optimizer reviews architecture"
+  
+  # Article 9: Maintainability
+  - rule: "Code shall prioritize long-term maintainability"
+    enforcement: "code-reviewer checks maintainability"
+
+# ============================================================================
+# Context Overflow Prevention
+# ============================================================================
+
+context_overflow_prevention:
+  # Level 1: File-by-file gradual output
+  level_1:
+    enabled: true
+    strategy: "file-by-file"
+    progress_format: "[{current}/{total}] Creating {filename}..."
+    save_immediately: true
+  
+  # Level 2: Multi-part large file generation
+  level_2:
+    enabled: true
+    strategy: "multi-part"
+    threshold_lines: 300
+    part_format: "[Part {current}/{total}: Lines {start}-{end}]"
+    continuation_markers: true
+
+# ============================================================================
+# SDD (Specification Driven Development) Configuration
+# ============================================================================
+
+sdd:
+  # 8-Stage SDD Process
+  stages:
+    - name: "steering"
+      agent: "steering"
+      trigger: "#sdd-steering"
+      description: "Establish project memory and context"
+    
+    - name: "requirements"
+      agent: "requirements-analyst"
+      trigger: "#sdd-requirements"
+      description: "Define EARS-formatted requirements"
+    
+    - name: "design"
+      agent: "system-architect"
+      trigger: "#sdd-design"
+      description: "Create C4 models and ADRs"
+    
+    - name: "tasks"
+      agent: "project-manager"
+      trigger: "#sdd-tasks"
+      description: "Break down into actionable tasks"
+    
+    - name: "implementation"
+      agent: "software-developer"
+      trigger: "#sdd-implement"
+      description: "Execute development"
+    
+    - name: "validation"
+      agent: "constitution-enforcer"
+      trigger: "#sdd-validate"
+      description: "Verify constitutional compliance"
+    
+    - name: "documentation"
+      agent: "technical-writer"
+      trigger: "#sdd-document"
+      description: "Generate bilingual documentation"
+    
+    - name: "review"
+      agent: "code-reviewer"
+      trigger: "#sdd-review"
+      description: "Quality assurance and refinement"
+  
+  # EARS format validation
+  ears:
+    patterns:
+      - ubiquitous: "The <system> shall <action>"
+      - event_driven: "WHEN <trigger> the <system> shall <action>"
+      - state_driven: "WHILE <state> the <system> shall <action>"
+      - unwanted: "IF <condition> THEN the <system> shall <action>"
+      - optional: "WHERE <feature> the <system> shall <action>"
+
+# ============================================================================
+# Integration Settings
+# ============================================================================
+
+integrations:
+  # Git settings
+  git:
+    default_branch: "main"
+    commit_signing: false
+    push_after_commit: true
+  
+  # npm settings
+  npm:
+    package_name: "musubi-sdd"
+    scope: null                 # No scope (public package)
+    publish_on_version_bump: false  # Manual publish
+
+# ============================================================================
+# Maintenance and Monitoring
+# ============================================================================
+
+maintenance:
+  # Regular tasks
+  tasks:
+    - frequency: "weekly"
+      description: "Review and update steering documents"
+    
+    - frequency: "monthly"
+      description: "Update dependencies"
+    
+    - frequency: "per-release"
+      description: "Update CHANGELOG.md"
+  
+  # Memory cleanup
+  memory_cleanup:
+    enabled: true
+    archive_after_days: 365
+    archive_path: "steering/memories/archive/"
+
+# ============================================================================
+# Experimental Features
+# ============================================================================
+
+experimental:
+  # Auto-sync steering documents with codebase
+  auto_sync_steering:
+    enabled: false
+    watch_paths: ["src/**", "tests/**"]
+  
+  # AI-assisted code review
+  ai_code_review:
+    enabled: false
+    review_all_commits: false
+  
+  # Automatic test generation
+  auto_test_generation:
+    enabled: false
+    coverage_target: 90
+
+# ============================================================================
+# Notes
+# ============================================================================
+
+notes: |
+  This project.yml file defines MUSUBI's project configuration.
+  
+  Key principles:
+  - 25 specialized agents for different SDD stages
+  - Constitutional governance with 9 articles
+  - Bilingual output (English + Japanese) for all docs
+  - Two-level context overflow prevention
+  - Memory system for persistent knowledge
+  
+  Modification guidelines:
+  - Update version when package.json changes
+  - Keep agent configuration aligned with SKILL.md files
+  - Document all custom rules clearly
+  - Test configuration changes before committing
+  
+  For more information:
+  - Steering documents: steering/*.md
+  - Agent skills: src/templates/agents/*/skills/*/SKILL.md
+  - Memories: steering/memories/*.md
+  - Constitutional Articles: steering/rules/constitution.md

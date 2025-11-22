@@ -211,4 +211,80 @@ Record of significant architectural and design decisions made during the MUSUBI 
 
 ---
 
+## [2025-11-22] Project Configuration File (project.yml)
+
+**Decision**: Implemented `steering/project.yml` as central project configuration
+
+**Context**: 
+- Memory system (Phase 1) completed, moving to Phase 2
+- MUSUBI had human-readable steering docs but no machine-readable config
+- Inspired by Serena's `.serena/project.yml` approach
+- Needed standardized configuration for agent customization
+- Required validation of version sync, framework matches, etc.
+
+**Solution**:
+Created `steering/project.yml` with 12 major sections:
+1. Project Metadata - name, version, platforms
+2. Languages and Frameworks - technology stack
+3. Project Structure Conventions - naming, directory patterns
+4. Steering Configuration - auto-update, exclusions, memories
+5. Agent Configuration - bilingual, gradual output, dialogue settings
+6. Development Workflow - testing, quality gates, commit format
+7. Custom Rules - 9 Constitutional Articles with enforcement
+8. Context Overflow Prevention - two-level defense configuration
+9. SDD Configuration - 8 stages, EARS patterns
+10. Integration Settings - git, npm
+11. Maintenance and Monitoring - tasks, cleanup policies
+12. Experimental Features - feature flags
+
+Complementary documentation:
+- `steering/project.yml.README.md` - comprehensive usage guide
+- Updated steering agent with Mode 5: Configuration Management
+- Config operations: show, validate, update
+
+**Rationale**:
+- YAML format: Human-readable, supports comments, widely used
+- Comprehensive: Serves as documentation, not just config
+- Machine-readable: Enables programmatic validation and automation
+- Single source of truth: Reduces configuration drift
+- Serena-inspired, MUSUBI-adapted: Proven pattern + our unique needs
+- Foundation for automation: Enables Phase 3 (onboarding), Phase 4 (auto-sync)
+
+**Implementation**:
+- File: `steering/project.yml` (~400 lines)
+- Documentation: `steering/project.yml.README.md` (~500 lines)
+- Agent update: Mode 5 added to steering SKILL.md
+- Operations: Show config, validate sync, update values
+- Synchronization: Manual (with package.json) for now
+
+**Impact**:
+
+Positive:
+- Agents can programmatically read configuration
+- Version synchronization can be validated automatically
+- Project conventions explicitly documented
+- New contributor onboarding faster
+- Foundation for CI/CD validation
+- Enables future automation (Phase 3, 4)
+
+Negative:
+- Additional file to maintain
+- Requires manual sync with package.json
+- Learning curve for contributors
+
+Trade-offs:
+- Manual sync chosen over auto-sync (safer, explicit control)
+- Comprehensive over minimal (better documentation)
+- YAML over JSON (readability > strict parsing)
+
+**Related**:
+- [2025-11-22] Memory System Implementation - Memories configured in project.yml
+- [2025-11-22] Multi-Level Context Overflow Prevention - Settings in project.yml
+- [Initial] 25-Agent Specialized System - Agent behavior configured
+- [Initial] Bilingual Output Requirement - Enabled in agents.bilingual_output
+- Phase 3 roadmap: Onboarding automation will use project.yml
+- Phase 4 roadmap: Auto-update/sync with project.yml
+
+---
+
 **Note**: This file records architectural decisions. For development workflows, see `development_workflow.md`. For lessons learned, see `lessons_learned.md`.

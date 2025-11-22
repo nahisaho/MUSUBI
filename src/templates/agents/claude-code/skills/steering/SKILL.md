@@ -26,8 +26,9 @@ allowed-tools: [Read, Write, Bash, Glob, Grep]
 - **structure.md**: アーキテクチャパターン、ディレクトリ構造、命名規則
 - **tech.md**: 技術スタック、フレームワーク、開発ツール、技術制約
 - **product.md**: ビジネスコンテキスト、製品目的、ユーザー、コア機能
+- **project.yml**: プロジェクト設定（機械可読形式、エージェント動作のカスタマイズ）
 
-### Memory System Management (NEW)
+### Memory System Management
 
 - **memories/architecture_decisions.md**: ADR-style architectural decision records
 - **memories/development_workflow.md**: Build, test, deployment processes
@@ -413,6 +414,61 @@ Steering Agentです。
 
 ---
 
+### Mode 5: Configuration Management (NEW)
+
+プロジェクト設定（project.yml）を管理します。
+
+```
+Steering Agentです。
+プロジェクト設定を管理します。
+
+【質問 1/1】どの操作を実行しますか？
+1) プロジェクト設定を表示
+2) 設定の特定セクションを確認
+3) 設定とコードベースの整合性チェック
+4) 設定の更新
+
+👤 ユーザー: [回答待ち]
+```
+
+#### Configuration Management Operations
+
+**1. Show Configuration**
+```
+📋 **プロジェクト設定 (project.yml)**
+
+Project: musubi-sdd v0.1.7
+Languages: javascript, markdown, yaml
+Frameworks: Node.js >=18.0.0, Jest, ESLint
+
+Agent Config:
+- Bilingual: Enabled
+- Gradual generation: Enabled
+- File splitting: >300 lines
+
+Constitutional Rules: 9 articles
+SDD Stages: 8 stages
+```
+
+**2. Validate Configuration**
+```
+🔍 **整合性チェック**
+
+✅ Version synchronized (project.yml ↔ package.json)
+✅ Frameworks match dependencies
+✅ Agent settings aligned with SKILL.md
+```
+
+**3. Update Configuration**
+```
+【質問 1/2】何を更新？
+1) Version 2) Frameworks 3) Agent settings 4) Rules
+
+👤 ユーザー: [回答待ち]
+```
+
+---
+
 ## Core Task: コードベース分析とSteering生成
 
 ### Bootstrap (初回生成) の詳細ステップ
@@ -493,7 +549,8 @@ steering/
 ├── tech.ja.md        # Japanese version
 ├── product.md        # English version
 ├── product.ja.md     # Japanese version
-└── memories/         # Memory system (NEW)
+├── project.yml       # Project configuration (machine-readable)
+└── memories/         # Memory system
     ├── README.md                    # Memory system documentation
     ├── architecture_decisions.md    # ADR-style decision records
     ├── development_workflow.md      # Build, test, deployment processes
@@ -636,6 +693,7 @@ Works now.
 - 📁 structure.md: アーキテクチャパターン、ディレクトリ構造
 - 🔧 tech.md: 技術スタック、フレームワーク、ツール
 - 🎯 product.md: ビジネスコンテキスト、製品目的、ユーザー
+- ⚙️ project.yml: プロジェクト設定（機械可読形式）
 - 🧠 memories/: プロジェクトの記憶（決定事項、ワークフロー、知識、学び）
 
 **利用可能なモード:**
@@ -643,12 +701,14 @@ Works now.
 2. **Sync**: 更新・同期（既存steeringとコードベースの乖離を検出・修正）
 3. **Review**: レビュー（現在のsteeringコンテキストを確認）
 4. **Memory**: メモリ管理（プロジェクトの記憶を追加・参照・更新）
+5. **Config**: 設定管理（project.yml の表示・更新・整合性チェック）
 
 【質問 1/1】どのモードで実行しますか？
 1) Bootstrap（初回生成）
 2) Sync（更新・同期）
 3) Review（レビュー）
 4) Memory（メモリ管理）
+5) Config（設定管理）
 
 👤 ユーザー: [回答待ち]
 ```
