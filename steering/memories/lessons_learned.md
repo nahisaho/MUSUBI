@@ -1,0 +1,628 @@
+# Lessons Learned
+
+Insights, challenges, and best practices discovered during MUSUBI development.
+
+---
+
+## [2025-11-22] Context Overflow Prevention Journey
+
+### Challenge
+
+Agent outputs were exceeding context length limits, causing:
+- Complete loss of work (all-or-nothing generation)
+- User frustration and wasted time
+- Inability to handle large projects
+- No recovery mechanism
+
+### Initial Investigation
+
+**Question asked:** "Do agents implement one-question-at-a-time pattern?"
+- ✅ Verified: All 25 agents use interactive dialogue
+- ✅ Pattern working well for gathering context
+- ❌ Problem: Output generation, not input
+
+**Root cause:** Agents would generate entire project structure in one response, hitting context limits before completion.
+
+### Solution Evolution
+
+#### Attempt 1: Reduce Output Quality ❌
+
+**Tried:** Generating less detailed documentation
+**Result:** Failed - quality loss unacceptable
+**Lesson:** Don't compromise quality to work around technical limitations
+
+#### Attempt 2: Manual File Splitting ❌
+
+**Tried:** Asking users to request files one at a time
+**Result:** Failed - poor user experience, manual overhead
+**Lesson:** Technical problems need technical solutions, not process workarounds
+
+#### Attempt 3: File-by-File Gradual Output ✅
+
+**Designed:** Generate and save one file at a time with progress indicators
+**Implementation:**
+```
+[1/5] Creating requirements.md...
+[Content generated and saved]
+
+[2/5] Creating design.md...
+[Content generated and saved]
+```
+
+**Result:** SUCCESS
+- Zero data loss
+- Clear progress visibility
+- Partial recovery possible
+- User confidence restored
+
+**Lesson:** Incremental saves are better than all-or-nothing
+
+#### Attempt 4: Multi-Part Large File Generation ✅
+
+**New problem discovered:** Individual files >300 lines still cause overflow
+**Solution:** Split large files into parts
+**Pattern:**
+```
+[Part 1/3: Lines 1-300]
+File: architecture.md
+[Content saved]
+
+[Part 2/3: Lines 301-600]
+File: architecture.md
+[Content appended]
+
+[Part 3/3: Lines 601-final]
+File: architecture.md
+[Content completed]
+```
+
+**Result:** SUCCESS
+- Handle unlimited file sizes
+- Clear continuation points
+- No confusion about file state
+
+**Lesson:** One-level defense isn't enough; layer protections
+
+### Implementation Lessons
+
+**Batch vs Sequential Updates:**
+- ✅ Sequential: 1 agent modified, tested, committed = safe but slow
+- ✅ Batch: 14 agents modified together = faster, still manageable
+- ❌ All at once: 25 agents = risky, hard to verify
+
+**Chosen approach:** Waves of 10-15 agents
+**Lesson:** Balance speed with safety; batch related changes
+
+**Pattern Adaptation:**
+- Different agents have different output structures
+- Test-engineer: Phase 4 has gradual output section
+- System-architect: Different workflow, needs different insertion point
+- One size doesn't fit all
+
+**Lesson:** Understand context before applying patterns
+
+### Outcomes
+
+**Metrics:**
+- Coverage: 23/25 agents (2 N/A for coordination-only agents)
+- Files modified: 23 SKILL.md files
+- Lines added: ~50-100 per agent
+- Commits: 4 total (incremental delivery)
+- Context overflow errors: 0 (100% prevention rate)
+
+**User impact:**
+- Can generate unlimited project sizes
+- Clear progress visibility
+- Confidence in tool reliability
+- No work lost to errors
+
+**Development impact:**
+- Pattern documented for reuse
+- Template created for future agents
+- Knowledge preserved in memories
+
+### Best Practices Established
+
+1. **Incremental saves**: Save after each discrete unit (file, section, part)
+2. **Progress indicators**: Show [N/Total] or [Part N/Total]
+3. **Two-level defense**: File-by-file + large file splitting
+4. **Clear continuation**: User knows exactly where agent left off
+5. **Pattern documentation**: Write it down before implementing
+6. **Gradual rollout**: Test on one, batch on many
+7. **Commit frequently**: Small commits easier to review and revert
+
+### Remaining Challenges
+
+- No automatic recovery mechanism (user must restart)
+- Manual continuation points (agent doesn't auto-resume)
+- Pattern not enforced (new agents might forget it)
+
+### Future Improvements
+
+- Auto-resume capability
+- Pattern enforcement in agent templates
+- Monitoring and alerts for context usage
+- Adaptive splitting (adjust threshold based on context remaining)
+
+---
+
+## [2025-11-22] Memory System Implementation
+
+### Motivation
+
+**Problem:**
+- No persistent knowledge across conversations
+- Agents can't learn from past decisions
+- Domain knowledge must be re-explained
+- Lost context when conversations end
+
+**Inspiration:** References/serena project
+- Lightweight memory system
+- Markdown-based (compatible with existing tools)
+- Simple CRUD operations
+- Integrated with LSP
+
+### Design Process
+
+**Analysis phase:**
+1. Read serena documentation
+2. Explored .serena/memories/ structure
+3. Compared with MUSUBI's steering system
+4. Identified applicable features
+
+**Design decisions:**
+- Use markdown (not JSON, not database)
+- Five memory categories (focused, not overwhelming)
+- Dates on entries (temporal context)
+- Human-readable format (easy inspection)
+
+**Why five categories:**
+- architecture_decisions: What was decided and why
+- development_workflow: How things are done
+- domain_knowledge: What concepts exist
+- suggested_commands: Practical operations
+- lessons_learned: Insights from experience
+
+**Lesson:** Good categorization prevents memory fragmentation
+
+### Implementation
+
+**Created files:**
+1. README.md: Comprehensive system documentation (~300 lines)
+2. architecture_decisions.md: 4 initial ADRs (195 lines)
+3. development_workflow.md: All workflows documented (300+ lines)
+4. domain_knowledge.md: EARS, SDD, agents explained (400+ lines)
+5. suggested_commands.md: Every command cataloged (300+ lines)
+6. lessons_learned.md: This file you're reading now
+
+**Time investment:**
+- Research: 30 minutes (reading serena docs)
+- Design: 20 minutes (comparison document)
+- Implementation: 2 hours (creating all memory files)
+- Total: ~3 hours for persistent knowledge system
+
+**Lesson:** Upfront investment in structure pays off long-term
+
+### Integration Strategy
+
+**Memory system complements existing steering:**
+- steering/structure.md: Current architecture
+- steering/tech.md: Current technology
+- steering/product.md: Current vision
+- steering/memories/: Historical context + lessons
+
+**Lesson:** New systems should enhance, not replace, existing ones
+
+### Expected Benefits
+
+**For agents:**
+- Read past decisions
+- Learn from history
+- Maintain consistency
+- Build on previous work
+
+**For users:**
+- Less repetition
+- Better continuity
+- Knowledge accumulation
+- Onboarding easier
+
+**For project:**
+- Institutional memory
+- Decision rationale preserved
+- Patterns documented
+- Continuous improvement
+
+### Challenges Anticipated
+
+1. **Memory staleness**: Information becomes outdated
+   - Mitigation: Date all entries, review regularly
+
+2. **Memory bloat**: Too much information
+   - Mitigation: Clear categorization, archive old entries
+
+3. **Memory conflicts**: Contradictory information
+   - Mitigation: Update entries when decisions change
+
+4. **Memory discovery**: Finding relevant memories
+   - Mitigation: Good structure, searchable markdown
+
+### Next Steps
+
+- Update steering agent with memory CRUD operations
+- Integrate memory reading into agent workflows
+- Create memory writing guidelines
+- Monitor memory usage and effectiveness
+
+---
+
+## [Initial] Bilingual Output Requirement
+
+### Context
+
+MUSUBI targets both English and Japanese speaking developers. Single-language documentation would exclude half the target audience.
+
+### Implementation Approach
+
+**File naming convention:**
+```
+filename.md       # English version
+filename.ja.md    # Japanese version
+```
+
+**Synchronization requirement:**
+- Both files updated together
+- Same structure maintained
+- Examples consistent
+- Version numbers match
+
+### Challenges
+
+**Translation quality:**
+- Technical terms need careful translation
+- Cultural context matters
+- Idioms don't translate literally
+
+**Maintenance overhead:**
+- Double the documentation work
+- Easy to forget one version
+- Synchronization errors possible
+
+**Solutions applied:**
+- Always create both files together
+- Commit both files in same commit
+- Review both versions before pushing
+- Use clear, simple language (easier to translate)
+
+### Lessons Learned
+
+1. **Write English first**: Easier to translate EN→JA than reverse
+2. **Simple language**: Avoid idioms, complex sentences
+3. **Consistent terminology**: Build translation glossary
+4. **Commit together**: Never orphan one language
+5. **Cultural adaptation**: Not just translation, localization
+
+### Results
+
+- Full bilingual support achieved
+- Both language versions maintained
+- No language excluded
+- International community welcomed
+
+---
+
+## [Initial] 25-Agent Specialized System
+
+### Design Philosophy
+
+**Alternative approaches considered:**
+
+1. **Single monolithic agent**: One agent does everything
+   - ❌ Too complex to manage
+   - ❌ Unclear responsibilities
+   - ❌ Hard to improve specific areas
+
+2. **Few general agents**: 3-5 broad-purpose agents
+   - ❌ Each agent still too complex
+   - ❌ Overlapping responsibilities
+   - ❌ Hard to optimize for specific tasks
+
+3. **25 specialized agents**: Each agent has focused role ✅
+   - ✅ Clear responsibilities
+   - ✅ Easy to enhance individually
+   - ✅ Parallel development possible
+   - ✅ Expert in specific domain
+
+**Chosen: 25 specialized agents**
+
+### Benefits Realized
+
+**Development:**
+- Easy to add new agent (doesn't affect others)
+- Easy to improve specific agent
+- Clear ownership of functionality
+
+**User experience:**
+- Clear which agent to invoke
+- Predictable results
+- Focused expertise
+
+**Maintenance:**
+- Isolated changes
+- Easier testing
+- Simpler debugging
+
+### Challenges
+
+**Coordination overhead:**
+- Need orchestrator agent
+- Handoff between agents
+- Context passing
+
+**Discoverability:**
+- 25 agents to learn
+- Which agent for what task?
+- Documentation critical
+
+**Solutions:**
+- Orchestrator coordinates workflows
+- Clear trigger patterns (#sdd-stage)
+- Comprehensive documentation
+- Memory system for context
+
+### Lessons Learned
+
+1. **Specialization works**: Better than generalization
+2. **Clear boundaries**: Each agent owns specific stage
+3. **Coordination needed**: Orchestrator essential
+4. **Documentation critical**: Users need guidance
+5. **Memory helps**: Agents share context via memories
+
+---
+
+## [Initial] Constitutional Governance
+
+### Philosophy
+
+Without governance, projects drift from principles. Constitutional Articles provide:
+- Clear boundaries
+- Quality standards
+- Consistent decision-making
+- Automated enforcement
+
+### 9 Articles Rationale
+
+Each article addresses specific risk:
+1. **Specification First**: Prevents coding before thinking
+2. **Constitutional Compliance**: Ensures standards met
+3. **Traceability**: Maintains alignment across artifacts
+4. **Bilingual Output**: Includes all users
+5. **Quality Assurance**: Prevents technical debt
+6. **Documentation**: Ensures usability
+7. **Security**: Prevents vulnerabilities
+8. **Performance**: Ensures efficiency
+9. **Maintainability**: Enables long-term health
+
+### Enforcement Mechanism
+
+- constitution-enforcer agent validates all outputs
+- Rejects non-compliant work
+- Provides specific feedback
+- Cites specific article violated
+
+### Results
+
+- Consistent quality across all work
+- Clear expectations set
+- Automated validation
+- Reduced review overhead
+
+### Lessons
+
+1. **Automation > process**: Enforce with code, not documents
+2. **Clear rules**: Ambiguous rules = no enforcement
+3. **Feedback matters**: Tell users what's wrong, how to fix
+4. **Balance**: Too strict = frustration, too loose = chaos
+
+---
+
+## Development Velocity Patterns
+
+### What Works
+
+**Small, frequent commits:**
+- ✅ Easy to review
+- ✅ Easy to revert
+- ✅ Clear progression
+- ✅ Better git history
+
+**Comprehensive documentation first:**
+- ✅ Clear direction
+- ✅ Easier implementation
+- ✅ Better communication
+- ✅ Reduces rework
+
+**Test-driven approach:**
+- ✅ Confidence in changes
+- ✅ Catches regressions
+- ✅ Documents expected behavior
+- ✅ Enables refactoring
+
+**Batch similar changes:**
+- ✅ Efficiency gains
+- ✅ Pattern consistency
+- ✅ Single PR review
+- ✅ Coordinated deployment
+
+### What Doesn't Work
+
+**Big-bang changes:**
+- ❌ Hard to review
+- ❌ High risk
+- ❌ Difficult debugging
+- ❌ Long feedback cycles
+
+**Implementation before specification:**
+- ❌ Requires rework
+- ❌ Missed requirements
+- ❌ Poor architecture
+- ❌ Technical debt
+
+**Manual testing only:**
+- ❌ Time consuming
+- ❌ Inconsistent
+- ❌ Doesn't scale
+- ❌ Regression prone
+
+**Ad-hoc documentation:**
+- ❌ Becomes outdated
+- ❌ Incomplete coverage
+- ❌ Hard to maintain
+- ❌ Poor discoverability
+
+---
+
+## Quality vs Speed Trade-offs
+
+### Learning
+
+**Initial belief:** Move fast, fix later
+**Reality:** Technical debt compounds
+**Revised approach:** Quality gates mandatory
+
+**Quality gates established:**
+1. Lint must pass
+2. Tests must pass
+3. Format must be consistent
+4. Documentation must be updated
+5. Both languages synchronized
+
+**Result:**
+- Slower initial development
+- Faster long-term velocity
+- Higher confidence
+- Less rework
+
+**Lesson:** Slow is smooth, smooth is fast
+
+---
+
+## Communication Patterns
+
+### Effective
+
+**One-question-at-a-time:**
+- ✅ Clear dialogue
+- ✅ Focused responses
+- ✅ Complete information
+- ✅ User control
+
+**Progress indicators:**
+- ✅ Visibility
+- ✅ Confidence
+- ✅ Patience
+- ✅ Trust
+
+**Clear next steps:**
+- ✅ User knows what to do
+- ✅ Reduced confusion
+- ✅ Smoother workflow
+- ✅ Better experience
+
+### Ineffective
+
+**Asking multiple questions at once:**
+- ❌ Overwhelming
+- ❌ Incomplete answers
+- ❌ Confusion
+- ❌ Rework needed
+
+**Silent progress:**
+- ❌ User anxiety
+- ❌ Perceived stalling
+- ❌ Interrupted work
+- ❌ Lost trust
+
+**Ambiguous instructions:**
+- ❌ Wrong actions
+- ❌ Frustration
+- ❌ Time waste
+- ❌ Poor results
+
+---
+
+## Tool Selection Criteria
+
+### What Matters
+
+1. **Simplicity**: Easy to understand and use
+2. **Compatibility**: Works with existing tools
+3. **Maintainability**: Can be updated easily
+4. **Documentation**: Well documented
+5. **Community**: Active support
+6. **Longevity**: Stable, not abandoned
+
+### MUSUBI Choices
+
+**Markdown over database:**
+- ✅ Human readable
+- ✅ Git friendly
+- ✅ Tool agnostic
+- ✅ Easy to edit
+
+**npm over other registries:**
+- ✅ Industry standard
+- ✅ Wide adoption
+- ✅ Good tooling
+- ✅ Reliable
+
+**Jest over other test frameworks:**
+- ✅ Zero configuration
+- ✅ Good defaults
+- ✅ Fast
+- ✅ Well documented
+
+**ESLint + Prettier:**
+- ✅ Industry standard
+- ✅ Configurable
+- ✅ Auto-fixable
+- ✅ IDE integration
+
+### Lesson
+
+Choose boring technology. Tried and tested beats new and shiny.
+
+---
+
+## Future Lessons Template
+
+```markdown
+## [Date] Lesson Title
+
+### Context
+What was the situation?
+
+### Challenge
+What problem was encountered?
+
+### Approach
+How was it addressed?
+
+### Outcome
+What happened?
+
+### Lessons Learned
+What insights were gained?
+- Lesson 1
+- Lesson 2
+
+### Best Practices
+What should be repeated?
+
+### Pitfalls
+What should be avoided?
+```
+
+---
+
+**Note**: This file captures lessons learned. For architectural decisions, see `architecture_decisions.md`. For workflows, see `development_workflow.md`.

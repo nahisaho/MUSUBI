@@ -27,6 +27,16 @@ allowed-tools: [Read, Write, Bash, Glob, Grep]
 - **tech.md**: 技術スタック、フレームワーク、開発ツール、技術制約
 - **product.md**: ビジネスコンテキスト、製品目的、ユーザー、コア機能
 
+### Memory System Management (NEW)
+
+- **memories/architecture_decisions.md**: ADR-style architectural decision records
+- **memories/development_workflow.md**: Build, test, deployment processes
+- **memories/domain_knowledge.md**: Business logic, terminology, core concepts
+- **memories/suggested_commands.md**: Frequently used CLI commands
+- **memories/lessons_learned.md**: Insights, challenges, best practices
+
+**Purpose**: Persistent knowledge across conversations, continuous learning, agent collaboration
+
 ### 乖離検出と推奨事項
 
 - コードとsteeringドキュメントの不一致検出
@@ -274,6 +284,133 @@ Steering Agentです。
 👤 ユーザー: [回答待ち]
 ```
 
+### Mode 4: Memory Management (NEW)
+
+プロジェクトの記憶（memories）を管理します。
+
+```
+Steering Agentです。
+プロジェクトメモリを管理します。
+
+【質問 1/1】どの操作を実行しますか？
+1) すべてのメモリファイルを表示
+2) 新しい決定事項を記録 (architecture_decisions.md)
+3) ワークフローを追加 (development_workflow.md)
+4) ドメイン知識を追加 (domain_knowledge.md)
+5) よく使うコマンドを追加 (suggested_commands.md)
+6) 学びを記録 (lessons_learned.md)
+
+👤 ユーザー: [回答待ち]
+```
+
+#### Memory Management Operations
+
+**1. Read Memories (すべてのメモリ表示)**
+```
+📝 **プロジェクトメモリ一覧**
+
+## Architecture Decisions (architecture_decisions.md)
+- [2025-11-22] Multi-Level Context Overflow Prevention
+- [Initial] 25-Agent Specialized System
+- [Initial] Constitutional Governance System
+
+## Development Workflow (development_workflow.md)
+- Testing: npm test, npm run test:watch
+- Publishing: version bump → npm publish → git push
+- Quality gates: lint, format, tests
+
+## Domain Knowledge (domain_knowledge.md)
+- EARS 5 patterns: Ubiquitous, Event-driven, State-driven, Unwanted, Optional
+- 9 Constitutional Articles
+- 25 Specialized agents
+
+## Suggested Commands (suggested_commands.md)
+- npm scripts: test, lint, format, publish
+- Git operations: add, commit, push
+- File operations: ls, cat, grep
+
+## Lessons Learned (lessons_learned.md)
+- [2025-11-22] Context Overflow Prevention Journey
+- [2025-11-22] Memory System Implementation
+- [Initial] Bilingual Output Requirement
+```
+
+**2. Write Memory (新しいエントリ追加)**
+
+```
+【質問 1/4】どのメモリファイルに追加しますか？
+1) architecture_decisions.md
+2) development_workflow.md
+3) domain_knowledge.md
+4) suggested_commands.md
+5) lessons_learned.md
+
+👤 ユーザー: [回答待ち]
+
+---
+
+【質問 2/4】エントリのタイトルは？
+例: API Rate Limiting Strategy
+
+👤 ユーザー: [回答待ち]
+
+---
+
+【質問 3/4】内容を教えてください。
+以下の情報を含めると良いです:
+- Context（背景・状況）
+- Decision/Approach（決定事項・アプローチ）
+- Rationale（理由・根拠）
+- Impact/Outcome（影響・結果）
+
+👤 ユーザー: [回答待ち]
+
+---
+
+【質問 4/4】追加情報はありますか？（なければ「なし」）
+例: 参考リンク、関連する他の決定事項など
+
+👤 ユーザー: [回答待ち]
+```
+
+**3. Update Memory (既存エントリ更新)**
+
+```
+【質問 1/2】どのメモリファイルを更新しますか？
+ファイル名を入力: architecture_decisions.md
+
+👤 ユーザー: [回答待ち]
+
+---
+
+[既存エントリ一覧を表示]
+
+【質問 2/2】どのエントリを更新しますか？更新内容は？
+
+👤 ユーザー: [回答待ち]
+```
+
+**4. Search Memories (メモリ検索)**
+
+```
+【質問 1/1】何を検索しますか？
+キーワードを入力: context overflow
+
+👤 ユーザー: [回答待ち]
+
+---
+
+🔍 **検索結果**
+
+## architecture_decisions.md
+- [2025-11-22] Multi-Level Context Overflow Prevention
+  Context: Agent outputs were exceeding context length limits...
+
+## lessons_learned.md
+- [2025-11-22] Context Overflow Prevention Journey
+  Challenge: Agent outputs were exceeding context length limits...
+```
+
 ---
 
 ## Core Task: コードベース分析とSteering生成
@@ -355,7 +492,14 @@ steering/
 ├── tech.md           # English version
 ├── tech.ja.md        # Japanese version
 ├── product.md        # English version
-└── product.ja.md     # Japanese version
+├── product.ja.md     # Japanese version
+└── memories/         # Memory system (NEW)
+    ├── README.md                    # Memory system documentation
+    ├── architecture_decisions.md    # ADR-style decision records
+    ├── development_workflow.md      # Build, test, deployment processes
+    ├── domain_knowledge.md          # Business logic, terminology, concepts
+    ├── suggested_commands.md        # Frequently used CLI commands
+    └── lessons_learned.md           # Insights, challenges, best practices
 ```
 
 ---
@@ -368,6 +512,104 @@ steering/
 2. **決定事項と理由を記録**: なぜその選択をしたかを明記
 3. **簡潔に保つ**: 詳細すぎる説明は避け、エッセンスを捉える
 4. **定期的に更新**: コードベースとの乖離を最小化
+
+### Memory System の原則 (NEW)
+
+1. **Date all entries**: Always include [YYYY-MM-DD] for temporal context
+2. **Provide context**: Explain the situation that led to the decision/insight
+3. **Include rationale**: Document why, not just what
+4. **Record impact**: Capture consequences and outcomes
+5. **Update when invalidated**: Mark outdated entries, add new ones
+6. **Cross-reference**: Link related entries across memory files
+7. **Keep concise but complete**: Enough detail to understand, not overwhelming
+
+### Memory Writing Guidelines
+
+**Good Memory Entry:**
+```markdown
+## [2025-11-22] Multi-Level Context Overflow Prevention
+
+**Context:**
+Agent outputs were exceeding context length limits, causing complete data loss
+and user frustration. Single-level protection proved insufficient.
+
+**Decision:**
+Implemented two-level defense:
+- Level 1: File-by-file gradual output with [N/Total] progress
+- Level 2: Multi-part generation for files >300 lines
+
+**Rationale:**
+- Incremental saves prevent total loss
+- Progress indicators build user confidence
+- Large file splitting handles unlimited sizes
+- Layered protection is more robust
+
+**Impact:**
+- Zero context overflow errors since implementation
+- Applied to 23/25 agents
+- Supports unlimited project sizes
+- User confidence restored
+```
+
+**Poor Memory Entry (Avoid):**
+```markdown
+## Fixed context overflow
+
+Changed agents to save files gradually.
+Works now.
+```
+
+### When to Write Memories
+
+**Architecture Decisions:**
+- Major architectural choices
+- Technology selections
+- Design pattern adoptions
+- Breaking changes
+- System constraints
+
+**Development Workflow:**
+- New processes introduced
+- Build/deployment procedures
+- Testing strategies
+- Quality gates
+- Automation added
+
+**Domain Knowledge:**
+- New business rules
+- Terminology definitions
+- System behaviors
+- Integration patterns
+- Core concepts
+
+**Suggested Commands:**
+- Frequently used CLI operations
+- Useful shortcuts
+- Troubleshooting commands
+- Maintenance tasks
+
+**Lessons Learned:**
+- Challenges overcome
+- Failed approaches (why they failed)
+- Successful strategies
+- Unexpected insights
+- Best practices discovered
+
+### Memory Maintenance
+
+**Weekly:**
+- Review recent entries for clarity
+- Add cross-references if needed
+
+**Monthly:**
+- Identify outdated entries
+- Archive superseded decisions
+- Consolidate related entries
+
+**Per Major Release:**
+- Update all memories with new patterns
+- Document breaking changes
+- Record migration lessons
 
 ### コードベース分析のコツ
 
@@ -394,16 +636,19 @@ steering/
 - 📁 structure.md: アーキテクチャパターン、ディレクトリ構造
 - 🔧 tech.md: 技術スタック、フレームワーク、ツール
 - 🎯 product.md: ビジネスコンテキスト、製品目的、ユーザー
+- 🧠 memories/: プロジェクトの記憶（決定事項、ワークフロー、知識、学び）
 
 **利用可能なモード:**
 1. **Bootstrap**: 初回生成（コードベースを分析してsteeringを作成）
 2. **Sync**: 更新・同期（既存steeringとコードベースの乖離を検出・修正）
 3. **Review**: レビュー（現在のsteeringコンテキストを確認）
+4. **Memory**: メモリ管理（プロジェクトの記憶を追加・参照・更新）
 
 【質問 1/1】どのモードで実行しますか？
 1) Bootstrap（初回生成）
 2) Sync（更新・同期）
 3) Review（レビュー）
+4) Memory（メモリ管理）
 
 👤 ユーザー: [回答待ち]
 ```
