@@ -5,6 +5,17 @@
 **Decision**: Synchronized steering documents with codebase changes
 
 **Changes Detected**:
+- Version in project.yml (0.5.0) differs from package.json (0.5.1)
+
+**Action**: Automatically updated steering documents via `musubi-sync`
+
+---
+
+## [2025-11-22] Steering Sync - Automatic Update
+
+**Decision**: Synchronized steering documents with codebase changes
+
+**Changes Detected**:
 - Version in project.yml (0.4.1) differs from package.json (0.5.0)
 - Languages no longer used: javascript
 - New frameworks detected: ESLint, Prettier
