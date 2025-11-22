@@ -400,7 +400,7 @@ async function applyChanges(changes, currentConfig, actualState) {
 
   // Record change in memories
   await recordChangeInMemory(changes);
-  console.log(chalk.gray(`  Updated steering/memories/architecture_decisions.md`));
+  console.log(chalk.gray('  Updated steering/memories/architecture_decisions.md'));
 }
 
 /**
@@ -438,7 +438,7 @@ async function updateProjectYml(changes, actualState) {
 /**
  * Update tech.md with new frameworks
  */
-async function updateTechMd(changes, actualState) {
+async function updateTechMd(changes, _actualState) {
   const newFrameworks = changes
     .filter(c => c.type === 'new_frameworks')
     .flatMap(c => c.added);
@@ -484,7 +484,7 @@ async function updateTechMd(changes, actualState) {
 /**
  * Update structure.md with new directories
  */
-async function updateStructureMd(changes, actualState) {
+async function updateStructureMd(changes, _actualState) {
   const newDirs = changes
     .filter(c => c.type === 'new_directories')
     .flatMap(c => c.added);

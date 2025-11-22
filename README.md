@@ -22,7 +22,8 @@ MUSUBI is a comprehensive SDD (Specification Driven Development) framework that 
 - 🧭 **Auto-Updating Project Memory** - Steering system maintains architecture, tech stack, and product context
 - 🚀 **Automatic Onboarding** - `musubi-onboard` analyzes existing projects and generates steering docs (2-5 minutes)
 - 🔄 **Auto-Sync** - `musubi-sync` detects codebase changes and keeps steering docs current
-- 🔍 **Intelligent Code Analysis** - `musubi-analyze` provides quality metrics, complexity analysis, and technical debt detection (v0.5.0)
+- 🔍 **Intelligent Code Analysis** - `musubi-analyze` provides quality metrics, complexity analysis, and technical debt detection
+- 🤝 **Team Collaboration** - `musubi-share` enables memory sharing, import/export, and multi-platform sync (v0.6.0)
 - ✅ **Complete Traceability** - Requirements → Design → Code → Tests mapping
 - 🌐 **Bilingual Documentation** - All agent-generated documents created in both English and Japanese
 
@@ -94,6 +95,12 @@ musubi-analyze --type=quality       # Quality metrics only
 musubi-analyze --type=dependencies  # Dependencies only
 musubi-analyze --type=security      # Security audit
 musubi-analyze --output=report.md   # Save report
+
+# Share project memories with team (v0.6.0)
+musubi-share export                 # Export memories to JSON
+musubi-share import memories.json   # Import from teammate
+musubi-share sync                   # Sync across AI platforms
+musubi-share status                 # Show sharing status
 ```
 
 ### Project Types
@@ -285,6 +292,15 @@ musubi-analyze --type=dependencies  # Dependency analysis
 musubi-analyze --type=security # Security vulnerabilities
 musubi-analyze --output=report.md   # Save report to file
 musubi-analyze --json          # JSON output
+
+# Share project memories with team (v0.6.0+)
+musubi-share export            # Export memories to JSON/YAML
+musubi-share export --output=memories.yaml  # YAML format
+musubi-share import memories.json  # Import and merge
+musubi-share import memories.json --strategy=theirs  # Auto-accept
+musubi-share sync              # Sync across AI platforms
+musubi-share sync --platform=cursor  # Sync specific platform
+musubi-share status            # Show sharing status
 ```
 
 #### musubi-onboard
@@ -365,7 +381,49 @@ musubi-sync --dry-run
 musubi-sync --auto-approve
 ```
 
-#### musubi status
+#### musubi-share
+
+Share and merge project memories across team members and AI platforms (v0.6.0+):
+
+```
+📤 MUSUBI Memory Export
+
+Export Summary:
+  File: team-memories.json
+  Format: json
+  Size: 1098.28 KB
+  Memories: 7 files
+  Agents: 1 platforms
+```
+
+**Features**:
+- **Export**: Share memories as JSON/YAML
+- **Import**: Merge memories from teammates
+- **Sync**: Synchronize across AI platforms
+- **Conflict Resolution**: Interactive, auto-accept, keep-local, or merge with markers
+- **Status**: Show installed platforms and memory counts
+
+**Usage**:
+```bash
+# Export memories
+musubi-share export
+musubi-share export --output=memories.yaml
+
+# Import and merge
+musubi-share import colleague-memories.json
+musubi-share import memories.json --strategy=theirs  # Auto-accept
+musubi-share import memories.json --strategy=ours    # Keep local
+musubi-share import memories.json --strategy=merge   # With markers
+
+# Platform sync
+musubi-share sync
+musubi-share sync --platform=cursor
+
+# Status check
+musubi-share status
+```
+
+####  musubi status
 
 Shows the current state of your MUSUBI project:
 
