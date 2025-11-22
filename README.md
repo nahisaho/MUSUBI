@@ -18,6 +18,7 @@ MUSUBI is a comprehensive SDD (Specification Driven Development) framework that 
   - Other 4 agents: AGENTS.md (compatible format)
 - 📋 **Constitutional Governance** - 9 immutable articles + Phase -1 Gates for quality enforcement
 - 📝 **EARS Requirements Generator** - Create unambiguous requirements with 5 EARS patterns (v0.8.0)
+- 🏗️ **Design Document Generator** - Create C4 models and ADRs with traceability (v0.8.2)
 - 🔄 **Delta Specifications** - Brownfield and greenfield project support
 - 🧭 **Auto-Updating Project Memory** - Steering system maintains architecture, tech stack, and product context
 - 🚀 **Automatic Onboarding** - `musubi-onboard` analyzes existing projects and generates steering docs (2-5 minutes)
@@ -109,12 +110,20 @@ musubi-validate gates               # Validate Phase -1 Gates
 musubi-validate complexity          # Check complexity limits
 musubi-validate all -v              # Full validation with details
 
-# Create EARS requirements (v0.8.0)
+# Generate EARS requirements documents (v0.8.0)
 musubi-requirements init "User Authentication"  # Initialize requirements doc
 musubi-requirements add                         # Add requirement interactively
 musubi-requirements list                        # List all requirements
 musubi-requirements validate                    # Validate EARS format
 musubi-requirements trace                       # Show traceability matrix
+
+# Generate design documents (v0.8.2)
+musubi-design init "User Authentication"        # Initialize design document
+musubi-design add-c4 context                    # Add C4 Context diagram
+musubi-design add-c4 container --format plantuml # Add Container with PlantUML
+musubi-design add-adr "Use JWT for tokens"      # Add Architecture Decision
+musubi-design validate                          # Validate design completeness
+musubi-design trace                             # Show requirements traceability
 ```
 
 ### Project Types

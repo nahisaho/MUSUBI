@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.2] - 2025-11-23
+
+### Added
+- **Design Document Generator** - Create C4 models and Architecture Decision Records
+  - `musubi-design init <feature>` - Initialize design document from template
+  - `musubi-design add-c4 <level>` - Add C4 diagram (context|container|component|code)
+  - `musubi-design add-adr <decision>` - Add Architecture Decision Record
+  - `musubi-design validate` - Validate design document completeness
+  - `musubi-design trace` - Show requirement-to-design traceability matrix
+  - C4 Model support with 4 levels:
+    - Level 1 Context: System in its environment with external dependencies
+    - Level 2 Container: High-level technology choices and deployable units
+    - Level 3 Component: Components within containers
+    - Level 4 Code: Class/component implementation details
+  - Diagram formats:
+    - Mermaid (default): Modern, GitHub-compatible, renders in markdown
+    - PlantUML: Traditional UML diagrams with C4-PlantUML library
+  - ADR (Architecture Decision Record) generation:
+    - Auto-numbered: ADR-001, ADR-002, ADR-003, etc.
+    - Status tracking: proposed, accepted, rejected, deprecated
+    - Structured format: Context, Decision, Consequences, Alternatives
+  - Design validation rules:
+    - Required sections: Architecture Design, Steering Context
+    - Required content: At least one C4 diagram
+  - Traceability matrix: Maps REQ-XXX-NNN requirements to design documents
+
+### Technical Details
+- **DesignGenerator**: Core generator engine (`src/generators/design.js`)
+- **C4 Templates**: 4 levels × 2 formats = 8 diagram templates
+- **Article V Compliance**: Requirement-to-design traceability
+- **Interactive Prompts**: Inquirer-based UI for diagram and ADR creation
+- **Template Processing**: Variables replaced: {{FEATURE_NAME}}, {{PROJECT_NAME}}, {{DATE}}, {{AUTHOR}}, {{SYSTEM}}
+
 ## [0.8.0] - 2025-11-23
 
 ### Added

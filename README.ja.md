@@ -14,6 +14,7 @@ MUSUBIは、6つの主要フレームワークのベスト機能を統合した�
   - その他4エージェント: AGENTS.md（互換形式）
 - 📋 **憲法ガバナンス** - 9つの不変条項 + フェーズ-1ゲートによる品質保証
 - 📝 **EARS要件ジェネレーター** - 5つのEARSパターンで明確な要件を作成（v0.8.0）
+- 🏗️ **設計ドキュメントジェネレーター** - トレーサビリティ付きC4モデルとADRを作成（v0.8.2）
 - 🔄 **差分仕様** - ブラウンフィールドおよびグリーンフィールドプロジェクト対応
 - 🧭 **自動更新プロジェクトメモリ** - ステアリングシステムがアーキテクチャ、技術スタック、製品コンテキストを維持
 - 🚀 **自動オンボーディング** - `musubi-onboard` が既存プロジェクトを分析し、ステアリングドキュメントを生成（2-5分）
@@ -105,12 +106,20 @@ musubi-validate gates               # フェーズ-1ゲートを検証
 musubi-validate complexity          # 複雑度制限をチェック
 musubi-validate all -v              # 詳細付き完全検証
 
-# EARS要件の作成（v0.8.0）
+# EARS要件ドキュメント生成（v0.8.0）
 musubi-requirements init "ユーザー認証"  # 要件ドキュメント初期化
 musubi-requirements add                 # インタラクティブに要件追加
 musubi-requirements list                # 全要件リスト表示
-musubi-requirements validate            # EARS形式検証
+musubi-requirements validate            # EARS形式を検証
 musubi-requirements trace               # トレーサビリティマトリクス表示
+
+# 設計ドキュメント生成（v0.8.2）
+musubi-design init "ユーザー認証"       # 設計ドキュメント初期化
+musubi-design add-c4 context            # C4コンテキスト図を追加
+musubi-design add-c4 container --format plantuml  # PlantUMLでコンテナ図追加
+musubi-design add-adr "JWTトークン使用" # アーキテクチャ決定記録追加
+musubi-design validate                  # 設計完全性を検証
+musubi-design trace                     # 要件トレーサビリティ表示
 ```
 
 ### プロジェクトタイプ
