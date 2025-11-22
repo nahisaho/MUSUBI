@@ -19,7 +19,7 @@ const { glob } = require('glob');
 class RequirementsGenerator {
   constructor(rootDir) {
     this.rootDir = rootDir;
-    this.templatePath = path.join(__dirname, '../src/templates/shared/documents/requirements.md');
+    this.templatePath = path.join(__dirname, '../../src/templates/shared/documents/requirements.md');
   }
 
   /**
