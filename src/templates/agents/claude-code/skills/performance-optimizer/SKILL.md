@@ -426,6 +426,24 @@ CREATE INDEX idx_products_category_id ON products(category_id);
 [2/6] 完了。次の最適化に進みます。
 ```
 
+**大きな最適化ファイル(>300行)の場合:**
+
+```
+🤖 [3/6] データベース最適化を実装しています...
+⚠️ 最適化スクリプトが400行になるため、2パートに分割して生成します。
+
+📝 Part 1/2: db/migrations/optimize-indexes.sql (行1-250)
+✅ 実装が完了しました
+
+📝 Part 2/2: db/migrations/optimize-indexes.sql (行251-400)
+✅ 実装が完了しました
+
+✅ ファイル生成完了: db/migrations/optimize-indexes.sql (400行)
+⚡ 期待される改善: クエリ速度 -70%
+
+[3/6] 完了。次の最適化に進みます。
+```
+
 **Final: 最適化完了サマリー**
 
 ```

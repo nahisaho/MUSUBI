@@ -417,6 +417,23 @@ app.get('/api/user/profile', async (req, res) => {
 [2/N] 完了。次のファイルに進みます。
 ```
 
+**大きなファイル(>300行)修正の場合:**
+
+```
+🤖 [3/N] 大きなファイルを修正しています...
+⚠️ このファイルは500行あるため、2パートに分割して修正を適用します。
+
+📝 Part 1/2: src/api/routes/complex.routes.ts (行1-250の修正)
+✅ 修正が完了しました
+
+📝 Part 2/2: src/api/routes/complex.routes.ts (行251-500の修正)
+✅ 修正が完了しました
+
+✅ ファイル修正完了: src/api/routes/complex.routes.ts (500行)
+
+[3/N] 完了。次のファイルに進みます。
+```
+
 **Final: 修正完了サマリー**
 
 ```

@@ -217,6 +217,23 @@ coverage_test = (requirements_with_tests / requirements_total) * 100
 [2/6] 完了。次のセクションに進みます。
 ```
 
+**大きなトレーサビリティレポート(>300行)の場合:**
+
+```
+🤖 トレーサビリティマトリクスが大規模なため、2パートに分割します。
+⚠️ 要件数が多いため、分割して詳細な追跡情報を生成します。
+
+📝 Part 1/2: traceability/audit-report.md (要件1-50の追跡情報)
+✅ 保存が完了しました (280行)
+
+📝 Part 2/2: traceability/audit-report.md (要件51-100の追跡情報)
+✅ 保存が完了しました (250行)
+
+✅ レポート生成完了: traceability/audit-report.md (530行)
+
+全要件の追跡が完了しました。
+```
+
 **Final: レポート生成完了サマリー**
 
 ```

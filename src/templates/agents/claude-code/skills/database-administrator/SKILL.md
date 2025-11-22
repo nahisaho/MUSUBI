@@ -586,6 +586,23 @@ RPO（Recovery Point Objective - 目標復旧時点）:
 [2/N] 完了。次のドキュメントに進みます。
 ```
 
+**大きなドキュメント(>300行)の場合:**
+
+```
+🤖 [3/N] データベース移行スクリプトを生成しています...
+⚠️ 移行スクリプトが600行になるため、2パートに分割して生成します。
+
+📝 Part 1/2: database/migrations/v2.0-schema-update.sql (行1-350)
+✅ 保存が完了しました
+
+📝 Part 2/2: database/migrations/v2.0-schema-update.sql (行351-600)
+✅ 保存が完了しました
+
+✅ ファイル生成完了: database/migrations/v2.0-schema-update.sql (600行)
+
+[3/N] 完了。次のドキュメントに進みます。
+```
+
 **Final: 生成完了サマリー**
 
 ```

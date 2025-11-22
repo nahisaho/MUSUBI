@@ -667,6 +667,23 @@ export async function login(email: string, password: string): Promise<LoginRespo
 [2/N] 完了。次の問題修正に進みます。
 ```
 
+**大きなファイル(>300行)のレビュー修正の場合:**
+
+```
+🤖 [3/N] 大規模ファイルのリファクタリングを実施しています...
+⚠️ このファイルは500行あるため、2パートに分割して修正を適用します。
+
+📝 Part 1/2: src/services/complex-service.ts (行1-250の修正)
+✅ 修正が完了しました (10箇所改善)
+
+📝 Part 2/2: src/services/complex-service.ts (行251-500の修正)
+✅ 修正が完了しました (8箇所改善)
+
+✅ ファイル修正完了: src/services/complex-service.ts (500行, 18箇所改善)
+
+[3/N] 完了。次の問題修正に進みます。
+```
+
 **Final: 修正完了サマリー**
 
 ```
