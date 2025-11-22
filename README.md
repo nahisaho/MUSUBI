@@ -20,6 +20,8 @@ MUSUBI is a comprehensive SDD (Specification Driven Development) framework that 
 - 📝 **EARS Requirements Format** - Unambiguous requirements with complete traceability
 - 🔄 **Delta Specifications** - Brownfield and greenfield project support
 - 🧭 **Auto-Updating Project Memory** - Steering system maintains architecture, tech stack, and product context
+- 🚀 **Automatic Onboarding** - `musubi-onboard` analyzes existing projects and generates steering docs (2-5 minutes)
+- 🔄 **Auto-Sync** - `musubi-sync` detects codebase changes and keeps steering docs current
 - ✅ **Complete Traceability** - Requirements → Design → Code → Tests mapping
 - 🌐 **Bilingual Documentation** - All agent-generated documents created in both English and Japanese
 
@@ -76,6 +78,14 @@ npx musubi-sdd init --windsurf
 # Or install globally
 npm install -g musubi-sdd
 musubi init --claude    # or --copilot, --cursor, etc.
+
+# Onboard existing project (automatic analysis)
+musubi-onboard
+
+# Synchronize steering docs with codebase
+musubi-sync
+musubi-sync --dry-run        # Preview changes
+musubi-sync --auto-approve   # Auto-apply (CI/CD)
 ```
 
 ### Project Types
@@ -157,9 +167,17 @@ your-project/
 │   ├── commands/            # Slash commands (/sdd-*)
 │   └── CLAUDE.md            # Claude Code guide
 ├── steering/                # Project memory (all agents)
+│   ├── project.yml          # Project configuration (v0.2.1+)
 │   ├── structure.md         # Architecture patterns
 │   ├── tech.md              # Technology stack
 │   ├── product.md           # Product context
+│   ├── memories/            # Persistent knowledge (v0.2.0+)
+│   │   ├── architecture_decisions.md
+│   │   ├── development_workflow.md
+│   │   ├── domain_knowledge.md
+│   │   ├── lessons_learned.md
+│   │   ├── suggested_commands.md
+│   │   └── technical_debt.md
 │   └── rules/
 │       ├── constitution.md  # 9 Constitutional Articles
 │       ├── workflow.md      # 8-Stage SDD workflow
@@ -194,6 +212,15 @@ your-project/
 │
 ├── GEMINI.md (root, for Gemini)  # 25 agents integrated into existing file
 ├── steering/                # Project memory (same for all)
+│   ├── project.yml          # Project configuration (v0.2.1+)
+│   ├── memories/            # Persistent knowledge (v0.2.0+)
+│   │   ├── architecture_decisions.md
+│   │   ├── development_workflow.md
+│   │   ├── domain_knowledge.md
+│   │   ├── lessons_learned.md
+│   │   ├── suggested_commands.md
+│   │   └── technical_debt.md
+│   └── ... (structure.md, tech.md, product.md, rules/)
 ├── templates/               # Document templates (same for all)
 └── storage/                 # Specs, changes, features (same for all)
 ```
@@ -232,6 +259,94 @@ musubi validate --all        # Validate all features
 
 # Initialize MUSUBI (interactive)
 musubi init
+
+# Onboard existing project (v0.3.0+)
+musubi-onboard
+musubi-onboard --auto-approve  # Skip confirmation
+musubi-onboard --skip-memories # Skip memory initialization
+
+# Synchronize steering docs with codebase (v0.4.0+)
+musubi-sync                    # Interactive mode
+musubi-sync --dry-run          # Preview changes only
+musubi-sync --auto-approve     # Auto-apply (CI/CD)
+```
+
+#### musubi-onboard
+
+Automatically analyzes existing projects and generates steering documentation:
+
+```
+🚀 MUSUBI Onboarding Wizard
+
+Analyzing your project...
+
+✅ Project structure analyzed
+✅ Technology stack detected
+   - Node.js, TypeScript, React, Jest
+✅ Steering documents generated
+   - steering/structure.md (en + ja)
+   - steering/tech.md (en + ja)
+   - steering/product.md (en + ja)
+✅ Memories initialized (6 files)
+✅ Project configuration created
+   - steering/project.yml
+
+⏱️  Onboarding completed in 2.5 minutes
+
+💡 Next steps:
+   - Review generated steering docs
+   - Run: musubi-sync to keep docs current
+   - Create requirements: /sdd-requirements [feature]
+```
+
+**Features**:
+- Automatic codebase analysis (package.json, directory structure)
+- Technology stack detection (languages, frameworks)
+- Bilingual steering docs generation (English + Japanese)
+- Memory system initialization (6 memory files)
+- Project configuration (project.yml)
+- 96% time reduction (2-4 hours → 2-5 minutes)
+
+#### musubi-sync
+
+Detects codebase changes and keeps steering documents synchronized:
+
+```
+🔄 MUSUBI Steering Sync
+
+Detected changes:
+  📦 Version: 0.3.0 → 0.4.0
+  ➕ New framework: js-yaml@4.1.0
+  📁 New directory: bin/
+
+? Apply these changes? (Y/n) Y
+
+✅ Updated steering/project.yml
+✅ Updated steering/tech.md (en + ja)
+✅ Updated steering/structure.md (en + ja)
+✅ Recorded change in memories/architecture_decisions.md
+
+🎉 Steering synchronized successfully!
+```
+
+**Features**:
+- Change detection (version, languages, frameworks, directories)
+- Interactive mode (default): Show changes, ask confirmation
+- Auto-approve mode (--auto-approve): CI/CD integration
+- Dry-run mode (--dry-run): Preview only
+- Bilingual updates (English + Japanese together)
+- Memory recording (audit trail)
+
+**Usage**:
+```bash
+# Interactive (default)
+musubi-sync
+
+# Preview changes without applying
+musubi-sync --dry-run
+
+# Auto-apply for CI/CD pipelines
+musubi-sync --auto-approve
 ```
 
 #### musubi status
