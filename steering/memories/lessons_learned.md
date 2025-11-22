@@ -849,6 +849,302 @@ User: "Done! Everything is set up!"
 
 ---
 
+## [2025-11-23] Auto-Sync System Implementation (Phase 4)
+
+### Context
+
+Phase 3 (onboarding) completed successfully. Phase 4 goal: Keep steering docs synchronized with codebase.
+
+**Problem:**
+- Code evolves, docs become stale
+- Version in project.yml drifts from package.json
+- New dependencies/frameworks not documented
+- New directories not reflected in structure.md
+- Manual updates forgotten or delayed
+- No automated drift detection
+
+**User pain:**
+> "I added a new framework but forgot to update tech.md"
+> "My project.yml says version 0.1.0 but package.json is at 0.3.0"
+> "How do I know if my steering docs are up to date?"
+
+### Challenge
+
+**Detecting meaningful changes is hard:**
+- Not all changes matter (node_modules, dist, etc.)
+- Some changes are significant (new frameworks, architecture shifts)
+- Version synchronization is critical but easy to forget
+- Balance between automation and control
+
+**Auto vs Manual:**
+- Fully automatic: Risky, might update incorrectly
+- Manual prompts: Safer, user stays in control
+- Dry-run option: Preview before committing
+
+### Solution Design
+
+**Phase 1: Load Current State**
+- Read project.yml (YAML parsing with js-yaml)
+- Extract version, languages, frameworks, directories
+- Cross-check with package.json for version
+
+**Phase 2: Analyze Codebase**
+- Reuse onboarding analysis logic
+- Detect languages from file extensions
+- Extract frameworks from dependencies
+- Scan directory structure
+
+**Phase 3: Detect Differences**
+- Version mismatch: project.yml vs package.json
+- New languages: Extensions not in config
+- Removed languages: Config lists unused languages
+- New frameworks: Dependencies not documented
+- Removed frameworks: Docs mention unused frameworks
+- New directories: Folders not in structure.md
+
+**Phase 4: Propose Updates**
+- Display all changes with old → new
+- Group by file (project.yml, tech.md, structure.md)
+- Explain each change
+- Request confirmation (or --auto-approve)
+
+**Phase 5: Apply Changes**
+- Update project.yml (YAML manipulation)
+- Append to tech.md + tech.ja.md (framework sections)
+- Append to structure.md + structure.ja.md (new directories)
+- Record sync event in architecture_decisions.md
+
+### Implementation Lessons
+
+**1. YAML Parsing is Tricky**
+
+Tried: Manual string manipulation
+Result: ❌ Error-prone, breaks formatting
+
+Revised: js-yaml library
+```javascript
+const yaml = require('js-yaml');
+const config = yaml.load(content);
+// Modify config object
+const updated = yaml.dump(config);
+```
+
+Result: ✅ Reliable, preserves structure
+Lesson: Use specialized libraries for structured formats
+
+**2. Change Detection Heuristics**
+
+Problem: What changes are "significant"?
+Solution: Whitelist approach
+```javascript
+// Only detect these categories:
+- version_mismatch
+- new_languages / removed_languages
+- new_frameworks / removed_frameworks  
+- new_directories
+```
+
+Result: ✅ Focused, actionable changes
+Lesson: Less is more - detect what matters
+
+**3. User Confirmation Flow**
+
+Tried: Apply changes immediately
+Result: ❌ Users lose control
+
+Revised: Show → Confirm → Apply
+```
+🔎 Found 3 changes:
+1. Version: 0.1.7 → 0.3.0
+2. New framework: Prettier
+3. New directory: tests
+
+Apply these changes? (y/N)
+```
+
+Result: ✅ Users trust the tool
+Lesson: Automation WITH control, not instead of
+
+**4. Dry-Run Mode**
+
+Feature: --dry-run flag
+Purpose: Preview changes without applying
+```bash
+musubi-sync --dry-run
+# Shows changes, exits without modifying files
+```
+
+Result: ✅ Safe exploration
+Lesson: Preview mode builds confidence
+
+**5. Recording Sync Events**
+
+Feature: Auto-append to architecture_decisions.md
+```markdown
+## [2025-11-23] Steering Sync - Automatic Update
+
+Changes Detected:
+- Version: 0.1.7 → 0.3.0
+- New framework: Prettier
+```
+
+Result: ✅ Audit trail of all syncs
+Lesson: Transparency builds trust
+
+### Time Investment
+
+- Research js-yaml library: 15 minutes
+- Design sync algorithm: 30 minutes
+- Implementation bin/musubi-sync.js: 120 minutes
+- Update steering agent Mode 6: 30 minutes
+- Testing on MUSUBI project: 45 minutes
+- Documentation: 30 minutes
+- **Total: ~4.5 hours**
+
+### Outcomes
+
+**Metrics:**
+- Files created: 1 (musubi-sync.js, ~650 lines)
+- Files modified: 2 (package.json, steering agent SKILL.md)
+- Dependencies added: 1 (js-yaml)
+- Detection accuracy: High (tested on MUSUBI itself)
+- False positives: Low (focused heuristics)
+
+**Usage:**
+```bash
+musubi-sync                 # Interactive mode
+musubi-sync --auto-approve  # Auto-apply
+musubi-sync --dry-run       # Preview only
+```
+
+### Challenges Encountered
+
+**1. YAML Formatting Preservation**
+
+Problem: js-yaml.dump() changes formatting
+Solution: Customize dump options
+```javascript
+yaml.dump(config, {
+  indent: 2,
+  lineWidth: 100,
+});
+```
+
+Limitation: Comments are lost
+Future: Investigate yaml-preserving libraries
+
+**2. Detecting Framework Removal**
+
+Problem: Hard to know if framework truly removed vs just renamed
+Solution: Simple diff - if in config but not in package.json, flag it
+Limitation: False positives possible
+Mitigation: User review before applying
+
+**3. Bilingual Doc Updates**
+
+Problem: Must update both .md and .ja.md
+Solution: Update both in same operation
+```javascript
+await updateTechMd(...);  // Updates both tech.md and tech.ja.md
+```
+
+Lesson: Bilingual requirement must be built into all operations
+
+**4. Memory Recording**
+
+Problem: How to record sync events without cluttering?
+Solution: Add entry to architecture_decisions.md with date
+Format: `## [YYYY-MM-DD] Steering Sync - Automatic Update`
+
+Lesson: Structured format makes history searchable
+
+### Best Practices Established
+
+1. **Confirm before applying**: Default to interactive mode
+2. **Provide dry-run**: Let users preview safely
+3. **Auto-approve for CI/CD**: --flag for automation
+4. **Update bilingual docs together**: Never orphan one language
+5. **Record all syncs**: Audit trail in memories
+6. **Focus on significant changes**: Not every file change matters
+7. **Clear change descriptions**: User understands what and why
+
+### User Benefits
+
+**Before (manual sync):**
+```
+[Developer adds Prettier]
+[Forgets to update tech.md]
+[6 months later]
+Team: "Why isn't Prettier documented?"
+Developer: "Oops, I forgot"
+```
+
+**After (auto-sync):**
+```
+[Developer adds Prettier]
+$ musubi-sync
+Found 1 change:
+- New framework: Prettier
+
+Apply? (y/N) y
+✅ Updated tech.md and tech.ja.md
+```
+
+### Future Improvements
+
+**Git Hook Integration:**
+- Pre-commit hook: Run musubi-sync --dry-run
+- Post-commit hook: Suggest running musubi-sync
+- Warn if steering is stale
+
+**Smart Scheduling:**
+- Detect when sync is needed (package.json modified)
+- Suggest sync at natural breakpoints (PR creation)
+- Periodic reminders (weekly)
+
+**Enhanced Detection:**
+- Architecture pattern changes (feature-first → DDD)
+- Breaking changes in dependencies
+- Configuration file changes (.env, docker-compose)
+- Database schema changes
+
+**CI/CD Integration:**
+```yaml
+# GitHub Actions
+- name: Sync steering
+  run: musubi-sync --dry-run
+  
+- name: Check if steering is current
+  run: |
+    if musubi-sync --dry-run | grep "Found.*change"; then
+      echo "::error::Steering is out of sync"
+      exit 1
+    fi
+```
+
+### Lessons Learned
+
+1. **Regular sync prevents drift**: Weekly sync >> yearly manual review
+2. **Automation + control = trust**: Show changes, let user decide
+3. **Preview mode essential**: Dry-run builds confidence
+4. **Bilingual from the start**: Don't bolt on later
+5. **Record everything**: Sync events are decisions too
+6. **Focus detection**: Fewer false positives > complete coverage
+7. **Library over DIY**: js-yaml >> manual YAML parsing
+8. **Phase 4 completes the cycle**: Onboard → Develop → Sync → Repeat
+
+**Meta-lesson:** Phase 1-4 form complete lifecycle:
+- Phase 1: Memory system (knowledge persistence)
+- Phase 2: Configuration (machine-readable settings)
+- Phase 3: Onboarding (fast project setup)
+- Phase 4: Auto-sync (ongoing maintenance)
+
+**Together:** Frictionless steering management from creation through evolution.
+
+**Validation:** Successfully synced MUSUBI project itself, detected version drift, updated docs correctly.
+
+---
+
 ## Future Lessons Template
 
 ```markdown

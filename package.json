@@ -7,7 +7,8 @@
     "musubi-sdd": "bin/musubi.js",
     "musubi": "bin/musubi.js",
     "musubi-init": "bin/musubi-init.js",
-    "musubi-onboard": "bin/musubi-onboard.js"
+    "musubi-onboard": "bin/musubi-onboard.js",
+    "musubi-sync": "bin/musubi-sync.js"
   },
   "scripts": {
     "test": "jest",
@@ -43,7 +44,8 @@
     "commander": "^11.0.0",
     "fs-extra": "^11.0.0",
     "glob": "^10.0.0",
-    "inquirer": "^9.0.0"
+    "inquirer": "^9.0.0",
+    "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "eslint": "^8.50.0",

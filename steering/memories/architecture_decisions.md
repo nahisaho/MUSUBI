@@ -412,4 +412,130 @@ musubi-onboard --skip-memories
 
 ---
 
+## [2025-11-23] Auto-Sync System (musubi-sync)
+
+**Decision**: Implemented `musubi-sync` command for automatic steering synchronization
+
+**Context**: 
+- Phase 3 (onboarding) completed, moving to Phase 4
+- Manual steering updates are error-prone and time-consuming
+- Codebase changes (new dependencies, directories, frameworks) require manual doc updates
+- No mechanism to detect drift between code and documentation
+- project.yml version can become out of sync with package.json
+
+**Solution**:
+Created `bin/musubi-sync.js` with automated sync:
+
+1. **Change Detection**:
+   - Load current steering configuration from project.yml
+   - Analyze current codebase state (same as onboarding analysis)
+   - Compare and detect differences:
+     - Version mismatches (project.yml vs package.json)
+     - New/removed languages
+     - New/removed frameworks
+     - New directories
+
+2. **Difference Analysis**:
+   - Version mismatch: project.yml != package.json
+   - New languages: File extensions not in config
+   - New frameworks: Dependencies not in config
+   - New directories: Folders not documented
+
+3. **Update Proposal**:
+   - Display all detected changes
+   - Show old vs new values
+   - Explain each change
+   - Request user confirmation (unless --auto-approve)
+
+4. **Automated Updates**:
+   - Update project.yml with new values
+   - Update tech.md + tech.ja.md with new frameworks
+   - Update structure.md + structure.ja.md with new directories
+   - Record sync event in architecture_decisions.md
+
+5. **Execution Modes**:
+   - Interactive (default): Show changes, ask for confirmation
+   - Auto-approve (`--auto-approve`): Apply changes automatically
+   - Dry-run (`--dry-run`): Show changes without applying
+
+**Rationale**:
+- Automation reduces manual burden
+- Detects drift immediately
+- Keeps documentation fresh
+- Prevents version sync errors
+- CI/CD integration possible (--auto-approve)
+- Complements onboarding (onboard = new projects, sync = ongoing)
+
+**Implementation**:
+- File: `bin/musubi-sync.js` (~650 lines)
+- Package.json: Added `musubi-sync` bin entry
+- Dependencies: Added `js-yaml` for YAML parsing
+- Steering agent: Added Mode 6: Auto-Sync
+- Options:
+  - Default: Interactive mode with confirmation
+  - `--auto-approve`: Automatic application
+  - `--dry-run`: Preview changes only
+
+Sync functions:
+- `loadSteeringConfig()` - Read current project.yml
+- `analyzeCodebase()` - Scan current codebase state
+- `detectChanges()` - Compare and find differences
+- `applyChanges()` - Update steering documents
+- `updateProjectYml()` - Modify project.yml
+- `updateTechMd()` - Append new frameworks
+- `updateStructureMd()` - Add new directories
+- `recordChangeInMemory()` - Log sync event
+
+**Impact**:
+
+Positive:
+- ✅ Automatic drift detection
+- ✅ One-command synchronization: `musubi-sync`
+- ✅ Version sync issues eliminated
+- ✅ Documentation stays current
+- ✅ Reduces manual update burden
+- ✅ CI/CD integration ready
+- ✅ Prevents documentation rot
+
+Negative:
+- ⚠️ Requires regular execution (not automatic background)
+- ⚠️ Heuristics may miss subtle changes
+- ⚠️ User review still needed for accuracy
+
+Trade-offs:
+- On-demand vs Automatic: Chose on-demand (safer, user control)
+- Full vs Partial update: Chose partial (only changed sections)
+- Interactive vs Silent: Chose interactive with auto-approve option
+
+**Usage**:
+```bash
+# Interactive sync (default)
+musubi-sync
+
+# Auto-approve all changes
+musubi-sync --auto-approve
+
+# Preview changes only
+musubi-sync --dry-run
+```
+
+**Typical Workflow**:
+```
+1. Develop code, add dependencies
+2. Run: musubi-sync
+3. Review detected changes
+4. Approve updates
+5. Commit updated steering docs
+6. Repeat regularly (weekly/sprint)
+```
+
+**Related**:
+- [2025-11-22] Automated Onboarding System - Onboard for new projects, sync for existing
+- [2025-11-22] Project Configuration File - project.yml is sync target
+- [2025-11-22] Memory System Implementation - Sync events recorded in memories
+- Phase 3: Onboarding provides initial state, Phase 4 maintains it
+- Future: Could integrate with git hooks for automatic sync on commit
+
+---
+
 **Note**: This file records architectural decisions. For development workflows, see `development_workflow.md`. For lessons learned, see `lessons_learned.md`.

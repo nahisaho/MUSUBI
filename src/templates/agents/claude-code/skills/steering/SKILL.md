@@ -684,7 +684,143 @@ Works now.
 
 ---
 
-## セッション開始メッセージ
+### Mode 6: Auto-Sync (自動同期)
+
+コードベースの変更を自動検出してsteeringを同期します。
+
+```
+Steering Agentです。
+コードベースを分析し、変更を検出して
+steeringドキュメントを自動同期します。
+
+【質問 1/2】同期モードを選択してください:
+1) 自動同期（変更を検出して自動適用）
+2) Dry run（変更を表示のみ）
+3) インタラクティブ（変更ごとに確認）
+
+👤 ユーザー: [回答待ち]
+```
+
+#### Auto-Sync実行フロー:
+
+**Step 1: 現在の設定読み込み**
+```
+📋 現在のSteering設定
+
+Project: musubi-sdd
+Version: 0.1.7 (project.yml)
+Languages: javascript, markdown
+Frameworks: Node.js, Jest, ESLint
+Directories: bin, src, steering, docs
+```
+
+**Step 2: コードベース分析**
+```
+🔍 コードベース分析中...
+
+検出結果:
+Version: 0.3.0 (package.json)
+Languages: javascript, markdown, yaml
+Frameworks: Node.js, Jest, ESLint, Prettier
+Directories: bin, src, steering, docs, tests
+```
+
+**Step 3: 変更検出**
+```
+🔎 変更検出結果
+
+見つかった変更: 3件
+
+1. バージョン不一致
+   File: steering/project.yml
+   Old: 0.1.7
+   New: 0.3.0
+   説明: project.ymlのバージョンがpackage.jsonと異なります
+
+2. 新しいフレームワーク検出
+   File: steering/project.yml, steering/tech.md
+   Added: Prettier
+   説明: 新しいフレームワークPrettierが検出されました
+
+3. 新しいディレクトリ検出
+   File: steering/structure.md
+   Added: tests
+   説明: 新しいディレクトリtestsが検出されました
+```
+
+**Step 4: ユーザー確認（インタラクティブモード）**
+```
+【質問 2/2】これらの変更をsteeringに反映しますか？
+
+変更内容:
+- project.yml: バージョンを0.3.0に更新
+- project.yml: Prettierをフレームワークに追加
+- tech.md: Prettierセクションを追加
+- structure.md: testsディレクトリを追加
+
+👤 ユーザー: [回答待ち]
+```
+
+**Step 5: 変更適用**
+```
+✨ 変更を適用中...
+
+Updated steering/project.yml
+Updated steering/tech.md
+Updated steering/tech.ja.md
+Updated steering/structure.md
+Updated steering/structure.ja.md
+Updated steering/memories/architecture_decisions.md
+
+✅ Steering同期完了！
+
+更新されたファイル:
+  steering/project.yml
+  steering/tech.md
+  steering/tech.ja.md
+  steering/structure.md
+  steering/structure.ja.md
+  steering/memories/architecture_decisions.md
+
+次のステップ:
+  1. 更新されたsteeringドキュメントを確認
+  2. 満足できればコミット
+  3. 定期的にmusubi-syncを実行してドキュメントを最新に保つ
+```
+
+#### Auto-Sync Options
+
+**自動同期モード (`--auto-approve`)**:
+- 変更を自動的に適用（確認なし）
+- CI/CDパイプラインでの使用に最適
+- 定期実行スクリプト向け
+
+**Dry runモード (`--dry-run`)**:
+- 変更を検出して表示のみ
+- 実際にファイルは変更しない
+- 変更内容の事前確認に使用
+
+**インタラクティブモード（デフォルト）**:
+- 変更を表示して確認を求める
+- ユーザーが承認後に適用
+- 手動実行時の標準モード
+
+#### CLI Usage
+
+```bash
+# デフォルト（インタラクティブ）
+musubi-sync
+
+# 自動承認
+musubi-sync --auto-approve
+
+# Dry run（変更確認のみ）
+musubi-sync --dry-run
+```
+
+---
+
+## セッション開始時のメッセージ
 
 ```
 🧭 **Steering Agent を起動しました**
