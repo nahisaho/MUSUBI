@@ -22,6 +22,7 @@ MUSUBI is a comprehensive SDD (Specification Driven Development) framework that 
 - 🧭 **Auto-Updating Project Memory** - Steering system maintains architecture, tech stack, and product context
 - 🚀 **Automatic Onboarding** - `musubi-onboard` analyzes existing projects and generates steering docs (2-5 minutes)
 - 🔄 **Auto-Sync** - `musubi-sync` detects codebase changes and keeps steering docs current
+- 🔍 **Intelligent Code Analysis** - `musubi-analyze` provides quality metrics, complexity analysis, and technical debt detection (v0.5.0)
 - ✅ **Complete Traceability** - Requirements → Design → Code → Tests mapping
 - 🌐 **Bilingual Documentation** - All agent-generated documents created in both English and Japanese
 
@@ -86,6 +87,13 @@ musubi-onboard
 musubi-sync
 musubi-sync --dry-run        # Preview changes
 musubi-sync --auto-approve   # Auto-apply (CI/CD)
+
+# Analyze code quality (v0.5.0)
+musubi-analyze                      # Full analysis
+musubi-analyze --type=quality       # Quality metrics only
+musubi-analyze --type=dependencies  # Dependencies only
+musubi-analyze --type=security      # Security audit
+musubi-analyze --output=report.md   # Save report
 ```
 
 ### Project Types
@@ -269,6 +277,14 @@ musubi-onboard --skip-memories # Skip memory initialization
 musubi-sync                    # Interactive mode
 musubi-sync --dry-run          # Preview changes only
 musubi-sync --auto-approve     # Auto-apply (CI/CD)
+
+# Analyze code quality (v0.5.0+)
+musubi-analyze                 # Full analysis (quality + dependencies + security)
+musubi-analyze --type=quality  # Code quality metrics only
+musubi-analyze --type=dependencies  # Dependency analysis
+musubi-analyze --type=security # Security vulnerabilities
+musubi-analyze --output=report.md   # Save report to file
+musubi-analyze --json          # JSON output
 ```
 
 #### musubi-onboard

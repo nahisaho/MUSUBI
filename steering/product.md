@@ -1,44 +1,42 @@
 # Product Context
 
-**Project**: musubi
-**Last Updated**: 2025-11-17
+**Project**: N
+**Last Updated**: 2025-11-22
 **Version**: 1.0
 
 ---
 
 ## Product Vision
 
-**Vision Statement**: Democratize Specification Driven Development for all AI coding platforms
+**Vision Statement**: {{VISION_STATEMENT}}
 
-> MUSUBI aims to make high-quality, specification-driven development accessible to every developer, regardless of their chosen AI coding assistant. By providing a unified SDD framework across 7 major AI platforms (Claude Code, GitHub Copilot, Cursor, Gemini CLI, Windsurf, Codex, Qwen Code), we eliminate the fragmentation in AI-assisted development workflows.
+> [1-2 paragraph description of what this product aims to achieve and why it exists]
 
-**Mission**: Provide the ultimate SDD tool with 25 specialized agents, 9 constitutional governance rules, and complete traceability from requirements to code
+**Mission**: {{MISSION_STATEMENT}}
 
-> We achieve this by integrating the best features from 6 leading SDD frameworks (musuhi, OpenSpec, ag2, ai-dev-tasks, cc-sdd, spec-kit) into a single, cohesive toolset that works seamlessly across all major AI coding platforms.
+> [How the product achieves its vision]
 
 ---
 
 ## Product Overview
 
-### What is musubi?
+### What is N?
 
-Ultimate Specification Driven Development Tool with 25 Agents for 7 AI Coding Platforms
+A software project using MUSUBI SDD
 
-> MUSUBI (むすび - "結び" meaning "connection/binding") is a comprehensive SDD framework that binds specifications, design, and code together. It evolved from spec-copilot (19 agents) through MUSUHI (20 agents) to its current form with 25 specialized agents supporting 7 AI platforms.
-
-> The tool provides template-based initialization, constitutional governance (9 articles), EARS-format requirements, complete traceability, and an 8-stage SDD workflow (Research → Monitoring). It's distributed as a single npm package with CLI commands for project initialization.
+> [2-3 paragraphs explaining the product, its purpose, and core value proposition]
 
 ### Problem Statement
 
-**Problem**: AI coding assistants accelerate development but create quality issues due to specification ambiguity and lack of traceability
+**Problem**: {{PROBLEM_STATEMENT}}
 
-> While AI coding assistants (Claude, Copilot, Cursor, etc.) increase development speed, they often produce inconsistent results due to vague requirements. Each platform has different agent formats, creating fragmentation. Developers struggle to maintain traceability from requirements through implementation to testing.
+> [What problem does this product solve? What pain points does it address?]
 
 ### Solution
 
-**Solution**: Unified SDD framework with 25 specialized agents, constitutional governance, and complete traceability across 7 AI platforms
+**Solution**: {{SOLUTION_STATEMENT}}
 
-> MUSUBI provides a standardized SDD approach that works across all major AI platforms. It enforces quality through 9 constitutional articles (Library-First, Test-First, EARS requirements, etc.), provides 25 specialized agents for different development phases, and maintains 100% traceability from requirements to tests. The tool is distributed via npm for easy adoption.
+> [How does this product solve the problem? What makes it unique?]
 
 ---
 
@@ -46,51 +44,56 @@ Ultimate Specification Driven Development Tool with 25 Agents for 7 AI Coding Pl
 
 ### Primary Users
 
-#### User Persona 1: AI-Assisted Developer
+#### User Persona 1: {{PERSONA_1_NAME}}
 
 **Demographics**:
-- **Role**: Software Developer / Tech Lead
-- **Organization Size**: Startup to Enterprise
-- **Technical Level**: Intermediate to Advanced
+
+- **Role**: {{ROLE}}
+- **Organization Size**: {{ORG_SIZE}}
+- **Technical Level**: {{TECH_LEVEL}}
 
 **Goals**:
-- Maintain code quality while using AI assistants
-- Ensure traceability from requirements to implementation
-- Standardize SDD practices across team
+
+- [Goal 1]
+- [Goal 2]
+- [Goal 3]
 
 **Pain Points**:
-- AI generates code without clear requirements
-- Difficulty tracking which requirements are implemented
-- Each AI platform has different agent formats
+
+- [Pain point 1]
+- [Pain point 2]
+- [Pain point 3]
 
 **Use Cases**:
-- Initialize new projects with SDD structure
-- Generate EARS-format requirements
-- Validate constitutional compliance
+
+- [Use case 1]
+- [Use case 2]
+- [Use case 3]
 
 ---
 
-#### User Persona 2: Multi-Platform AI User
+#### User Persona 2: {{PERSONA_2_NAME}}
 
 **Demographics**:
-- **Role**: Full-Stack Developer / Consultant
-- **Organization Size**: Freelance to Mid-size
-- **Technical Level**: Advanced
+
+- **Role**: {{ROLE}}
+- **Organization Size**: {{ORG_SIZE}}
+- **Technical Level**: {{TECH_LEVEL}}
 
 **Goals**:
-- Use different AI platforms for different projects
-- Maintain consistent SDD workflow across platforms
-- Leverage specialized agents for specific tasks
+
+- [Goal 1]
+- [Goal 2]
 
 **Pain Points**:
-- Each AI platform requires different setup
-- No unified approach to SDD across platforms
-- Manual agent configuration is time-consuming
+
+- [Pain point 1]
+- [Pain point 2]
 
 **Use Cases**:
-- Switch between Claude Code, Copilot, Cursor seamlessly
-- Use 25 specialized agents (architect, QA, DevOps, etc.)
-- Apply same SDD workflow to greenfield and brownfield projects
+
+- [Use case 1]
+- [Use case 2]
 
 ---
 
@@ -105,27 +108,28 @@ Ultimate Specification Driven Development Tool with 25 Agents for 7 AI Coding Pl
 
 ### Market Opportunity
 
-**Market Size**: Growing AI-assisted development market (millions of developers using Claude, Copilot, Cursor)
+**Market Size**: {{MARKET_SIZE}}
 
-**Target Market**: Developers using AI coding assistants (7 platforms: Claude Code, GitHub Copilot, Cursor, Gemini CLI, Windsurf, Codex, Qwen Code)
+**Target Market**: {{TARGET_MARKET}}
 
-> The AI coding assistant market is rapidly expanding with major platforms (GitHub Copilot, Claude Code, Cursor) gaining millions of users. However, there's a gap in standardized SDD practices. MUSUBI positions itself as the universal SDD framework that works across all platforms.
+> [Description of the market opportunity, competitive landscape, and positioning]
 
 ### Business Model
 
-**Revenue Model**: Open Source (MIT License) with Community Support
+**Revenue Model**: {{REVENUE_MODEL}}
 
-> MUSUBI is distributed as a free, open-source npm package under MIT license. The project builds community through GitHub contributions, documentation, and integration with popular AI platforms.
+> Examples: SaaS subscription, One-time purchase, Freemium, Usage-based
 
 **Pricing Tiers** (if applicable):
+
 - **Free Tier**: [Features, limitations]
 - **Pro Tier**: ${{PRICE}}/month - [Features]
 - **Enterprise Tier**: Custom pricing - [Features]
 
 ### Competitive Landscape
 
-| Competitor | Strengths | Weaknesses | Our Differentiation |
-|------------|-----------|------------|---------------------|
+| Competitor       | Strengths   | Weaknesses   | Our Differentiation   |
+| ---------------- | ----------- | ------------ | --------------------- |
 | {{COMPETITOR_1}} | [Strengths] | [Weaknesses] | [How we're different] |
 | {{COMPETITOR_2}} | [Strengths] | [Weaknesses] | [How we're different] |
 
@@ -190,6 +194,7 @@ Ultimate Specification Driven Development Tool with 25 Agents for 7 AI Coding Pl
    - [Description]
 
 **Examples**:
+
 - **Simplicity First**: Favor simple solutions over complex ones
 - **User Empowerment**: Give users control and flexibility
 - **Speed & Performance**: Fast response times (< 200ms)
@@ -203,6 +208,7 @@ Ultimate Specification Driven Development Tool with 25 Agents for 7 AI Coding Pl
    - [How this guides UX decisions]
 
 **Examples**:
+
 - **Progressive Disclosure**: Show advanced features only when needed
 - **Accessibility First**: WCAG 2.1 AA compliance
 - **Mobile-First**: Design for mobile, enhance for desktop
@@ -215,29 +221,31 @@ Ultimate Specification Driven Development Tool with 25 Agents for 7 AI Coding Pl
 
 #### Business Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| **npm Weekly Downloads** | 1,000+ | npm registry stats |
-| **GitHub Stars** | 500+ | GitHub repository |
-| **GitHub Contributors** | 20+ | GitHub insights |
-| **Platform Coverage** | 7 AI platforms | Feature parity across platforms |
-| **Community Engagement** | Active issues/PRs | GitHub activity |
+| Metric                              | Target            | Measurement    |
+| ----------------------------------- | ----------------- | -------------- |
+| **Monthly Active Users (MAU)**      | {{MAU_TARGET}}    | [How measured] |
+| **Monthly Recurring Revenue (MRR)** | ${{MRR_TARGET}}   | [How measured] |
+| **Customer Acquisition Cost (CAC)** | ${{CAC_TARGET}}   | [How measured] |
+| **Customer Lifetime Value (LTV)**   | ${{LTV_TARGET}}   | [How measured] |
+| **Churn Rate**                      | < {{CHURN_RATE}}% | [How measured] |
 
 #### Product Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| **Initialization Success Rate** | > 95% | CLI execution logs |
-| **Platform Coverage** | 7/7 platforms | Template availability |
-| **Template Completeness** | 25 agents | Agent definition coverage |
-| **Documentation Quality** | Comprehensive | User feedback, issues |#### Technical Metrics
+| Metric                       | Target                | Measurement    |
+| ---------------------------- | --------------------- | -------------- |
+| **Daily Active Users (DAU)** | {{DAU_TARGET}}        | [How measured] |
+| **Feature Adoption Rate**    | > {{ADOPTION_RATE}}%  | [How measured] |
+| **User Retention (Day 7)**   | > {{RETENTION_RATE}}% | [How measured] |
+| **Net Promoter Score (NPS)** | > {{NPS_TARGET}}      | [How measured] |
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| **API Response Time (p95)** | < 200ms | Monitoring dashboard |
-| **Uptime** | 99.9% | Status page |
-| **Error Rate** | < 0.1% | Error tracking (Sentry) |
-| **Page Load Time** | < 2s | Web vitals |
+#### Technical Metrics
+
+| Metric                      | Target  | Measurement             |
+| --------------------------- | ------- | ----------------------- |
+| **API Response Time (p95)** | < 200ms | Monitoring dashboard    |
+| **Uptime**                  | 99.9%   | Status page             |
+| **Error Rate**              | < 0.1%  | Error tracking (Sentry) |
+| **Page Load Time**          | < 2s    | Web vitals              |
 
 ---
 
@@ -248,11 +256,13 @@ Ultimate Specification Driven Development Tool with 25 Agents for 7 AI Coding Pl
 **Goal**: Launch minimum viable product
 
 **Features**:
+
 - [Feature 1]
 - [Feature 2]
 - [Feature 3]
 
 **Success Criteria**:
+
 - [Criterion 1]
 - [Criterion 2]
 
@@ -263,11 +273,13 @@ Ultimate Specification Driven Development Tool with 25 Agents for 7 AI Coding Pl
 **Goal**: Achieve product-market fit
 
 **Features**:
+
 - [Feature 4]
 - [Feature 5]
 - [Feature 6]
 
 **Success Criteria**:
+
 - [Criterion 1]
 - [Criterion 2]
 
@@ -278,11 +290,13 @@ Ultimate Specification Driven Development Tool with 25 Agents for 7 AI Coding Pl
 **Goal**: Scale to {{USER_TARGET}} users
 
 **Features**:
+
 - [Feature 7]
 - [Feature 8]
 - [Feature 9]
 
 **Success Criteria**:
+
 - [Criterion 1]
 - [Criterion 2]
 
@@ -295,6 +309,7 @@ Ultimate Specification Driven Development Tool with 25 Agents for 7 AI Coding Pl
 **User Goal**: {{USER_GOAL}}
 
 **Steps**:
+
 1. User [action 1]
 2. System [response 1]
 3. User [action 2]
@@ -302,6 +317,7 @@ Ultimate Specification Driven Development Tool with 25 Agents for 7 AI Coding Pl
 5. User achieves [goal]
 
 **Success Criteria**:
+
 - User completes workflow in < {{TIME}} minutes
 - Success rate > {{SUCCESS_RATE}}%
 
@@ -312,11 +328,13 @@ Ultimate Specification Driven Development Tool with 25 Agents for 7 AI Coding Pl
 **User Goal**: {{USER_GOAL}}
 
 **Steps**:
+
 1. [Step 1]
 2. [Step 2]
 3. [Step 3]
 
 **Success Criteria**:
+
 - [Criterion 1]
 - [Criterion 2]
 
@@ -333,6 +351,7 @@ Key concepts and terminology used in this domain:
 3. **{{CONCEPT_3}}**: [Definition and importance]
 
 **Example for SaaS Authentication**:
+
 - **Identity Provider (IdP)**: Service that authenticates users
 - **Single Sign-On (SSO)**: One login for multiple applications
 - **Multi-Factor Authentication (MFA)**: Additional verification step
@@ -348,6 +367,7 @@ Key concepts and terminology used in this domain:
    - **Example**: [Example]
 
 **Example for E-commerce**:
+
 - **Inventory Reservation**: Reserved items held for 10 minutes during checkout
 - **Refund Window**: Refunds allowed within 30 days of purchase
 
@@ -382,21 +402,21 @@ Key concepts and terminology used in this domain:
 
 ### Internal Stakeholders
 
-| Role | Name | Responsibilities |
-|------|------|------------------|
-| **Product Owner** | {{PO_NAME}} | Vision, roadmap, priorities |
-| **Tech Lead** | {{TECH_LEAD_NAME}} | Architecture, technical decisions |
-| **Engineering Manager** | {{EM_NAME}} | Team management, delivery |
-| **QA Lead** | {{QA_LEAD_NAME}} | Quality assurance, testing |
-| **Design Lead** | {{DESIGN_LEAD_NAME}} | UX/UI design |
+| Role                    | Name                 | Responsibilities                  |
+| ----------------------- | -------------------- | --------------------------------- |
+| **Product Owner**       | {{PO_NAME}}          | Vision, roadmap, priorities       |
+| **Tech Lead**           | {{TECH_LEAD_NAME}}   | Architecture, technical decisions |
+| **Engineering Manager** | {{EM_NAME}}          | Team management, delivery         |
+| **QA Lead**             | {{QA_LEAD_NAME}}     | Quality assurance, testing        |
+| **Design Lead**         | {{DESIGN_LEAD_NAME}} | UX/UI design                      |
 
 ### External Stakeholders
 
-| Role | Name | Responsibilities |
-|------|------|------------------|
-| **Customer Advisory Board** | [Members] | Product feedback |
-| **Investors** | [Names] | Funding, strategic guidance |
-| **Partners** | [Companies] | Integration, co-marketing |
+| Role                        | Name        | Responsibilities            |
+| --------------------------- | ----------- | --------------------------- |
+| **Customer Advisory Board** | [Members]   | Product feedback            |
+| **Investors**               | [Names]     | Funding, strategic guidance |
+| **Partners**                | [Companies] | Integration, co-marketing   |
 
 ---
 
@@ -407,6 +427,7 @@ Key concepts and terminology used in this domain:
 **Target Launch Date**: {{LAUNCH_DATE}}
 
 **Launch Phases**:
+
 1. **Private Beta** ({{START_DATE}} - {{END_DATE}})
    - Invite-only, 50 beta users
    - Focus: Gather feedback, fix critical bugs
@@ -432,12 +453,13 @@ Key concepts and terminology used in this domain:
 
 ### Product Risks
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
+| Risk       | Probability     | Impact          | Mitigation            |
+| ---------- | --------------- | --------------- | --------------------- |
 | {{RISK_1}} | High/Medium/Low | High/Medium/Low | [Mitigation strategy] |
 | {{RISK_2}} | High/Medium/Low | High/Medium/Low | [Mitigation strategy] |
 
 **Example Risks**:
+
 - **Low adoption**: Users don't understand value → Clear onboarding, demos
 - **Performance issues**: System slow at scale → Load testing, optimization
 - **Security breach**: Data compromised → Security audit, penetration testing
@@ -455,12 +477,12 @@ Key concepts and terminology used in this domain:
 
 ### Support SLA
 
-| Tier | Response Time | Resolution Time |
-|------|---------------|-----------------|
-| **Critical (P0)** | < 1 hour | < 4 hours |
-| **High (P1)** | < 4 hours | < 24 hours |
-| **Medium (P2)** | < 24 hours | < 3 days |
-| **Low (P3)** | < 48 hours | Best effort |
+| Tier              | Response Time | Resolution Time |
+| ----------------- | ------------- | --------------- |
+| **Critical (P0)** | < 1 hour      | < 4 hours       |
+| **High (P1)**     | < 4 hours     | < 24 hours      |
+| **Medium (P2)**   | < 24 hours    | < 3 days        |
+| **Low (P3)**      | < 48 hours    | Best effort     |
 
 ---
 
@@ -473,12 +495,12 @@ Key concepts and terminology used in this domain:
 
 ### Events to Track
 
-| Event | Description | Purpose |
-|-------|-------------|---------|
-| `user_signup` | New user registration | Track acquisition |
-| `feature_used` | User uses core feature | Track engagement |
-| `payment_completed` | User completes payment | Track conversion |
-| `error_occurred` | User encounters error | Track reliability |
+| Event               | Description            | Purpose           |
+| ------------------- | ---------------------- | ----------------- |
+| `user_signup`       | New user registration  | Track acquisition |
+| `feature_used`      | User uses core feature | Track engagement  |
+| `payment_completed` | User completes payment | Track conversion  |
+| `error_occurred`    | User encounters error  | Track reliability |
 
 ---
 
@@ -503,11 +525,13 @@ Key concepts and terminology used in this domain:
 ### Data Collection
 
 **What data we collect**:
+
 - User account information (email, name)
 - Usage analytics (anonymized)
 - Error logs (for debugging)
 
 **What data we DON'T collect**:
+
 - [Sensitive data we avoid, e.g., passwords (only hashed), payment details (tokenized)]
 
 ### Privacy Policy
@@ -522,26 +546,27 @@ Key concepts and terminology used in this domain:
 
 ### Existing Integrations
 
-| Integration | Purpose | Priority |
-|-------------|---------|----------|
-| {{INTEGRATION_1}} | [Purpose] | P0 |
-| {{INTEGRATION_2}} | [Purpose] | P1 |
+| Integration       | Purpose   | Priority |
+| ----------------- | --------- | -------- |
+| {{INTEGRATION_1}} | [Purpose] | P0       |
+| {{INTEGRATION_2}} | [Purpose] | P1       |
 
 ### Planned Integrations
 
-| Integration | Purpose | Timeline |
-|-------------|---------|----------|
-| {{INTEGRATION_3}} | [Purpose] | Q2 2025 |
-| {{INTEGRATION_4}} | [Purpose] | Q3 2025 |
+| Integration       | Purpose   | Timeline |
+| ----------------- | --------- | -------- |
+| {{INTEGRATION_3}} | [Purpose] | Q2 2025  |
+| {{INTEGRATION_4}} | [Purpose] | Q3 2025  |
 
 ---
 
 ## Changelog
 
 ### Version 1.1 (Planned)
+
 - [Future product updates]
 
 ---
 
 **Last Updated**: 2025-11-22
-**Maintained By**: MUSUBI Contributors
+**Maintained By**: {{MAINTAINER}}

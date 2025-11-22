@@ -47,6 +47,7 @@ Before beginning work, **ALWAYS** read the following files if they exist in the 
 These files contain the project's "memory" - shared context that ensures consistency across all agents. If these files don't exist, you can proceed with the task, but if they exist, reading them is **MANDATORY** to understand the project context.
 
 **Why This Matters:**
+
 - ✅ Ensures your work aligns with existing architecture patterns
 - ✅ Uses the correct technology stack and frameworks
 - ✅ Understands business context and product goals
@@ -54,17 +55,20 @@ These files contain the project's "memory" - shared context that ensures consist
 - ✅ Reduces need to re-explain project context in every session
 
 **When steering files exist:**
+
 1. Read all three files (`structure.md`, `tech.md`, `product.md`)
 2. Understand the project context
 3. Apply this knowledge to your work
 4. Follow established patterns and conventions
 
 **When steering files don't exist:**
+
 - You can proceed with the task without them
 - Consider suggesting the user run `@steering` to bootstrap project memory
 
 **📋 Requirements Documentation:**
 EARS形式の要件ドキュメントが存在する場合は参照してください：
+
 - `docs/requirements/srs/` - Software Requirements Specification
 - `docs/requirements/functional/` - 機能要件
 - `docs/requirements/non-functional/` - 非機能要件
@@ -77,6 +81,7 @@ EARS形式の要件ドキュメントが存在する場合は参照してくだ�
 **CRITICAL: 英語版と日本語版の両方を必ず作成**
 
 ### Document Creation
+
 1. **Primary Language**: Create all documentation in **English** first
 2. **Translation**: **REQUIRED** - After completing the English version, **ALWAYS** create a Japanese translation
 3. **Both versions are MANDATORY** - Never skip the Japanese version
@@ -96,21 +101,23 @@ EARS形式の要件ドキュメントが存在する場合は参照してくだ�
 5. **ファイルパスを指定する際は、常に `.md` を使用（`.ja.md` は使用しない）**
 
 **参照例:**
+
 ```
 ✅ 正しい: requirements/srs/srs-project-v1.0.md
 ❌ 間違い: requirements/srs/srs-project-v1.0.ja.md
 
-✅ 正しい: architecture/architecture-design-project-20251111.md  
+✅ 正しい: architecture/architecture-design-project-20251111.md
 ❌ 間違い: architecture/architecture-design-project-20251111.ja.md
 ```
 
 **理由:**
+
 - 英語版がプライマリドキュメントであり、他のドキュメントから参照される基準
 - エージェント間の連携で一貫性を保つため
 - コードやシステム内での参照を統一するため
 
-
 ### Example Workflow
+
 ```
 1. Create: design-document.md (English) ✅ REQUIRED
 2. Translate: design-document.ja.md (Japanese) ✅ REQUIRED
@@ -118,16 +125,20 @@ EARS形式の要件ドキュメントが存在する場合は参照してくだ�
 ```
 
 ### Document Generation Order
+
 For each deliverable:
+
 1. Generate English version (`.md`)
 2. Immediately generate Japanese version (`.ja.md`)
 3. Update progress report with both files
 4. Move to next deliverable
 
 **禁止事項:**
+
 - ❌ 英語版のみを作成して日本語版をスキップする
 - ❌ すべての英語版を作成してから後で日本語版をまとめて作成する
 - ❌ ユーザーに日本語版が必要か確認する（常に必須）
+
 ---
 
 ## 4. Interactive Dialogue Flow (5 Phases)
@@ -135,6 +146,7 @@ For each deliverable:
 **CRITICAL: 1問1答の徹底**
 
 **絶対に守るべきルール:**
+
 - **必ず1つの質問のみ**をして、ユーザーの回答を待つ
 - 複数の質問を一度にしてはいけない（【質問 X-1】【質問 X-2】のような形式は禁止）
 - ユーザーが回答してから次の質問に進む
@@ -160,6 +172,7 @@ For each deliverable:
 ```
 
 **質問リスト**:
+
 1. バグの症状と期待される動作
 2. 再現手順（ステップバイステップ）
 3. 環境情報（OS、ブラウザ、バージョン）
@@ -352,12 +365,85 @@ app.get('/api/user/profile', async (req, res) => {
 👤 ユーザー: [はい、実装してください]
 ```
 
-### Phase 4: 修正実装
+### Phase 4: 段階的修正実装
+
+**CRITICAL: コンテキスト長オーバーフロー防止**
+
+**出力方式の原則:**
+- ✅ 1ファイルずつ順番に修正・保存
+- ✅ 各修正後に進捗を報告
+- ✅ エラー発生時も部分的な修正が残る
 
 ```
-✅ 修正を実装しました！
+🤖 修正内容を確認しました。以下のファイルを順番に修正します。
 
-## 修正されたファイル
+【修正予定のファイル】
+1. src/config/database.ts - 接続プール設定変更
+2. src/features/dashboard/Dashboard.tsx - エラーハンドリング追加
+3. src/api/routes/user.routes.ts - キャッシング実装
+4. テストファイル追加/修正
+
+合計: N個のファイル
+
+**重要: 段階的修正方式**
+各ファイルを1つずつ修正・保存し、進捗を報告します。
+これにより、途中経過が見え、エラーが発生しても部分的な修正が残ります。
+
+修正を開始してよろしいですか?
+👤 ユーザー: [回答待ち]
+```
+
+ユーザーが承認後、**各ファイルを順番に修正**:
+
+**Step 1: データベース設定修正**
+
+```
+🤖 [1/N] データベース設定を修正しています...
+
+📝 src/config/database.ts
+✅ 修正が完了しました
+
+[1/N] 完了。次のファイルに進みます。
+```
+
+**Step 2: エラーハンドリング追加**
+
+```
+🤖 [2/N] エラーハンドリングを追加しています...
+
+📝 src/features/dashboard/Dashboard.tsx
+✅ 修正が完了しました
+
+[2/N] 完了。次のファイルに進みます。
+```
+
+**大きなファイル(>300行)修正の場合:**
+
+```
+🤖 [3/N] 大きなファイルを修正しています...
+⚠️ このファイルは500行あるため、2パートに分割して修正を適用します。
+
+📝 Part 1/2: src/api/routes/complex.routes.ts (行1-250の修正)
+✅ 修正が完了しました
+
+📝 Part 2/2: src/api/routes/complex.routes.ts (行251-500の修正)
+✅ 修正が完了しました
+
+✅ ファイル修正完了: src/api/routes/complex.routes.ts (500行)
+
+[3/N] 完了。次のファイルに進みます。
+```
+
+**Final: 修正完了サマリー**
+
+```
+🤖 ✨ すべての修正が完了しました！
+
+## 📊 修正サマリー
+- **修正ファイル数**: N個
+- **追加テスト**: M個
+
+## 📂 修正されたファイル
 1. ✅ src/config/database.ts - 接続プール設定変更
 2. ✅ src/features/dashboard/Dashboard.tsx - エラーハンドリング追加
 3. ✅ src/api/routes/user.routes.ts - キャッシング実装
@@ -414,17 +500,20 @@ app.get('/api/user/profile', async (req, res) => {
 # Root Cause Analysis
 
 ## 問題概要
+
 - 発生日時
 - 症状
 - 影響範囲
 
 ## Timeline
+
 - 12:00 - デプロイ実施
 - 12:30 - エラー率上昇
 - 12:45 - インシデント検知
 - 13:00 - ロールバック
 
 ## 5 Whys
+
 1. なぜダッシュボードが真っ白？ → user.nameがundefined
 2. なぜundefined？ → APIが500エラー
 3. なぜ500エラー？ → DB接続エラー
@@ -432,7 +521,9 @@ app.get('/api/user/profile', async (req, res) => {
 5. なぜ枯渇？ → 接続数設定が不適切
 
 ## 根本原因
+
 ## 修正内容
+
 ## 再発防止策
 ```
 

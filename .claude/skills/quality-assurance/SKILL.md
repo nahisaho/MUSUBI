@@ -48,6 +48,7 @@ Before beginning work, **ALWAYS** read the following files if they exist in the 
 These files contain the project's "memory" - shared context that ensures consistency across all agents. If these files don't exist, you can proceed with the task, but if they exist, reading them is **MANDATORY** to understand the project context.
 
 **Why This Matters:**
+
 - ✅ Ensures your work aligns with existing architecture patterns
 - ✅ Uses the correct technology stack and frameworks
 - ✅ Understands business context and product goals
@@ -55,17 +56,20 @@ These files contain the project's "memory" - shared context that ensures consist
 - ✅ Reduces need to re-explain project context in every session
 
 **When steering files exist:**
+
 1. Read all three files (`structure.md`, `tech.md`, `product.md`)
 2. Understand the project context
 3. Apply this knowledge to your work
 4. Follow established patterns and conventions
 
 **When steering files don't exist:**
+
 - You can proceed with the task without them
 - Consider suggesting the user run `@steering` to bootstrap project memory
 
 **📋 Requirements Documentation:**
 EARS形式の要件ドキュメントが存在する場合は参照してください：
+
 - `docs/requirements/srs/` - Software Requirements Specification
 - `docs/requirements/functional/` - 機能要件
 - `docs/requirements/non-functional/` - 非機能要件
@@ -78,6 +82,7 @@ EARS形式の要件ドキュメントが存在する場合は参照してくだ�
 **CRITICAL: 英語版と日本語版の両方を必ず作成**
 
 ### Document Creation
+
 1. **Primary Language**: Create all documentation in **English** first
 2. **Translation**: **REQUIRED** - After completing the English version, **ALWAYS** create a Japanese translation
 3. **Both versions are MANDATORY** - Never skip the Japanese version
@@ -97,21 +102,23 @@ EARS形式の要件ドキュメントが存在する場合は参照してくだ�
 5. **ファイルパスを指定する際は、常に `.md` を使用（`.ja.md` は使用しない）**
 
 **参照例:**
+
 ```
 ✅ 正しい: requirements/srs/srs-project-v1.0.md
 ❌ 間違い: requirements/srs/srs-project-v1.0.ja.md
 
-✅ 正しい: architecture/architecture-design-project-20251111.md  
+✅ 正しい: architecture/architecture-design-project-20251111.md
 ❌ 間違い: architecture/architecture-design-project-20251111.ja.md
 ```
 
 **理由:**
+
 - 英語版がプライマリドキュメントであり、他のドキュメントから参照される基準
 - エージェント間の連携で一貫性を保つため
 - コードやシステム内での参照を統一するため
 
-
 ### Example Workflow
+
 ```
 1. Create: design-document.md (English) ✅ REQUIRED
 2. Translate: design-document.ja.md (Japanese) ✅ REQUIRED
@@ -119,16 +126,20 @@ EARS形式の要件ドキュメントが存在する場合は参照してくだ�
 ```
 
 ### Document Generation Order
+
 For each deliverable:
+
 1. Generate English version (`.md`)
 2. Immediately generate Japanese version (`.ja.md`)
 3. Update progress report with both files
 4. Move to next deliverable
 
 **禁止事項:**
+
 - ❌ 英語版のみを作成して日本語版をスキップする
 - ❌ すべての英語版を作成してから後で日本語版をまとめて作成する
 - ❌ ユーザーに日本語版が必要か確認する（常に必須）
+
 ---
 
 ## 4. Interactive Dialogue Flow (5 Phases)
@@ -136,6 +147,7 @@ For each deliverable:
 **CRITICAL: 1問1答の徹底**
 
 **絶対に守るべきルール:**
+
 - **必ず1つの質問のみ**をして、ユーザーの回答を待つ
 - 複数の質問を一度にしてはいけない（【質問 X-1】【質問 X-2】のような形式は禁止）
 - ユーザーが回答してから次の質問に進む
@@ -145,6 +157,7 @@ For each deliverable:
 **重要**: 必ずこの対話フローに従って段階的に情報を収集してください。
 
 ### Phase 1: プロジェクト情報の収集
+
 QA対象のプロジェクトについて基本情報を収集します。**1問ずつ**質問し、回答を待ちます。
 
 ```
@@ -162,6 +175,7 @@ QA対象のプロジェクトについて基本情報を収集します。**1問
 ```
 
 **質問リスト (1問ずつ順次実行)**:
+
 1. プロジェクト名と概要、現在のフェーズ
 2. QA活動の目的（新規リリース / アップデート / リグレッション / 品質改善）
 3. 要件定義書・仕様書の場所（あれば）
@@ -172,6 +186,7 @@ QA対象のプロジェクトについて基本情報を収集します。**1問
 8. QA活動の範囲（機能テストのみ / 非機能テストも含む / フルQA）
 
 ### Phase 2: QA戦略とテスト計画の策定
+
 収集した情報をもとに、QA戦略とテスト計画を提示します。
 
 ```
@@ -365,6 +380,7 @@ QA対象のプロジェクトについて基本情報を収集します。**1問
 ```
 
 ### Phase 3: テストケース作成
+
 詳細なテストケースを作成します。
 
 ```
@@ -501,10 +517,98 @@ QA対象のプロジェクトについて基本情報を収集します。**1問
 👤 ユーザー: [回答待ち]
 ```
 
-### Phase 4: テスト実行と品質メトリクス収集
+### Phase 4: 段階的テスト実行と品質メトリクス収集
+
+**CRITICAL: コンテキスト長オーバーフロー防止**
+
+**出力方式の原則:**
+- ✅ 1ドキュメントずつ順番に生成・保存
+- ✅ 各生成後に進捗を報告
+- ✅ 大きなレポート(>300行)はセクションごとに分割
+- ✅ エラー発生時も部分的なレポートが残る
+
 テストを実行し、結果を記録、品質メトリクスを収集します。
 
 ```
+🤖 テスト実行を開始し、以下のドキュメントを順番に生成します。
+
+【生成予定のドキュメント】
+1. テスト実行レポート (test_execution_report.md)
+2. 欠陥レポート (defect_report.md)
+3. 品質メトリクス (quality_metrics.md)
+4. テストカバレッジレポート (coverage_report.md)
+5. リリース判定レポート (release_readiness.md)
+
+合計: 5個のレポート
+
+**重要: 段階的生成方式**
+各レポートを1つずつ生成・保存し、進捗を報告します。
+これにより、途中経過が見え、エラーが発生しても部分的なレポートが残ります。
+
+生成を開始してよろしいですか?
+👤 ユーザー: [回答待ち]
+```
+
+ユーザーが承認後、**各レポートを順番に生成**:
+
+**Step 1: テスト実行レポート**
+
+```
+🤖 [1/5] テスト実行レポートを生成しています...
+
+📝 qa/reports/test_execution_report.md
+✅ 保存が完了しました (250行)
+
+[1/5] 完了。次のレポートに進みます。
+```
+
+**Step 2: 欠陥レポート**
+
+```
+🤖 [2/5] 欠陥レポートを生成しています...
+
+📝 qa/reports/defect_report.md
+✅ 保存が完了しました (180行)
+
+[2/5] 完了。次のレポートに進みます。
+```
+
+**大きなレポート(>300行)の場合:**
+
+```
+🤖 [3/5] テスト実行レポートを生成しています...
+⚠️ レポートが500行になるため、2パートに分割して生成します。
+
+📝 Part 1/2: qa/reports/test_execution_report.md (セクション1-3)
+✅ 保存が完了しました
+
+📝 Part 2/2: qa/reports/test_execution_report.md (セクション4-6)
+✅ 保存が完了しました
+
+✅ レポート生成完了: qa/reports/test_execution_report.md (500行)
+
+[3/5] 完了。次のレポートに進みます。
+```
+
+**Final: テスト実行完了サマリー**
+
+```
+🤖 ✨ すべてのテストレポート生成が完了しました！
+
+## 📊 テスト結果サマリー
+- **実行テストケース**: 150/200 (75%)
+- **合格率**: 90%
+- **検出欠陥**: Critical 2件, High 5件
+
+## 📂 生成されたレポート
+1. ✅ qa/reports/test_execution_report.md - テスト実行レポート
+2. ✅ qa/reports/defect_report.md - 欠陥レポート
+3. ✅ qa/reports/quality_metrics.md - 品質メトリクス
+4. ✅ qa/reports/coverage_report.md - カバレッジレポート
+5. ✅ qa/reports/release_readiness.md - リリース判定
+
+```
+
 テスト実行を開始します。
 
 🧪 **テスト実行レポート**
@@ -667,6 +771,7 @@ DRE = 15 / 15 = 100% ✅
 ```
 
 ### Phase 5: QA完了とフォローアップ
+
 QA活動完了を報告し、継続的な品質改善を提案します。
 
 ```
@@ -810,10 +915,12 @@ QA活動完了を報告し、継続的な品質改善を提案します。
 ```
 
 **更新対象ファイル:**
+
 - `steering/tech.md` (英語版)
 - `steering/tech.ja.md` (日本語版)
 
 **更新内容:**
+
 - QA processes and methodologies (test levels, test types, coverage goals)
 - Quality metrics and KPIs (coverage targets, defect density thresholds)
 - Testing standards and best practices (coding standards for tests, review process)
@@ -822,6 +929,7 @@ QA活動完了を報告し、継続的な品質改善を提案します。
 - Quality gates and release criteria (definition of done, acceptance criteria)
 
 **更新方法:**
+
 1. 既存の `steering/tech.md` を読み込む（存在する場合）
 2. 今回の成果物から重要な情報を抽出
 3. tech.md の該当セクションに追記または更新
@@ -842,11 +950,13 @@ QA活動完了を報告し、継続的な品質改善を提案します。
 ```
 
 **更新例:**
+
 ```markdown
 ## QA Strategy and Testing Standards
 
 ### Test Pyramid
 ```
+
           /\
          /E2E\        10% - Critical user flows
         /------\
@@ -854,6 +964,7 @@ QA活動完了を報告し、継続的な品質改善を提案します。
       /----------\
      /   Unit    \   60% - Functions, components
     /--------------\
+
 ```
 
 ### Quality Metrics and Targets
@@ -933,31 +1044,47 @@ QA活動完了を報告し、継続的な品質改善を提案します。
 # QA戦略書
 
 ## 1. はじめに
+
 ### 1.1 目的
+
 ### 1.2 スコープ
+
 ### 1.3 前提条件
 
 ## 2. 品質目標
+
 ### 2.1 機能品質目標
+
 ### 2.2 非機能品質目標
+
 ### 2.3 KPI
 
 ## 3. テスト戦略
+
 ### 3.1 テストレベル
+
 ### 3.2 テストタイプ
+
 ### 3.3 テストアプローチ
 
 ## 4. テスト環境
+
 ### 4.1 環境構成
+
 ### 4.2 テストデータ
+
 ### 4.3 ツール
 
 ## 5. リスク管理
+
 ### 5.1 リスク分析
+
 ### 5.2 軽減策
 
 ## 6. 品質ゲート
+
 ### 6.1 リリース判定基準
+
 ### 6.2 Exit Criteria
 ```
 
@@ -965,6 +1092,7 @@ QA活動完了を報告し、継続的な品質改善を提案します。
 
 ```markdown
 ## テストケースID: TC-XXX
+
 - **テストケース名**: [名称]
 - **優先度**: P0/P1/P2
 - **テストカテゴリ**: 機能テスト/非機能テスト/セキュリティテスト
@@ -986,6 +1114,7 @@ QA活動完了を報告し、継続的な品質改善を提案します。
 ## 6. File Output Requirements
 
 ### 出力先ディレクトリ
+
 ```
 qa/
 ├── strategy/             # QA戦略
@@ -1014,6 +1143,7 @@ qa/
 ## 7. Best Practices
 
 ### QA活動の進め方
+
 1. **早期関与**: 要件定義フェーズからQAが参加
 2. **リスクベース**: リスクの高い領域に重点的にリソース配分
 3. **自動化**: 繰り返し実行するテストは自動化
@@ -1021,6 +1151,7 @@ qa/
 5. **コミュニケーション**: すべてのステークホルダーとの密な連携
 
 ### 品質文化の醸成
+
 - **品質は全員の責任**: QAチームだけでなく、全員が品質に責任
 - **失敗から学ぶ**: 欠陥を責めるのではなく、改善の機会と捉える
 - **透明性**: 品質状況をオープンに共有

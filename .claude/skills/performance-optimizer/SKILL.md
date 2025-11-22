@@ -46,6 +46,7 @@ Before beginning work, **ALWAYS** read the following files if they exist in the 
 These files contain the project's "memory" - shared context that ensures consistency across all agents. If these files don't exist, you can proceed with the task, but if they exist, reading them is **MANDATORY** to understand the project context.
 
 **Why This Matters:**
+
 - ✅ Ensures your work aligns with existing architecture patterns
 - ✅ Uses the correct technology stack and frameworks
 - ✅ Understands business context and product goals
@@ -53,17 +54,20 @@ These files contain the project's "memory" - shared context that ensures consist
 - ✅ Reduces need to re-explain project context in every session
 
 **When steering files exist:**
+
 1. Read all three files (`structure.md`, `tech.md`, `product.md`)
 2. Understand the project context
 3. Apply this knowledge to your work
 4. Follow established patterns and conventions
 
 **When steering files don't exist:**
+
 - You can proceed with the task without them
 - Consider suggesting the user run `@steering` to bootstrap project memory
 
 **📋 Requirements Documentation:**
 EARS形式の要件ドキュメントが存在する場合は参照してください：
+
 - `docs/requirements/srs/` - Software Requirements Specification
 - `docs/requirements/functional/` - 機能要件
 - `docs/requirements/non-functional/` - 非機能要件
@@ -76,6 +80,7 @@ EARS形式の要件ドキュメントが存在する場合は参照してくだ�
 **CRITICAL: 英語版と日本語版の両方を必ず作成**
 
 ### Document Creation
+
 1. **Primary Language**: Create all documentation in **English** first
 2. **Translation**: **REQUIRED** - After completing the English version, **ALWAYS** create a Japanese translation
 3. **Both versions are MANDATORY** - Never skip the Japanese version
@@ -95,21 +100,23 @@ EARS形式の要件ドキュメントが存在する場合は参照してくだ�
 5. **ファイルパスを指定する際は、常に `.md` を使用（`.ja.md` は使用しない）**
 
 **参照例:**
+
 ```
 ✅ 正しい: requirements/srs/srs-project-v1.0.md
 ❌ 間違い: requirements/srs/srs-project-v1.0.ja.md
 
-✅ 正しい: architecture/architecture-design-project-20251111.md  
+✅ 正しい: architecture/architecture-design-project-20251111.md
 ❌ 間違い: architecture/architecture-design-project-20251111.ja.md
 ```
 
 **理由:**
+
 - 英語版がプライマリドキュメントであり、他のドキュメントから参照される基準
 - エージェント間の連携で一貫性を保つため
 - コードやシステム内での参照を統一するため
 
-
 ### Example Workflow
+
 ```
 1. Create: design-document.md (English) ✅ REQUIRED
 2. Translate: design-document.ja.md (Japanese) ✅ REQUIRED
@@ -117,16 +124,20 @@ EARS形式の要件ドキュメントが存在する場合は参照してくだ�
 ```
 
 ### Document Generation Order
+
 For each deliverable:
+
 1. Generate English version (`.md`)
 2. Immediately generate Japanese version (`.ja.md`)
 3. Update progress report with both files
 4. Move to next deliverable
 
 **禁止事項:**
+
 - ❌ 英語版のみを作成して日本語版をスキップする
 - ❌ すべての英語版を作成してから後で日本語版をまとめて作成する
 - ❌ ユーザーに日本語版が必要か確認する（常に必須）
+
 ---
 
 ## 4. Interactive Dialogue Flow (5 Phases)
@@ -134,6 +145,7 @@ For each deliverable:
 **CRITICAL: 1問1答の徹底**
 
 **絶対に守るべきルール:**
+
 - **必ず1つの質問のみ**をして、ユーザーの回答を待つ
 - 複数の質問を一度にしてはいけない（【質問 X-1】【質問 X-2】のような形式は禁止）
 - ユーザーが回答してから次の質問に進む
@@ -159,6 +171,7 @@ For each deliverable:
 ```
 
 **質問リスト**:
+
 1. 最適化対象とパフォーマンス課題
 2. 現在のメトリクス（わかれば）
 3. 技術スタック
@@ -357,12 +370,88 @@ CREATE INDEX idx_products_category_id ON products(category_id);
 👤 ユーザー: [はい、実装してください]
 ```
 
-### Phase 4: 実装と検証
+### Phase 4: 段階的最適化実装
+
+**CRITICAL: コンテキスト長オーバーフロー防止**
+
+**出力方式の原則:**
+- ✅ 1最適化項目ずつ順番に実装・保存
+- ✅ 各実装後に進捗とパフォーマンス改善を報告
+- ✅ エラー発生時も部分的な最適化が残る
 
 ```
-✅ **最適化実装完了！**
+🤖 確認ありがとうございます。以下の最適化を順番に実装します。
 
-## 実装された最適化
+【実装予定の最適化】(優先度順)
+1. JavaScriptバンドル削減（lodash, moment.js置換）- 期待改善: -40%
+2. コード分割（React.lazy）- 期待改善: -45%
+3. N+1クエリ解決（Eager loading）- 期待改善: -83%
+4. 画像最適化（WebP, Lazy loading）- 期待改善: -80%
+5. Redisキャッシング - 期待改善: -60%
+6. データベースインデックス追加 - 期待改善: -70%
+
+合計: 6項目
+
+**重要: 段階的実装方式**
+各最適化を1つずつ実装・保存し、進捗を報告します。
+これにより、途中経過が見え、エラーが発生しても部分的な最適化が残ります。
+
+実装を開始してよろしいですか?
+👤 ユーザー: [回答待ち]
+```
+
+ユーザーが承認後、**各最適化を順番に実装**:
+
+**Step 1: バンドル削減**
+
+```
+🤖 [1/6] JavaScriptバンドル削減を実装しています...
+
+📝 [ファイルパス]
+✅ 実装が完了しました
+⚡ パフォーマンス改善: 5.8MB → 3.5MB (-40%)
+
+[1/6] 完了。次の最適化に進みます。
+```
+
+**Step 2: コード分割**
+
+```
+🤖 [2/6] コード分割を実装しています...
+
+📝 [ファイルパス]
+✅ 実装が完了しました
+⚡ パフォーマンス改善: 初期ロード 5.8s → 3.2s (-45%)
+
+[2/6] 完了。次の最適化に進みます。
+```
+
+**大きな最適化ファイル(>300行)の場合:**
+
+```
+🤖 [3/6] データベース最適化を実装しています...
+⚠️ 最適化スクリプトが400行になるため、2パートに分割して生成します。
+
+📝 Part 1/2: db/migrations/optimize-indexes.sql (行1-250)
+✅ 実装が完了しました
+
+📝 Part 2/2: db/migrations/optimize-indexes.sql (行251-400)
+✅ 実装が完了しました
+
+✅ ファイル生成完了: db/migrations/optimize-indexes.sql (400行)
+⚡ 期待される改善: クエリ速度 -70%
+
+[3/6] 完了。次の最適化に進みます。
+```
+
+**Final: 最適化完了サマリー**
+
+```
+🤖 ✨ すべての最適化実装が完了しました！
+
+## 📊 最適化サマリー
+
+### 実装された最適化
 1. ✅ JavaScriptバンドル削減（lodash, moment.js置換）
 2. ✅ コード分割（React.lazy）
 3. ✅ N+1クエリ解決（Eager loading）
@@ -406,11 +495,13 @@ Load Testing (100 concurrent users):
 ## 5. Benchmark Tools
 
 ### フロントエンド
+
 - **Lighthouse**: Chrome DevTools
 - **WebPageTest**: webpagetest.org
 - **Bundle Analyzer**: webpack-bundle-analyzer
 
 ### バックエンド
+
 - **Load Testing**: k6, Apache JMeter, Artillery
 - **APM**: New Relic, Datadog, Dynatrace
 - **Database**: EXPLAIN, Query Profiler
