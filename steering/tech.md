@@ -18,14 +18,14 @@ This document defines the approved technology stack for musubi. All development 
 
 | Language | Version | Usage | Notes |
 |----------|---------|-------|-------|
-| {{PRIMARY_LANGUAGE}} | {{VERSION}} | Primary application language | [Notes] |
-| SQL | PostgreSQL 15+ | Database queries | Via Prisma ORM |
-| TypeScript | 5.0+ | Type definitions | Strict mode enabled |
+| JavaScript | ES2020+ | Primary CLI implementation | Node.js runtime |
+| Markdown | - | Template definitions | For 6 AI platforms |
+| TOML | - | Gemini CLI format | Gemini-specific templates |
 
 ### Runtime Environment
 
-- **Node.js**: {{NODE_VERSION}}+ (LTS)
-- **Package Manager**: npm {{NPM_VERSION}}+ / pnpm {{PNPM_VERSION}}+
+- **Node.js**: 18.0.0+ (LTS)
+- **Package Manager**: npm 8.0.0+
 
 ---
 
@@ -33,13 +33,9 @@ This document defines the approved technology stack for musubi. All development 
 
 ### Framework
 
-**Primary Framework**: {{FRONTEND_FRAMEWORK}}
+**Primary Framework**: N/A (CLI Tool)
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| {{FRONTEND_FRAMEWORK}} | {{VERSION}} | [Purpose] |
-| React | 18+ | UI library (if using Next.js/Remix) |
-| TypeScript | 5.0+ | Type safety |
+> MUSUBI is a command-line tool with no frontend. Users interact via terminal commands.
 
 ### UI Components
 
@@ -70,13 +66,15 @@ This document defines the approved technology stack for musubi. All development 
 
 ### Framework
 
-**Primary Framework**: {{BACKEND_FRAMEWORK}}
+**Primary Framework**: Node.js CLI Application
 
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| {{BACKEND_FRAMEWORK}} | {{VERSION}} | API server |
-| Express | 4.0+ | Web framework (if using Node.js) |
-| Next.js API Routes | 14+ | Serverless API (if using Next.js) |
+| Node.js | 18.0.0+ | JavaScript runtime |
+| Commander.js | 11.0+ | CLI argument parsing |
+| Inquirer.js | 9.0+ | Interactive CLI prompts |
+| fs-extra | 11.0+ | File system operations |
+| Chalk | 4.1+ | Terminal string styling |
 
 ### API Technologies
 
@@ -92,12 +90,9 @@ This document defines the approved technology stack for musubi. All development 
 
 ### Primary Database
 
-**Database**: {{DATABASE}}
+**Database**: N/A (Template Generator)
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| {{DATABASE}} | {{VERSION}} | Primary data store |
-| Prisma | 5.0+ | ORM and migrations |
+> MUSUBI does not use a database. It generates template files that are copied to user projects.
 
 ### Database Schema
 
@@ -159,9 +154,9 @@ model User {
 
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| {{TEST_FRAMEWORK}} | {{VERSION}} | Unit testing |
-| Jest | 29+ | Test runner (if using JavaScript/TypeScript) |
-| Vitest | 1.0+ | Fast test runner (alternative to Jest) |
+| Jest | 29.0+ | Unit testing framework |
+| ESLint | 8.50+ | Code linting |
+| Prettier | 3.0+ | Code formatting |
 
 ### Testing Libraries
 
@@ -245,9 +240,8 @@ services:
 
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| {{CI_CD_PLATFORM}} | - | Continuous Integration/Deployment |
 | GitHub Actions | - | CI/CD workflows |
-| GitLab CI | - | Alternative CI/CD |
+| npm | - | Package publishing (npmjs.com) |
 
 ### Deployment
 
@@ -261,16 +255,15 @@ services:
 
 ## Cloud Infrastructure
 
-### Cloud Provider
+### Distribution Platform
 
-**Primary Provider**: {{CLOUD_PROVIDER}}
+**Primary Platform**: npm Registry
 
 | Service | Purpose |
 |---------|---------|
-| {{COMPUTE_SERVICE}} | Application hosting |
-| {{DATABASE_SERVICE}} | Managed database |
-| {{STORAGE_SERVICE}} | Object storage |
-| {{CACHE_SERVICE}} | Managed Redis |
+| npmjs.com | Package distribution |
+| GitHub | Source code hosting |
+| GitHub Releases | Version release management |
 
 ### Infrastructure as Code
 
@@ -533,5 +526,5 @@ When evaluating new technologies:
 
 ---
 
-**Last Updated**: 2025-11-17
-**Maintained By**: {{MAINTAINER}}
+**Last Updated**: 2025-11-22
+**Maintained By**: MUSUBI Contributors

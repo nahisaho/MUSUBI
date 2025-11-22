@@ -8,13 +8,13 @@
 
 ## Product Vision
 
-**Vision Statement**: {{VISION_STATEMENT}}
+**Vision Statement**: Democratize Specification Driven Development for all AI coding platforms
 
-> [1-2 paragraph description of what this product aims to achieve and why it exists]
+> MUSUBI aims to make high-quality, specification-driven development accessible to every developer, regardless of their chosen AI coding assistant. By providing a unified SDD framework across 7 major AI platforms (Claude Code, GitHub Copilot, Cursor, Gemini CLI, Windsurf, Codex, Qwen Code), we eliminate the fragmentation in AI-assisted development workflows.
 
-**Mission**: {{MISSION_STATEMENT}}
+**Mission**: Provide the ultimate SDD tool with 25 specialized agents, 9 constitutional governance rules, and complete traceability from requirements to code
 
-> [How the product achieves its vision]
+> We achieve this by integrating the best features from 6 leading SDD frameworks (musuhi, OpenSpec, ag2, ai-dev-tasks, cc-sdd, spec-kit) into a single, cohesive toolset that works seamlessly across all major AI coding platforms.
 
 ---
 
@@ -22,21 +22,23 @@
 
 ### What is musubi?
 
-A software project using MUSUBI SDD
+Ultimate Specification Driven Development Tool with 25 Agents for 7 AI Coding Platforms
 
-> [2-3 paragraphs explaining the product, its purpose, and core value proposition]
+> MUSUBI (むすび - "結び" meaning "connection/binding") is a comprehensive SDD framework that binds specifications, design, and code together. It evolved from spec-copilot (19 agents) through MUSUHI (20 agents) to its current form with 25 specialized agents supporting 7 AI platforms.
+
+> The tool provides template-based initialization, constitutional governance (9 articles), EARS-format requirements, complete traceability, and an 8-stage SDD workflow (Research → Monitoring). It's distributed as a single npm package with CLI commands for project initialization.
 
 ### Problem Statement
 
-**Problem**: {{PROBLEM_STATEMENT}}
+**Problem**: AI coding assistants accelerate development but create quality issues due to specification ambiguity and lack of traceability
 
-> [What problem does this product solve? What pain points does it address?]
+> While AI coding assistants (Claude, Copilot, Cursor, etc.) increase development speed, they often produce inconsistent results due to vague requirements. Each platform has different agent formats, creating fragmentation. Developers struggle to maintain traceability from requirements through implementation to testing.
 
 ### Solution
 
-**Solution**: {{SOLUTION_STATEMENT}}
+**Solution**: Unified SDD framework with 25 specialized agents, constitutional governance, and complete traceability across 7 AI platforms
 
-> [How does this product solve the problem? What makes it unique?]
+> MUSUBI provides a standardized SDD approach that works across all major AI platforms. It enforces quality through 9 constitutional articles (Library-First, Test-First, EARS requirements, etc.), provides 25 specialized agents for different development phases, and maintains 100% traceability from requirements to tests. The tool is distributed via npm for easy adoption.
 
 ---
 
@@ -44,48 +46,51 @@ A software project using MUSUBI SDD
 
 ### Primary Users
 
-#### User Persona 1: {{PERSONA_1_NAME}}
+#### User Persona 1: AI-Assisted Developer
 
 **Demographics**:
-- **Role**: {{ROLE}}
-- **Organization Size**: {{ORG_SIZE}}
-- **Technical Level**: {{TECH_LEVEL}}
+- **Role**: Software Developer / Tech Lead
+- **Organization Size**: Startup to Enterprise
+- **Technical Level**: Intermediate to Advanced
 
 **Goals**:
-- [Goal 1]
-- [Goal 2]
-- [Goal 3]
+- Maintain code quality while using AI assistants
+- Ensure traceability from requirements to implementation
+- Standardize SDD practices across team
 
 **Pain Points**:
-- [Pain point 1]
-- [Pain point 2]
-- [Pain point 3]
+- AI generates code without clear requirements
+- Difficulty tracking which requirements are implemented
+- Each AI platform has different agent formats
 
 **Use Cases**:
-- [Use case 1]
-- [Use case 2]
-- [Use case 3]
+- Initialize new projects with SDD structure
+- Generate EARS-format requirements
+- Validate constitutional compliance
 
 ---
 
-#### User Persona 2: {{PERSONA_2_NAME}}
+#### User Persona 2: Multi-Platform AI User
 
 **Demographics**:
-- **Role**: {{ROLE}}
-- **Organization Size**: {{ORG_SIZE}}
-- **Technical Level**: {{TECH_LEVEL}}
+- **Role**: Full-Stack Developer / Consultant
+- **Organization Size**: Freelance to Mid-size
+- **Technical Level**: Advanced
 
 **Goals**:
-- [Goal 1]
-- [Goal 2]
+- Use different AI platforms for different projects
+- Maintain consistent SDD workflow across platforms
+- Leverage specialized agents for specific tasks
 
 **Pain Points**:
-- [Pain point 1]
-- [Pain point 2]
+- Each AI platform requires different setup
+- No unified approach to SDD across platforms
+- Manual agent configuration is time-consuming
 
 **Use Cases**:
-- [Use case 1]
-- [Use case 2]
+- Switch between Claude Code, Copilot, Cursor seamlessly
+- Use 25 specialized agents (architect, QA, DevOps, etc.)
+- Apply same SDD workflow to greenfield and brownfield projects
 
 ---
 
@@ -100,17 +105,17 @@ A software project using MUSUBI SDD
 
 ### Market Opportunity
 
-**Market Size**: {{MARKET_SIZE}}
+**Market Size**: Growing AI-assisted development market (millions of developers using Claude, Copilot, Cursor)
 
-**Target Market**: {{TARGET_MARKET}}
+**Target Market**: Developers using AI coding assistants (7 platforms: Claude Code, GitHub Copilot, Cursor, Gemini CLI, Windsurf, Codex, Qwen Code)
 
-> [Description of the market opportunity, competitive landscape, and positioning]
+> The AI coding assistant market is rapidly expanding with major platforms (GitHub Copilot, Claude Code, Cursor) gaining millions of users. However, there's a gap in standardized SDD practices. MUSUBI positions itself as the universal SDD framework that works across all platforms.
 
 ### Business Model
 
-**Revenue Model**: {{REVENUE_MODEL}}
+**Revenue Model**: Open Source (MIT License) with Community Support
 
-> Examples: SaaS subscription, One-time purchase, Freemium, Usage-based
+> MUSUBI is distributed as a free, open-source npm package under MIT license. The project builds community through GitHub contributions, documentation, and integration with popular AI platforms.
 
 **Pricing Tiers** (if applicable):
 - **Free Tier**: [Features, limitations]
@@ -212,22 +217,20 @@ A software project using MUSUBI SDD
 
 | Metric | Target | Measurement |
 |--------|--------|-------------|
-| **Monthly Active Users (MAU)** | {{MAU_TARGET}} | [How measured] |
-| **Monthly Recurring Revenue (MRR)** | ${{MRR_TARGET}} | [How measured] |
-| **Customer Acquisition Cost (CAC)** | ${{CAC_TARGET}} | [How measured] |
-| **Customer Lifetime Value (LTV)** | ${{LTV_TARGET}} | [How measured] |
-| **Churn Rate** | < {{CHURN_RATE}}% | [How measured] |
+| **npm Weekly Downloads** | 1,000+ | npm registry stats |
+| **GitHub Stars** | 500+ | GitHub repository |
+| **GitHub Contributors** | 20+ | GitHub insights |
+| **Platform Coverage** | 7 AI platforms | Feature parity across platforms |
+| **Community Engagement** | Active issues/PRs | GitHub activity |
 
 #### Product Metrics
 
 | Metric | Target | Measurement |
 |--------|--------|-------------|
-| **Daily Active Users (DAU)** | {{DAU_TARGET}} | [How measured] |
-| **Feature Adoption Rate** | > {{ADOPTION_RATE}}% | [How measured] |
-| **User Retention (Day 7)** | > {{RETENTION_RATE}}% | [How measured] |
-| **Net Promoter Score (NPS)** | > {{NPS_TARGET}} | [How measured] |
-
-#### Technical Metrics
+| **Initialization Success Rate** | > 95% | CLI execution logs |
+| **Platform Coverage** | 7/7 platforms | Template availability |
+| **Template Completeness** | 25 agents | Agent definition coverage |
+| **Documentation Quality** | Comprehensive | User feedback, issues |#### Technical Metrics
 
 | Metric | Target | Measurement |
 |--------|--------|-------------|
@@ -540,5 +543,5 @@ Key concepts and terminology used in this domain:
 
 ---
 
-**Last Updated**: 2025-11-17
-**Maintained By**: {{MAINTAINER}}
+**Last Updated**: 2025-11-22
+**Maintained By**: MUSUBI Contributors

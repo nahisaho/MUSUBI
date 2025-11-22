@@ -8,10 +8,9 @@
 
 ## Architecture Pattern
 
-**Primary Pattern**: {{ARCHITECTURE_PATTERN}}
+**Primary Pattern**: CLI Tool (Single Package)
 
-> [Description of the architecture pattern used in this project]
-> Examples: Monorepo with Library-First, Microservices, Modular Monolith, Serverless
+> MUSUBI is a command-line tool distributed as a single npm package. It provides template generation and initialization functionality for 7 AI coding platforms. The architecture follows a simple, focused approach with a CLI entry point that copies pre-defined templates to user projects.
 
 ---
 
@@ -21,24 +20,38 @@
 
 ```
 musubi/
-├── lib/                  # Reusable libraries (Article I: Library-First)
-├── app/                  # Application code (Next.js, etc.)
-├── api/                  # API routes/controllers
-├── components/           # UI components
-├── services/             # Business logic services
-├── tests/                # Test suites
+├── bin/                  # CLI entry points (musubi.js, musubi-init.js)
+├── src/                  # Source code
+│   ├── agents/           # Agent registry
+│   │   └── registry.js   # Multi-agent platform registry
+│   └── templates/        # Template files for 7 platforms
+│       ├── agents/       # Platform-specific agent configs
+│       │   ├── claude-code/      # Claude Code Skills API
+│       │   ├── github-copilot/   # GitHub Copilot AGENTS.md
+│       │   ├── cursor/           # Cursor AGENTS.md
+│       │   ├── gemini-cli/       # Gemini CLI TOML format
+│       │   ├── windsurf/         # Windsurf AGENTS.md
+│       │   ├── codex/            # Codex AGENTS.md
+│       │   ├── qwen-code/        # Qwen Code AGENTS.md
+│       │   └── shared/           # Shared templates
+│       └── shared/       # Common templates
+│           ├── constitution/     # 9 Constitutional Articles
+│           ├── documents/        # SDD document templates
+│           └── steering/         # Steering templates
+├── tests/                # Test suites (Jest)
 ├── docs/                 # Documentation
-├── storage/              # SDD artifacts
-│   ├── specs/            # Requirements, design, tasks
-│   ├── changes/          # Delta specifications (brownfield)
-│   └── validation/       # Validation reports
+│   ├── Qiita/            # Qiita articles
+│   └── analysis/         # Framework analysis
 ├── steering/             # Project memory (this directory)
 │   ├── structure.md      # This file
 │   ├── tech.md           # Technology stack
 │   ├── product.md        # Product context
 │   └── rules/            # Constitutional governance
-├── templates/            # Document templates
-└── [Other directories]
+└── References/           # Reference implementations
+    ├── ag2/              # AutoGen framework
+    ├── OpenSpec/         # OpenSpec framework
+    ├── spec-kit/         # spec-kit framework
+    └── musuhi/           # MUSUHI (predecessor)
 ```
 
 ---
@@ -401,5 +414,5 @@ This structure enforces:
 
 ---
 
-**Last Updated**: 2025-11-17
-**Maintained By**: {{MAINTAINER}}
+**Last Updated**: 2025-11-22
+**Maintained By**: MUSUBI Contributors
