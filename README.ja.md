@@ -129,6 +129,15 @@ musubi-tasks list --priority P0         # 重要タスクのみ表示
 musubi-tasks update 001 "In Progress"   # タスクステータス更新
 musubi-tasks validate                   # タスク完全性を検証
 musubi-tasks graph                      # 依存関係グラフ表示
+
+# エンドツーエンドトレーサビリティ（v0.8.5）
+musubi-trace matrix                             # トレーサビリティマトリクス生成
+musubi-trace matrix --format markdown > trace.md # Markdownにエクスポート
+musubi-trace coverage                           # カバレッジ統計計算
+musubi-trace coverage --min-coverage 100        # 100%カバレッジ要求
+musubi-trace gaps                               # 孤立した要件/コード検出
+musubi-trace requirement REQ-AUTH-001           # 特定要件をトレース
+musubi-trace validate                           # 100%トレーサビリティ検証（第5条）
 ```
 
 ### プロジェクトタイプ

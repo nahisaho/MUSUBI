@@ -133,6 +133,15 @@ musubi-tasks list --priority P0                 # List critical tasks
 musubi-tasks update 001 "In Progress"           # Update task status
 musubi-tasks validate                           # Validate task completeness
 musubi-tasks graph                              # Show dependency graph
+
+# End-to-end traceability (v0.8.5)
+musubi-trace matrix                             # Generate traceability matrix
+musubi-trace matrix --format markdown > trace.md # Export to markdown
+musubi-trace coverage                           # Calculate coverage statistics
+musubi-trace coverage --min-coverage 100        # Require 100% coverage
+musubi-trace gaps                               # Detect orphaned requirements/code
+musubi-trace requirement REQ-AUTH-001           # Trace specific requirement
+musubi-trace validate                           # Validate 100% traceability (Article V)
 ```
 
 ### Project Types

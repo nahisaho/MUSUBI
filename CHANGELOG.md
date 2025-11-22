@@ -5,6 +5,72 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.5] - 2025-11-23
+
+### Added
+- **Traceability System** - End-to-end requirement traceability from requirements to tests
+  - `musubi-trace matrix` - Generate full traceability matrix
+    - Multiple output formats: table (console), markdown (docs), JSON (machine), HTML (web)
+    - Shows Requirements → Design → Tasks → Code → Tests chain
+    - Visual coverage indicators (✓/✗) for each stage
+  - `musubi-trace coverage` - Calculate coverage statistics
+    - Design coverage percentage (requirements → design)
+    - Tasks coverage percentage (requirements → tasks)
+    - Code coverage percentage (requirements → code)
+    - Tests coverage percentage (requirements → tests)
+    - Overall coverage score (average of all stages)
+    - Progress bar visualization with color coding
+  - `musubi-trace gaps` - Detect traceability gaps
+    - Orphaned requirements (no design or tasks)
+    - Orphaned design (no requirement references)
+    - Orphaned tasks (no requirement references)
+    - Untested code (no test coverage)
+    - Missing tests (requirements without tests)
+    - Color-coded output (red=critical, yellow=warning, green=pass)
+  - `musubi-trace requirement <id>` - Trace specific requirement
+    - Shows complete chain: REQ → Design → Tasks → Code → Tests
+    - Identifies gaps in specific requirement coverage
+  - `musubi-trace validate` - Validate 100% traceability (Article V)
+    - Enforces Constitutional requirement for complete traceability
+    - Exit code 0 for pass, 1 for fail (CI/CD integration)
+    - Configurable minimum coverage threshold
+  - Traceability features:
+    - REQ-XXX-NNN pattern matching in all artifacts
+    - Requirement extraction from docs/requirements/*.md
+    - Design reference extraction (C4 diagrams, ADRs)
+    - Task reference extraction from docs/tasks/*.md
+    - Code reference extraction from src/**/*.{js,ts,py,java,go,rs}
+    - Test reference extraction from tests/**/*.{test,spec}.{js,ts,py,java,go,rs}
+    - Dependency graph building (Requirements → Tests)
+    - Coverage calculation per stage
+    - Multi-format matrix output
+
+### Technical Details
+- **TraceabilityAnalyzer**: Core analysis engine (src/analyzers/traceability.js)
+  - `generateMatrix(options)` - Generate full traceability matrix
+  - `calculateCoverage(options)` - Calculate coverage statistics
+  - `detectGaps(options)` - Detect orphaned artifacts and untested code
+  - `traceRequirement(id, options)` - Trace specific requirement through all stages
+  - `validate(options)` - Validate 100% coverage (Article V compliance)
+  - `formatMatrix(matrix, format)` - Format matrix (table|markdown|json|html)
+  - `findRequirements(path)` - Parse REQ-XXX-NNN from requirements files
+  - `findDesign(path)` - Parse design documents (C4, ADRs)
+  - `findTasks(path)` - Parse task breakdown files
+  - `findCode(path)` - Parse source code for REQ references
+  - `findTests(path)` - Parse test files for REQ references
+  - `linksToRequirement(doc, reqId)` - Check if document references requirement
+  - `testCoversCode(test, code)` - Check if test covers code
+  - `calculateMatrixSummary(matrix)` - Calculate coverage statistics
+- 26 new tests (185 total passing)
+  - Matrix generation (basic, full coverage, empty workspace)
+  - Coverage calculation (100%, partial, 0%)
+  - Gap detection (5 gap types)
+  - Requirement tracing (full chain, missing stages, non-existent)
+  - Validation (pass/fail scenarios)
+  - Format conversion (table, markdown, json, html)
+  - File parsing (requirements, design, tasks, code, tests)
+- Article V compliance: Enforces 100% traceability coverage
+
 ## [0.8.4] - 2025-11-22
 
 ### Added
