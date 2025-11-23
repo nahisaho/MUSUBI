@@ -555,7 +555,11 @@ class TraceabilityAnalyzer {
 
     for (const file of files) {
       const content = await fs.readFile(file, 'utf-8');
-      const reqMatches = content.matchAll(/### (REQ-[A-Z0-9]+-\d{3}): (.+)/g);
+      // Support multiple requirement ID formats:
+      // - REQ-ABC-001 (original)
+      // - REQ-ABC-F-001 (with category: F, NF, etc.)
+      // - REQ-ABCF-001 (category without hyphen)
+      const reqMatches = content.matchAll(/### (REQ-[A-Z0-9]+-(?:[A-Z]+-)?(?:[A-Z0-9]+-)?\d{3}): (.+)/g);
 
       for (const match of reqMatches) {
         requirements.push({

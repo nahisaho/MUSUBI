@@ -24,7 +24,7 @@ const program = new Command();
 program
   .name('musubi-requirements')
   .description('EARS Requirements Generator - Create unambiguous specifications')
-  .version('0.9.6');
+  .version('0.9.7');
 
 // Initialize requirements document
 program

@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.7] - 2025-11-23
+
+### Fixed
+
+- **Requirement ID Pattern**: Enhanced traceability analyzer to support flexible requirement ID formats
+  - Now supports: `REQ-ABC-001` (original), `REQ-ABC-F-001` (with category), `REQ-ABCF-001` (category without hyphen)
+  - Regex pattern updated: `/### (REQ-[A-Z0-9]+-(?:[A-Z]+-)?(?:[A-Z0-9]+-)?\d{3}): (.+)/g`
+  - Fixes issue where `REQ-TODO-F-001` and `REQ-TODO-NF-001` were not detected
+  - Tested with Todo web app project (10 requirements detected correctly)
+
 ## [0.9.6] - 2025-11-23
 
 ### Fixed
