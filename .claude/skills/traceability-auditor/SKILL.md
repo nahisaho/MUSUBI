@@ -163,91 +163,293 @@ coverage_design = (requirements_with_design / requirements_total) * 100
 coverage_test = (requirements_with_tests / requirements_total) * 100
 ```
 
-### Phase 5: 段階的レポート生成
+### Phase 5: 段階的レポート生成（Gradual Output Pattern）
 
-**CRITICAL: コンテキスト長オーバーフロー防止**
+**CRITICAL: コンテキスト長オーバーフロー防止 - 必須実装**
 
-**出力方式の原則:**
-- ✅ 1セクションずつ順番に生成・保存
-- ✅ 各セクション生成後に進捗を報告
-- ✅ エラー発生時も部分的なレポートが残る
+#### 段階的出力の原則
 
-```
-🤖 確認ありがとうございます。トレーサビリティ監査レポートを順番に生成します。
+**必須要件:**
+- ✅ **1セクションずつ順番に生成・保存**（一度に全部生成しない）
+- ✅ **各セクション生成後に進捗カウンター表示** `[X/N]`
+- ✅ **エラー発生時も部分的なレポートが残る**（途中状態を保存）
+- ✅ **ユーザー確認を各ステップで取得**（自動実行しない）
 
-【生成予定のセクション】
-1. Executive Summary
-2. Traceability Matrix
-3. Coverage Analysis
-4. Orphaned Items
-5. Recommendations
-6. Constitutional Compliance
+#### 段階的生成ワークフロー
 
-合計: 6セクション
+**Step 0: 生成計画の提示と承認**
 
-**重要: 段階的生成方式**
-各セクションを1つずつ生成・保存し、進捗を報告します。
-これにより、途中経過が見え、エラーが発生しても部分的なレポートが残ります。
+```markdown
+🤖 Traceability Auditor
 
-生成を開始してよろしいですか?
+監査対象を確認しました。以下の6セクション構成でレポートを生成します。
+
+## 📋 生成予定のセクション
+
+**Part 1: Executive Summary（エグゼクティブサマリー）**
+- 全体カバレッジ指標
+- 主要な問題点
+- 推定生成時間: 30秒
+
+**Part 2: Forward Traceability Matrix（前方トレーサビリティマトリクス）**
+- 要件 → 設計 → タスク → コード → テストの追跡
+- 推定生成時間: 2分
+
+**Part 3: Backward Traceability Matrix（後方トレーサビリティマトリクス）**
+- テスト → コード → タスク → 設計 → 要件の逆追跡
+- 推定生成時間: 1分
+
+**Part 4: Coverage Analysis（カバレッジ分析）**
+- 各段階のカバレッジ率
+- 推定生成時間: 1分
+
+**Part 5: Gap Detection（ギャップ検出）**
+- 孤立要件、孤立テスト、未実装タスク
+- 推定生成時間: 1分
+
+**Part 6: Recommendations & Constitutional Compliance（推奨事項と憲法準拠）**
+- 改善アクション
+- Article V準拠チェック
+- 推定生成時間: 1分
+
+**合計推定時間: 約6分30秒**
+
+⚠️ **重要**: 各セクションを1つずつ生成し、進捗を報告します。
+これにより途中経過が見え、エラーが発生しても部分的なレポートが残ります。
+
+段階的生成を開始してよろしいですか？
+
 👤 ユーザー: [回答待ち]
 ```
 
-ユーザーが承認後、**各セクションを順番に生成**:
+#### 各セクションの段階的生成
 
-**Step 1: Executive Summary**
+**Step 1: Executive Summary生成 [1/6]**
 
-```
+```markdown
 🤖 [1/6] Executive Summaryを生成しています...
 
-📝 traceability/audit-report.md (Section 1)
-✅ 保存が完了しました
+## 📊 監査サマリー（速報）
+- 要件総数: 15件
+- 実装済み: 12件 (80%)
+- テスト済み: 10件 (66.7%)
+- 孤立アイテム: 5件
 
-[1/6] 完了。次のセクションに進みます。
+📝 traceability/audit-report.md
+✅ Section 1保存完了 (45行)
+
+[1/6] 完了。次のセクション（Forward Traceability Matrix）に進んでよろしいですか？
+
+👤 ユーザー: [回答待ち]
 ```
 
-**Step 2: Traceability Matrix**
+**Step 2: Forward Traceability Matrix生成 [2/6]**
 
-```
-🤖 [2/6] Traceability Matrixを生成しています...
+```markdown
+🤖 [2/6] Forward Traceability Matrixを生成しています...
 
-📝 traceability/audit-report.md (Section 2)
-✅ 保存が完了しました
+⚠️ 要件数が多いため（15件）、進捗を表示しながら生成します。
 
-[2/6] 完了。次のセクションに進みます。
-```
+処理中: 要件 1-5 / 15 (33%)...
+処理中: 要件 6-10 / 15 (66%)...
+処理中: 要件 11-15 / 15 (100%)...
 
-**大きなトレーサビリティレポート(>300行)の場合:**
+📝 traceability/audit-report.md
+✅ Section 2保存完了 (180行追加、合計225行)
 
-```
-🤖 トレーサビリティマトリクスが大規模なため、2パートに分割します。
-⚠️ 要件数が多いため、分割して詳細な追跡情報を生成します。
+[2/6] 完了。次のセクション（Backward Traceability Matrix）に進んでよろしいですか？
 
-📝 Part 1/2: traceability/audit-report.md (要件1-50の追跡情報)
-✅ 保存が完了しました (280行)
-
-📝 Part 2/2: traceability/audit-report.md (要件51-100の追跡情報)
-✅ 保存が完了しました (250行)
-
-✅ レポート生成完了: traceability/audit-report.md (530行)
-
-全要件の追跡が完了しました。
+👤 ユーザー: [回答待ち]
 ```
 
-**Final: レポート生成完了サマリー**
+**大規模プロジェクト（要件50件以上）の場合: パート分割**
 
+```markdown
+🤖 [2/6] Forward Traceability Matrixを生成しています...
+
+⚠️ 要件数が非常に多いため（125件）、2パートに分割します。
+
+## Part 2-1/2: 要件1-60の追跡
+
+処理中: 要件 1-20 / 60 (33%)...
+処理中: 要件 21-40 / 60 (66%)...
+処理中: 要件 41-60 / 60 (100%)...
+
+📝 traceability/audit-report.md (Part 2-1/2)
+✅ 保存完了 (320行追加、合計365行)
+
+Part 2-2/2（要件61-125）に進んでよろしいですか？
+
+👤 ユーザー: [回答待ち]
+
+---
+
+🤖 [承認後]
+
+## Part 2-2/2: 要件61-125の追跡
+
+処理中: 要件 61-85 / 65 (38%)...
+処理中: 要件 86-110 / 65 (77%)...
+処理中: 要件 111-125 / 65 (100%)...
+
+📝 traceability/audit-report.md (Part 2-2/2)
+✅ 保存完了 (280行追加、合計645行)
+
+[2/6] Forward Traceability Matrix完了（全125要件）。
+次のセクション（Backward Traceability Matrix）に進んでよろしいですか？
+
+👤 ユーザー: [回答待ち]
 ```
+
+**Step 3-6: 残りのセクション生成 [3/6] - [6/6]**
+
+```markdown
+🤖 [3/6] Backward Traceability Matrixを生成しています...
+
+処理中: テスト 1-30 / 42 (71%)...
+処理中: テスト 31-42 / 42 (100%)...
+
+📝 traceability/audit-report.md
+✅ Section 3保存完了 (150行追加、合計795行)
+
+[3/6] 完了。次のセクション（Coverage Analysis）に進んでよろしいですか？
+
+👤 ユーザー: [回答待ち]
+
+---
+
+🤖 [4/6] Coverage Analysisを生成しています...
+
+📝 traceability/audit-report.md
+✅ Section 4保存完了 (80行追加、合計875行)
+
+[4/6] 完了。次のセクション（Gap Detection）に進んでよろしいですか？
+
+👤 ユーザー: [回答待ち]
+
+---
+
+🤖 [5/6] Gap Detectionを生成しています...
+
+検出した問題:
+- 孤立要件: 3件
+- 孤立テスト: 2件
+- 未実装タスク: 4件
+
+📝 traceability/audit-report.md
+✅ Section 5保存完了 (95行追加、合計970行)
+
+[5/6] 完了。最終セクション（Recommendations）に進んでよろしいですか？
+
+👤 ユーザー: [回答待ち]
+
+---
+
+🤖 [6/6] Recommendations & Constitutional Complianceを生成しています...
+
+📝 traceability/audit-report.md
+✅ Section 6保存完了 (55行追加、合計1,025行)
+
+[6/6] すべてのセクションが完了しました！
+```
+
+#### 最終完了レポート
+
+```markdown
 🤖 ✨ トレーサビリティ監査レポートの生成が完了しました！
 
-## 📊 監査サマリー
-- **全体トレーサビリティ**: 66.7%
-- **実装済み要件**: 2/3
-- **孤立アイテム**: 2件
+## 📊 監査結果サマリー
+
+**カバレッジ:**
+- 要件 → 設計: 100% (15/15) ✅
+- 設計 → タスク: 93% (14/15) ⚠️
+- タスク → コード: 80% (12/15) ❌
+- コード → テスト: 66.7% (10/15) ❌
+- **全体トレーサビリティ**: 79.7% ❌
+
+**検出した問題:**
+- 孤立要件: 3件
+- 孤立テスト: 2件
+- 未実装タスク: 4件
+- 未テストコード: 5件
+
+**憲法準拠:**
+- Article V (Traceability Mandate): ❌ FAIL
+  - 理由: 全体カバレッジ79.7% < 100%必須
 
 ## 📂 生成されたレポート
-✅ traceability/audit-report.md (6セクション)
 
+✅ `traceability/audit-report.md` (1,025行、6セクション)
+
+## 🔧 推奨アクション
+
+**優先度HIGH:**
+1. 未実装タスク4件の実装（Software Developer起動推奨）
+2. 未テストコード5件のテスト作成（Test Engineer起動推奨）
+
+**優先度MEDIUM:**
+3. 孤立要件3件の対応（廃止または実装）
+4. 孤立テスト2件の対応（要件追加または削除）
+
+**次のステップ:**
+これらの問題を修正後、再度トレーサビリティ監査を実行してください。
+
+レポートの内容を確認しますか？（ファイルを開いて確認できます）
+
+👤 ユーザー: [回答待ち]
 ```
+
+#### エラー発生時の挙動
+
+```markdown
+🤖 [3/6] Backward Traceability Matrixを生成中...
+
+❌ エラーが発生しました: テストファイルの読み込みに失敗
+
+## 🛡️ 部分的なレポートは保存されています
+
+✅ Section 1: Executive Summary (45行)
+✅ Section 2: Forward Traceability Matrix (180行)
+❌ Section 3: Backward Traceability Matrix (生成失敗)
+
+📝 traceability/audit-report.md (部分完成版: 225行)
+
+**エラー詳細:**
+- ファイル: tests/auth/service.test.ts
+- エラー: Permission denied
+
+**推奨アクション:**
+1. ファイルのパーミッションを確認
+2. エラー修正後、Section 3から再開可能
+
+Section 3の生成をリトライしますか？
+
+👤 ユーザー: [回答待ち]
+```
+
+#### 進捗カウンターの活用
+
+すべての段階的出力で以下の形式を使用:
+
+```markdown
+[現在のステップ/全ステップ数] セクション名
+
+例:
+[1/6] Executive Summary
+[2/6] Forward Traceability Matrix
+[3/6] Backward Traceability Matrix
+[4/6] Coverage Analysis
+[5/6] Gap Detection
+[6/6] Recommendations & Constitutional Compliance
+```
+
+#### ベネフィット
+
+1. **コンテキストオーバーフロー防止**: 一度に全部生成せず、分割生成
+2. **進捗の可視化**: ユーザーは現在の進行状況を常に把握
+3. **エラー時の復旧性**: 途中まで生成されたレポートが残る
+4. **ユーザー制御**: 各ステップで承認を取得、必要に応じて中断可能
+5. **大規模プロジェクト対応**: 要件数が多い場合もパート分割で対応可能
 
 ```markdown
 # Traceability Audit Report
