@@ -163,6 +163,16 @@ musubi-gaps coverage --min-coverage 100         # Require 100% coverage
 musubi-gaps detect --format markdown > gaps.md  # Export gap report
 ```
 
+## Documentation
+
+Comprehensive guides are available in `docs/guides/`:
+
+- **[Brownfield Tutorial](docs/guides/brownfield-tutorial.md)** - Step-by-step guide for managing changes in existing projects
+- **[Delta Specification Guide](docs/guides/delta-spec-guide.md)** - Format reference for change tracking
+- **[Change Management Workflow](docs/guides/change-management-workflow.md)** - End-to-end workflow documentation
+- **[Traceability Matrix Guide](docs/guides/traceability-matrix-guide.md)** - Traceability system usage
+- **[Video Tutorial Plan](docs/guides/video-tutorial-plan.md)** - Video content script
+
 ### Project Types
 
 During initialization, MUSUBI asks you to select a **Project Type**. This determines the workflow and features available:

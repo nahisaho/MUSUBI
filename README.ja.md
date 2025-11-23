@@ -208,6 +208,16 @@ musubi-gaps detect --format markdown > gaps.md  # ギャップレポートをエ
   - 成熟度が異なるマルチコンポーネントシステム
 - **有効化される機能**:
   - すべてのGreenfield + Brownfield機能
+
+## ドキュメント
+
+包括的なガイドは `docs/guides/` で利用可能です:
+
+- **[ブラウンフィールドチュートリアル](docs/guides/brownfield-tutorial.md)** - 既存プロジェクトでの変更管理ステップバイステップガイド
+- **[差分仕様ガイド](docs/guides/delta-spec-guide.md)** - 変更追跡のフォーマットリファレンス
+- **[変更管理ワークフロー](docs/guides/change-management-workflow.md)** - エンドツーエンドワークフロードキュメント
+- **[トレーサビリティマトリクスガイド](docs/guides/traceability-matrix-guide.md)** - トレーサビリティシステム使用方法
+- **[ビデオチュートリアル計画](docs/guides/video-tutorial-plan.md)** - ビデオコンテンツスクリプト
   - コンポーネントごとにワークフローを選択する柔軟性
   - 同一プロジェクト内で差分仕様とグリーンフィールド仕様を混在
 - **メリット**:
