@@ -47,6 +47,35 @@ MUSUBIは7つのAIコーディングエージェントに対応し、それぞ�
 - Gemini CLIはTOML形式 + GEMINI.md統合を使用
 - その他のエージェントはMarkdown形式 + AGENTS.mdを使用
 
+---
+
+## 憲法ガバナンス
+
+MUSUBIは品質保証のために9つの憲法条項を強制します:
+
+```bash
+# 憲法準拠性の検証
+musubi-validate all
+musubi-validate constitution
+musubi-validate gates
+musubi-validate complexity
+```
+
+**9つの条項**:
+1. **Library-Firstの原則** - すべての機能は独立したライブラリとして開始
+2. **CLIインターフェース義務** - すべてのライブラリがCLI機能を公開
+3. **Test-Firstの要請** - コードの前にテストを記述（80%カバレッジ必須）
+4. **EARS要件フォーマット** - 曖昧さのない要件のための5つのEARSパターン
+5. **トレーサビリティ義務** - 100%のトレーサビリティ: 要件 ↔ 設計 ↔ コード ↔ テスト
+6. **プロジェクトメモリ** - Steeringシステムがプロジェクトコンテキストを維持
+7. **シンプリシティゲート** - 初期は最大3サブプロジェクト（フェーズ-1ゲート）
+8. **抽象化防止ゲート** - フレームワークAPIを直接使用（フェーズ-1ゲート）
+9. **統合ファーストテスト** - 統合テストは実サービスを使用（モック禁止）
+
+**フェーズ-1ゲート**: 条項VII & VIIIの実装前検証チェックポイント。詳細:
+- [steering/rules/constitution.md](steering/rules/constitution.md) - 完全な憲法テキスト
+- [steering/rules/phase-gates.md](steering/rules/phase-gates.md) - 承認プロセスとアクティブゲート
+
 ## クイックスタート
 
 ### npx経由でのインストール

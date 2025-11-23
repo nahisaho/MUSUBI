@@ -181,13 +181,28 @@ class ConstitutionValidator {
 
     // Check for test coverage configuration
     const packageJsonPath = path.join(this.projectRoot, 'package.json');
+    const jestConfigPath = path.join(this.projectRoot, 'jest.config.js');
+    
+    let hasCoverageThreshold = false;
+    
     if (await fs.pathExists(packageJsonPath)) {
       const packageJson = await fs.readJson(packageJsonPath);
       if (packageJson.jest && packageJson.jest.coverageThreshold) {
-        result.warnings.push('Article III: Test coverage thresholds configured');
-      } else {
-        result.warnings.push('Article III: No coverage thresholds - consider adding 80% minimum');
+        hasCoverageThreshold = true;
       }
+    }
+    
+    if (!hasCoverageThreshold && await fs.pathExists(jestConfigPath)) {
+      const jestConfig = await fs.readFile(jestConfigPath, 'utf-8');
+      if (jestConfig.includes('coverageThreshold')) {
+        hasCoverageThreshold = true;
+      }
+    }
+    
+    if (hasCoverageThreshold) {
+      result.warnings.push('Article III: Test coverage thresholds configured (80% minimum)');
+    } else {
+      result.warnings.push('Article III: No coverage thresholds - consider adding 80% minimum');
     }
 
     result.summary = testFileCount > 0 
@@ -361,13 +376,31 @@ class ConstitutionValidator {
     const projectCount = packageJsonFiles.length;
 
     if (projectCount > 3) {
-      result.passed = false;
-      result.violations.push(`Article VII: ${projectCount} sub-projects detected (limit: 3) - Phase -1 Gate approval required`);
+      // Check for Phase -1 Gate approval
+      const phaseGatesPath = path.join(this.steeringPath, 'rules', 'phase-gates.md');
+      let gateApproved = false;
+
+      if (await fs.pathExists(phaseGatesPath)) {
+        const content = await fs.readFile(phaseGatesPath, 'utf-8');
+        // Check for Gate #001 approval (Simplicity Gate)
+        if (content.includes('Gate #001') && content.includes('APPROVED')) {
+          gateApproved = true;
+          result.warnings.push(`Article VII: ${projectCount} sub-projects detected - Phase -1 Gate #001 APPROVED`);
+        }
+      }
+
+      if (!gateApproved) {
+        result.passed = false;
+        result.violations.push(`Article VII: ${projectCount} sub-projects detected (limit: 3) - Phase -1 Gate approval required`);
+      }
     } else {
       result.warnings.push(`Article VII: ${projectCount} sub-project(s) detected - within Simplicity Gate limit`);
     }
 
-    result.summary = `Article VII: ${projectCount} sub-project(s) ${projectCount > 3 ? '(EXCEEDS LIMIT)' : '(within limit)'}`;
+    result.summary = projectCount > 3 
+      ? (result.passed ? `Article VII: ${projectCount} sub-projects (Gate APPROVED)` : `Article VII: ${projectCount} sub-project(s) (EXCEEDS LIMIT)`)
+      : `Article VII: ${projectCount} sub-project(s) (within limit)`;
+    
     return result;
   }
 
@@ -394,17 +427,34 @@ class ConstitutionValidator {
     ];
 
     let abstractionCount = 0;
+    const abstractionFiles = [];
     for (const pattern of abstractionPatterns) {
       const files = await glob(pattern, { cwd: this.projectRoot });
       abstractionCount += files.length;
+      abstractionFiles.push(...files);
     }
 
     if (abstractionCount > 0) {
-      result.warnings.push(`Article VIII: ${abstractionCount} potential abstraction layers detected - verify necessity`);
+      // Check for Phase -1 Gate approval
+      const phaseGatesPath = path.join(this.steeringPath, 'rules', 'phase-gates.md');
+      let gateApproved = false;
+
+      if (await fs.pathExists(phaseGatesPath)) {
+        const content = await fs.readFile(phaseGatesPath, 'utf-8');
+        // Check for Gate #002 approval (Anti-Abstraction Gate)
+        if (content.includes('Gate #002') && content.includes('APPROVED')) {
+          gateApproved = true;
+          result.warnings.push(`Article VIII: ${abstractionCount} abstraction layers - Phase -1 Gate #002 APPROVED`);
+        }
+      }
+
+      if (!gateApproved) {
+        result.warnings.push(`Article VIII: ${abstractionCount} potential abstraction layers detected - verify necessity`);
+      }
     }
 
     result.summary = abstractionCount > 0
-      ? `Article VIII: ${abstractionCount} potential abstractions - manual review needed`
+      ? `Article VIII: ${abstractionCount} potential abstractions - ${result.warnings.some(w => w.includes('APPROVED')) ? 'Gate APPROVED' : 'manual review needed'}`
       : 'Article VIII: No obvious abstraction layers detected';
     
     return result;

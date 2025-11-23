@@ -49,6 +49,35 @@ MUSUBI supports 7 AI coding agents, each with tailored configurations:
 - **All 7 platforms now support 25 agents** via Skills API (Claude Code) or AGENTS.md (others)
 - AGENTS.md: OpenAI specification, officially supported by GitHub Copilot & Cursor
 - Gemini CLI uses TOML format + GEMINI.md integration
+
+---
+
+## Constitutional Governance
+
+MUSUBI enforces 9 Constitutional Articles for quality assurance:
+
+```bash
+# Validate constitutional compliance
+musubi-validate all
+musubi-validate constitution
+musubi-validate gates
+musubi-validate complexity
+```
+
+**9 Articles**:
+1. **Library-First Principle** - All features begin as independent libraries
+2. **CLI Interface Mandate** - All libraries expose CLI functionality
+3. **Test-First Imperative** - Tests written before code (80% coverage required)
+4. **EARS Requirements Format** - 5 EARS patterns for unambiguous requirements
+5. **Traceability Mandate** - 100% traceability: Requirements ↔ Design ↔ Code ↔ Tests
+6. **Project Memory** - Steering system maintains project context
+7. **Simplicity Gate** - Maximum 3 sub-projects initially (Phase -1 Gate)
+8. **Anti-Abstraction Gate** - Use framework APIs directly (Phase -1 Gate)
+9. **Integration-First Testing** - Integration tests use real services (no mocks)
+
+**Phase -1 Gates**: Pre-implementation validation checkpoints for Articles VII & VIII. See:
+- [steering/rules/constitution.md](steering/rules/constitution.md) - Full constitutional text
+- [steering/rules/phase-gates.md](steering/rules/phase-gates.md) - Approval process and active gates
 - All other agents use Markdown format + AGENTS.md
 
 ## Quick Start

@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2025-11-23
+
+### Added - Constitutional Governance System (Phase 1 P0)
+
+- **Phase -1 Gates Process**: Added `steering/rules/phase-gates.md` with approval process
+  - Gate #001: Simplicity Gate approval for References directory
+  - Gate #002: Anti-Abstraction approval for CLI wrappers
+  - Documented approval template and workflow
+- **Test Coverage Enforcement**: Added Jest configuration with 80% coverage thresholds
+  - Enforces Article III: Test-First Imperative
+  - Global thresholds: 80% branches, functions, lines, statements
+- **Constitutional Validation**: Enhanced `musubi-validate` CLI (already implemented in v0.7.0)
+  - Validates all 9 Constitutional Articles
+  - Phase -1 Gates validation
+  - Complexity limits enforcement
+  - Multiple output formats (console, JSON, Markdown)
+
+### Status
+
+- **Phase 1 Core Framework**: Constitutional Governance System complete
+- **Phase 2 Change Management**: 100% complete (v0.8.5-v0.8.8)
+- **Next Priority**: Verify existing CLI commands (requirements, design, tasks)
+
+---
+
 ## [0.8.8] - 2025-11-23
 
 ### Added
