@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] - 2025-11-23
+
+### Changed - CLI Command Enhancement
+
+- **Version Synchronization**: Synchronized all CLI command versions to 0.9.1
+  - `musubi-requirements`: 0.8.0 → 0.9.1
+  - `musubi-design`: 0.8.2 → 0.9.1
+  - `musubi-tasks`: 0.8.4 → 0.9.1
+- **Constitutional Compliance**: All CLI commands now reference Constitutional Articles
+  - Requirements CLI enforces Article IV: EARS Format Imperative
+  - Design CLI enforces Article V: C4 Model Imperative
+  - Tasks CLI enforces Article VI: Task Breakdown Imperative
+
+### Fixed
+- Resolved version drift across CLI commands
+- Improved consistency in command structure
+
+---
+
 ## [0.9.0] - 2025-11-23
 
 ### Added - Constitutional Governance System (Phase 1 P0)
