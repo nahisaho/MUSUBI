@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.6] - 2025-11-23
+
+### Fixed
+
+- **Bidirectional Traceability**: Fixed `musubi-trace bidirectional` command
+  - Changed method call from `generateBidirectionalTrace()` to `analyzeBidirectional()`
+  - Updated output formatting to match actual method return structure (`completeness` and `orphaned`)
+  - Fixed forward/backward traceability percentage reporting
+  - Added detailed orphaned items breakdown (requirements, design, tasks, code, tests)
+
 ## [0.9.5] - 2025-11-23
 
 ### Improved - Orchestrator Enhancement

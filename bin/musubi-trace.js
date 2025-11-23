@@ -23,7 +23,7 @@ const program = new Command();
 program
   .name('musubi-trace')
   .description('MUSUBI Traceability System - End-to-end requirement traceability')
-  .version('0.9.5');
+  .version('0.9.6');
 
 // Generate traceability matrix
 program
@@ -376,20 +376,22 @@ program
       console.log(chalk.bold('\n🔄 Bidirectional Traceability Analysis\n'));
       
       const analyzer = new TraceabilityAnalyzer(process.cwd());
-      const result = await analyzer.generateBidirectionalTrace(options);
+      const result = await analyzer.analyzeBidirectional(options);
       
       console.log(chalk.bold('Forward Traceability (Requirements → Tests):'));
-      console.log(chalk.dim(`  Complete: ${result.summary.completeRequirements}/${result.summary.totalRequirements} (${Math.round((result.summary.completeRequirements/result.summary.totalRequirements)*100)}%)`));
+      console.log(chalk.dim(`  Complete: ${result.completeness.forwardComplete}/${result.completeness.forwardTotal} (${result.completeness.forwardPercentage}%)`));
       console.log();
       
-      console.log(chalk.bold('Traceability Score:'));
-      console.log(chalk.dim(`  Overall: ${result.summary.traceabilityScore}%`));
+      console.log(chalk.bold('Backward Traceability (Tests → Requirements):'));
+      console.log(chalk.dim(`  Complete: ${result.completeness.backwardComplete}/${result.completeness.backwardTotal} (${result.completeness.backwardPercentage}%)`));
       console.log();
       
       console.log(chalk.bold('Orphaned Items:'));
-      console.log(chalk.dim(`  Incomplete Requirements: ${result.summary.incompleteRequirements}`));
-      console.log(chalk.dim(`  Orphaned Code: ${result.summary.orphanedCode}`));
-      console.log(chalk.dim(`  Orphaned Tests: ${result.summary.orphanedTests}`));
+      console.log(chalk.dim(`  Requirements: ${result.orphaned.requirements.length}`));
+      console.log(chalk.dim(`  Design: ${result.orphaned.design.length}`));
+      console.log(chalk.dim(`  Tasks: ${result.orphaned.tasks.length}`));
+      console.log(chalk.dim(`  Code: ${result.orphaned.code.length}`));
+      console.log(chalk.dim(`  Tests: ${result.orphaned.tests.length}`));
       console.log();
       
       if (options.format === 'json') {
@@ -403,7 +405,7 @@ program
         }
       }
       
-      const allComplete = result.summary.traceabilityScore === 100;
+      const allComplete = result.completeness.forwardPercentage === 100 && result.completeness.backwardPercentage === 100;
       
       if (allComplete) {
         console.log(chalk.green('✓ 100% bidirectional traceability achieved!\n'));
