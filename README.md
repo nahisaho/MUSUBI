@@ -20,6 +20,7 @@ MUSUBI is a comprehensive SDD (Specification Driven Development) framework that 
 - 📝 **EARS Requirements Generator** - Create unambiguous requirements with 5 EARS patterns (v0.8.0)
 - 🏗️ **Design Document Generator** - Create C4 models and ADRs with traceability (v0.8.2)
 - 🔄 **Change Management System** - Delta specifications for brownfield projects (v0.8.6)
+- 🔍 **Gap Detection System** - Identify orphaned requirements and untested code (v0.8.7)
 - 🧭 **Auto-Updating Project Memory** - Steering system maintains architecture, tech stack, and product context
 - 🚀 **Automatic Onboarding** - `musubi-onboard` analyzes existing projects and generates steering docs (2-5 minutes)
 - 🔄 **Auto-Sync** - `musubi-sync` detects codebase changes and keeps steering docs current
@@ -151,6 +152,15 @@ musubi-change apply CHANGE-001                  # Apply changes to codebase
 musubi-change archive CHANGE-001                # Archive to specs/
 musubi-change list --status pending             # List pending changes
 musubi-change list --format json                # List in JSON format
+
+# Gap detection and coverage validation (v0.8.7)
+musubi-gaps detect                              # Detect all gaps
+musubi-gaps detect --verbose                    # Show detailed gap information
+musubi-gaps requirements                        # Detect orphaned requirements
+musubi-gaps code                                # Detect untested code
+musubi-gaps coverage                            # Calculate coverage statistics
+musubi-gaps coverage --min-coverage 100         # Require 100% coverage
+musubi-gaps detect --format markdown > gaps.md  # Export gap report
 ```
 
 ### Project Types

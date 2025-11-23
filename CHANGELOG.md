@@ -5,6 +5,60 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.7] - 2025-11-23
+
+### Added
+- **Gap Detection System** - Identify orphaned requirements and untested code
+  - `musubi-gaps detect` - Detect all gaps (requirements, code, tests)
+    - Orphaned requirements (no design/task references)
+    - Unimplemented requirements (no code implementation)
+    - Untested code (no test files)
+    - Missing tests (requirements without test coverage)
+  - `musubi-gaps requirements` - Detect orphaned requirements only
+  - `musubi-gaps code` - Detect untested code only
+  - `musubi-gaps coverage` - Calculate coverage statistics
+    - Requirements coverage (design/tasks/code/tests)
+    - Code coverage (tested vs untested)
+    - Minimum coverage threshold validation
+  - Gap detection workflow:
+    - Extract requirements from docs/requirements
+    - Extract references from design/tasks/code/tests
+    - Identify missing traceability links
+    - Report gaps with detailed reasoning
+  - Output formats:
+    - Table (console, color-coded)
+    - JSON (machine-readable)
+    - Markdown (exportable reports)
+  - Coverage statistics:
+    - Requirements: design/task/implementation/test coverage %
+    - Code: test coverage %
+    - Average coverage calculation
+    - Configurable minimum threshold (--min-coverage)
+
+### Technical Details
+- **GapDetector**: Core gap detection engine (src/analyzers/gap-detector.js)
+  - `detectAllGaps()` - Detect all gap types
+  - `detectOrphanedRequirements()` - Find requirements without design/tasks
+  - `detectUnimplementedRequirements()` - Find requirements without code
+  - `detectUntestedCode()` - Find source files without tests
+  - `detectMissingTests()` - Find requirements without test coverage
+  - `calculateCoverage()` - Calculate comprehensive coverage statistics
+  - `extractRequirements()` - Parse REQ-XXX-NNN from markdown
+  - `extractDesignReferences()` - Extract requirement IDs from design docs
+  - `extractTaskReferences()` - Extract requirement IDs from task docs
+  - `extractCodeReferences()` - Extract requirement IDs from source code
+  - `extractTestReferences()` - Extract requirement IDs from test files
+  - `formatMarkdown()` - Export reports as markdown
+  - Multi-format output (table/json/markdown)
+- 14 new tests (213 total passing)
+  - Extract requirements (2 tests)
+  - Detect orphaned requirements (3 tests)
+  - Detect untested code (3 tests)
+  - Calculate coverage (2 tests)
+  - Detect all gaps (2 tests)
+  - Format markdown (2 tests)
+- Phase 2 progress: 40% complete (Validation Gates operational)
+
 ## [0.8.6] - 2025-11-23
 
 ### Added

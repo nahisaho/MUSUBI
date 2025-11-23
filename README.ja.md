@@ -16,6 +16,7 @@ MUSUBIは、6つの主要フレームワークのベスト機能を統合した�
 - 📝 **EARS要件ジェネレーター** - 5つのEARSパターンで明確な要件を作成（v0.8.0）
 - 🏗️ **設計ドキュメントジェネレーター** - トレーサビリティ付きC4モデルとADRを作成（v0.8.2）
 - 🔄 **変更管理システム** - ブラウンフィールドプロジェクト向け差分仕様（v0.8.6）
+- 🔍 **ギャップ検出システム** - 孤立した要件とテストされていないコードを特定（v0.8.7）
 - 🧭 **自動更新プロジェクトメモリ** - ステアリングシステムがアーキテクチャ、技術スタック、製品コンテキストを維持
 - 🚀 **自動オンボーディング** - `musubi-onboard` が既存プロジェクトを分析し、ステアリングドキュメントを生成（2-5分）
 - 🔄 **自動同期** - `musubi-sync` がコードベースの変更を検出し、ステアリングドキュメントを最新に保つ
@@ -147,6 +148,15 @@ musubi-change apply CHANGE-001                  # コードベースに変更を
 musubi-change archive CHANGE-001                # specs/にアーカイブ
 musubi-change list --status pending             # 保留中の変更をリスト
 musubi-change list --format json                # JSON形式でリスト
+
+# ギャップ検出とカバレッジ検証（v0.8.7）
+musubi-gaps detect                              # 全ギャップを検出
+musubi-gaps detect --verbose                    # 詳細なギャップ情報を表示
+musubi-gaps requirements                        # 孤立した要件を検出
+musubi-gaps code                                # テストされていないコードを検出
+musubi-gaps coverage                            # カバレッジ統計を計算
+musubi-gaps coverage --min-coverage 100         # 100%カバレッジを要求
+musubi-gaps detect --format markdown > gaps.md  # ギャップレポートをエクスポート
 ```
 
 ### プロジェクトタイプ
