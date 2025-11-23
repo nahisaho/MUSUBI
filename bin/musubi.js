@@ -356,6 +356,19 @@ program
       )
     );
     console.log(chalk.gray('   Documentation: technical-writer, ai-ml-engineer\n'));
+
+    console.log(chalk.white('Advanced CLI Commands (standalone):'));
+    console.log(chalk.gray('   musubi-requirements  # EARS requirements generator'));
+    console.log(chalk.gray('   musubi-design        # Technical design generator (C4, ADR)'));
+    console.log(chalk.gray('   musubi-tasks         # Task breakdown generator'));
+    console.log(chalk.gray('   musubi-trace         # Traceability matrix analyzer'));
+    console.log(chalk.gray('   musubi-analyze       # Gap detection and analysis'));
+    console.log(chalk.gray('   musubi-onboard       # Team onboarding assistant'));
+    console.log(chalk.gray('   musubi-share         # Knowledge sharing tools'));
+    console.log(chalk.gray('   musubi-change        # Change impact analysis'));
+    console.log(chalk.gray('   musubi-gaps          # Requirements gap detector\n'));
+
+    console.log(chalk.gray('Run any command with --help for detailed usage information.\n'));
   });
 
 // ============================================================================
@@ -399,6 +412,19 @@ program.on('--help', () => {
   console.log('  @software-developer, @test-engineer, @code-reviewer, and 18 more...');
   console.log('');
   console.log('Note: Skills API is Claude Code exclusive. Other agents use commands/prompts.');
+  console.log('');
+  console.log('Advanced CLI Commands (standalone):');
+  console.log('  musubi-requirements  # EARS requirements generator');
+  console.log('  musubi-design        # Technical design generator (C4, ADR)');
+  console.log('  musubi-tasks         # Task breakdown generator');
+  console.log('  musubi-trace         # Traceability matrix analyzer');
+  console.log('  musubi-analyze       # Gap detection and analysis');
+  console.log('  musubi-onboard       # Team onboarding assistant');
+  console.log('  musubi-share         # Knowledge sharing tools');
+  console.log('  musubi-change        # Change impact analysis');
+  console.log('  musubi-gaps          # Requirements gap detector');
+  console.log('');
+  console.log('Run any command with --help for detailed usage information.');
   console.log('');
 });
 

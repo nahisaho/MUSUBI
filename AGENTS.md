@@ -33,6 +33,13 @@ This project uses **MUSUBI** (Ultimate Specification Driven Development).
 
 ## Recent Updates
 
+### v1.1.2 (2025-11-23) - Documentation Enhancement
+
+**Enhanced:**
+- 📚 Added standalone CLI commands documentation to help output
+- ℹ️ Listed all 9 advanced CLI tools (requirements, design, tasks, etc.)
+- 🔍 Improved discoverability of specialized command-line tools
+
 ### v1.1.1 (2025-11-23) - Bug Fix Release
 
 **Fixed:**
@@ -57,4 +64,4 @@ This project uses **MUSUBI** (Ultimate Specification Driven Development).
 
 **Agent**: GitHub Copilot
 **Initialized**: 2025-11-23
-**MUSUBI Version**: 1.1.1
+**MUSUBI Version**: 1.1.2
