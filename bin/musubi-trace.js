@@ -23,7 +23,7 @@ const program = new Command();
 program
   .name('musubi-trace')
   .description('MUSUBI Traceability System - End-to-end requirement traceability')
-  .version('0.9.4');
+  .version('0.9.5');
 
 // Generate traceability matrix
 program

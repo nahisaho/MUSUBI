@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.5] - 2025-11-23
+
+### Improved - Orchestrator Enhancement
+
+- **Enhanced Orchestrator Skill**: Updated to support all 25 specialized agents
+  - Added CLI Commands Reference section with all MUSUBI commands
+  - Updated agent count from 18 to 25 (added 7 new agents)
+  - New agents: Orchestrator, Steering, Constitution Enforcer, Site Reliability Engineer, Release Coordinator, Change Impact Analyzer, Traceability Auditor
+  - Comprehensive CLI integration guide for all commands
+  - Enhanced Agent Selection Matrix with CLI command mappings
+  - Updated welcome messages (English and Japanese) to reflect 25 agents
+
+- **CLI Commands Integration**
+  - `musubi-requirements` - EARS requirements management
+  - `musubi-design` - C4 + ADR design documents
+  - `musubi-tasks` - Task breakdown management
+  - `musubi-trace` - Traceability analysis (including v0.9.4 enhancements)
+  - `musubi-change` - Change management for brownfield projects
+  - `musubi-gaps` - Gap detection & coverage validation
+  - `musubi-validate` - Constitutional validation
+  - `musubi-init` - Project initialization
+  - `musubi-share` - Memory sharing across projects
+  - `musubi-sync` - Steering files synchronization
+  - `musubi-analyze` - Project analysis
+  - `musubi-onboard` - AI platform onboarding
+
+- **Documentation Updates**
+  - All 25 agents now properly categorized (Orchestration, Design, Development, Operations, Specialists)
+  - CLI command mapping for each agent where applicable
+  - Enhanced workflow examples with CLI integration
+  - Better agent selection logic with command references
+
+### Example Usage
+```bash
+# Orchestrator can now guide users through all MUSUBI commands
+# Example: Full project initialization
+musubi-init --platform claude-code
+musubi-requirements init authentication
+musubi-design init authentication
+musubi-tasks init authentication
+musubi-trace matrix
+musubi-validate all
+```
+
+---
+
 ## [0.9.4] - 2025-11-23
 
 ### Added - Enhanced Traceability Analysis
