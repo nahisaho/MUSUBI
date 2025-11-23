@@ -5,6 +5,18 @@
 **Decision**: Synchronized steering documents with codebase changes
 
 **Changes Detected**:
+- Version in project.yml (0.8.8) differs from package.json (0.9.6)
+- New directories detected: tests, templates, storage, steering, orchestrator, docs, coverage, bin, References
+
+**Action**: Automatically updated steering documents via `musubi-sync`
+
+---
+
+## [2025-11-23] Steering Sync - Automatic Update
+
+**Decision**: Synchronized steering documents with codebase changes
+
+**Changes Detected**:
 - Version in project.yml (0.7.0) differs from package.json (0.8.8)
 - New directories detected: tests, templates, storage, steering, orchestrator, docs, coverage, bin, References
 
