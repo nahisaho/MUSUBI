@@ -156,56 +156,114 @@ Orchestratorは **CodeGraphMCPServer** を活用して、コードベースの�
 
 ### CodeGraph MCP インストール・設定
 
-ユーザーが「CodeGraph MCP を設定したい」「コード分析ツールを追加したい」と依頼した場合、以下の手順を案内してください：
+ユーザーが「CodeGraph MCP を設定して」「コード分析ツールを追加したい」と依頼した場合、**以下の手順を自動実行**してください：
 
-#### Option 1: Python venv（推奨）
+#### Step 1: 環境確認
+
+まず現在の状態を確認：
 
 ```bash
-# 1. 仮想環境作成
-python3 -m venv ~/codegraph-venv
-
-# 2. アクティベートしてインストール
-cd ~/codegraph-venv && source bin/activate
-pip install codegraph-mcp
-
-# 3. 動作確認
-codegraph-mcp --version
+which python3 && python3 --version
+which codegraph-mcp 2>/dev/null || echo "codegraph-mcp not installed"
 ```
 
-#### Option 2: Claude Code（ターミナル）
+#### Step 2: インストール実行
+
+codegraph-mcpがインストールされていない場合、**ユーザーに確認後、以下を実行**：
+
+```bash
+# 仮想環境作成とインストール
+python3 -m venv ~/codegraph-venv
+cd ~/codegraph-venv && source bin/activate && pip install codegraph-mcp
+
+# 動作確認
+~/codegraph-venv/bin/codegraph-mcp --version
+```
+
+#### Step 3: プロジェクトインデックス作成
+
+インストール完了後、**現在のプロジェクトをインデックス**：
+
+```bash
+~/codegraph-venv/bin/codegraph-mcp index "${workspaceFolder}" --full
+```
+
+#### Step 4: 設定ファイル作成（オプション選択）
+
+ユーザーに使用環境を確認し、適切な設定を作成：
+
+**a) Claude Code の場合**:
 
 ```bash
 claude mcp add codegraph -- ~/codegraph-venv/bin/codegraph-mcp serve --repo ${workspaceFolder}
 ```
 
-#### Option 3: VS Code settings.json
-
-`.vscode/settings.json` に追加：
+**b) VS Code の場合** - `.vscode/settings.json` を作成/更新：
 
 ```json
 {
   "mcp.servers": {
     "codegraph": {
-      "command": "npx",
-      "args": ["-y", "@anthropic/codegraph-mcp", "--codebase", "."]
+      "command": "~/codegraph-venv/bin/codegraph-mcp",
+      "args": ["serve", "--repo", "${workspaceFolder}"]
     }
   }
 }
 ```
 
-#### Option 4: ~/.claude/claude_desktop_config.json
-
-Claude Desktop設定ファイル：
+**c) Claude Desktop の場合** - `~/.claude/claude_desktop_config.json` を作成/更新：
 
 ```json
 {
   "mcpServers": {
     "CodeGraph": {
-      "command": "/path/to/codegraph-venv/bin/codegraph-mcp",
-      "args": ["serve", "--repo", "/path/to/your/project"]
+      "command": "~/codegraph-venv/bin/codegraph-mcp",
+      "args": ["serve", "--repo", "/absolute/path/to/project"]
     }
   }
 }
+```
+
+### 自動実行フロー
+
+**重要**: 「CodeGraph MCP を設定して」と依頼された場合、以下を順番に実行：
+
+1. ✅ Python環境確認（`which python3`）
+2. ✅ 既存インストール確認（`which codegraph-mcp`）
+3. ✅ 未インストールなら venv 作成・pip install 実行
+4. ✅ 現在のプロジェクトをインデックス（`codegraph-mcp index --full`）
+5. ✅ 統計表示（`codegraph-mcp stats`）
+6. ✅ 使用環境を確認し、設定ファイル作成
+
+**対話例**:
+
+```markdown
+🤖 Orchestrator:
+CodeGraph MCP の設定を開始します。
+
+[Step 1] 環境確認中...
+✅ Python 3.11.0 検出
+❌ codegraph-mcp 未インストール
+
+[Step 2] インストールを実行しますか？
+a) はい、インストールする
+b) いいえ、キャンセル
+
+👤 ユーザー: a
+
+[インストール実行...]
+✅ codegraph-mcp v0.7.1 インストール完了
+
+[Step 3] プロジェクトをインデックスしています...
+✅ 105ファイル、1006エンティティ、36コミュニティ
+
+[Step 4] 設定ファイルを作成します。使用環境は？
+a) Claude Code
+b) VS Code
+c) Claude Desktop
+d) スキップ（手動設定）
+
+👤 ユーザー: [回答待ち]
 ```
 
 ### プロジェクトのインデックス作成
@@ -229,7 +287,7 @@ Indexed 105 files
 ### 利用可能な MCP Tools
 
 | Tool | 説明 | 活用エージェント |
-|------|------|-----------------|
+| --- | --- | --- |
 | `init_graph` | コードグラフ初期化 | Orchestrator, Steering |
 | `get_code_snippet` | ソースコード取得 | Software Developer, Bug Hunter |
 | `find_callers` | 呼び出し元追跡 | Test Engineer, Security Auditor |

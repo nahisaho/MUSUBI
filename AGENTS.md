@@ -33,6 +33,14 @@ This project uses **MUSUBI** (Ultimate Specification Driven Development).
 
 ## Recent Updates
 
+### v2.0.1 (2025-12-03) - Orchestrator Auto-Setup Fix
+
+**Fixed:**
+
+- 🔧 **Orchestrator CodeGraph MCP Auto-Setup** - Changed from "guide" to "auto-execute" flow
+- 📋 **Interactive Dialog** - Step-by-step installation with user confirmation
+- ⚙️ **Environment Detection** - Auto-detect Python and existing installations
+
 ### v2.0.0 (2025-12-03) - MCP Server Integration 🚀
 
 **Major New Feature:**
@@ -85,4 +93,4 @@ This project uses **MUSUBI** (Ultimate Specification Driven Development).
 
 **Agent**: GitHub Copilot
 **Initialized**: 2025-12-03
-**MUSUBI Version**: 2.0.0
+**MUSUBI Version**: 2.0.1

@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2025-12-03
+
+### Fixed - Orchestrator CodeGraph MCP Auto-Setup
+
+- **Orchestrator Auto-Execution Flow**: Changed from "guide" to "auto-execute" instructions
+  - Step 1: Environment check (`which python3`, `which codegraph-mcp`)
+  - Step 2: Auto-install with user confirmation (venv + pip install)
+  - Step 3: Project indexing (`codegraph-mcp index --full`)
+  - Step 4: Config file creation based on user's environment
+
+- **Dialog Flow Added**: Interactive setup with clear progress indicators
+  - Environment detection and status display
+  - User confirmation before installation
+  - Platform selection (Claude Code / VS Code / Claude Desktop)
+
+- **Both SKILL.md Files Updated**:
+  - `src/templates/agents/claude-code/skills/orchestrator/SKILL.md`
+  - `.claude/skills/orchestrator/SKILL.md`
+
+---
+
 ## [2.0.0] - 2025-12-03
 
 ### Added - MCP Server Integration 🚀
