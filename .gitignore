@@ -2,6 +2,10 @@
 
 # Reference frameworks (local analysis only)
 References/
+Refecences/
+
+# CodeGraph MCP Server (local database)
+.codegraph/
 
 # Python
 __pycache__/
