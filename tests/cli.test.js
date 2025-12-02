@@ -15,7 +15,8 @@ const os = require('os');
 
 // MUSUBI bin directory (project root for tests)
 const projectRoot = path.resolve(__dirname, '..');
-const musubi = `node ${path.join(projectRoot, 'bin/musubi.js')}`;
+// Quote the path to handle spaces in directory names (e.g., OneDrive - Microsoft)
+const musubi = `node "${path.join(projectRoot, 'bin/musubi.js')}"`;
 
 describe('MUSUBI CLI', () => {
   let testDir;
