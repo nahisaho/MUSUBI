@@ -56,7 +56,7 @@ class TraceabilityAnalyzer {
    * Calculate coverage statistics
    */
   async calculateCoverage(options = {}) {
-    const { matrix, summary } = await this.generateMatrix(options);
+    const { summary } = await this.generateMatrix(options);
 
     const overall = Math.round(
       (summary.designCoverage + summary.tasksCoverage + summary.codeCoverage + summary.testsCoverage) / 4
