@@ -236,7 +236,7 @@ claude mcp add codegraph -- codegraph-mcp serve --repo .
 ```bash
 # Orchestrator can now guide users through all MUSUBI commands
 # Example: Full project initialization
-musubi-init --platform claude-code
+musubi init --claude-code
 musubi-requirements init authentication
 musubi-design init authentication
 musubi-tasks init authentication

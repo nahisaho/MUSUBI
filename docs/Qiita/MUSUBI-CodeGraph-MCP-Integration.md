@@ -440,7 +440,7 @@ MUSUBI v2.0 × CodeGraph MCP Serverの統合により、AIエージェントは�
 npm install -g musubi-sdd
 
 # プロジェクトで初期化
-musubi-init --platform claude-code
+musubi init --claude-code
 
 # Orchestratorに依頼
 # "CodeGraph MCP を設定して"
