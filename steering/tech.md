@@ -74,6 +74,7 @@ Phase -1 Gate（Article VIII: Anti-Abstraction）で明示的に承認されな�
 | Library | Version | Purpose |
 | --- | --- | --- |
 | eslint | ^8.50.0 | JavaScriptリント |
+| eslint-config-prettier | ^9.1.0 | ESLint/Prettier競合解消 |
 | jest | ^29.0.0 | テストフレームワーク |
 | prettier | ^3.0.0 | コードフォーマッター |
 

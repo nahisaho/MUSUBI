@@ -76,6 +76,7 @@ MUSUBIはNode.jsベースのCLIツールです。このドキュメントは承�
 |-----------|----------|------|
 | jest | ^29.7.0 | テストフレームワーク |
 | eslint | ^8.56.0 | コード品質 |
+| eslint-config-prettier | ^9.1.0 | ESLint/Prettier競合解消 |
 | prettier | ^3.2.0 | コードフォーマット |
 
 ---
@@ -143,10 +144,10 @@ module.exports = {
   testEnvironment: 'node',
   coverageThreshold: {
     global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80
+      branches: 45,
+      functions: 60,
+      lines: 60,
+      statements: 60
     }
   }
 };
