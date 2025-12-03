@@ -44,6 +44,158 @@ stats                     - コードベース統計
 community                 - コミュニティ検出
 ```
 
+## 🚀 CodeGraph連携で新たに可能になったこと
+
+従来のAIコーディングアシスタントには「**コードベース全体を理解できない**」という根本的な限界がありました。CodeGraph MCP Serverとの連携により、この限界を突破しました。
+
+### Before / After 比較
+
+| シナリオ | Before（従来） | After（CodeGraph連携） |
+|----------|----------------|------------------------|
+| **関数の影響調査** | 手動でgrep検索、見落としリスク | `find_callers`で完全な呼び出し元リスト |
+| **リファクタリング計画** | 経験と勘に依存 | `analyze_module_structure`で客観的分析 |
+| **依存関係の把握** | import文を目視確認 | `find_dependencies`で深い依存も検出 |
+| **コードベースの理解** | ファイルを1つずつ読む | `stats`, `community`で全体構造を即座に把握 |
+| **類似コードの発見** | 記憶や文字列検索に依存 | `local_search`でセマンティック検索 |
+| **変更の波及範囲** | 「たぶん大丈夫」で進める | `find_callers` + `find_dependencies`で完全分析 |
+
+### 具体例: 今までできなかったことが可能に
+
+#### 1. 「この関数を変更したら、どこに影響する？」への完全回答
+
+**従来**: grep検索 → 見つかった箇所を目視確認 → 間接的な呼び出しは見落とし
+
+**CodeGraph連携後**:
+
+```text
+ユーザー: calculatePrice関数を変更したいです。影響範囲を教えてください。
+
+🤖 Change Impact Analyzer:
+find_callers("calculatePrice") を実行...
+
+【直接呼び出し元】(5件)
+- OrderService.createOrder() - line 45
+- CartController.updateCart() - line 78
+- InvoiceGenerator.generate() - line 112
+- PriceValidator.validate() - line 23
+- BatchProcessor.processAll() - line 89
+
+【間接呼び出し元】(3件) ← これが今まで見落としていた部分
+- APIController.handleRequest() → OrderService → calculatePrice
+- ScheduledTask.dailyReport() → BatchProcessor → calculatePrice
+- WebhookHandler.onPayment() → InvoiceGenerator → calculatePrice
+
+【テストへの影響】
+- tests/unit/price.test.ts (直接テスト)
+- tests/integration/order.test.ts (間接影響)
+```
+
+#### 2. 「このプロジェクトの構造を教えて」への即座の回答
+
+**従来**: ディレクトリ構造を見る → ファイルを開いて読む → 数時間かけて理解
+
+**CodeGraph連携後**:
+
+```text
+ユーザー: このプロジェクトの構造を説明してください。
+
+🤖 System Architect:
+stats + community を実行...
+
+【コードベース統計】
+- ファイル数: 105
+- エンティティ数: 1,006（関数/クラス/モジュール）
+- 関係数: 5,359（呼び出し/依存/継承）
+- コミュニティ数: 36（論理的なモジュール群）
+
+【主要コミュニティ（モジュール境界）】
+1. 認証・認可 (AuthService, TokenManager, PermissionChecker)
+2. 注文処理 (OrderService, CartService, PaymentProcessor)
+3. データアクセス (UserRepository, OrderRepository, BaseRepository)
+4. API層 (Controllers, Middleware, Routes)
+5. ユーティリティ (Logger, Validator, Formatter)
+
+【アーキテクチャパターン】
+- レイヤードアーキテクチャ（Controller → Service → Repository）
+- 依存性注入パターンを使用
+- イベント駆動の非同期処理あり
+```
+
+#### 3. 「セキュリティ的に危険なコードはある？」への網羅的調査
+
+**従来**: 既知のパターンをgrep → 経験に基づく目視レビュー → 見落とし多発
+
+**CodeGraph連携後**:
+
+```text
+ユーザー: セキュリティリスクのあるコードを特定してください。
+
+🤖 Security Auditor:
+query_codebase("eval, exec, shell execution, SQL injection, XSS") を実行...
+find_callers で各箇所への入力経路を追跡...
+
+【高リスク】🔴
+1. src/utils/dynamicLoader.js:23 - eval()使用
+   - 入力経路: APIリクエスト → validateInput → dynamicLoader
+   - リスク: ユーザー入力がevalに到達可能
+   - 推奨: JSON.parseまたはvm.runInNewContextに置換
+
+2. src/db/queries.js:89 - 文字列結合SQL
+   - 入力経路: WebForm → Controller → queries
+   - リスク: SQLインジェクション脆弱性
+   - 推奨: パラメータ化クエリに変更
+
+【中リスク】🟡
+3. src/views/renderer.js:45 - innerHTML使用
+   - 入力経路: APIレスポンス → sanitize → renderer
+   - リスク: XSS（sanitize関数の実装次第）
+   - 推奨: textContentまたはDOMPurify使用
+```
+
+#### 4. 「新機能をどこに実装すべき？」への根拠ある提案
+
+**従来**: 既存コードを読み漁る → なんとなく場所を決める → 後で「ここじゃなかった」と後悔
+
+**CodeGraph連携後**:
+
+```text
+ユーザー: メール通知機能を追加したいです。どこに実装すべきですか？
+
+🤖 System Architect:
+analyze_module_structure + query_codebase("notification, email, send") を実行...
+
+【既存の類似機能】
+- src/services/NotificationService.ts - プッシュ通知（実装済み）
+- src/services/SMSService.ts - SMS通知（実装済み）
+- src/utils/Mailer.ts - メール送信ユーティリティ（低レベル）
+
+【推奨実装場所】
+📁 src/services/EmailNotificationService.ts（新規作成）
+
+【理由】
+1. NotificationService, SMSServiceと同じパターンで統一性を維持
+2. 既存のMailer.tsを内部で利用可能
+3. Controllerからの呼び出しパスが既存パターンと一致
+
+【実装構造案】
+EmailNotificationService
+  ├── implements: INotificationService（既存インターフェース）
+  ├── uses: Mailer（既存ユーティリティ）
+  ├── uses: TemplateEngine（既存）
+  └── uses: UserRepository（メールアドレス取得）
+```
+
+### なぜこれが重要なのか
+
+従来のAIアシスタントは「**今開いているファイル**」しか見えませんでした。これは、地図なしで知らない街を歩くようなものです。
+
+CodeGraph連携により、AIは「**プロジェクト全体の地図**」を持つようになりました：
+
+- 🗺️ **全体俯瞰**: どこに何があるかを瞬時に把握
+- 🔗 **関係性理解**: コード間のつながりを完全に追跡
+- 🎯 **的確な判断**: 根拠に基づいた提案が可能
+- ⚡ **高速分析**: 人間なら数時間かかる調査を数秒で完了
+
 ## MUSUBI × CodeGraph の相乗効果
 
 MUSUBIの25の専門エージェントが、CodeGraph MCPを活用することで、より高度な分析と提案が可能になります。
