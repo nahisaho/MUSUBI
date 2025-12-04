@@ -11,7 +11,7 @@
  */
 
 const path = require('path');
-const { execSync, spawnSync } = require('child_process');
+const { spawnSync } = require('child_process');
 
 // ============================================================================
 // Dependency Auto-Installation
@@ -22,8 +22,6 @@ const { execSync, spawnSync } = require('child_process');
  */
 function ensureDependencies() {
   const packageDir = path.join(__dirname, '..');
-  const nodeModulesDir = path.join(packageDir, 'node_modules');
-  const packageJsonPath = path.join(packageDir, 'package.json');
 
   // Check if node_modules exists and has required packages
   const requiredModules = ['commander', 'chalk', 'fs-extra', 'inquirer'];
