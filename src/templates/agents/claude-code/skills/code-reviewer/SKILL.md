@@ -77,6 +77,47 @@ EARS形式の要件ドキュメントが存在する場合は参照してくだ�
 
 要件ドキュメントを参照することで、プロジェクトの要求事項を正確に理解し、traceabilityを確保できます。
 
+---
+
+## Workflow Engine Integration (v2.1.0)
+
+**Code Reviewer** は **Stage 5: Review** を担当します。
+
+### ワークフロー連携
+
+```bash
+# コードレビュー開始時（Stage 5へ遷移）
+musubi-workflow next review
+
+# レビュー完了時（Stage 6へ遷移）
+musubi-workflow next testing
+```
+
+### レビュー結果に応じたアクション
+
+**レビュー承認の場合**:
+```bash
+musubi-workflow next testing
+```
+
+**修正が必要な場合（フィードバックループ）**:
+```bash
+musubi-workflow feedback review implementation -r "コード品質の問題を発見"
+```
+
+### レビュー完了チェックリスト
+
+レビューステージを完了する前に確認：
+
+- [ ] コード品質チェック完了
+- [ ] SOLID原則の遵守確認
+- [ ] セキュリティレビュー完了
+- [ ] パフォーマンス考慮事項確認
+- [ ] テストカバレッジ確認
+- [ ] ドキュメント更新確認
+
+---
+
 ## 3. Documentation Language Policy
 
 **CRITICAL: 英語版と日本語版の両方を必ず作成**
