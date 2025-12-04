@@ -1,14 +1,14 @@
 # Technology Stack
 
 **Project**: musubi
-**Last Updated**: 2025-12-05
-**Version**: 2.0.6
+**Last Updated**: 2025-12-04
+**Version**: 1.0
 
 ---
 
 ## Overview
 
-This document defines the technology stack for MUSUBI - Ultimate Specification Driven Development Tool supporting 7 AI Coding Agents with MCP Integration.
+This document defines the approved technology stack for musubi. All development MUST use these technologies unless explicitly approved via Phase -1 Gate (Article VIII: Anti-Abstraction).
 
 ---
 
@@ -16,74 +16,88 @@ This document defines the technology stack for MUSUBI - Ultimate Specification D
 
 ### Programming Languages
 
-| Language | Version | Usage | Notes |
-|----------|---------|-------|-------|
-| JavaScript | ES2022+ | Primary application language | Node.js runtime |
-| YAML | 1.2 | Configuration files | project.yml |
-| Markdown | - | Documentation, templates | EARS format |
+| Language             | Version        | Usage                        | Notes               |
+| -------------------- | -------------- | ---------------------------- | ------------------- |
+| {{PRIMARY_LANGUAGE}} | {{VERSION}}    | Primary application language | [Notes]             |
+| SQL                  | PostgreSQL 15+ | Database queries             | Via Prisma ORM      |
+| TypeScript           | 5.0+           | Type definitions             | Strict mode enabled |
 
 ### Runtime Environment
 
-- **Node.js**: 18.0.0+ (LTS)
-- **Package Manager**: npm 8.0+
+- **Node.js**: {{NODE_VERSION}}+ (LTS)
+- **Package Manager**: npm {{NPM_VERSION}}+ / pnpm {{PNPM_VERSION}}+
 
 ---
 
-## Core Dependencies
+## Frontend Stack
 
-### CLI Framework
+### Framework
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| Commander | 11.0.0 | CLI command parsing |
-| Inquirer | 9.0.0 | Interactive prompts |
-| Chalk | 4.1.2 | Terminal styling |
+**Primary Framework**: {{FRONTEND_FRAMEWORK}}
 
-### File System & Data
+| Technology             | Version     | Purpose                             |
+| ---------------------- | ----------- | ----------------------------------- |
+| {{FRONTEND_FRAMEWORK}} | {{VERSION}} | [Purpose]                           |
+| React                  | 18+         | UI library (if using Next.js/Remix) |
+| TypeScript             | 5.0+        | Type safety                         |
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| fs-extra | 11.0.0 | Enhanced file operations |
-| glob | 10.5.0 | File pattern matching |
-| js-yaml | 4.1.0 | YAML parsing |
+### UI Components
 
----
+| Library        | Version     | Purpose              |
+| -------------- | ----------- | -------------------- |
+| {{UI_LIBRARY}} | {{VERSION}} | Component library    |
+| Tailwind CSS   | 3.0+        | Utility-first CSS    |
+| shadcn/ui      | Latest      | Component primitives |
 
-## MCP Integration (v2.0.0+)
+### State Management
 
-### CodeGraphMCPServer
+| Library           | Version     | Purpose                       |
+| ----------------- | ----------- | ----------------------------- |
+| {{STATE_LIBRARY}} | {{VERSION}} | [Global state / Server state] |
+| React Context     | Built-in    | Local state                   |
+| React Query       | 5.0+        | Server state (if applicable)  |
 
-| Technology | Purpose |
-|------------|---------|
-| CodeGraph MCP Server | GraphRAG-powered code analysis |
-| 14 MCP Tools | Enhanced code understanding |
-| Louvain Community Detection | Semantic code grouping |
+### Form Handling
 
-**MCP Tools Available**:
-- `find_dependencies` - Dependency analysis
-- `find_callers` - Call graph analysis
-- `analyze_module_structure` - Module structure
-- `local_search` / `global_search` - Code search
-- `query_codebase` - Semantic queries
+| Library         | Version | Purpose           |
+| --------------- | ------- | ----------------- |
+| React Hook Form | 7.0+    | Form management   |
+| Zod             | 3.0+    | Schema validation |
 
 ---
 
-## Development Tools
+## Backend Stack
 
-### Testing
+### Framework
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| Jest | 29.0.0 | Test runner |
-| jest-coverage | - | Coverage reporting |
+**Primary Framework**: {{BACKEND_FRAMEWORK}}
 
-### Code Quality
+| Technology            | Version     | Purpose                           |
+| --------------------- | ----------- | --------------------------------- |
+| {{BACKEND_FRAMEWORK}} | {{VERSION}} | API server                        |
+| Express               | 4.0+        | Web framework (if using Node.js)  |
+| Next.js API Routes    | 14+         | Serverless API (if using Next.js) |
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| ESLint | 8.50.0 | Linting |
-| Prettier | 3.0.0 | Code formatting |
-| eslint-config-prettier | 10.1.8 | ESLint + Prettier integration |
+### API Technologies
+
+| Technology | Version    | Purpose               |
+| ---------- | ---------- | --------------------- |
+| REST       | -          | Primary API style     |
+| GraphQL    | (Optional) | Complex data fetching |
+| OpenAPI    | 3.0+       | API specification     |
+
+---
+
+## Database Stack
+
+### Primary Database
+
+**Database**: {{DATABASE}}
+
+| Technology   | Version     | Purpose            |
+| ------------ | ----------- | ------------------ |
+| {{DATABASE}} | {{VERSION}} | Primary data store |
+| Prisma       | 5.0+        | ORM and migrations |
 
 ### Database Schema
 

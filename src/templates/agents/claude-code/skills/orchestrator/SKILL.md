@@ -75,6 +75,7 @@ The Orchestrator can leverage all MUSUBI CLI commands to execute tasks efficient
 
 | Command               | Purpose                        | Example                              |
 | --------------------- | ------------------------------ | ------------------------------------ |
+| `musubi-workflow`     | Workflow state & metrics       | `musubi-workflow init <feature>`     |
 | `musubi-requirements` | EARS requirements management   | `musubi-requirements init <feature>` |
 | `musubi-design`       | C4 + ADR design documents      | `musubi-design init <feature>`       |
 | `musubi-tasks`        | Task breakdown management      | `musubi-tasks init <feature>`        |
@@ -94,6 +95,16 @@ The Orchestrator can leverage all MUSUBI CLI commands to execute tasks efficient
 | `musubi-onboard` | AI platform onboarding         | `musubi-onboard <platform>`          |
 
 ### Detailed Command Options
+
+**musubi-workflow** (v2.1.0 NEW):
+
+- `init <feature>` - Initialize workflow for a feature
+- `status` - Show current workflow status and stage
+- `next [stage]` - Transition to next stage
+- `feedback <from> <to> -r <reason>` - Record feedback loop
+- `complete` - Complete workflow with summary
+- `history` - View workflow event history
+- `metrics` - Show workflow metrics summary
 
 **musubi-requirements**:
 
@@ -439,6 +450,92 @@ EARS形式の要件ドキュメントが存在する場合は参照してくだ�
 - `docs/requirements/user-stories/` - ユーザーストーリー
 
 要件ドキュメントを参照することで、プロジェクトの要求事項を正確に理解し、traceabilityを確保できます。
+
+---
+
+## Workflow Engine Integration (v2.1.0)
+
+**NEW**: Orchestratorはワークフローエンジンを使用して、開発プロセスの状態管理とメトリクス収集を行います。
+
+### ワークフロー開始時
+
+新機能開発やプロジェクト開始時に、ワークフローを初期化します：
+
+```bash
+# ワークフロー初期化
+musubi-workflow init <feature-name>
+
+# 例
+musubi-workflow init user-authentication
+```
+
+### ステージ遷移
+
+各ステージの作業完了時に、次のステージへ遷移します：
+
+```bash
+# 現在のステータス確認
+musubi-workflow status
+
+# 次のステージへ遷移
+musubi-workflow next design
+musubi-workflow next tasks
+musubi-workflow next implementation
+```
+
+### 10ステージ ワークフロー
+
+| Stage | Name | Description | CLI Command |
+|-------|------|-------------|-------------|
+| 0 | Spike/PoC | 調査・プロトタイピング | `musubi-workflow next spike` |
+| 1 | Requirements | 要件定義 | `musubi-requirements` |
+| 2 | Design | 設計（C4 + ADR） | `musubi-design` |
+| 3 | Tasks | タスク分解 | `musubi-tasks` |
+| 4 | Implementation | 実装 | - |
+| 5 | Review | コードレビュー | `musubi-workflow next review` |
+| 6 | Testing | テスト | `musubi-validate` |
+| 7 | Deployment | デプロイ | - |
+| 8 | Monitoring | モニタリング | - |
+| 9 | Retrospective | 振り返り | `musubi-workflow complete` |
+
+### フィードバックループ
+
+問題発見時に前のステージに戻る場合：
+
+```bash
+# レビューで問題発見 → 実装に戻る
+musubi-workflow feedback review implementation -r "リファクタリング必要"
+
+# テストで問題発見 → 要件に戻る
+musubi-workflow feedback testing requirements -r "要件の不整合を発見"
+```
+
+### メトリクス活用
+
+プロジェクト完了時やレトロスペクティブで分析：
+
+```bash
+# ワークフロー完了（サマリー表示）
+musubi-workflow complete
+
+# メトリクスサマリー
+musubi-workflow metrics
+
+# 履歴確認
+musubi-workflow history
+```
+
+### Orchestrator推奨フロー
+
+```markdown
+1. ユーザーから新機能リクエストを受信
+2. `musubi-workflow init <feature>` でワークフロー開始
+3. 各ステージで適切なエージェントを呼び出し
+4. ステージ完了時に `musubi-workflow next <stage>` で遷移
+5. 問題発見時は `musubi-workflow feedback` でループ記録
+6. 全ステージ完了後 `musubi-workflow complete` で終了
+7. メトリクスを元にプロセス改善を提案
+```
 
 ---
 
