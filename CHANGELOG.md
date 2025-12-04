@@ -5,12 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.6] - 2025-12-04
+
+### Fixed - CodeGraph MCP Install Always Updates to Latest
+
+- **Changed `pipx install` to `pipx install --force`**
+  - Ensures latest version is always installed, even if already installed
+  - Fixes issue where existing installation would skip update
+  - All documentation updated with `--force` flag
+
+- **Updated files**:
+  - `README.md` and `README.ja.md`
+  - `docs/Qiita/MUSUBI-CodeGraph-MCP-Integration.md`
+  - `src/templates/agents/claude-code/skills/orchestrator/SKILL.md`
+  - `.claude/skills/orchestrator/SKILL.md`
+  - `CHANGELOG.md`
+
+---
+
 ## [2.0.5] - 2025-12-04
 
 ### Changed - CodeGraph MCP Installation Method
 
 - **Switch to pipx installation** (recommended over venv + pip)
-  - Simpler installation: `pipx install codegraph-mcp-server`
+  - Simpler installation: `pipx install --force codegraph-mcp-server`
   - No need for virtual environment management
   - Commands available globally without path prefix
 

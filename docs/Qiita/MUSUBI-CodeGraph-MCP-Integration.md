@@ -244,10 +244,11 @@ Orchestratorが以下を自動実行：
 
 ```bash
 # pipxでインストール（推奨）
-pipx install codegraph-mcp-server
+# --force で既存インストールも最新版に更新
+pipx install --force codegraph-mcp-server
 
 # または GitHub から最新版
-pipx install git+https://github.com/nahisaho/CodeGraphMCPServer.git
+pipx install --force git+https://github.com/nahisaho/CodeGraphMCPServer.git
 ```
 
 #### Step 2: プロジェクトのインデックス作成

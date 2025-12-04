@@ -218,7 +218,8 @@ codegraph-mcpがインストールされていない場合、**ユーザーに�
 
 ```bash
 # pipxでインストール（推奨）
-pipx install codegraph-mcp-server
+# --force で既存インストールも最新版に更新
+pipx install --force codegraph-mcp-server
 
 # 動作確認
 codegraph-mcp --version
