@@ -10,10 +10,66 @@
  * - musubi version    - Show version information
  */
 
+const path = require('path');
+const { execSync, spawnSync } = require('child_process');
+
+// ============================================================================
+// Dependency Auto-Installation
+// ============================================================================
+
+/**
+ * Check if a module is installed and install dependencies if needed
+ */
+function ensureDependencies() {
+  const packageDir = path.join(__dirname, '..');
+  const nodeModulesDir = path.join(packageDir, 'node_modules');
+  const packageJsonPath = path.join(packageDir, 'package.json');
+
+  // Check if node_modules exists and has required packages
+  const requiredModules = ['commander', 'chalk', 'fs-extra', 'inquirer'];
+  let needsInstall = false;
+
+  for (const mod of requiredModules) {
+    try {
+      require.resolve(mod, { paths: [packageDir] });
+    } catch {
+      needsInstall = true;
+      break;
+    }
+  }
+
+  if (needsInstall) {
+    console.log('\n📦 Installing MUSUBI dependencies...\n');
+
+    try {
+      // Run npm install in the package directory
+      const result = spawnSync('npm', ['install', '--omit=dev'], {
+        cwd: packageDir,
+        stdio: 'inherit',
+        shell: process.platform === 'win32',
+      });
+
+      if (result.status !== 0) {
+        console.error('\n❌ Failed to install dependencies.');
+        console.error('Please run manually: cd ' + packageDir + ' && npm install\n');
+        process.exit(1);
+      }
+
+      console.log('\n✅ Dependencies installed successfully!\n');
+    } catch (err) {
+      console.error('\n❌ Failed to install dependencies:', err.message);
+      console.error('Please run manually: cd ' + packageDir + ' && npm install\n');
+      process.exit(1);
+    }
+  }
+}
+
+// Ensure dependencies are installed before requiring them
+ensureDependencies();
+
 const { Command } = require('commander');
 const chalk = require('chalk');
 const fs = require('fs-extra');
-const path = require('path');
 const {
   detectAgentFromFlags,
   getAgentDefinition,
