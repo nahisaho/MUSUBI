@@ -1,10 +1,16 @@
 # Ultimate SDD Tool "MUSUBI" - 7つのAIエージェント対応、25スキル搭載の究極仕様駆動開発ツール
 
+> **MUSUBI v2.1.1** - 仕様、設計、コードを結びつける包括的SDDフレームワーク
+>
+> 🆕 v2.0新機能: [CodeGraph MCP統合](https://qiita.com/hisaho/items/719210ccc20fe2514054)でプロジェクト全体のコード理解力を獲得！
+
 ## はじめに
 
 ソフトウェア開発における最大の課題の一つは、**要件から実装、テスト、デプロイまでの一貫性を保つこと**です。AIコーディングアシスタントの登場により開発速度は向上しましたが、仕様の曖昧さやトレーサビリティの欠如により、品質問題が頻発しています。
 
 この記事では、Specification Driven Development（仕様駆動開発）を徹底的に支援する究極のツール **MUSUBI** を紹介します。MUSUBIは、spec-copilot（19エージェント）から始まり、MUSUHI（20エージェント）を経て、**7つのAIコーディングエージェント対応、25の専門スキルを搭載した最終形態**へと進化しました。
+
+**v2.0の革新**: CodeGraph MCP Serverとの統合により、AIエージェントが「ファイル単位の支援」から「プロジェクト全体を理解した支援」へと進化しました。
 
 ## MUSUBIとは？
 
@@ -463,6 +469,59 @@ npx musubi-sdd init --claude
 - ✅ ADDED/MODIFIED/REMOVED自動検出
 - ✅ 既存プロジェクトへのシームレスな導入
 
+## 🚀 v2.0新機能: CodeGraph MCP統合
+
+MUSUBI v2.0では、[CodeGraph MCP Server](https://qiita.com/hisaho/items/b99ac51d78119ef60b6b)との統合により、AIエージェントが「プロジェクト全体のコード構造」を理解できるようになりました。
+
+### 従来の課題 → v2.0で解決
+
+| 課題 | Before (v1.x) | After (v2.0 + CodeGraph) |
+|------|---------------|--------------------------|
+| コードベース理解 | ファイル単位 | プロジェクト全体のグラフ構造 |
+| 関数の影響調査 | 手動grep（見落としリスク） | `find_callers`で完全リスト |
+| リファクタリング計画 | 経験と勘に依存 | `analyze_module_structure`で客観的分析 |
+| 依存関係の把握 | import文を目視 | `find_dependencies`で深い依存も検出 |
+| セキュリティ調査 | パターンマッチのみ | 入力経路の完全追跡 |
+
+### CodeGraph MCPの主な機能
+
+```
+# コードグラフ操作
+init_graph          - グラフ初期化
+find_callers        - 呼び出し元追跡
+find_callees        - 呼び出し先追跡
+find_dependencies   - 依存関係分析
+
+# 検索機能
+local_search        - ローカルコンテキスト検索
+global_search       - グローバル検索
+query_codebase      - 自然言語クエリ
+
+# 分析機能
+analyze_module_structure  - モジュール構造分析
+suggest_refactoring       - リファクタリング提案
+community                 - コミュニティ（モジュール境界）検出
+```
+
+### MUSUBIエージェントとの連携
+
+| エージェント | CodeGraph活用 | 効果 |
+|-------------|---------------|------|
+| Orchestrator | `global_search`, `stats` | プロジェクト全体把握 |
+| System Architect | `analyze_module_structure` | アーキテクチャ可視化 |
+| Change Impact Analyzer | `find_callers`, `find_dependencies` | 完全な影響分析 |
+| Security Auditor | `query_codebase`, `find_callers` | 脆弱性の入力経路追跡 |
+| Code Reviewer | `suggest_refactoring` | 客観的な改善提案 |
+
+### セットアップ
+
+```bash
+# Orchestratorに依頼するだけ
+@orchestrator CodeGraph MCP を設定してください
+```
+
+詳細は [MUSUBI × CodeGraph MCP Server 統合ガイド](https://qiita.com/hisaho/items/719210ccc20fe2514054) をご覧ください。
+
 ## インストールと利用開始
 
 ### インストール
@@ -551,13 +610,16 @@ npx musubi-sdd init --cursor     # Cursor (AGENTS.md)
 
 ## リソース
 
-- 📦 **npm**: `musubi-sdd`
-- 📚 **ドキュメント**: [GitHub Repository](https://github.com/your-org/musubi)
-- 🎯 **ブループリント**: [Ultimate-SDD-Tool-Blueprint-v3-25-Skills.md](https://github.com/your-org/musubi/blob/main/Ultimate-SDD-Tool-Blueprint-v3-25-Skills.md)
+- 📦 **npm**: [musubi-sdd](https://www.npmjs.com/package/musubi-sdd) (v2.1.1)
+- 📚 **GitHub**: [nahisaho/musubi](https://github.com/nahisaho/musubi)
+- 🎯 **ブループリント**: [Ultimate-SDD-Tool-Blueprint-v3-25-Skills.md](https://github.com/nahisaho/musubi/blob/main/Ultimate-SDD-Tool-Blueprint-v3-25-Skills.md)
 - 📊 **フレームワーク比較**: 本記事の比較表参照
 
 ---
 
 **MUSUBI** - むすび - 仕様、設計、コードを結びつける。
+
+> 🌟 このプロジェクトはMITライセンスのオープンソースです。
+> スター ⭐ やコントリビューションをお待ちしています！
 
 #SDD #SpecificationDrivenDevelopment #AI #ClaudeCode #GitHubCopilot #Cursor #開発ツール #仕様駆動開発

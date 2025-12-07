@@ -1,5 +1,9 @@
 # MUSUBI ではじめる仕様駆動開発入門 - Vibe CodingからSDD（Specification Driven Development）へ
 
+> **MUSUBI v2.1.1** - 7つのAIエージェント対応、25スキル搭載の究極仕様駆動開発ツール
+> 
+> 🆕 v2.0新機能: CodeGraph MCP統合によりプロジェクト全体のコード理解力を獲得！
+
 ## はじめに
 
 「GitHub CopilotやClaude Codeを使えば、もう設計書なんていらないよね？」
@@ -9,6 +13,8 @@
 この記事では、AIコーディング時代に真に必要な「仕様駆動開発（SDD）」と、それを実現する究極のツール「**MUSUBI**」の使い方を、実践を交えながらステップバイステップで解説します。
 
 **初心者の方へ**: MUSUBIには25の専門エージェントがありますが、最初は **`@orchestrator`（オーケストレーター）だけ覚えればOK** です。orchestratorがあなたの代わりに適切な専門エージェントを呼び出してくれます。
+
+**v2.0の進化**: MUSUBI v2.0では[CodeGraph MCP Server](https://qiita.com/hisaho/items/b99ac51d78119ef60b6b)との統合により、AIエージェントが「ファイル単位」から「プロジェクト全体」を理解できるようになりました。
 
 ## Vibe Coding vs SDD（Specification Driven Development）
 
@@ -1405,6 +1411,82 @@ AND IF ユーザーが2FA未有効化の場合、THEN システムSHALLログイ
 
 この差分仕様により、既存機能への影響を最小限に抑えながら、安全に新機能を追加できます。
 
+## 🚀 MUSUBI v2.0: CodeGraph MCP統合でコード理解力を強化
+
+MUSUBI v2.0では、**CodeGraph MCP Server**との統合により、AIエージェントがプロジェクト全体のコード構造を理解できるようになりました。
+
+### 従来の課題
+
+従来のAIコーディングアシスタントには「ファイル単位の視野」という限界がありました：
+
+- 「この関数はどこから呼ばれている？」→ 回答不可
+- 「変更の影響範囲は？」→ 推測に頼る
+- 「プロジェクト全体の構造は？」→ 時間のかかる手動調査
+
+### CodeGraph MCPで解決
+
+CodeGraph MCP Serverは、コードベースをグラフ構造として解析し、AIエージェントに「プロジェクト全体の地図」を提供します。
+
+#### 主な機能
+
+| 機能 | 説明 |
+|------|------|
+| 🔍 **コード構造分析** | 関数、クラス、モジュールの依存関係を可視化 |
+| 🧠 **GraphRAG検索** | セマンティックなコード検索（意味ベース） |
+| 📊 **影響分析** | 変更の波及範囲を自動特定 |
+| 🏘️ **コミュニティ検出** | モジュール境界を自動分析 |
+| 🌐 **14言語対応** | Python, JS, TS, Java, Go, Rust, etc. |
+
+### Before / After 比較
+
+| タスク | Before (v1.x) | After (v2.0 + CodeGraph) |
+|--------|---------------|--------------------------|
+| 関数の影響調査 | 手動grep（見落としリスク）| `find_callers`で完全リスト |
+| リファクタリング計画 | 経験と勘に依存 | `analyze_module_structure`で客観的分析 |
+| 依存関係の把握 | import文を目視確認 | `find_dependencies`で深い依存も検出 |
+| コードベースの理解 | ファイルを1つずつ読む | `stats`, `community`で全体把握 |
+
+### 実践例: 影響分析の強化
+
+```
+ユーザー: @change-impact-analyzer calculatePrice関数を変更したいです。影響範囲を教えてください。
+
+🤖 Change Impact Analyzer (CodeGraph活用):
+
+find_callers("calculatePrice") を実行...
+
+【直接呼び出し元】(5件)
+- OrderService.createOrder() - line 45
+- CartController.updateCart() - line 78
+- InvoiceGenerator.generate() - line 112
+- PriceValidator.validate() - line 23
+- BatchProcessor.processAll() - line 89
+
+【間接呼び出し元】(3件) ← これが今まで見落としていた部分！
+- APIController.handleRequest() → OrderService → calculatePrice
+- ScheduledTask.dailyReport() → BatchProcessor → calculatePrice
+- WebhookHandler.onPayment() → InvoiceGenerator → calculatePrice
+
+【テストへの影響】
+- tests/unit/price.test.ts (直接テスト)
+- tests/integration/order.test.ts (間接影響)
+```
+
+### セットアップ方法
+
+```bash
+# Orchestratorに依頼するだけ
+@orchestrator CodeGraph MCP を設定してください
+```
+
+Orchestratorが自動的に：
+1. ✅ Python環境確認
+2. ✅ CodeGraph MCP Serverインストール
+3. ✅ プロジェクトのインデックス作成
+4. ✅ 設定ファイル生成
+
+詳細は [MUSUBI × CodeGraph MCP Server 統合ガイド](https://qiita.com/hisaho/items/719210ccc20fe2514054) をご覧ください。
+
 ## まとめ
 
 ### Vibe Coding vs SDD with MUSUBI
@@ -1498,10 +1580,15 @@ AND IF ユーザーが2FA未有効化の場合、THEN システムSHALLログイ
 
 - **MUSUBI npm**: https://www.npmjs.com/package/musubi-sdd
 - **GitHub Repository**: https://github.com/nahisaho/musubi
-- **詳細ガイド**: [Ultimate SDD Tool MUSUBI](https://qiita.com/nahisaho/items/...)
+- **Current Version**: v2.1.1（2025年6月現在）
 
 ---
 
 **仕様駆動開発で、AIコーディングの可能性を最大限に引き出しましょう！** 🚀
+
+---
+
+> この記事で紹介したMUSUBIはMITライセンスのオープンソースプロジェクトです。
+> コントリビューションやスター ⭐ をお待ちしています！
 
 #SDD #SpecificationDrivenDevelopment #MUSUBI #AI #ClaudeCode #GitHubCopilot #Cursor #開発プロセス #品質保証
