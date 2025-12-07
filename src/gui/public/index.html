@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MUSUBI - SDD Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #0ea5e9;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .logo-icon {
+      font-size: 2rem;
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--error);
+    }
+
+    .status-dot.connected {
+      background: var(--success);
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 280px 1fr 320px;
+      gap: 1px;
+      background: var(--border);
+    }
+
+    .sidebar {
+      background: var(--bg-card);
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .sidebar h2 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 0.25rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .content {
+      background: var(--bg);
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .panel {
+      background: var(--bg-card);
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .panel h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .card h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+    }
+
+    .stat-card .label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-card .value {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .stat-card .change {
+      font-size: 0.875rem;
+      color: var(--success);
+      margin-top: 0.25rem;
+    }
+
+    .workflow-stage {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .workflow-stage.completed {
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .workflow-stage.active {
+      background: rgba(14, 165, 233, 0.2);
+      border: 1px solid var(--secondary);
+    }
+
+    .stage-number {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .workflow-stage.completed .stage-number {
+      background: var(--success);
+      color: white;
+    }
+
+    .workflow-stage.active .stage-number {
+      background: var(--secondary);
+      color: white;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .requirements-list {
+      list-style: none;
+    }
+
+    .requirement-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .requirement-item:last-child {
+      border-bottom: none;
+    }
+
+    .req-id {
+      font-family: monospace;
+      font-size: 0.75rem;
+      background: var(--primary);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+    }
+
+    .req-title {
+      flex: 1;
+      font-size: 0.875rem;
+    }
+
+    .req-status {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+    }
+
+    .req-status.implemented {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--success);
+    }
+
+    .req-status.designed {
+      background: rgba(14, 165, 233, 0.2);
+      color: var(--secondary);
+    }
+
+    .req-status.unlinked {
+      background: rgba(148, 163, 184, 0.2);
+      color: var(--text-muted);
+    }
+
+    .constitution-article {
+      padding: 1rem;
+      background: rgba(99, 102, 241, 0.05);
+      border-left: 3px solid var(--primary);
+      margin-bottom: 0.75rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+
+    .article-number {
+      font-size: 0.75rem;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      color: var(--text-muted);
+    }
+
+    .loading-spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 0.75rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state h4 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    footer {
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      padding: 1rem 2rem;
+      text-align: center;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    #traceability-graph {
+      width: 100%;
+      height: 400px;
+      background: var(--bg);
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+    }
+
+    @media (max-width: 1200px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar, .panel {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo">
+        <span class="logo-icon">🔮</span>
+        MUSUBI
+      </div>
+      <div class="connection-status">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Connecting...</span>
+      </div>
+    </header>
+
+    <main>
+      <aside class="sidebar">
+        <h2>Navigation</h2>
+        <div class="nav-item active" data-view="dashboard">
+          📊 Dashboard
+        </div>
+        <div class="nav-item" data-view="workflow">
+          🔄 Workflow
+        </div>
+        <div class="nav-item" data-view="requirements">
+          📋 Requirements
+        </div>
+        <div class="nav-item" data-view="traceability">
+          🔗 Traceability
+        </div>
+        <div class="nav-item" data-view="constitution">
+          📜 Constitution
+        </div>
+      </aside>
+
+      <section class="content" id="mainContent">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          Loading project data...
+        </div>
+      </section>
+
+      <aside class="panel">
+        <h3>📌 Quick Actions</h3>
+        <div style="margin-bottom: 1rem;">
+          <button class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;">
+            ➕ New Requirement
+          </button>
+          <button class="btn btn-outline" style="width: 100%; margin-bottom: 0.5rem;">
+            🔍 Validate Project
+          </button>
+          <button class="btn btn-outline" style="width: 100%;">
+            📤 Export Report
+          </button>
+        </div>
+
+        <h3>📈 Coverage</h3>
+        <div id="coverageStats">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      MUSUBI SDD - Specification Driven Development Dashboard
+    </footer>
+  </div>
+
+  <script>
+    // State
+    let project = null;
+    let ws = null;
+    let currentView = 'dashboard';
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      connectWebSocket();
+      loadProject();
+      setupNavigation();
+    });
+
+    // WebSocket connection
+    function connectWebSocket() {
+      const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${location.host}`);
+
+      ws.onopen = () => {
+        document.getElementById('statusDot').classList.add('connected');
+        document.getElementById('statusText').textContent = 'Connected';
+      };
+
+      ws.onclose = () => {
+        document.getElementById('statusDot').classList.remove('connected');
+        document.getElementById('statusText').textContent = 'Disconnected';
+        setTimeout(connectWebSocket, 3000);
+      };
+
+      ws.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        handleWebSocketMessage(message);
+      };
+    }
+
+    function handleWebSocketMessage(message) {
+      switch (message.type) {
+        case 'project:init':
+        case 'file:changed':
+        case 'file:added':
+        case 'file:removed':
+          project = message.data.project || message.data;
+          renderCurrentView();
+          loadCoverage();
+          break;
+      }
+    }
+
+    // API calls
+    async function loadProject() {
+      try {
+        const response = await fetch('/api/project');
+        project = await response.json();
+        renderCurrentView();
+      } catch (error) {
+        console.error('Failed to load project:', error);
+      }
+    }
+
+    async function loadCoverage() {
+      try {
+        const response = await fetch('/api/coverage');
+        const coverage = await response.json();
+        renderCoverage(coverage);
+      } catch (error) {
+        console.error('Failed to load coverage:', error);
+      }
+    }
+
+    async function loadTraceability() {
+      try {
+        const response = await fetch('/api/traceability');
+        return await response.json();
+      } catch (error) {
+        console.error('Failed to load traceability:', error);
+        return { requirements: [], traces: [] };
+      }
+    }
+
+    async function loadConstitution() {
+      try {
+        const response = await fetch('/api/constitution');
+        return await response.json();
+      } catch (error) {
+        console.error('Failed to load constitution:', error);
+        return null;
+      }
+    }
+
+    async function loadWorkflow() {
+      try {
+        const response = await fetch('/api/workflow');
+        return await response.json();
+      } catch (error) {
+        console.error('Failed to load workflow:', error);
+        return null;
+      }
+    }
+
+    // Navigation
+    function setupNavigation() {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const view = item.dataset.view;
+          setActiveView(view);
+        });
+      });
+    }
+
+    function setActiveView(view) {
+      currentView = view;
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.view === view);
+      });
+      renderCurrentView();
+    }
+
+    // Render functions
+    function renderCurrentView() {
+      const content = document.getElementById('mainContent');
+      
+      switch (currentView) {
+        case 'dashboard':
+          renderDashboard(content);
+          break;
+        case 'workflow':
+          renderWorkflow(content);
+          break;
+        case 'requirements':
+          renderRequirements(content);
+          break;
+        case 'traceability':
+          renderTraceability(content);
+          break;
+        case 'constitution':
+          renderConstitution(content);
+          break;
+      }
+    }
+
+    function renderDashboard(container) {
+      if (!project) {
+        container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading...</div>';
+        return;
+      }
+
+      const specs = project.specs || [];
+      const totalReqs = specs.reduce((sum, s) => sum + (s.requirements?.length || 0), 0);
+      const totalTasks = specs.reduce((sum, s) => sum + (s.tasks?.length || 0), 0);
+      const completedTasks = specs.reduce((sum, s) => 
+        sum + (s.tasks?.filter(t => t.completed)?.length || 0), 0);
+
+      container.innerHTML = `
+        <h2 style="margin-bottom: 1.5rem;">📊 Project Dashboard</h2>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="label">Project</div>
+            <div class="value">${project.name || 'Unknown'}</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Specifications</div>
+            <div class="value">${specs.length}</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Requirements</div>
+            <div class="value">${totalReqs}</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Tasks</div>
+            <div class="value">${completedTasks}/${totalTasks}</div>
+            <div class="change">${totalTasks > 0 ? Math.round(completedTasks/totalTasks*100) : 0}% complete</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>🎯 Project Status</h3>
+          <p style="color: var(--text-muted); margin-bottom: 1rem;">
+            ${project.hasSteering ? '✅ Steering configured' : '⚠️ No steering directory'}
+            ${project.hasSpecs ? ' • ✅ Specs available' : ' • ⚠️ No specs yet'}
+          </p>
+          ${project.constitution ? `
+            <p style="color: var(--success);">
+              📜 Constitution: ${project.constitution.articles?.length || 0} articles
+            </p>
+          ` : ''}
+        </div>
+
+        ${specs.length > 0 ? `
+          <div class="card">
+            <h3>📁 Recent Specifications</h3>
+            <ul class="requirements-list">
+              ${specs.slice(0, 5).map(spec => `
+                <li class="requirement-item">
+                  <span class="req-id">${spec.id}</span>
+                  <span class="req-title">${spec.title || spec.id}</span>
+                  <span class="req-status designed">${spec.requirements?.length || 0} reqs</span>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    async function renderWorkflow(container) {
+      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading workflow...</div>';
+      
+      const workflow = await loadWorkflow();
+      
+      if (!workflow || !workflow.stages) {
+        container.innerHTML = `
+          <h2 style="margin-bottom: 1.5rem;">🔄 Workflow</h2>
+          <div class="empty-state">
+            <h4>No workflow defined</h4>
+            <p>Create a workflow configuration in steering/rules/workflow.md</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <h2 style="margin-bottom: 1.5rem;">🔄 Workflow</h2>
+        
+        <div class="card">
+          <h3>SDD Stages</h3>
+          ${workflow.stages.map((stage, i) => `
+            <div class="workflow-stage ${stage.status}">
+              <span class="stage-number">${i + 1}</span>
+              <span>${stage.name}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    async function renderRequirements(container) {
+      if (!project || !project.specs) {
+        container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading...</div>';
+        return;
+      }
+
+      const allReqs = project.specs.flatMap(spec => 
+        (spec.requirements || []).map(req => ({
+          ...req,
+          specId: spec.id
+        }))
+      );
+
+      container.innerHTML = `
+        <h2 style="margin-bottom: 1.5rem;">📋 Requirements</h2>
+        
+        ${allReqs.length > 0 ? `
+          <div class="card">
+            <h3>All Requirements (${allReqs.length})</h3>
+            <ul class="requirements-list">
+              ${allReqs.map(req => `
+                <li class="requirement-item">
+                  <span class="req-id">${req.id}</span>
+                  <span class="req-title" title="${req.body || ''}">${req.body?.substring(0, 80) || req.id}...</span>
+                  <span class="req-status designed">${req.pattern}</span>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        ` : `
+          <div class="empty-state">
+            <h4>No Requirements</h4>
+            <p>Create requirements using musubi-requirements command</p>
+          </div>
+        `}
+      `;
+    }
+
+    async function renderTraceability(container) {
+      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading traceability...</div>';
+      
+      const matrix = await loadTraceability();
+      
+      container.innerHTML = `
+        <h2 style="margin-bottom: 1.5rem;">🔗 Traceability Matrix</h2>
+        
+        <div class="card">
+          <h3>Requirements → Implementation</h3>
+          ${matrix.requirements?.length > 0 ? `
+            <ul class="requirements-list">
+              ${matrix.requirements.map(req => `
+                <li class="requirement-item">
+                  <span class="req-id">${req.id}</span>
+                  <span class="req-title">${req.specTitle || ''}</span>
+                  <span class="req-status ${req.status || 'unlinked'}">${req.status || 'unlinked'}</span>
+                </li>
+              `).join('')}
+            </ul>
+          ` : `
+            <div class="empty-state">
+              <p>No requirements to trace</p>
+            </div>
+          `}
+        </div>
+
+        <div class="card">
+          <h3>📊 Trace Links (${matrix.traces?.length || 0})</h3>
+          ${matrix.traces?.length > 0 ? `
+            <ul class="requirements-list">
+              ${matrix.traces.slice(0, 10).map(trace => `
+                <li class="requirement-item">
+                  <span class="req-id">${trace.from}</span>
+                  <span style="color: var(--text-muted);">→</span>
+                  <span class="req-id" style="background: var(--secondary);">${trace.to}</span>
+                  <span class="req-title">${trace.type}</span>
+                </li>
+              `).join('')}
+            </ul>
+          ` : '<p style="color: var(--text-muted); padding: 1rem;">No trace links found</p>'}
+        </div>
+      `;
+    }
+
+    async function renderConstitution(container) {
+      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading constitution...</div>';
+      
+      const constitution = await loadConstitution();
+      
+      if (!constitution || !constitution.articles) {
+        container.innerHTML = `
+          <h2 style="margin-bottom: 1.5rem;">📜 Constitution</h2>
+          <div class="empty-state">
+            <h4>No Constitution</h4>
+            <p>Create a constitution in steering/rules/constitution.md</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <h2 style="margin-bottom: 1.5rem;">📜 Constitution</h2>
+        
+        <div class="card">
+          <h3>Articles (${constitution.articles.length})</h3>
+          ${constitution.articles.map(article => `
+            <div class="constitution-article">
+              <div class="article-number">Article ${article.number}</div>
+              <div>${article.title}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderCoverage(coverage) {
+      const container = document.getElementById('coverageStats');
+      
+      container.innerHTML = `
+        <div style="margin-bottom: 1rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span>Total</span>
+            <span>${coverage.total || 0}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span>Linked</span>
+            <span style="color: var(--secondary);">${coverage.linked || 0} (${coverage.linkedPercent || 0}%)</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span>Implemented</span>
+            <span style="color: var(--success);">${coverage.implemented || 0} (${coverage.implementedPercent || 0}%)</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" style="width: ${coverage.implementedPercent || 0}%"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Initial load
+    loadCoverage();
+  </script>
+</body>
+</html>

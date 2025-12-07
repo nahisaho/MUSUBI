@@ -22,7 +22,8 @@
     "musubi-remember": "bin/musubi-remember.js",
     "musubi-resolve": "bin/musubi-resolve.js",
     "musubi-convert": "bin/musubi-convert.js",
-    "musubi-browser": "bin/musubi-browser.js"
+    "musubi-browser": "bin/musubi-browser.js",
+    "musubi-gui": "bin/musubi-gui.js"
   },
   "scripts": {
     "test": "jest",
@@ -56,12 +57,18 @@
   "dependencies": {
     "@octokit/rest": "^22.0.1",
     "chalk": "^4.1.2",
+    "chokidar": "^3.5.3",
     "commander": "^11.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
     "fs-extra": "^11.3.2",
     "glob": "^10.5.0",
+    "gray-matter": "^4.0.3",
     "inquirer": "^9.0.0",
     "js-yaml": "^4.1.0",
-    "playwright": "^1.40.0"
+    "open": "^10.1.0",
+    "playwright": "^1.40.0",
+    "ws": "^8.14.2"
   },
   "devDependencies": {
     "eslint": "^8.50.0",
