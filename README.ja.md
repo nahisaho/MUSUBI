@@ -21,9 +21,11 @@
 
 MUSUBI（結び）は、6つの主要フレームワークのベスト機能を統合した包括的な**仕様駆動開発（SDD）**フレームワークです。複数のAIコーディングエージェントに対応した本番環境対応ツールです。
 
-<!-- TODO: デモGIFをここに追加
-![MUSUBI Demo](docs/assets/demo.gif)
--->
+<div align="center">
+
+![MUSUBI Demo](docs/assets/demo.svg)
+
+</div>
 
 ## ✨ なぜMUSUBI？
 

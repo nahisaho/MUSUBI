@@ -21,9 +21,11 @@
 
 MUSUBI (結び - "connection/binding") is a comprehensive **Specification Driven Development (SDD)** framework that synthesizes the best features from 6 leading frameworks into a production-ready tool for multiple AI coding agents.
 
-<!-- TODO: Add demo GIF here
-![MUSUBI Demo](docs/assets/demo.gif)
--->
+<div align="center">
+
+![MUSUBI Demo](docs/assets/demo.svg)
+
+</div>
 
 ## ✨ Why MUSUBI?
 

@@ -1,0 +1,13 @@
+{"version": 2, "width": 257, "height": 7, "timestamp": 1765104834, "env": {"SHELL": "/bin/bash", "TERM": "xterm-256color"}}
+[0.004881, "o", "=== MUSUBI Demo ===\r\n\r\n📦 Initialize MUSUBI in 30 seconds...\r\n"]
+[1.013937, "o", "$ npx musubi-sdd init\r\n"]
+[3.023627, "o", "\r\n🎋 MUSUBI Initialized!\r\n   ✅ Created steering/structure.md\r\n   ✅ Created steering/tech.md\r\n   ✅ Created steering/product.md\r\n   ✅ Created 25 Claude Code skills\r\n   ✅ Created constitutional governance\r\n\r\n"]
+[5.035453, "o", "📋 Available SDD Commands:\r\n\r\n  /sdd-requirements  - Generate EARS requirements\r\n  /sdd-design        - Create C4 + ADR designs\r\n  /sdd-tasks         - Break down into tasks\r\n  /sdd-implement     - Execute implementation\r\n  /sdd-validate      - Validate constitution\r\n\r\n"]
+[7.038794, "o", "🔄 Workflow Engine (v2.1.0):\r\n\r\n$ musubi-workflow status\r\n"]
+[8.054088, "o", "\r\n  Current Stage: requirements\r\n  Started: 2025-12-07T10:00:00Z\r\n  Time in Stage: 45 minutes\r\n  Feedback Loops: 2\r\n\r\n"]
+[10.069435, "o", "⚖️ Constitutional Validation:\r\n\r\n$ musubi-validate all\r\n"]
+[11.074833, "o", "\r\n  ✅ Article I:   Library-First Principle\r\n"]
+[11.075018, "o", "  ✅ Article II:  CLI Interface Mandate\r\n  ✅ Article III: Test-First Imperative (87% coverage)\r\n  ✅ Article IV:  EARS Requirements Format\r\n  ✅ Article V:   Traceability Mandate\r\n  ✅ Article VI:  Project Memory\r\n  ✅ Article VII: Simplicity Gate\r\n  ✅ Article VIII: Anti-Abstraction Gate\r\n  ✅ Article IX:  Integration-First Testing\r\n\r\n  📊 Constitutional Compliance: 100%\r\n\r\n"]
+[13.085583, "o", "🤖 Supported AI Coding Agents:\r\n\r\n"]
+[13.08602, "o", "  • Claude Code    - Skills API (25 skills)\r\n  • GitHub Copilot - AGENTS.md\r\n  • Cursor IDE     - AGENTS.md\r\n  • Gemini CLI     - GEMINI.md\r\n  • Codex CLI      - AGENTS.md\r\n  • Qwen Code      - AGENTS.md\r\n  • Windsurf IDE   - AGENTS.md\r\n\r\n"]
+[15.099553, "o", "🎋 MUSUBI - Ultimate Specification Driven Development\r\n   https://github.com/nahisaho/musubi\r\n\r\n"]
