@@ -100,6 +100,36 @@ MUSUBI enforces 9 immutable constitutional articles:
 - **Prompts**: Always read English versions for work
 - **Code References**: Requirement IDs, technical terms stay in English
 
+## OpenHands-Inspired Modules (v3.0.0)
+
+MUSUBI provides advanced AI agent assistance modules:
+
+| Module | Purpose | Import |
+|--------|---------|--------|
+| **StuckDetector** | Detect agent stuck states | `src/analyzers/stuck-detector.js` |
+| **MemoryCondenser** | Compress session history | `src/managers/memory-condenser.js` |
+| **AgentMemoryManager** | Extract & persist learnings | `src/managers/agent-memory.js` |
+| **CriticSystem** | Evaluate SDD stage quality | `src/validators/critic-system.js` |
+| **SecurityAnalyzer** | Detect security risks | `src/analyzers/security-analyzer.js` |
+| **IssueResolver** | GitHub Issue analysis | `src/resolvers/issue-resolver.js` |
+| **SkillLoader** | Load keyword-triggered skills | `src/managers/skill-loader.js` |
+| **RepoSkillManager** | Manage project skills | `src/managers/repo-skill-manager.js` |
+
+### Usage Example
+
+```javascript
+// Detect if agent is stuck
+const { StuckDetector } = require('musubi/src/analyzers/stuck-detector');
+const detector = new StuckDetector();
+detector.addEvent({ type: 'action', content: 'Read file' });
+const analysis = detector.detect();
+
+// Evaluate requirements quality
+const { CriticSystem } = require('musubi/src/validators/critic-system');
+const critic = new CriticSystem();
+const result = await critic.evaluate('requirements', context);
+```
+
 ## Quick Start
 
 ### First Time Setup

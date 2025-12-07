@@ -1,0 +1,146 @@
+name: MUSUBI Issue Resolver
+
+on:
+  issues:
+    types: [opened, labeled]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to resolve'
+        required: true
+        type: number
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: write
+
+jobs:
+  analyze-issue:
+    name: Analyze Issue
+    runs-on: ubuntu-latest
+    # 手動実行、ラベル追加（musubi-resolve）、またはコメント（/musubi resolve）でトリガー
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' && contains(github.event.issue.labels.*.name, 'musubi-resolve')) ||
+      (github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '/musubi resolve'))
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install MUSUBI
+        run: npm install -g musubi-sdd
+
+      - name: Get Issue Number
+        id: issue
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "number=${{ github.event.inputs.issue_number }}" >> $GITHUB_OUTPUT
+          else
+            echo "number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Analyze Issue
+        id: analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          musubi-resolve analyze ${{ steps.issue.outputs.number }} \
+            --output json > analysis.json
+          
+          echo "result<<EOF" >> $GITHUB_OUTPUT
+          cat analysis.json >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Comment Analysis
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const analysis = ${{ steps.analyze.outputs.result }};
+            
+            let comment = `## 🤖 MUSUBI Issue Analysis\n\n`;
+            comment += `**Type**: ${analysis.issueType}\n`;
+            comment += `**Status**: ${analysis.status}\n\n`;
+            
+            if (analysis.requirements && analysis.requirements.length > 0) {
+              comment += `### Extracted Requirements\n\n`;
+              analysis.requirements.forEach((req, i) => {
+                comment += `${i + 1}. ${req}\n`;
+              });
+              comment += '\n';
+            }
+            
+            comment += `### Next Steps\n\n`;
+            comment += `- Add label \`musubi-implement\` to create a branch and PR\n`;
+            comment += `- Or comment \`/musubi implement\` to proceed\n\n`;
+            comment += `---\n_Analyzed by MUSUBI Issue Resolver_`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.issue.outputs.number }},
+              body: comment
+            });
+
+      - name: Add Analyzed Label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.issue.outputs.number }},
+              labels: ['musubi-analyzed']
+            });
+
+  create-pr:
+    name: Create PR
+    runs-on: ubuntu-latest
+    needs: analyze-issue
+    if: |
+      always() &&
+      (contains(github.event.issue.labels.*.name, 'musubi-implement') ||
+       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '/musubi implement')))
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install MUSUBI
+        run: npm install -g musubi-sdd
+
+      - name: Get Issue Number
+        id: issue
+        run: |
+          echo "number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+
+      - name: Create Branch and PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          musubi-resolve implement ${{ steps.issue.outputs.number }} --draft
+
+      - name: Comment Success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.issue.outputs.number }},
+              body: `## ✅ PR Created\n\nA draft PR has been created to address this issue.\n\n_Created by MUSUBI Issue Resolver_`
+            });

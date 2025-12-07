@@ -55,15 +55,15 @@ describe('Platform Initialization Tests', () => {
   });
 
   // Claude Code専用: Skillsディレクトリのテスト
-  test('should have claude-code skills directory with 25 skills', () => {
+  test('should have claude-code skills directory with 27 skills', () => {
     const skillsPath = path.join(TEMPLATE_DIR, 'claude-code', 'skills');
     expect(fs.existsSync(skillsPath)).toBe(true);
 
     const skills = fs.readdirSync(skillsPath);
-    expect(skills.length).toBeGreaterThanOrEqual(25);
+    expect(skills.length).toBeGreaterThanOrEqual(27);
 
     // コアスキルの存在確認
-    const coreSkills = ['orchestrator', 'steering', 'requirements-analyst', 'system-architect'];
+    const coreSkills = ['orchestrator', 'steering', 'requirements-analyst', 'system-architect', 'agent-assistant', 'issue-resolver'];
     coreSkills.forEach(skill => {
       const skillPath = path.join(skillsPath, skill, 'SKILL.md');
       expect(fs.existsSync(skillPath)).toBe(true);

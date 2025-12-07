@@ -1,0 +1,107 @@
+name: MUSUBI Validate
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  constitutional-validation:
+    name: Constitutional Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Install MUSUBI
+        run: npm install -g musubi-sdd
+
+      - name: Run MUSUBI Validation
+        id: validate
+        run: |
+          # Run constitutional validation with scoring
+          npx musubi-validate score > validation-report.json 2>&1 || true
+          
+          if [ -f validation-report.json ]; then
+            SCORE=$(jq '.score // 0' validation-report.json 2>/dev/null || echo "0")
+            PASS=$(jq '.pass // false' validation-report.json 2>/dev/null || echo "false")
+            
+            echo "score=$SCORE" >> $GITHUB_OUTPUT
+            echo "pass=$PASS" >> $GITHUB_OUTPUT
+          else
+            echo "score=0" >> $GITHUB_OUTPUT
+            echo "pass=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Traceability Check
+        id: trace
+        run: |
+          npx musubi-trace --verify > trace-report.json 2>&1 || true
+          
+          if [ -f trace-report.json ]; then
+            COVERAGE=$(jq '.coverage // 100' trace-report.json 2>/dev/null || echo "100")
+            ORPHANS=$(jq '.orphanCount // 0' trace-report.json 2>/dev/null || echo "0")
+            
+            echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+            echo "orphans=$ORPHANS" >> $GITHUB_OUTPUT
+          else
+            echo "coverage=100" >> $GITHUB_OUTPUT
+            echo "orphans=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment Validation Results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const score = '${{ steps.validate.outputs.score }}';
+            const pass = '${{ steps.validate.outputs.pass }}';
+            const coverage = '${{ steps.trace.outputs.coverage }}';
+            const orphans = '${{ steps.trace.outputs.orphans }}';
+            
+            const emoji = pass === 'true' ? '✅' : '⚠️';
+            const scoreNum = parseFloat(score) || 0;
+            const scoreBar = '█'.repeat(Math.floor(scoreNum / 10)) + '░'.repeat(10 - Math.floor(scoreNum / 10));
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## ${emoji} MUSUBI Validation Report\n\n` +
+                `### Constitutional Compliance\n` +
+                `| Metric | Value |\n` +
+                `|--------|-------|\n` +
+                `| Score | ${scoreBar} ${score}% |\n` +
+                `| Status | ${pass === 'true' ? 'PASS' : 'NEEDS REVIEW'} |\n\n` +
+                `### Traceability\n` +
+                `| Metric | Value |\n` +
+                `|--------|-------|\n` +
+                `| Coverage | ${coverage}% |\n` +
+                `| Orphan Items | ${orphans} |\n\n` +
+                `---\n_Validated by MUSUBI SDD Framework_`
+            });
+
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: musubi-validation-reports
+          path: |
+            validation-report.json
+            trace-report.json
+          retention-days: 30

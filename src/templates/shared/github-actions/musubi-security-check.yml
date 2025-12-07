@@ -1,0 +1,89 @@
+name: MUSUBI Security Check
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+
+jobs:
+  security-analysis:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install MUSUBI
+        run: npm install -g musubi-sdd
+
+      - name: Run Security Analysis
+        id: security
+        run: |
+          # 変更されたファイルを取得
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.(js|ts|py|json|yml|yaml)$' || true)
+          else
+            FILES=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(js|ts|py|json|yml|yaml)$' || true)
+          fi
+          
+          if [ -z "$FILES" ]; then
+            echo "No relevant files changed"
+            echo "risks=[]" >> $GITHUB_OUTPUT
+            echo "blocked=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # セキュリティ分析実行
+          echo "$FILES" | xargs musubi-analyze security --format json > security-report.json 2>/dev/null || true
+          
+          if [ -f security-report.json ]; then
+            CRITICAL=$(jq '[.risks[] | select(.severity == "critical")] | length' security-report.json 2>/dev/null || echo "0")
+            HIGH=$(jq '[.risks[] | select(.severity == "high")] | length' security-report.json 2>/dev/null || echo "0")
+            
+            echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+            echo "high=$HIGH" >> $GITHUB_OUTPUT
+            
+            if [ "$CRITICAL" -gt 0 ]; then
+              echo "blocked=true" >> $GITHUB_OUTPUT
+            else
+              echo "blocked=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "blocked=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && steps.security.outputs.blocked == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## 🚨 Security Issues Detected\n\n` +
+                `**Critical**: ${{ steps.security.outputs.critical }}\n` +
+                `**High**: ${{ steps.security.outputs.high }}\n\n` +
+                `Please review the security findings before merging.\n\n` +
+                `---\n_Analyzed by MUSUBI Security Analyzer_`
+            });
+
+      - name: Fail if Critical Issues
+        if: steps.security.outputs.blocked == 'true'
+        run: |
+          echo "::error::Critical security issues detected. Please fix before merging."
+          exit 1

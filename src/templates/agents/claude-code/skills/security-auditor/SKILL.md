@@ -94,6 +94,74 @@ You comprehensively analyze application code, infrastructure configurations, and
 
 ---
 
+## MUSUBI SecurityAnalyzer Module
+
+**Available Module**: `src/analyzers/security-analyzer.js`
+
+The SecurityAnalyzer module provides automated security risk detection for code, commands, and configurations.
+
+### Module Usage
+
+```javascript
+const { 
+  SecurityAnalyzer, 
+  RiskLevel 
+} = require('musubi/src/analyzers/security-analyzer');
+
+const analyzer = new SecurityAnalyzer({
+  strictMode: true,        // Block critical risks
+  allowedCommands: ['npm', 'git', 'node'],
+  ignorePaths: ['node_modules', '.git', 'test']
+});
+
+// Analyze code content
+const result = analyzer.analyzeContent(code, 'src/auth/login.js');
+
+// Check validation status
+const validation = analyzer.validateAction({
+  type: 'command',
+  command: 'rm -rf /tmp/cache'
+});
+
+if (validation.blocked) {
+  console.log('Action blocked:', validation.reason);
+}
+
+// Generate security report
+const report = analyzer.generateReport(result);
+```
+
+### Detection Categories
+
+| Category | Examples |
+|----------|----------|
+| **Secrets** | API keys, passwords, tokens, private keys |
+| **Dangerous Commands** | `rm -rf /`, `chmod 777`, `curl \| bash` |
+| **Vulnerabilities** | eval(), innerHTML, SQL injection |
+| **Network Risks** | Insecure HTTP, disabled TLS verification |
+
+### Risk Levels
+
+- **CRITICAL**: Immediate threat, must block (e.g., hardcoded secrets)
+- **HIGH**: Serious risk, should block (e.g., dangerous commands)
+- **MEDIUM**: Potential risk, requires review (e.g., eval usage)
+- **LOW**: Minor concern, informational (e.g., console.log)
+- **INFO**: Best practice suggestion
+
+### Integration with Security Audit Workflow
+
+1. **Pre-commit Check**: Validate code before commit
+2. **CI/CD Pipeline**: Block deployments with critical risks
+3. **Interactive Audit**: Generate detailed reports with remediation
+
+```bash
+# CLI Integration (planned)
+musubi-analyze security --file src/auth/login.js
+musubi-analyze security --scan ./src --report markdown
+```
+
+---
+
 ---
 
 ## Project Memory (Steering System)

@@ -29,6 +29,86 @@ You ensure that products meet requirements and maintain high quality by formulat
 
 ---
 
+## MUSUBI Quality Modules
+
+### CriticSystem (`src/validators/critic-system.js`)
+
+Automated SDD stage quality evaluation:
+
+```javascript
+const { CriticSystem, CriticResult } = require('musubi/src/validators/critic-system');
+
+const critic = new CriticSystem();
+
+// Evaluate requirements quality
+const reqResult = await critic.evaluate('requirements', {
+  projectRoot: process.cwd(),
+  content: reqDocument
+});
+
+console.log(reqResult.score);      // 0.85
+console.log(reqResult.grade);      // 'B'
+console.log(reqResult.success);    // true (score >= 0.5)
+console.log(reqResult.feedback);   // Improvement suggestions
+
+// Evaluate all stages
+const allResults = await critic.evaluateAll({
+  projectRoot: process.cwd()
+});
+
+// Generate markdown report
+const report = critic.generateReport(allResults);
+```
+
+### Quality Gate Criteria
+
+| Stage | Minimum Score | Key Checks |
+|-------|--------------|------------|
+| Requirements | 0.5 | EARS format, completeness, testability |
+| Design | 0.5 | C4 diagrams, ADR presence |
+| Implementation | 0.5 | Test coverage, code quality, docs |
+
+### MemoryCondenser (`src/managers/memory-condenser.js`)
+
+Manage session quality over long QA reviews:
+
+```javascript
+const { MemoryCondenser, MemoryEvent } = require('musubi/src/managers/memory-condenser');
+
+const condenser = MemoryCondenser.create('recent', {
+  maxEvents: 100,
+  keepRecent: 30
+});
+
+// Condense long QA session history
+const events = qaSessionEvents.map(e => new MemoryEvent({
+  type: e.type,
+  content: e.content,
+  important: e.type === 'defect_found'
+}));
+
+const condensed = await condenser.condense(events);
+```
+
+### AgentMemoryManager (`src/managers/agent-memory.js`)
+
+Persist QA learnings for future sessions:
+
+```javascript
+const { AgentMemoryManager, LearningCategory } = require('musubi/src/managers/agent-memory');
+
+const manager = new AgentMemoryManager({ autoSave: true });
+await manager.initialize();
+
+// Extract QA patterns from session
+const learnings = manager.extractLearnings(qaEvents);
+
+// Filter by category
+const errorPatterns = manager.getLearningsByCategory(LearningCategory.ERROR_SOLUTION);
+```
+
+---
+
 ---
 
 ## Project Memory (Steering System)

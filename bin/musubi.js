@@ -387,7 +387,7 @@ program
     console.log(chalk.white('Documentation:'));
     console.log(chalk.gray('   https://github.com/your-org/musubi\n'));
 
-    console.log(chalk.white('25 Claude Code Skills:'));
+    console.log(chalk.white('27 Claude Code Skills:'));
     console.log(chalk.gray('   Orchestration: orchestrator, steering, constitution-enforcer'));
     console.log(
       chalk.gray('   Requirements: requirements-analyst, project-manager, change-impact-analyzer')
@@ -397,7 +397,7 @@ program
         '   Architecture: system-architect, api-designer, database-schema-designer, ui-ux-designer'
       )
     );
-    console.log(chalk.gray('   Development: software-developer'));
+    console.log(chalk.gray('   Development: software-developer, issue-resolver'));
     console.log(
       chalk.gray(
         '   Quality: test-engineer, code-reviewer, bug-hunter, quality-assurance, traceability-auditor'
@@ -409,7 +409,8 @@ program
         '   Infrastructure: devops-engineer, cloud-architect, database-administrator, site-reliability-engineer, release-coordinator'
       )
     );
-    console.log(chalk.gray('   Documentation: technical-writer, ai-ml-engineer\n'));
+    console.log(chalk.gray('   Documentation: technical-writer, ai-ml-engineer'));
+    console.log(chalk.gray('   Agent Support: agent-assistant (v3.0.0 NEW)\n'));
 
     console.log(chalk.white('Advanced CLI Commands (standalone):'));
     console.log(chalk.gray('   musubi-requirements  # EARS requirements generator'));

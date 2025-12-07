@@ -60,10 +60,11 @@ program
   .name('musubi-analyze')
   .description('Analyze codebase for quality, complexity, and technical debt')
   .version('0.5.0')
-  .option('-t, --type <type>', 'Analysis type: quality, dependencies, security, all', 'all')
+  .option('-t, --type <type>', 'Analysis type: quality, dependencies, security, stuck, all', 'all')
   .option('-o, --output <file>', 'Output file for analysis report')
   .option('--json', 'Output in JSON format')
   .option('--threshold <level>', 'Quality threshold: low, medium, high', 'medium')
+  .option('--detect-stuck', 'Detect stuck agent patterns (repetitive errors, circular edits)')
   .option('-v, --verbose', 'Verbose output')
   .parse(process.argv);
 
@@ -406,6 +407,210 @@ async function generateReport(analysisData) {
 }
 
 // ============================================================================
+// Stuck Detection Analysis
+// ============================================================================
+
+async function analyzeStuckPatterns() {
+  log('Stuck Pattern Analysis', 'analyze');
+  console.log();
+
+  const stuckPatterns = {
+    isStuck: false,
+    confidence: 0,
+    patterns: [],
+    suggestions: []
+  };
+
+  try {
+    // Check git log for repetitive patterns
+    const { execSync } = require('child_process');
+    
+    // Get recent commits
+    let commits = [];
+    try {
+      const gitLog = execSync(
+        'git log --oneline -20 --format="%h|%s" 2>/dev/null',
+        { encoding: 'utf8' }
+      ).trim();
+      commits = gitLog.split('\n').filter(Boolean).map(line => {
+        const [hash, ...msgParts] = line.split('|');
+        return { hash, message: msgParts.join('|') };
+      });
+    } catch {
+      // Not in git repo or no commits
+    }
+
+    // Pattern 1: Repetitive revert/fix cycles
+    const revertPattern = commits.filter(c => 
+      c.message.toLowerCase().includes('revert') ||
+      c.message.toLowerCase().includes('undo')
+    );
+    if (revertPattern.length >= 3) {
+      stuckPatterns.patterns.push({
+        type: 'revert-cycle',
+        severity: 'high',
+        message: `${revertPattern.length} revert commits detected in recent history`,
+        commits: revertPattern.slice(0, 3).map(c => c.message)
+      });
+      stuckPatterns.confidence += 30;
+    }
+
+    // Pattern 2: Same file edited repeatedly
+    let recentChanges = [];
+    try {
+      const gitDiff = execSync(
+        'git diff --stat HEAD~5 HEAD 2>/dev/null',
+        { encoding: 'utf8' }
+      ).trim();
+      recentChanges = gitDiff.split('\n').filter(Boolean);
+    } catch {
+      // No recent changes or not enough history
+    }
+
+    const fileEditCounts = {};
+    for (let i = 0; i < Math.min(commits.length, 10); i++) {
+      try {
+        const files = execSync(
+          `git show --name-only --format= ${commits[i].hash} 2>/dev/null`,
+          { encoding: 'utf8' }
+        ).trim().split('\n').filter(Boolean);
+        files.forEach(f => {
+          fileEditCounts[f] = (fileEditCounts[f] || 0) + 1;
+        });
+      } catch {
+        // Skip this commit
+      }
+    }
+
+    const frequentlyEdited = Object.entries(fileEditCounts)
+      .filter(([, count]) => count >= 4)
+      .map(([file, count]) => ({ file, count }));
+
+    if (frequentlyEdited.length > 0) {
+      stuckPatterns.patterns.push({
+        type: 'circular-edit',
+        severity: 'medium',
+        message: 'Files being edited repeatedly without resolution',
+        files: frequentlyEdited
+      });
+      stuckPatterns.confidence += 25;
+    }
+
+    // Pattern 3: Test failures in recent runs
+    const testResultsPath = path.join(process.cwd(), 'coverage', 'test-results.json');
+    if (fs.existsSync(testResultsPath)) {
+      try {
+        const testResults = fs.readJsonSync(testResultsPath);
+        if (testResults.numFailedTests > 0) {
+          stuckPatterns.patterns.push({
+            type: 'test-failure',
+            severity: 'medium',
+            message: `${testResults.numFailedTests} tests failing`,
+            failedTests: testResults.testResults?.filter(t => t.status === 'failed').slice(0, 5)
+          });
+          stuckPatterns.confidence += 20;
+        }
+      } catch {
+        // Cannot read test results
+      }
+    }
+
+    // Pattern 4: Error log patterns
+    const errorLogPath = path.join(process.cwd(), 'logs', 'error.log');
+    if (fs.existsSync(errorLogPath)) {
+      try {
+        const errorLog = fs.readFileSync(errorLogPath, 'utf8');
+        const recentErrors = errorLog.split('\n').slice(-50);
+        const errorCounts = {};
+        recentErrors.forEach(line => {
+          const match = line.match(/Error: (.+)/);
+          if (match) {
+            const key = match[1].slice(0, 50);
+            errorCounts[key] = (errorCounts[key] || 0) + 1;
+          }
+        });
+
+        const repetitiveErrors = Object.entries(errorCounts)
+          .filter(([, count]) => count >= 3)
+          .map(([error, count]) => ({ error, count }));
+
+        if (repetitiveErrors.length > 0) {
+          stuckPatterns.patterns.push({
+            type: 'repetitive-error',
+            severity: 'high',
+            message: 'Same errors occurring repeatedly',
+            errors: repetitiveErrors
+          });
+          stuckPatterns.confidence += 30;
+        }
+      } catch {
+        // Cannot read error log
+      }
+    }
+
+    // Determine if stuck
+    stuckPatterns.isStuck = stuckPatterns.confidence >= 50;
+
+    // Generate suggestions based on patterns
+    if (stuckPatterns.patterns.some(p => p.type === 'revert-cycle')) {
+      stuckPatterns.suggestions.push('Consider stepping back to review the overall approach');
+      stuckPatterns.suggestions.push('Break down the problem into smaller, testable pieces');
+    }
+    if (stuckPatterns.patterns.some(p => p.type === 'circular-edit')) {
+      stuckPatterns.suggestions.push('Focus on one file at a time and verify changes work');
+      stuckPatterns.suggestions.push('Run tests after each change to catch issues early');
+    }
+    if (stuckPatterns.patterns.some(p => p.type === 'test-failure')) {
+      stuckPatterns.suggestions.push('Fix failing tests before making new changes');
+      stuckPatterns.suggestions.push('Review test expectations vs implementation');
+    }
+    if (stuckPatterns.patterns.some(p => p.type === 'repetitive-error')) {
+      stuckPatterns.suggestions.push('Address root cause of repetitive errors');
+      stuckPatterns.suggestions.push('Consider using different approach if error persists');
+    }
+
+    // Display results
+    if (stuckPatterns.isStuck) {
+      console.log(chalk.bold.red('🚨 Stuck Pattern Detected!\n'));
+    } else if (stuckPatterns.patterns.length > 0) {
+      console.log(chalk.bold.yellow('⚠️ Potential Issues Found\n'));
+    } else {
+      console.log(chalk.bold.green('✓ No stuck patterns detected\n'));
+      return stuckPatterns;
+    }
+
+    console.log(chalk.dim(`Confidence: ${stuckPatterns.confidence}%\n`));
+
+    stuckPatterns.patterns.forEach(pattern => {
+      const severityColor = {
+        high: chalk.red,
+        medium: chalk.yellow,
+        low: chalk.blue
+      }[pattern.severity] || chalk.white;
+
+      console.log(severityColor(`[${pattern.severity.toUpperCase()}] ${pattern.type}`));
+      console.log(chalk.dim(`  ${pattern.message}`));
+      console.log();
+    });
+
+    if (stuckPatterns.suggestions.length > 0) {
+      console.log(chalk.bold('Suggestions:'));
+      stuckPatterns.suggestions.forEach(s => {
+        console.log(chalk.cyan(`  → ${s}`));
+      });
+      console.log();
+    }
+
+    return stuckPatterns;
+  } catch (error) {
+    if (options.verbose) {
+      log(`Stuck analysis error: ${error.message}`, 'error');
+    }
+    return stuckPatterns;
+  }
+}
+
+// ============================================================================
 // Main Function
 // ============================================================================
 
@@ -415,6 +620,19 @@ async function main() {
   const analysisData = {};
 
   try {
+    // Handle --detect-stuck option
+    if (options.detectStuck || options.type === 'stuck') {
+      analysisData.stuck = await analyzeStuckPatterns();
+      
+      if (options.json) {
+        console.log(JSON.stringify(analysisData.stuck, null, 2));
+      }
+      
+      if (options.type === 'stuck') {
+        process.exit(analysisData.stuck?.isStuck ? 1 : 0);
+      }
+    }
+
     if (options.type === 'quality' || options.type === 'all') {
       analysisData.quality = await analyzeQuality();
     }

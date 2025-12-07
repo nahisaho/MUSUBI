@@ -107,6 +107,93 @@ program
     }
   });
 
+// Score validation (numeric score output for CI/CD)
+program
+  .command('score')
+  .description('Calculate constitutional compliance score (0-100)')
+  .option('-f, --format <type>', 'Output format (console|json)', 'console')
+  .option('--threshold <number>', 'Minimum passing score (default: 70)', '70')
+  .action(async options => {
+    try {
+      const validator = new ConstitutionValidator(process.cwd());
+      
+      console.log(chalk.dim('📊 Calculating constitutional compliance score...\n'));
+
+      const [constitutionResults, gatesResults, complexityResults] = await Promise.all([
+        validator.validateAll(),
+        validator.validateGates(),
+        validator.validateComplexity(),
+      ]);
+
+      // Calculate weighted score
+      const constitutionScore = constitutionResults.passed ? 100 : 
+        Math.max(0, 100 - (constitutionResults.violations?.length || 0) * 10);
+      const gatesScore = gatesResults.passed ? 100 : 
+        Math.max(0, 100 - (gatesResults.violations?.length || 0) * 15);
+      const complexityScore = complexityResults.passed ? 100 : 
+        Math.max(0, 100 - (complexityResults.violations?.length || 0) * 5);
+
+      // Weighted average: Constitution 50%, Gates 30%, Complexity 20%
+      const overallScore = Math.round(
+        constitutionScore * 0.5 + gatesScore * 0.3 + complexityScore * 0.2
+      );
+
+      const threshold = parseInt(options.threshold) || 70;
+      const passed = overallScore >= threshold;
+
+      const result = {
+        score: overallScore,
+        pass: passed,
+        threshold,
+        breakdown: {
+          constitution: { score: constitutionScore, weight: '50%' },
+          gates: { score: gatesScore, weight: '30%' },
+          complexity: { score: complexityScore, weight: '20%' }
+        },
+        timestamp: new Date().toISOString()
+      };
+
+      if (options.format === 'json') {
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        const scoreBar = '█'.repeat(Math.floor(overallScore / 10)) + 
+                        '░'.repeat(10 - Math.floor(overallScore / 10));
+        
+        console.log(chalk.bold('Constitutional Compliance Score\n'));
+        console.log(chalk.bold('━'.repeat(50)));
+        console.log(`\n${scoreBar} ${chalk.bold(overallScore)}%\n`);
+        
+        console.log(chalk.dim('Breakdown:'));
+        console.log(`  Constitution (50%): ${constitutionScore}%`);
+        console.log(`  Gates (30%):        ${gatesScore}%`);
+        console.log(`  Complexity (20%):   ${complexityScore}%`);
+        
+        console.log('\n' + chalk.bold('━'.repeat(50)));
+        
+        if (passed) {
+          console.log(chalk.bold.green(`\n✓ PASSED (threshold: ${threshold}%)\n`));
+        } else {
+          console.log(chalk.bold.red(`\n✗ FAILED (threshold: ${threshold}%, got: ${overallScore}%)\n`));
+        }
+      }
+
+      process.exit(passed ? 0 : 1);
+    } catch (error) {
+      console.error(chalk.red('✗ Score calculation error:'), error.message);
+      process.exit(1);
+    }
+  });
+
+// All validations (duplicate removed, keeping original)
+
+      displayResults('Complexity Validation', results, options);
+      process.exit(results.passed ? 0 : 1);
+    } catch (error) {
+      console.error(chalk.red('✗ Validation error:'), error.message);
+      process.exit(1);
+    }
+  });
+
 // All validations
 program
   .command('all')

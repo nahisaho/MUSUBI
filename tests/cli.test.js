@@ -76,12 +76,13 @@ describe('MUSUBI CLI', () => {
       expect(output).toContain('Node.js:');
     });
 
-    it('should list all 25 skills', () => {
+    it('should list all 27 skills', () => {
       const output = execSync(`${musubi} info`, { encoding: 'utf8' });
-      expect(output).toContain('25 Claude Code Skills');
+      expect(output).toContain('27 Claude Code Skills');
       expect(output).toContain('orchestrator');
       expect(output).toContain('requirements-analyst');
       expect(output).toContain('software-developer');
+      expect(output).toContain('agent-assistant');
     });
   });
 

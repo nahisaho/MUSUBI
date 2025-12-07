@@ -1,7 +1,7 @@
 {
   "name": "musubi-sdd",
-  "version": "2.1.1",
-  "description": "Ultimate Specification Driven Development Tool with 25 Agents for 7 AI Coding Platforms + MCP Integration (Claude Code, GitHub Copilot, Cursor, Gemini CLI, Windsurf, Codex, Qwen Code)",
+  "version": "2.2.0",
+  "description": "Ultimate Specification Driven Development Tool with 27 Agents for 7 AI Coding Platforms + MCP Integration (Claude Code, GitHub Copilot, Cursor, Gemini CLI, Windsurf, Codex, Qwen Code)",
   "main": "src/index.js",
   "bin": {
     "musubi-sdd": "bin/musubi.js",
@@ -18,7 +18,9 @@
     "musubi-trace": "bin/musubi-trace.js",
     "musubi-gaps": "bin/musubi-gaps.js",
     "musubi-change": "bin/musubi-change.js",
-    "musubi-workflow": "bin/musubi-workflow.js"
+    "musubi-workflow": "bin/musubi-workflow.js",
+    "musubi-remember": "bin/musubi-remember.js",
+    "musubi-resolve": "bin/musubi-resolve.js"
   },
   "scripts": {
     "test": "jest",
@@ -50,9 +52,10 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@octokit/rest": "^22.0.1",
     "chalk": "^4.1.2",
     "commander": "^11.0.0",
-    "fs-extra": "^11.0.0",
+    "fs-extra": "^11.3.2",
     "glob": "^10.5.0",
     "inquirer": "^9.0.0",
     "js-yaml": "^4.1.0"

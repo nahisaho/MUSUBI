@@ -5,6 +5,88 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2025-12-07
+
+### Added - OpenHands-Inspired Features 🤖
+
+**MUSUBI v2.2.0 introduces 8 new modules** inspired by OpenHands autonomous agent framework, significantly enhancing agent reliability and automation capabilities.
+
+#### New Modules (8 total)
+
+| Module | Purpose | Tests |
+|--------|---------|-------|
+| **StuckDetector** | Detect agent stuck patterns (5 scenarios) | 74 |
+| **SkillsLoader** | Keyword-triggered skill loading | 26 |
+| **MemoryCondenser** | Compress conversation history | 24 |
+| **CriticSystem** | Multi-critic validation system | 35 |
+| **IssueResolver** | GitHub Issue auto-resolution | 35 |
+| **SecurityAnalyzer** | Code security analysis | 35 |
+| **AgentMemoryManager** | Persistent agent memory | 30 |
+| **GitHubClient** | GitHub API integration | - |
+
+#### New CLI Commands
+
+```bash
+# Stuck pattern detection
+musubi-analyze --detect-stuck
+
+# Constitutional compliance scoring
+musubi-validate score
+musubi-validate score --threshold 80 --format json
+
+# Agent memory management
+musubi-remember add "Important insight" --type decision --priority high
+musubi-remember list --type insight
+musubi-remember search "authentication"
+musubi-remember condense
+musubi-remember clear --force
+
+# GitHub Issue resolution
+musubi-resolve 42
+musubi-resolve --url https://github.com/owner/repo/issues/42
+musubi-resolve 42 --dry-run
+musubi-resolve list
+```
+
+#### New GitHub Actions Workflows
+
+- **musubi-issue-resolver.yml**: Automated Issue resolution with PR creation
+- **musubi-security-check.yml**: Security analysis on PRs
+- **musubi-validate.yml**: Constitutional validation with scoring
+
+#### New Skills (2 total, 27 total now)
+
+- **agent-assistant**: StuckDetector, MemoryCondenser, AgentMemoryManager integration
+- **issue-resolver**: IssueResolver, GitHub API integration
+
+#### Updated Skills (4)
+
+- **security-auditor**: SecurityAnalyzer integration
+- **orchestrator**: All 8 modules overview
+- **bug-hunter**: StuckDetector, IssueResolver, SecurityAnalyzer
+- **quality-assurance**: CriticSystem, MemoryCondenser, AgentMemoryManager
+
+#### Platform Updates
+
+All 6 agent platform configurations updated with OpenHands modules section:
+- GitHub Copilot (`AGENTS.md`)
+- Cursor (`AGENTS.md`)
+- Windsurf (`AGENTS.md`)
+- Gemini CLI (`GEMINI.md`)
+- Codex (`AGENTS.md`)
+- Qwen Code (`QWEN.md`)
+
+### Dependencies
+
+- Added: `@octokit/rest` for GitHub API integration
+
+### Tests
+
+- **483 tests passing** (up from 224 in v2.1.1)
+- 259 new tests for OpenHands modules
+
+---
+
 ## [2.1.1] - 2025-12-05
 
 ### Added - Workflow Engine Integration to All Key Agents
