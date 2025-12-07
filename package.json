@@ -20,7 +20,8 @@
     "musubi-change": "bin/musubi-change.js",
     "musubi-workflow": "bin/musubi-workflow.js",
     "musubi-remember": "bin/musubi-remember.js",
-    "musubi-resolve": "bin/musubi-resolve.js"
+    "musubi-resolve": "bin/musubi-resolve.js",
+    "musubi-convert": "bin/musubi-convert.js"
   },
   "scripts": {
     "test": "jest",

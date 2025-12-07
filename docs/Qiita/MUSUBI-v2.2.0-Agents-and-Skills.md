@@ -4,11 +4,31 @@
 
 MUSUBI (Specification Driven Development) v2.2.0は、Claude Codeを活用した仕様駆動開発フレームワークです。本記事では、MUSUBIに搭載された **25の専門AIエージェント（Skill）** について、それぞれの役割、使用可能なツール、専門領域を詳しく解説します。
 
-## インストール
+## インストール・アップグレード
+
+### 新規インストール
 
 ```bash
-npx musubi init --copilot
+# Claude Code用（デフォルト）
+npx musubi-sdd@2.2.0 init
+
+# GitHub Copilot用
+npx musubi-sdd@2.2.0 init --copilot
+
+# Cursor IDE用
+npx musubi-sdd@2.2.0 init --cursor
 ```
+
+### 既存プロジェクトのアップグレード
+
+```bash
+# v2.2.0にアップグレード
+npx musubi-sdd@2.2.0 init
+
+# Skillsとコマンドが自動的に更新されます
+```
+
+**注意:** `npx`を使用すると常に最新版が実行されます。グローバルインストールは不要です。
 
 ## エージェント（Skill）の概要
 
@@ -869,7 +889,7 @@ community                 - コミュニティ検出
 
 Orchestratorが自動実行：
 1. Python環境確認
-2. codegraph-mcp-server インストール
+2. codegraph-mcp-serverインストール
 3. プロジェクトのインデックス作成
 4. 使用環境に応じた設定ファイル生成
 
