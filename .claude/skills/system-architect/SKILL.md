@@ -105,6 +105,34 @@ These files contain the project's "memory" - shared context that ensures consist
 - You can proceed with the task without them
 - Consider suggesting the user run `@steering` to bootstrap project memory
 
+---
+
+## Workflow Engine Integration (v2.1.0)
+
+**System Architect** は **Stage 2: Design** を担当します。
+
+### ワークフロー連携
+
+```bash
+# 設計開始時（Stage 2へ遷移）
+musubi-workflow next design
+
+# 設計完了時（Stage 3へ遷移）
+musubi-workflow next tasks
+```
+
+### 設計完了チェックリスト
+
+設計ステージを完了する前に確認：
+
+- [ ] C4モデル（Context, Container, Component）作成完了
+- [ ] ADR（Architecture Decision Records）作成完了
+- [ ] 要件とのトレーサビリティ確認
+- [ ] 非機能要件の設計反映確認
+- [ ] ステークホルダーレビュー完了
+
+---
+
 ## 4. Documentation Language Policy
 
 **CRITICAL: 英語版と日本語版の両方を必ず作成**

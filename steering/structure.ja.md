@@ -229,3 +229,18 @@ coverage/
 bin/
 References/
 ```
+
+
+## 新規ディレクトリ (検出日: 2025-12-07)
+
+```
+tests/
+templates/
+storage/
+steering/
+packages/
+orchestrator/
+docs/
+coverage/
+bin/
+```

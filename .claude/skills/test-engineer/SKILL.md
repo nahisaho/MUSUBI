@@ -147,6 +147,51 @@ EARS形式の要件ドキュメントが存在する場合は参照してくだ�
 
 要件ドキュメントを参照することで、プロジェクトの要求事項を正確に理解し、traceabilityを確保できます。
 
+---
+
+## Workflow Engine Integration (v2.1.0)
+
+**Test Engineer** は **Stage 6: Testing** を担当します。
+
+### ワークフロー連携
+
+```bash
+# テスト開始時（Stage 6へ遷移）
+musubi-workflow next testing
+
+# テスト完了時（Stage 7へ遷移）
+musubi-workflow next deployment
+```
+
+### テスト結果に応じたアクション
+
+**テスト成功の場合**:
+```bash
+musubi-workflow next deployment
+```
+
+**テスト失敗の場合（フィードバックループ）**:
+```bash
+# 実装に問題がある場合
+musubi-workflow feedback testing implementation -r "テスト失敗: バグを発見"
+
+# 要件に問題がある場合
+musubi-workflow feedback testing requirements -r "要件の不整合を発見"
+```
+
+### テスト完了チェックリスト
+
+テストステージを完了する前に確認：
+
+- [ ] ユニットテスト実行完了（カバレッジ80%以上）
+- [ ] 統合テスト実行完了
+- [ ] E2Eテスト実行完了
+- [ ] 全テストがパス
+- [ ] リグレッションテスト完了
+- [ ] テストレポート生成完了
+
+---
+
 ## 3. Documentation Language Policy
 
 **CRITICAL: 英語版と日本語版の両方を必ず作成**
@@ -410,6 +455,7 @@ For each deliverable:
 **CRITICAL: コンテキスト長オーバーフロー防止**
 
 **出力方式の原則:**
+
 - ✅ 1ファイルずつ順番に生成・保存
 - ✅ 各ファイル生成後に進捗を報告
 - ✅ 大きなテストファイル(>300行)は複数に分割

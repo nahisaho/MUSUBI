@@ -415,9 +415,9 @@ tests/
 templates/
 storage/
 steering/
+packages/
 orchestrator/
 docs/
 coverage/
 bin/
-References/
 ```

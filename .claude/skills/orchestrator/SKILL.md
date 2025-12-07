@@ -168,6 +168,68 @@ The Orchestrator can leverage all MUSUBI CLI commands to execute tasks efficient
 
 ---
 
+## OpenHands-Inspired Modules (v3.0.0)
+
+Orchestrator can leverage advanced AI agent modules inspired by OpenHands:
+
+### Available Modules
+
+| Module | Purpose | Use Case |
+|--------|---------|----------|
+| **StuckDetector** | Detect agent stuck states | When agent loops or doesn't progress |
+| **MemoryCondenser** | Compress session history | Long sessions exceeding context |
+| **AgentMemoryManager** | Extract & persist learnings | Session knowledge capture |
+| **CriticSystem** | Evaluate SDD stage quality | Quality gates before transitions |
+| **SecurityAnalyzer** | Detect security risks | Pre-commit/deployment checks |
+| **IssueResolver** | GitHub Issue analysis | Issue → SDD workflow |
+| **SkillLoader** | Load keyword-triggered skills | Dynamic skill activation |
+| **RepoSkillManager** | Manage .musubi/skills/ | Project-specific skills |
+
+### Module Integration Examples
+
+#### Stuck Detection
+```javascript
+const { StuckDetector } = require('musubi/src/analyzers/stuck-detector');
+const detector = new StuckDetector();
+// Monitor agent events
+detector.addEvent({ type: 'action', content: 'Read file.js' });
+const analysis = detector.detect();
+if (analysis) {
+  console.log('Stuck:', analysis.scenario, analysis.getMessage());
+}
+```
+
+#### Quality Evaluation
+```javascript
+const { CriticSystem } = require('musubi/src/validators/critic-system');
+const critic = new CriticSystem();
+const result = await critic.evaluate('requirements', context);
+if (result.success) {
+  // Proceed to next stage
+}
+```
+
+#### Security Pre-check
+```javascript
+const { SecurityAnalyzer } = require('musubi/src/analyzers/security-analyzer');
+const analyzer = new SecurityAnalyzer({ strictMode: true });
+const validation = analyzer.validateAction({ type: 'command', command: cmd });
+if (validation.blocked) {
+  // Prevent risky action
+}
+```
+
+### Orchestrator Integration Points
+
+1. **Before Stage Transition**: Run CriticSystem to validate quality
+2. **On Agent Stuck**: Use StuckDetector to identify and resolve
+3. **Session End**: Extract learnings with AgentMemoryManager
+4. **Long Sessions**: Condense memory with MemoryCondenser
+5. **Security Actions**: Validate with SecurityAnalyzer
+6. **Issue Workflow**: Parse issues with IssueResolver
+
+---
+
 ## CodeGraph MCP Server Integration
 
 Orchestratorは **CodeGraphMCPServer** を活用して、コードベースの高度な構造分析を行えます。

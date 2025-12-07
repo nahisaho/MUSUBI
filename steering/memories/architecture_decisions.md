@@ -5,6 +5,20 @@
 **Decision**: Synchronized steering documents with codebase changes
 
 **Changes Detected**:
+- Version in project.yml (2.2.0) differs from package.json (3.0.0)
+- New frameworks detected: Express
+- Update tech.md with new frameworks: Express
+- New directories detected: tests, templates, storage, steering, packages, orchestrator, docs, coverage, bin
+
+**Action**: Automatically updated steering documents via `musubi-sync`
+
+---
+
+## [2025-12-07] Steering Sync - Automatic Update
+
+**Decision**: Synchronized steering documents with codebase changes
+
+**Changes Detected**:
 - Version in project.yml (1.1.2) differs from package.json (2.2.0)
 - Languages no longer used: rust, go, java, ruby
 - New directories detected: tests, templates, storage, steering, orchestrator, docs, coverage, bin, References

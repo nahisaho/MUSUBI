@@ -66,6 +66,45 @@ These files contain the project's "memory" - shared context that ensures consist
 - You can proceed with the task without them
 - Consider suggesting the user run `@steering` to bootstrap project memory
 
+---
+
+## Workflow Engine Integration (v2.1.0)
+
+**MUSUBI Workflow Engine** を使用してプロジェクトの進捗を管理できます。
+
+### ワークフロー状態確認
+
+プロジェクト作業開始時に、現在のワークフロー状態を確認：
+
+```bash
+musubi-workflow status
+```
+
+### プロジェクトマネージャーの役割
+
+| ワークフローステージ | PMの主な責務 |
+|---------------------|-------------|
+| Stage 0: Spike | 調査範囲の定義、期間設定 |
+| Stage 1-3: Requirements→Design→Tasks | 進捗追跡、リソース配分 |
+| Stage 4-6: Implementation→Review→Testing | リスク管理、ブロッカー解消 |
+| Stage 7-8: Deployment→Monitoring | リリース計画、本番監視 |
+| Stage 9: Retrospective | 振り返りファシリテーション |
+
+### 推奨コマンド
+
+```bash
+# ワークフロー初期化（新プロジェクト開始時）
+musubi-workflow init <project-name>
+
+# メトリクス確認（進捗レビュー時）
+musubi-workflow metrics
+
+# 履歴確認（振り返り時）
+musubi-workflow history
+```
+
+---
+
 ## 3. Documentation Language Policy
 
 **CRITICAL: 英語版と日本語版の両方を必ず作成**

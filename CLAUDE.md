@@ -1,4 +1,4 @@
-# MUSUBI - N
+# MUSUBI - musubi
 
 A software project using MUSUBI SDD
 
@@ -36,5 +36,5 @@ Check `.claude/skills/` directory for all installed skills.
 ---
 
 **Agent**: Claude Code
-**Initialized**: 2025-11-22
+**Initialized**: 2025-12-07
 **MUSUBI Version**: 0.1.0
