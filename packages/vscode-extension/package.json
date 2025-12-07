@@ -1,0 +1,207 @@
+{
+  "name": "musubi-sdd",
+  "displayName": "MUSUBI SDD",
+  "description": "Ultimate Specification Driven Development Tool - 27 Skills, 7 AI Platforms",
+  "version": "0.1.0",
+  "publisher": "nahisaho",
+  "icon": "resources/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nahisaho/musubi"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Linters",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "sdd",
+    "specification-driven-development",
+    "ai-coding",
+    "claude-code",
+    "github-copilot",
+    "cursor",
+    "requirements",
+    "traceability",
+    "musubi"
+  ],
+  "activationEvents": [
+    "workspaceContains:steering/",
+    "workspaceContains:CLAUDE.md",
+    "workspaceContains:.github/AGENTS.md"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "musubi.init",
+        "title": "MUSUBI: Initialize Project",
+        "category": "MUSUBI"
+      },
+      {
+        "command": "musubi.validate",
+        "title": "MUSUBI: Validate Constitutional Compliance",
+        "category": "MUSUBI"
+      },
+      {
+        "command": "musubi.validateScore",
+        "title": "MUSUBI: Show Compliance Score",
+        "category": "MUSUBI"
+      },
+      {
+        "command": "musubi.requirements",
+        "title": "MUSUBI: Generate Requirements",
+        "category": "MUSUBI"
+      },
+      {
+        "command": "musubi.design",
+        "title": "MUSUBI: Generate Design",
+        "category": "MUSUBI"
+      },
+      {
+        "command": "musubi.tasks",
+        "title": "MUSUBI: Generate Tasks",
+        "category": "MUSUBI"
+      },
+      {
+        "command": "musubi.selectAgent",
+        "title": "MUSUBI: Select AI Agent Platform",
+        "category": "MUSUBI"
+      },
+      {
+        "command": "musubi.openSteering",
+        "title": "MUSUBI: Open Steering File",
+        "category": "MUSUBI"
+      },
+      {
+        "command": "musubi.refresh",
+        "title": "MUSUBI: Refresh Views",
+        "category": "MUSUBI",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "musubi.sync",
+        "title": "MUSUBI: Sync Steering Documents",
+        "category": "MUSUBI"
+      },
+      {
+        "command": "musubi.analyze",
+        "title": "MUSUBI: Analyze Codebase",
+        "category": "MUSUBI"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "musubi-explorer",
+          "title": "MUSUBI SDD",
+          "icon": "resources/icons/musubi.svg"
+        }
+      ]
+    },
+    "views": {
+      "musubi-explorer": [
+        {
+          "id": "musubi-steering",
+          "name": "Steering",
+          "contextualTitle": "Project Steering"
+        },
+        {
+          "id": "musubi-requirements",
+          "name": "Requirements",
+          "contextualTitle": "EARS Requirements"
+        },
+        {
+          "id": "musubi-tasks",
+          "name": "Tasks",
+          "contextualTitle": "Implementation Tasks"
+        },
+        {
+          "id": "musubi-agents",
+          "name": "Skills",
+          "contextualTitle": "Available Skills"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "musubi.refresh",
+          "when": "view =~ /^musubi-/",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "musubi.init",
+          "when": "true"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "MUSUBI SDD",
+      "properties": {
+        "musubi.autoValidate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically validate constitutional compliance on file save"
+        },
+        "musubi.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show MUSUBI status bar item"
+        },
+        "musubi.defaultPlatform": {
+          "type": "string",
+          "default": "claude-code",
+          "enum": [
+            "claude-code",
+            "github-copilot",
+            "cursor",
+            "gemini-cli",
+            "windsurf",
+            "codex",
+            "qwen-code"
+          ],
+          "description": "Default AI coding platform for new projects"
+        },
+        "musubi.cliPath": {
+          "type": "string",
+          "default": "npx musubi-sdd",
+          "description": "Path to MUSUBI CLI executable"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "watch": "npm run compile -- --sourcemap --watch",
+    "package": "npm run compile -- --minify",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test",
+    "test:unit": "jest"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "@vscode/test-cli": "^0.0.4",
+    "@vscode/test-electron": "^2.3.8",
+    "esbuild": "^0.19.8",
+    "eslint": "^8.54.0",
+    "glob": "^13.0.0",
+    "jest": "^29.7.0",
+    "mocha": "^11.7.5",
+    "typescript": "^5.3.2"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}
