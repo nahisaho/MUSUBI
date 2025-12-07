@@ -64,13 +64,16 @@ SDD, マルチエージェント, 要件定義, 設計, AI
 
 ---
 
-## Dev.to Article (English) - To Be Created
+## Dev.to Article (English) - Created ✅
 
 | Check | Item | Status |
 |:-----:|------|--------|
-| ⬜ | Draft created | Pending |
-| ⬜ | English translation/adaptation | Pending |
-| ⬜ | Screenshots/GIFs | Pending |
+| ✅ | File: `docs/DevTo/MUSUBI-Constitutional-AI-for-SDD.md` | Created |
+| ✅ | Title: "MUSUBI: Constitutional AI for SDD" | Set |
+| ✅ | npm/GitHub links | Correct |
+| ✅ | Version info (v2.1.1) | Included |
+| ✅ | CodeGraph MCP section | Included |
+| ✅ | Star CTA | Added |
 | ⬜ | Dev.to post created | Pending |
 
 **Suggested Dev.to Title:**
@@ -82,6 +85,12 @@ MUSUBI: Constitutional AI for Specification-Driven Development
 ```
 ai, coding, productivity, opensource
 ```
+
+**Key Differentiators for Dev.to:**
+- "Vibe Coding" hook (relatable problem)
+- Constitutional AI angle (unique)
+- Before/After metrics (concrete results)
+- Quick Start focus (@orchestrator only)
 
 ---
 
