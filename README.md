@@ -71,7 +71,15 @@ musubi init --windsurf  # Windsurf IDE
 
 ---
 
-## 📊 What's New in v2.1.0
+## 📊 What's New in v3.6.0
+
+- 🧠 **Dynamic Replanning Engine** - AI agents can now dynamically adjust plans when tasks fail
+- 🔌 **LLM Provider Abstraction** - Multi-provider support (Copilot, Anthropic, OpenAI)
+- 📡 **Real-time Plan Monitoring** - Detect failures, timeouts, and quality degradation
+- 🔄 **Alternative Path Generation** - LLM-powered alternative strategies with confidence scoring
+- 📝 **Replan History & Audit** - Full audit trail with JSONL persistence and export
+
+### Previous (v3.5.1)
 
 - 🔄 **Workflow Engine** - New `musubi-workflow` CLI for stage management and metrics
 - 📊 **Metrics Collection** - Track time per stage, iteration counts, feedback loops
@@ -80,7 +88,12 @@ musubi init --windsurf  # Windsurf IDE
 - 🔄 **Retrospective Stage** - Stage 9 for continuous improvement
 - ✅ **Stage Validation Guide** - Checklists for stage transition validation
 
-### Previous (v2.0.0)
+### Previous (v3.5.1)
+
+- 🔧 **CLI Integration** - Added CLI command references to all 8 Claude Code skills
+- 📚 **Platform Documentation** - CLI Commands section added to all 6 non-Claude platforms
+
+### v2.1.0
 
 - 🔌 **CodeGraphMCPServer Integration** - 14 MCP tools for enhanced code analysis
 - 🧠 **GraphRAG-Powered Search** - Semantic code understanding with Louvain community detection
@@ -89,7 +102,8 @@ musubi init --windsurf  # Windsurf IDE
 ## Features
 
 - 🤖 **Multi-Agent Support** - Works with 7 AI coding agents (Claude Code, GitHub Copilot, Cursor, Gemini CLI, Codex CLI, Qwen Code, Windsurf)
-- 🔌 **MCP Server Integration** - CodeGraphMCPServer for advanced code analysis (NEW in v2.0.0)
+- 🧠 **Dynamic Replanning** - AI agents dynamically adjust plans on failure with LLM-powered alternatives (NEW in v3.6.0)
+- 🔌 **MCP Server Integration** - CodeGraphMCPServer for advanced code analysis (v2.0.0)
 - 📄 **Flexible Command Formats** - Supports Markdown, TOML, and AGENTS.md formats
 - 🎯 **25 Specialized Agents (All Platforms)** - Orchestrator, Steering, Requirements, Architecture, Development, Quality, Security, Infrastructure
   - Claude Code: Skills API (25 skills)

@@ -5,6 +5,62 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0] - 2025-12-09
+
+### Added
+
+**Dynamic Replanning Engine** 🧠
+
+A new intelligent replanning system that enables AI agents to dynamically adjust execution plans when tasks fail, timeout, or encounter obstacles - inspired by cutting-edge agentic AI research.
+
+#### LLM Provider Abstraction (`src/llm-providers/`)
+- `BaseLLMProvider` - Abstract base class for all LLM providers
+- `CopilotProvider` - GitHub Copilot LM API integration (priority provider)
+- `AnthropicProvider` - Anthropic Claude API integration
+- `OpenAIProvider` - OpenAI GPT API integration
+- `LLMProviderFactory` - Auto-detection and instantiation of appropriate provider
+- Platform-aware provider selection (VS Code → Copilot, otherwise fallback chain)
+
+#### Replanning Core (`src/orchestration/replanning/`)
+- `ReplanningEngine` - Core orchestration engine with dynamic replanning
+- `PlanMonitor` - Real-time plan execution monitoring with event emission
+- `PlanEvaluator` - Progress evaluation, efficiency metrics, and recommendations
+- `AlternativeGenerator` - LLM-powered alternative path generation
+- `ReplanHistory` - Audit logging with JSONL persistence
+- `ReplanTrigger` - Trigger types (failure, timeout, quality, manual, dependency)
+- `ReplanDecision` - Decision types (continue, retry, alternative, abort, human)
+
+#### Configuration & Integration
+- Configurable trigger thresholds (failure count, timeout, quality degradation)
+- Confidence-based decision making (threshold 0.7 for human approval)
+- SwarmPattern integration with `enableReplanning` option
+- Event-driven architecture with `replan:*` event emission
+- Full backward compatibility with existing orchestration patterns
+
+### Changed
+
+- Updated `src/orchestration/index.js` with Replanning exports
+- Enhanced `SwarmPattern` with `_handleReplanningWithContext()` and `_applyReplan()` methods
+- Added comprehensive test suite (44 tests) for Replanning Engine
+
+### Technical Details
+
+| Component | Purpose |
+|-----------|---------|
+| `plan-monitor.js` | Watch execution, detect failures/timeouts, emit triggers |
+| `plan-evaluator.js` | Calculate progress, efficiency, generate recommendations |
+| `alternative-generator.js` | LLM-based alternative path generation with confidence scoring |
+| `replan-history.js` | Audit trail with filtering, metrics, and export (MD/JSON) |
+| `replanning-engine.js` | Main orchestrator with plan normalization and modification |
+
+### Documentation
+
+- `storage/features/replanning-engine.md` - EARS requirements (12 requirements)
+- `storage/specs/design-replanning-engine.md` - C4 design + ADR
+- `storage/specs/tasks-replanning-engine.md` - Task breakdown
+
+---
+
 ## [3.5.1] - 2025-12-08
 
 ### Added
