@@ -71,13 +71,14 @@ musubi init --windsurf  # Windsurf IDE
 
 ---
 
-## 📊 What's New in v3.6.1
+## 📊 What's New in v3.7.1
 
-- 🚀 **ProactivePathOptimizer** - Continuous path optimization even during successful execution
-- 🎯 **GoalProgressTracker** - Real-time goal progress monitoring with milestone management
-- 🔄 **AdaptiveGoalModifier** - Dynamic goal adjustment based on execution context
-- 🛠️ **New CLI Commands** - `replan`, `goal`, `optimize`, `path` subcommands for orchestration
-- 📚 **Updated Agent Templates** - All 7 platforms with replanning command documentation
+- 🌐 **WebSocket Real-time GUI** - Live replanning updates with `musubi-browser` dashboard
+- 📋 **GUI Quick Actions** - Modal dialog for New Requirement, Validate Project, Export Report
+- 🔄 **GitHub Actions Integration** - `musubi-action` for CI/CD with MUSUBI validation
+- 🔧 **OpenAPI Converter** - Convert OpenAPI 3.x/Swagger 2.x specs to MUSUBI format
+- 🌍 **Multi-language Templates** - 7 language support (EN, JA, ZH, KO, ES, DE, FR)
+- 🤖 **Ollama Integration** - Local LLM support with 9 model presets
 
 ### Previous (v3.6.0)
 

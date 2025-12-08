@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.7.1] - 2025-12-09
+
+### Fixed
+
+**GUI Quick Actions Enhancement** 🔧
+
+#### Modal Dialog for New Requirement
+- **Interactive Requirement Modal** (`src/gui/public/index.html`)
+  - GUI modal dialog for creating requirements without terminal
+  - Form-based input: Title, Description, Priority, Category
+  - Real-time validation and success/error feedback
+  - Backdrop click and close button support
+
+#### Validate Project Fix
+- **Fixed validation command** (`src/gui/server.js`)
+  - Changed from `musubi-validate` to `musubi-validate all`
+  - Proper subcommand handling for CLI integration
+  - Enhanced error handling and output parsing
+
+#### Export Report API
+- **TraceabilityService.generateReport()** (`src/gui/services/traceability-service.js`)
+  - New method for generating traceability reports
+  - Integrated with Export Report quick action
+  - Report download functionality
+
+### Added
+
+- **POST /api/requirements** endpoint for creating requirements via GUI
+- **POST /api/actions/validate** endpoint for project validation
+- **POST /api/actions/export-report** endpoint for report generation
+
+---
+
 ## [3.7.0] - 2025-12-09
 
 ### Added
