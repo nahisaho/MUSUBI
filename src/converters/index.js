@@ -8,6 +8,7 @@
 
 const { parseMusubiProject } = require('./parsers/musubi-parser');
 const { parseSpeckitProject } = require('./parsers/speckit-parser');
+const { parseOpenAPISpec } = require('./parsers/openapi-parser');
 const { writeMusubiProject } = require('./writers/musubi-writer');
 const { writeSpeckitProject } = require('./writers/speckit-writer');
 const irTypes = require('./ir/types');
@@ -199,6 +200,42 @@ async function testRoundtrip(projectPath, options = {}) {
 }
 
 /**
+ * Convert OpenAPI/Swagger specification to MUSUBI format
+ * @param {string} specPath - Path to OpenAPI spec (JSON or YAML)
+ * @param {Object} options - Conversion options
+ * @returns {Promise<{featuresCreated: number, requirementsCreated: number, warnings: string[], outputPath: string}>}
+ */
+async function convertFromOpenAPI(specPath, options = {}) {
+  const { output = '.', dryRun = false, force = false, verbose = false, featureName } = options;
+  
+  if (verbose) console.log(`Converting OpenAPI spec from: ${specPath}`);
+  
+  // Parse OpenAPI spec to IR
+  const ir = await parseOpenAPISpec(specPath);
+  
+  // Count requirements
+  let requirementsCreated = 0;
+  for (const feature of ir.features) {
+    requirementsCreated += feature.requirements?.length || 0;
+  }
+  
+  if (verbose) {
+    console.log(`  Found ${ir.features.length} features`);
+    console.log(`  Found ${requirementsCreated} requirements`);
+  }
+  
+  // Write to MUSUBI format
+  const result = await writeMusubiProject(ir, output, { dryRun, force, verbose });
+  
+  return {
+    featuresCreated: ir.features.length,
+    requirementsCreated,
+    warnings: result.warnings,
+    outputPath: output,
+  };
+}
+
+/**
  * Compare two IR structures and return similarity percentage
  * @param {import('./ir/types').ProjectIR} original 
  * @param {import('./ir/types').ProjectIR} roundtrip 
@@ -275,10 +312,12 @@ function compareIR(original, roundtrip, differences) {
 module.exports = {
   convertFromSpeckit,
   convertToSpeckit,
+  convertFromOpenAPI,
   validateFormat,
   testRoundtrip,
   parseMusubiProject,
   parseSpeckitProject,
+  parseOpenAPISpec,
   writeMusubiProject,
   writeSpeckitProject,
   ir: irTypes,

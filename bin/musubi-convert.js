@@ -19,7 +19,8 @@ const {
   convertFromSpeckit, 
   convertToSpeckit, 
   validateFormat, 
-  testRoundtrip 
+  testRoundtrip,
+  convertFromOpenAPI,
 } = require('../src/converters');
 const packageJson = require('../package.json');
 
@@ -130,6 +131,44 @@ program
       }
     } catch (error) {
       console.error(`\n❌ Validation failed: ${error.message}`);
+      if (options.verbose) {
+        console.error(error.stack);
+      }
+      process.exit(1);
+    }
+  });
+
+program
+  .command('from-openapi <specPath>')
+  .description('Convert OpenAPI/Swagger specification to MUSUBI requirements')
+  .option('-o, --output <dir>', 'Output directory', '.')
+  .option('--dry-run', 'Preview changes without writing')
+  .option('-v, --verbose', 'Verbose output')
+  .option('-f, --force', 'Overwrite existing files')
+  .option('--feature <name>', 'Create as single feature with given name')
+  .action(async (specPath, options) => {
+    try {
+      console.log('🔄 Converting OpenAPI → MUSUBI...\n');
+      
+      const result = await convertFromOpenAPI(specPath, {
+        output: options.output,
+        dryRun: options.dryRun,
+        force: options.force,
+        verbose: options.verbose,
+        featureName: options.feature,
+      });
+      
+      console.log(`\n✅ Conversion complete!`);
+      console.log(`   Features created: ${result.featuresCreated}`);
+      console.log(`   Requirements: ${result.requirementsCreated}`);
+      console.log(`   Output: ${result.outputPath}`);
+      
+      if (result.warnings.length > 0) {
+        console.log(`\n⚠️  Warnings (${result.warnings.length}):`);
+        result.warnings.forEach(w => console.log(`   - ${w}`));
+      }
+    } catch (error) {
+      console.error(`\n❌ Conversion failed: ${error.message}`);
       if (options.verbose) {
         console.error(error.stack);
       }
