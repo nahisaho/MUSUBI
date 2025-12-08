@@ -6,7 +6,7 @@ title: MUSUBIの軌跡：Spec-CopilotからMUSUHI、そしてMUSUBIへの完全�
 
 **MUSUBI（Specification Driven Development）** は、AIエージェントを活用した仕様駆動開発フレームワークです。しかし、MUSUBIは突然生まれたわけではありません。**Spec-Copilot** → **MUSUHI** → **MUSUBI** という3つのプロジェクトを経て、現在の形に進化してきました。
 
-本記事では、2025年11月の最初のプロジェクトから現在のv3.6.1までの完全な変遷を振り返り、各段階で何が追加され、どのような開発体験が可能になったかを詳説します。
+本記事では、2025年11月の最初のプロジェクトから現在のv3.7.0までの完全な変遷を振り返り、各段階で何が追加され、どのような開発体験が可能になったかを詳説します。
 
 **対象読者:**
 - MUSUBIを使用中/検討中の開発者
@@ -21,6 +21,7 @@ title: MUSUBIの軌跡：Spec-CopilotからMUSUHI、そしてMUSUBIへの完全�
 - MUSUBI v2.x-v3.0.0: MCP統合、ワークフロー、ブラウザ自動化
 - MUSUBI v3.3.0-v3.5.1: モニタリング、Steering高度化、CLI統合
 - MUSUBI v3.6.0-v3.6.1: Dynamic Replanning Engine、目標管理、パス最適化
+- MUSUBI v3.7.0: 多言語テンプレート、Ollama統合、コスト追跡、チェックポイント
 
 ---
 
@@ -992,9 +993,399 @@ v3.6.0のDynamic Replanning Engineをベースに、プロアクティブ最適�
 
 ---
 
-# 第11章 バージョン比較まとめ
+# 第11章 v3.7.0 - Advanced Integration & Monitoring
 
-## 10.1 機能進化の概要
+## 11.1 v3.7.0 - 統合強化とモニタリング
+
+**リリース日:** 2025-12-09
+
+v3.7.0では8つの重要な機能を追加し、多言語サポート、ローカルLLM統合、コスト追跡、チェックポイント管理など、開発ワークフロー全体を強化しました。
+
+### 新機能一覧
+
+| カテゴリ | 機能 | 説明 |
+|---------|------|------|
+| **GUI** | WebSocket Replanning | GUIでリアルタイムリプランニング更新 |
+| **Browser** | musubi-browser完成 | 包括的なブラウザ自動化テスト |
+| **CI/CD** | GitHub Actions | musubi-action再利用可能ワークフロー |
+| **変換** | OpenAPI/Swagger変換 | REST APIからMUSUBI変換 |
+| **国際化** | 多言語テンプレート | 7言語対応テンプレートシステム |
+| **LLM** | Ollama Provider | ローカルLLM統合 |
+| **モニタリング** | Cost Tracker | LLM API使用コスト追跡 |
+| **状態管理** | Checkpoint Manager | 開発状態スナップショット |
+
+---
+
+## 11.2 WebSocket Replanning Updates
+
+GUIダッシュボードにWebSocketベースのリアルタイム更新機能を追加しました。
+
+### 機能
+
+```javascript
+// WebSocket接続
+const socket = new WebSocket('ws://localhost:3001');
+
+// リプランニングイベント
+socket.on('replan:started', (data) => {
+  console.log('Replanning started:', data.contextId);
+});
+
+socket.on('replan:completed', (data) => {
+  console.log('Plan updated:', data.newPlan);
+});
+
+socket.on('goal:progress', (data) => {
+  console.log('Goal progress:', data.progress);
+});
+```
+
+### 対応イベント
+
+| イベント | 説明 |
+|---------|------|
+| `replan:started` | リプランニング開始 |
+| `replan:completed` | リプランニング完了 |
+| `replan:failed` | リプランニング失敗 |
+| `goal:progress` | 目標進捗更新 |
+| `task:status` | タスクステータス変更 |
+
+---
+
+## 11.3 musubi-browser 完成
+
+ブラウザ自動化エージェントの包括的なテストスイートを完備しました。
+
+### テストカバレッジ
+
+| カテゴリ | テスト数 | 説明 |
+|---------|---------|------|
+| ナビゲーション | 8 | ページ遷移、URL検証 |
+| 要素操作 | 10 | クリック、入力、選択 |
+| データ抽出 | 6 | テキスト、属性、テーブル |
+| スクリーンショット | 4 | 画面キャプチャ |
+| 待機 | 5 | 要素表示、非表示待ち |
+| エラーハンドリング | 7 | タイムアウト、要素不在 |
+
+---
+
+## 11.4 GitHub Actions (musubi-action)
+
+MUSUBIをCI/CDパイプラインに統合するための再利用可能なGitHub Actionsを追加しました。
+
+### 使用方法
+
+```yaml
+# .github/workflows/musubi.yml
+name: MUSUBI Validation
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run MUSUBI Validation
+        uses: nahisaho/musubi-action@v1
+        with:
+          command: validate
+          report-format: sarif
+          
+      - name: Check Traceability
+        uses: nahisaho/musubi-action@v1
+        with:
+          command: trace
+          fail-on-gaps: true
+```
+
+### 対応コマンド
+
+| コマンド | 用途 |
+|---------|------|
+| `init` | プロジェクト初期化 |
+| `validate` | 仕様検証 |
+| `trace` | トレーサビリティ確認 |
+| `gaps` | ギャップ検出 |
+| `analyze` | 品質分析 |
+
+---
+
+## 11.5 OpenAPI/Swagger変換
+
+OpenAPI/Swagger定義からMUSUBI仕様への自動変換機能を追加しました。
+
+### 使用方法
+
+```bash
+# OpenAPI JSONから変換
+musubi-convert from-openapi openapi.json -o specs/
+
+# OpenAPI YAMLから変換
+musubi-convert from-openapi swagger.yaml -o specs/
+
+# URLから直接変換
+musubi-convert from-openapi https://api.example.com/openapi.json -o specs/
+```
+
+### 変換マッピング
+
+| OpenAPI | MUSUBI |
+|---------|--------|
+| `paths` | 要件ドキュメント |
+| `schemas` | 設計ドキュメント |
+| `securitySchemes` | セキュリティ要件 |
+| `tags` | カテゴリ分類 |
+
+### 生成ファイル
+
+```
+specs/
+├── requirements/
+│   └── api-requirements.md    # エンドポイント要件
+├── design/
+│   └── api-design.md          # スキーマ設計
+└── specs/
+    └── api-spec.yml           # API仕様
+```
+
+---
+
+## 11.6 多言語テンプレート (LocaleManager)
+
+7言語に対応したテンプレートローカライゼーションシステムを追加しました。
+
+### 対応言語
+
+| 言語コード | 言語 | 完成度 |
+|-----------|------|--------|
+| `en` | English | 100% |
+| `ja` | 日本語 | 100% |
+| `zh` | 中文 | 100% |
+| `ko` | 한국어 | 100% |
+| `de` | Deutsch | 100% |
+| `fr` | Français | 100% |
+| `es` | Español | 100% |
+
+### 使用方法
+
+```javascript
+const { LocaleManager } = require('musubi');
+
+// 言語設定
+const locale = new LocaleManager('ja');
+
+// テンプレート取得
+const template = locale.getTemplate('requirements');
+console.log(template.sections.overview); // "概要"
+
+// 動的切替
+locale.setLocale('zh');
+console.log(template.sections.overview); // "概述"
+```
+
+### 翻訳カテゴリ
+
+| カテゴリ | 項目数 |
+|---------|--------|
+| セクション名 | 15 |
+| ラベル | 25 |
+| ステータス | 8 |
+| エラーメッセージ | 20 |
+
+---
+
+## 11.7 Ollama Provider (ローカルLLM)
+
+Ollamaを使用したローカルLLM統合を追加しました。プライバシー重視やオフライン環境での開発をサポートします。
+
+### 対応機能
+
+| 機能 | 説明 |
+|------|------|
+| テキスト生成 | ローカルLLMによる補完 |
+| ストリーミング | リアルタイム応答 |
+| 埋め込み | ベクトル埋め込み生成 |
+| マルチモデル | 複数モデル切替 |
+
+### 使用方法
+
+```javascript
+const { OllamaProvider } = require('musubi/llm-providers');
+
+const ollama = new OllamaProvider({
+  baseUrl: 'http://localhost:11434',
+  model: 'qwen2.5:7b'
+});
+
+// テキスト生成
+const response = await ollama.complete('Explain MUSUBI in one sentence');
+
+// ストリーミング
+await ollama.stream('Generate a user story', {
+  onToken: (token) => process.stdout.write(token)
+});
+
+// 埋め込み
+const embeddings = await ollama.embed('MUSUBI specification');
+// 768次元ベクトル（nomic-embed-text使用時）
+```
+
+### 動作確認済みモデル
+
+| モデル | パラメータ | 用途 |
+|--------|-----------|------|
+| `qwen2.5:7b` | 7.6B | 汎用（推奨） |
+| `codellama:7b` | 7B | コード生成 |
+| `mistral:7b` | 7B | 高速推論 |
+| `nomic-embed-text` | - | 埋め込み |
+
+---
+
+## 11.8 Cost Tracker (LLMコスト追跡)
+
+LLM API使用料金のリアルタイム追跡機能を追加しました。
+
+### 機能
+
+```javascript
+const { CostTracker } = require('musubi/monitoring');
+
+const tracker = new CostTracker();
+
+// 使用量記録
+tracker.recordUsage('gpt-4', {
+  inputTokens: 1500,
+  outputTokens: 500,
+  latencyMs: 2300
+});
+
+// コスト取得
+const costs = tracker.getCosts();
+console.log(costs);
+// {
+//   total: 0.075,
+//   byModel: { 'gpt-4': 0.075 },
+//   byDay: { '2025-12-09': 0.075 }
+// }
+
+// 予算アラート
+tracker.setBudget(10.0); // $10 上限
+tracker.on('budget:warning', (data) => {
+  console.log(`Budget ${data.percentage}% used`);
+});
+```
+
+### 対応プロバイダー
+
+| プロバイダー | モデル | 入力単価 | 出力単価 |
+|-------------|--------|---------|---------|
+| OpenAI | gpt-4 | $0.03/1K | $0.06/1K |
+| OpenAI | gpt-4-turbo | $0.01/1K | $0.03/1K |
+| OpenAI | gpt-3.5-turbo | $0.0015/1K | $0.002/1K |
+| Anthropic | claude-3-opus | $0.015/1K | $0.075/1K |
+| Anthropic | claude-3-sonnet | $0.003/1K | $0.015/1K |
+
+### レポート出力
+
+```bash
+# コストレポート生成
+musubi-analyze costs --period week --format markdown
+
+# 予算状況確認
+musubi-analyze budget --threshold 80
+```
+
+---
+
+## 11.9 Checkpoint Manager (状態スナップショット)
+
+開発状態のスナップショット機能を追加しました。長時間作業の中間保存やロールバックをサポートします。
+
+### 機能
+
+| 機能 | 説明 |
+|------|------|
+| 作成 | 現在の状態をスナップショット |
+| 復元 | 過去の状態に復元 |
+| 比較 | 2つのチェックポイント間の差分 |
+| アーカイブ | 古いチェックポイントの圧縮保存 |
+| タグ付け | チェックポイントの分類 |
+
+### 使用方法
+
+```javascript
+const { CheckpointManager } = require('musubi/managers');
+
+const manager = new CheckpointManager({
+  storageDir: '.musubi/checkpoints',
+  maxCheckpoints: 50,
+  autoCheckpointInterval: 1800000 // 30分
+});
+
+// チェックポイント作成
+const checkpoint = await manager.create({
+  name: 'before-refactoring',
+  description: 'Pre-refactoring state',
+  tags: ['milestone', 'refactoring']
+});
+
+// 一覧取得
+const checkpoints = await manager.list();
+
+// 復元
+await manager.restore(checkpoint.id);
+
+// 比較
+const diff = await manager.compare(checkpoint1.id, checkpoint2.id);
+console.log(diff.filesAdded);
+console.log(diff.filesModified);
+console.log(diff.filesDeleted);
+
+// アーカイブ
+await manager.archive({ olderThan: '7d' });
+```
+
+### CLI
+
+```bash
+# チェックポイント作成
+musubi-checkpoint create "milestone-1" --tags feature,tested
+
+# 一覧表示
+musubi-checkpoint list
+
+# 復元
+musubi-checkpoint restore <checkpoint-id>
+
+# 比較
+musubi-checkpoint compare <id1> <id2>
+
+# アーカイブ
+musubi-checkpoint archive --older-than 7d
+```
+
+---
+
+## 11.10 v3.7.0で可能になったこと
+
+- ✅ **リアルタイムGUI更新**: WebSocketでリプランニング状態をライブ表示
+- ✅ **CI/CD統合**: GitHub Actionsで自動仕様検証
+- ✅ **REST API移行**: OpenAPI/Swaggerから自動変換
+- ✅ **7言語対応**: 日本語、英語、中国語など7言語でドキュメント生成
+- ✅ **ローカルLLM**: Ollamaでプライベート/オフラインAI開発
+- ✅ **コスト可視化**: LLM API使用料金のリアルタイム追跡
+- ✅ **状態管理**: チェックポイントで安全な開発作業
+- ✅ **181テスト追加**: 合計2,022テスト達成
+
+---
+
+# 第12章 バージョン比較まとめ
+
+## 12.1 機能進化の概要
 
 | プロジェクト/バージョン | リリース日 | 主要機能 | テスト数 | エージェント数 |
 |----------------------|-----------|---------|---------|--------------|
@@ -1020,8 +1411,9 @@ v3.6.0のDynamic Replanning Engineをベースに、プロアクティブ最適�
 | **MUSUBI** v3.5.1 | 2025-12-08 | 全プラットフォームCLI統合 | 1,490 | 27 |
 | **MUSUBI** v3.6.0 | 2025-12-09 | Dynamic Replanning Engine | 1,797 | 27 |
 | **MUSUBI** v3.6.1 | 2025-12-09 | 高度リプランニングコンポーネント | 1,841 | 27 |
+| **MUSUBI** v3.7.0 | 2025-12-09 | 多言語、Ollama、コスト追跡、チェックポイント | 2,022 | 27 |
 
-## 10.2 各バージョンの「できること」
+## 12.2 各バージョンの「できること」
 
 ### Spec-Copilot
 
@@ -1148,11 +1540,25 @@ v3.6.0のDynamic Replanning Engineをベースに、プロアクティブ最適�
 | 8つのリプランニングCLIコマンド | ✅ |
 | 1,841テスト（122リプランニングテスト） | ✅ |
 
+### MUSUBI v3.7.0
+
+| 機能 | ステータス |
+|------|----------|
+| WebSocketリアルタイムGUI更新 | ✅ |
+| musubi-browser完成（40テスト） | ✅ |
+| GitHub Actions（musubi-action） | ✅ |
+| OpenAPI/Swagger変換（29テスト） | ✅ |
+| 多言語テンプレート（7言語対応、31テスト） | ✅ |
+| Ollama Provider（ローカルLLM、38テスト） | ✅ |
+| Cost Tracker（LLMコスト追跡、39テスト） | ✅ |
+| Checkpoint Manager（状態スナップショット、44テスト） | ✅ |
+| 2,022テスト（181テスト追加） | ✅ |
+
 ---
 
-# 第12章 アップグレード方法
+# 第13章 アップグレード方法
 
-## 11.1 新規インストール
+## 13.1 新規インストール
 
 ```bash
 # 常に最新版を使用（推奨）
@@ -1164,7 +1570,7 @@ npx musubi-sdd@latest init --copilot      # GitHub Copilot
 npx musubi-sdd@latest init --cursor       # Cursor IDE
 ```
 
-## 11.2 既存プロジェクトのアップグレード
+## 13.2 既存プロジェクトのアップグレード
 
 ```bash
 # 同じコマンドで最新版に更新
@@ -1173,7 +1579,7 @@ npx musubi-sdd@latest init
 # Skills、エージェント、CLIコマンドが自動更新されます
 ```
 
-## 11.3 CodeGraph MCP Server（v2.0.0機能）
+## 13.3 CodeGraph MCP Server（v2.0.0機能）
 
 ```bash
 # pipxでインストール
@@ -1187,7 +1593,7 @@ codegraph-mcp index /path/to/project --full
 
 # まとめ
 
-MUSUBIは、2025年11月5日に公開されたSpec-Copilotを起源とし、MUSUHI、そしてMUSUBIへと進化を遂げたプロジェクトです。約1ヶ月強でv0.1.0からv3.6.1まで劇的な成長を遂げました。
+MUSUBIは、2025年11月5日に公開されたSpec-Copilotを起源とし、MUSUHI、そしてMUSUBIへと進化を遂げたプロジェクトです。約1ヶ月強でv0.1.0からv3.7.0まで劇的な成長を遂げました。
 
 ```mermaid
 flowchart TB
@@ -1218,7 +1624,10 @@ flowchart TB
     subgraph Phase7["🧠 Phase 7: MUSUBI Dynamic Replanning（v3.6.1）"]
         P7["リプランニングエンジン、目標管理、パス最適化、1,841テスト"]
     end
-    Origin --> Evolution --> Phase1 --> Phase2 --> Phase3 --> Phase4 --> Phase5 --> Phase6 --> Phase7
+    subgraph Phase8["🔧 Phase 8: MUSUBI Advanced Integration（v3.7.0）"]
+        P8["多言語、Ollama、コスト追跡、チェックポイント、2,022テスト"]
+    end
+    Origin --> Evolution --> Phase1 --> Phase2 --> Phase3 --> Phase4 --> Phase5 --> Phase6 --> Phase7 --> Phase8
 ```
 
 **Key Milestones:**
@@ -1237,8 +1646,9 @@ flowchart TB
 | 全プラットフォームCLI | MUSUBI v3.5.1 | 20 CLI、7プラットフォーム統合 |
 | Dynamic Replanning | MUSUBI v3.6.0 | LLMによる動的リプランニング |
 | 高度リプランニング | MUSUBI v3.6.1 | 目標管理、パス最適化、1,841テスト |
+| Advanced Integration | MUSUBI v3.7.0 | 多言語、Ollama、コスト追跡、2,022テスト |
 
-Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて、MUSUBIは単なる仕様管理ツールから、**包括的なAI支援開発プラットフォーム**へと成長しました。v3.6.1では、Dynamic Replanning Engineにより、AIエージェントがタスク失敗時に自動で代替プランを生成し、目標進捗を追跡し、実行パスを最適化できるようになりました。1,841のテストと28のCLIコマンドで、堅牢で信頼性の高いSDD体験を提供します。
+Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて、MUSUBIは単なる仕様管理ツールから、**包括的なAI支援開発プラットフォーム**へと成長しました。v3.7.0では、7言語対応の多言語テンプレート、OllamaによるローカルLLM統合、LLM APIコスト追跡、開発チェックポイント管理など、開発ワークフロー全体を強化する8つの重要な機能を追加しました。2,022のテストと20のCLIコマンドで、堅牢で信頼性の高いSDD体験を提供します。
 
 ---
 
@@ -1247,6 +1657,7 @@ Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて�
 - [MUSUBI GitHub](https://github.com/nahisaho/musubi)
 - [MUSUHI GitHub](https://github.com/nahisaho/musuhi)（前身プロジェクト）
 - [Spec-Copilot GitHub](https://github.com/nahisaho/spec-copilot)（起源プロジェクト）
+- [MUSUBI v3.7.0 Integration Guide](https://qiita.com/nahisaho/items/musubi-v3-integration)
 - [MUSUBI v3.6.1 Replanning Guide](https://qiita.com/nahisaho/items/musubi-v3-replanning)
 - [MUSUBI v3.0.0 完全ガイド](https://qiita.com/nahisaho/items/musubi-v3-agents)
 - [MUSUBI v3.5.1 CLI統合ガイド](https://qiita.com/nahisaho/items/musubi-cli-integration)
@@ -1254,4 +1665,4 @@ Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて�
 
 ## タグ
 
-`#MUSUBI` `#MUSUHI` `#Spec-Copilot` `#SDD` `#仕様駆動開発` `#AIエージェント` `#ClaudeCode` `#GitHubCopilot` `#MCP` `#Replanning`
+`#MUSUBI` `#MUSUHI` `#Spec-Copilot` `#SDD` `#仕様駆動開発` `#AIエージェント` `#ClaudeCode` `#GitHubCopilot` `#MCP` `#Replanning` `#Ollama` `#i18n`
