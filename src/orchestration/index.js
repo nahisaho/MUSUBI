@@ -56,6 +56,13 @@ const {
   createHumanInLoopPattern
 } = require('./patterns/human-in-loop');
 
+const {
+  SwarmPattern,
+  PLabel,
+  SwarmStrategy,
+  createSwarmPattern
+} = require('./patterns/swarm');
+
 /**
  * Create a fully configured orchestration engine
  * with default patterns registered
@@ -73,6 +80,7 @@ function createOrchestrationEngine(options = {}) {
   registry.register(PatternType.NESTED, createNestedPattern());
   registry.register(PatternType.GROUP_CHAT, createGroupChatPattern());
   registry.register(PatternType.HUMAN_IN_LOOP, createHumanInLoopPattern());
+  registry.register(PatternType.SWARM, createSwarmPattern());
 
   // Register patterns with engine
   registry.registerWithEngine(engine);
@@ -132,6 +140,11 @@ module.exports = {
   GateType,
   GateResult,
   createHumanInLoopPattern,
+
+  SwarmPattern,
+  PLabel,
+  SwarmStrategy,
+  createSwarmPattern,
 
   // Constants
   PatternType,
