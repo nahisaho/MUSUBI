@@ -601,6 +601,7 @@ function createMonitoringConfig(options = {}) {
 const releaseManagerModule = require('./release-manager');
 const incidentManagerModule = require('./incident-manager');
 const observabilityModule = require('./observability');
+const costTrackerModule = require('./cost-tracker');
 
 module.exports = {
   // Classes
@@ -629,5 +630,8 @@ module.exports = {
   ...incidentManagerModule,
   
   // Observability
-  ...observabilityModule
+  ...observabilityModule,
+  
+  // Cost Tracker
+  ...costTrackerModule
 };
