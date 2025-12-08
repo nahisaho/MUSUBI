@@ -615,6 +615,143 @@ program
     }
   });
 
+// Full validation with TraceabilityValidator (CI/CD ready)
+program
+  .command('check')
+  .description('Run full traceability validation (CI/CD ready)')
+  .option('--strictness <level>', 'Strictness level (strict|standard|relaxed)', 'standard')
+  .option('--min-design <percent>', 'Minimum design coverage', '80')
+  .option('--min-code <percent>', 'Minimum code coverage', '80')
+  .option('--min-tests <percent>', 'Minimum test coverage', '80')
+  .option('--min-overall <percent>', 'Minimum overall coverage', '80')
+  .option('-o, --output <path>', 'Save report to file')
+  .option('--format <type>', 'Output format (text|json|markdown)', 'text')
+  .action(async options => {
+    try {
+      const { TraceabilityValidator } = require('../src/validators/traceability-validator.js');
+
+      console.log(chalk.bold('\n🔍 Traceability Check\n'));
+      console.log(chalk.dim(`Strictness: ${options.strictness}`));
+      console.log();
+
+      const config = {
+        strictness: options.strictness,
+        thresholds: {
+          design: parseInt(options.minDesign),
+          code: parseInt(options.minCode),
+          tests: parseInt(options.minTests),
+          overall: parseInt(options.minOverall),
+        },
+      };
+
+      const validator = new TraceabilityValidator(process.cwd(), config);
+      const result = await validator.validate();
+
+      if (options.format === 'json') {
+        console.log(JSON.stringify(result, null, 2));
+      } else if (options.format === 'markdown') {
+        console.log(validator.generateReport(result));
+      } else {
+        // Text format
+        if (result.valid) {
+          console.log(chalk.green.bold('✅ PASSED - Traceability validation successful'));
+        } else {
+          console.log(chalk.red.bold('❌ FAILED - Traceability validation failed'));
+        }
+        console.log();
+
+        // Show coverage
+        if (result.coverage) {
+          console.log(chalk.bold('Coverage:'));
+          console.log(chalk.dim(`  Design:  ${result.coverage.designCoverage}%`));
+          console.log(chalk.dim(`  Tasks:   ${result.coverage.tasksCoverage}%`));
+          console.log(chalk.dim(`  Code:    ${result.coverage.codeCoverage}%`));
+          console.log(chalk.dim(`  Tests:   ${result.coverage.testsCoverage}%`));
+          console.log(chalk.dim(`  Overall: ${result.coverage.overall}%`));
+          console.log();
+        }
+
+        // Show errors
+        if (result.violations.length > 0) {
+          console.log(chalk.red.bold('Errors:'));
+          result.violations.forEach(v => {
+            console.log(chalk.red(`  🔴 ${v.rule}: ${v.message}`));
+          });
+          console.log();
+        }
+
+        // Show warnings
+        if (result.warnings.length > 0) {
+          console.log(chalk.yellow.bold('Warnings:'));
+          result.warnings.forEach(v => {
+            console.log(chalk.yellow(`  ⚠️ ${v.rule}: ${v.message}`));
+          });
+          console.log();
+        }
+
+        console.log(chalk.bold('Summary:'));
+        console.log(`  Total: ${result.summary.total} issues`);
+        console.log(chalk.red(`  Errors: ${result.summary.errors}`));
+        console.log(chalk.yellow(`  Warnings: ${result.summary.warnings}`));
+        console.log(chalk.dim(`  Infos: ${result.summary.infos}`));
+      }
+
+      // Save report if output specified
+      if (options.output) {
+        const fs = require('fs-extra');
+        const report = validator.generateReport(result);
+        await fs.writeFile(options.output, report, 'utf-8');
+        console.log();
+        console.log(chalk.green(`✓ Report saved to ${options.output}`));
+      }
+
+      console.log();
+      process.exit(result.valid ? 0 : 1);
+    } catch (error) {
+      console.error(chalk.red('✗ Error:'), error.message);
+      process.exit(1);
+    }
+  });
+
+// Generate coverage report
+program
+  .command('report')
+  .description('Generate detailed coverage report')
+  .option('--format <type>', 'Report format (text|markdown|html|json)', 'markdown')
+  .option('-o, --output <path>', 'Output file path')
+  .option('--no-details', 'Exclude detailed matrix')
+  .option('--no-gaps', 'Exclude gaps analysis')
+  .action(async options => {
+    try {
+      const { CoverageReporter, ReportFormat } = require('../src/reporters/coverage-report.js');
+
+      console.log(chalk.bold('\n📊 Generating Coverage Report\n'));
+
+      const reporter = new CoverageReporter(process.cwd(), {
+        format: options.format,
+        includeDetails: options.details !== false,
+        includeGaps: options.gaps !== false,
+      });
+
+      const report = await reporter.generate();
+
+      if (options.output) {
+        const fs = require('fs-extra');
+        await fs.ensureDir(require('path').dirname(options.output));
+        await fs.writeFile(options.output, report, 'utf-8');
+        console.log(chalk.green(`✓ Report saved to ${options.output}`));
+        console.log();
+      } else {
+        console.log(report);
+      }
+
+      process.exit(0);
+    } catch (error) {
+      console.error(chalk.red('✗ Error:'), error.message);
+      process.exit(1);
+    }
+  });
+
 program.parse(process.argv);
 
 if (!process.argv.slice(2).length) {

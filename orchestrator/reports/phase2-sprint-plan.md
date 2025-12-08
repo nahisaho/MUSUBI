@@ -120,9 +120,9 @@ Enable brownfield (existing project) support with delta specification tracking a
   - New `status` command for workflow summary
 - [x] 29 unit tests for Impact Analyzer (all passing)
 
-### Sprint 2.3 (Week 5-6)
-- [ ] Traceability validation
-- [ ] Gap detection
+### Sprint 2.3 (Week 5-6) 🚀 IN PROGRESS
+- [ ] Traceability validation (REQ ↔ Design ↔ Code ↔ Test)
+- [ ] Gap detection (orphaned requirements)
 - [ ] Coverage reporting
 
 ### Sprint 2.4 (Week 7-8)
