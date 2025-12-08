@@ -63,6 +63,14 @@ const {
   createSwarmPattern
 } = require('./patterns/swarm');
 
+const {
+  WorkflowOrchestrator,
+  StepType,
+  WorkflowState,
+  SDDWorkflowTemplates,
+  createWorkflowOrchestrator
+} = require('./workflow-orchestrator');
+
 /**
  * Create a fully configured orchestration engine
  * with default patterns registered
@@ -145,6 +153,13 @@ module.exports = {
   PLabel,
   SwarmStrategy,
   createSwarmPattern,
+
+  // Workflow Orchestrator
+  WorkflowOrchestrator,
+  StepType,
+  WorkflowState,
+  SDDWorkflowTemplates,
+  createWorkflowOrchestrator,
 
   // Constants
   PatternType,
