@@ -5,6 +5,104 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1] - 2025-12-08
+
+### Added - Phase 1 Core Framework Complete 🎉
+
+**MUSUBI v3.0.1 completes Phase 1 of the project roadmap.**
+
+#### Phase 1 Deliverables (5 Major)
+
+| Deliverable | Description | Status |
+|-------------|-------------|--------|
+| 25 Claude Code Skills | Full skill implementations | ✅ 27 skills (108%) |
+| Constitutional Governance | 9 Articles + Phase -1 Gates | ✅ Complete |
+| Core Templates | Requirements, Design, Tasks | ✅ 15 templates |
+| CLI Implementation | Full command set | ✅ 19 commands |
+| Documentation Website | VitePress documentation | ✅ 13 pages |
+
+#### Claude Code Skills (27 total)
+
+**Core Skills**:
+- `orchestrator` - Multi-skill coordination
+- `steering` - Project memory management
+- `constitution-enforcer` - Constitutional compliance
+
+**Requirements & Development**:
+- `requirements-analyst` - EARS requirements
+- `system-architect` - C4 architecture design
+- `software-developer` - Implementation
+- `test-engineer` - Testing strategy
+- `code-reviewer` - Code quality review
+
+**Quality & Infrastructure**:
+- `security-auditor` - Security analysis
+- `performance-optimizer` - Performance tuning
+- `traceability-auditor` - Traceability verification
+- `devops-engineer` - CI/CD pipelines
+- `release-coordinator` - Release management
+- `site-reliability-engineer` - SRE practices
+- `database-administrator` - Database management
+- `cloud-architect` - Cloud infrastructure
+
+**Design & Documentation**:
+- `api-designer` - API design
+- `database-schema-designer` - Schema design
+- `ui-ux-designer` - UI/UX design
+- `ai-ml-engineer` - AI/ML integration
+- `technical-writer` - Documentation
+
+**Management**:
+- `project-manager` - Project coordination
+- `change-impact-analyzer` - Change analysis
+
+**Additional**:
+- `general` - General-purpose skill
+- `context-synthesis` - Context synthesis
+- `browser-agent` - E2E testing
+- `web-gui` - Dashboard
+
+#### Documentation Website
+
+- **Technology**: VitePress v1.6.4
+- **Location**: `website/` directory
+- **Deployment**: GitHub Pages via GitHub Actions
+
+**Pages**:
+- Getting Started Guide
+- SDD Workflow (8 stages)
+- Constitutional Governance (9 Articles)
+- EARS Requirements Format
+- Traceability Guide
+- CLI Reference (19 commands)
+- Skills Reference (25 skills)
+- AI Agents Guide (7 platforms)
+- Examples
+
+#### Constitutional Governance
+
+**Templates** (`steering/templates/constitutional/`):
+- `compliance-checklist.md`
+- `constitutional-amendment-proposal.md`
+- `gate-verification.md`
+- `violation-report.md`
+- `waiver-request.md`
+
+**Validator**: `src/validators/constitution-validator.js`
+
+### Changed
+
+- Moved documentation site from `docs/` to `website/` to avoid conflicts
+- Updated VitePress configuration for ESM compatibility
+- Enhanced skill registry with utility functions
+
+### Fixed
+
+- Fixed `musubi-validate.js` duplicate code issue
+- Fixed ESM module loading in VitePress build
+
+---
+
 ## [3.0.0] - 2025-12-07
 
 ### Added - P1 Feature Completion 🎉
@@ -1105,7 +1203,7 @@ musubi-requirements metrics --json
 - copySkill() now returns early if agent.layout.skillsDir is undefined
 - Skill installation logic now checks `agentKey === 'claude-code'` before proceeding
 
-## [0.1.3] - 2025-01-17
+## [0.1.3] - 2025-11-17
 
 ### Added (v0.1.3)
 
@@ -1148,7 +1246,7 @@ musubi-requirements metrics --json
 - New projects: Use `npx musubi-sdd init --[platform]` to initialize with your preferred AI coding agent
 - Multi-platform projects: AGENTS.md files are automatically copied to appropriate locations
 
-## [0.1.2] - 2025-01-15
+## [0.1.2] - 2025-11-15
 
 ### Added (v0.1.2)
 
@@ -1166,14 +1264,14 @@ musubi-requirements metrics --json
 - CLI tools for project initialization and status checking
 - Constitutional validation
 
-## [0.1.1] - 2025-01-10
+## [0.1.1] - 2025-11-10
 
 ### Fixed (v0.1.1)
 
 - CLI initialization bug fixes
 - Documentation improvements
 
-## [0.1.0] - 2025-01-08
+## [0.1.0] - 2025-11-08
 
 ### Added (v0.1.0)
 

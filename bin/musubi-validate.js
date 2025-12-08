@@ -184,16 +184,6 @@ program
     }
   });
 
-// All validations (duplicate removed, keeping original)
-
-      displayResults('Complexity Validation', results, options);
-      process.exit(results.passed ? 0 : 1);
-    } catch (error) {
-      console.error(chalk.red('✗ Validation error:'), error.message);
-      process.exit(1);
-    }
-  });
-
 // All validations
 program
   .command('all')

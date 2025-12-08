@@ -1,0 +1,169 @@
+# Constitutional Governance GitHub Actions Workflow
+# Validates compliance with 9 Constitutional Articles
+
+name: Constitutional Governance
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  constitutional-validation:
+    name: Constitutional Compliance Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for test-first validation
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        run: npm ci
+      
+      - name: Run Constitutional Validator
+        id: validate
+        run: |
+          node src/validators/constitutional-validator.js . > constitutional-report.txt 2>&1
+          echo "validation_exit_code=$?" >> $GITHUB_OUTPUT
+        continue-on-error: true
+      
+      - name: Upload Validation Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: constitutional-report
+          path: constitutional-report.txt
+      
+      - name: Comment on PR (if violations)
+        if: github.event_name == 'pull_request' && steps.validate.outputs.validation_exit_code != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('constitutional-report.txt', 'utf-8');
+            
+            const body = `## 🏛️ Constitutional Governance Validation Failed
+            
+            This PR has constitutional violations that must be resolved before merging.
+            
+            \`\`\`
+            ${report}
+            \`\`\`
+            
+            ### Resolution Steps
+            1. Review the violations above
+            2. Address each violation per the recommendations
+            3. Push fixes and re-run validation
+            
+            📜 See [Constitutional Governance](steering/rules/constitution.md) for details.
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+      
+      - name: Fail if Violations
+        if: steps.validate.outputs.validation_exit_code != '0'
+        run: |
+          echo "Constitutional violations detected. See report for details."
+          cat constitutional-report.txt
+          exit 1
+
+  steering-sync:
+    name: Steering Files Sync Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Verify Steering Files
+        run: |
+          echo "Checking steering files..."
+          
+          required_files=("steering/structure.md" "steering/tech.md" "steering/product.md")
+          missing=()
+          
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              missing+=("$file")
+            fi
+          done
+          
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "❌ Missing steering files:"
+            printf '  - %s\n' "${missing[@]}"
+            exit 1
+          fi
+          
+          echo "✅ All required steering files present"
+      
+      - name: Check Steering Freshness
+        run: |
+          echo "Checking steering file freshness..."
+          
+          for file in steering/*.md; do
+            if [ -f "$file" ]; then
+              last_modified=$(git log -1 --format="%ci" -- "$file")
+              days_old=$(( ($(date +%s) - $(date -d "$last_modified" +%s)) / 86400 ))
+              
+              if [ $days_old -gt 90 ]; then
+                echo "⚠️ Warning: $file last updated $days_old days ago"
+              else
+                echo "✅ $file: updated $days_old days ago"
+              fi
+            fi
+          done
+
+  traceability-check:
+    name: Traceability Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        run: npm ci
+      
+      - name: Check Requirement Coverage
+        run: |
+          echo "Checking requirement-to-test traceability..."
+          
+          # Find all requirements
+          req_count=$(grep -r "REQ-" docs/ storage/ 2>/dev/null | grep -oE "REQ-[A-Z]+-[0-9]+" | sort -u | wc -l)
+          
+          # Find requirements referenced in tests
+          test_req_count=$(grep -r "REQ-" tests/ 2>/dev/null | grep -oE "REQ-[A-Z]+-[0-9]+" | sort -u | wc -l)
+          
+          echo "Requirements defined: $req_count"
+          echo "Requirements in tests: $test_req_count"
+          
+          if [ $req_count -gt 0 ]; then
+            coverage=$((test_req_count * 100 / req_count))
+            echo "Coverage: $coverage%"
+            
+            if [ $coverage -lt 80 ]; then
+              echo "⚠️ Warning: Requirement coverage below 80%"
+            else
+              echo "✅ Requirement coverage: $coverage%"
+            fi
+          fi
