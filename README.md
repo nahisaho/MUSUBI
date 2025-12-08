@@ -71,7 +71,15 @@ musubi init --windsurf  # Windsurf IDE
 
 ---
 
-## 📊 What's New in v3.6.0
+## 📊 What's New in v3.6.1
+
+- 🚀 **ProactivePathOptimizer** - Continuous path optimization even during successful execution
+- 🎯 **GoalProgressTracker** - Real-time goal progress monitoring with milestone management
+- 🔄 **AdaptiveGoalModifier** - Dynamic goal adjustment based on execution context
+- 🛠️ **New CLI Commands** - `replan`, `goal`, `optimize`, `path` subcommands for orchestration
+- 📚 **Updated Agent Templates** - All 7 platforms with replanning command documentation
+
+### Previous (v3.6.0)
 
 - 🧠 **Dynamic Replanning Engine** - AI agents can now dynamically adjust plans when tasks fail
 - 🔌 **LLM Provider Abstraction** - Multi-provider support (Copilot, Anthropic, OpenAI)
@@ -102,7 +110,7 @@ musubi init --windsurf  # Windsurf IDE
 ## Features
 
 - 🤖 **Multi-Agent Support** - Works with 7 AI coding agents (Claude Code, GitHub Copilot, Cursor, Gemini CLI, Codex CLI, Qwen Code, Windsurf)
-- 🧠 **Dynamic Replanning** - AI agents dynamically adjust plans on failure with LLM-powered alternatives (NEW in v3.6.0)
+- 🧠 **Dynamic Replanning** - AI agents dynamically adjust plans on failure with LLM-powered alternatives (v3.6.0+)
 - 🔌 **MCP Server Integration** - CodeGraphMCPServer for advanced code analysis (v2.0.0)
 - 📄 **Flexible Command Formats** - Supports Markdown, TOML, and AGENTS.md formats
 - 🎯 **25 Specialized Agents (All Platforms)** - Orchestrator, Steering, Requirements, Architecture, Development, Quality, Security, Infrastructure

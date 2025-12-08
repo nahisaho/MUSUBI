@@ -5,6 +5,62 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.1] - 2025-12-09
+
+### Added
+
+**Advanced Replanning Components** 🚀
+
+Building on v3.6.0's Dynamic Replanning Engine, this release adds three powerful components for proactive optimization and goal management:
+
+#### ProactivePathOptimizer (`src/orchestration/replanning/proactive-path-optimizer.js`)
+- Continuous path optimization even during successful execution
+- Resource utilization analysis and bottleneck detection
+- Parallel execution opportunity identification
+- Optimization suggestions with confidence scoring
+- Metrics: optimization count, improvement rate, suggestions generated
+
+#### GoalProgressTracker (`src/orchestration/replanning/goal-progress-tracker.js`)
+- Real-time goal progress monitoring with percentage tracking
+- Milestone management with automatic progress calculation
+- Goal dependency tracking and blocking detection
+- Progress velocity and ETA estimation
+- Goal status: pending, in-progress, completed, blocked, failed
+
+#### AdaptiveGoalModifier (`src/orchestration/replanning/adaptive-goal-modifier.js`)
+- Dynamic goal adjustment based on execution context
+- Constraint relaxation when goals become unachievable
+- Goal splitting for complex objectives
+- Priority recalculation based on dependencies
+- Modification history with rollback support
+
+### CLI Commands (v3.6.1 NEW)
+
+| Command | Purpose |
+|---------|---------|
+| `musubi-orchestrate replan <context-id>` | Execute dynamic replanning |
+| `musubi-orchestrate goal register` | Register a new goal |
+| `musubi-orchestrate goal update <goal-id>` | Update goal progress |
+| `musubi-orchestrate goal status` | View goal status |
+| `musubi-orchestrate optimize run <path-id>` | Run path optimization |
+| `musubi-orchestrate optimize suggest <path-id>` | Get optimization suggestions |
+| `musubi-orchestrate path analyze <path-id>` | Analyze execution path |
+| `musubi-orchestrate path optimize <path-id>` | Optimize execution path |
+
+### Updated
+
+- All 7 agent templates with Replanning Commands section
+- Orchestrator skill with detailed replanning CLI documentation
+- `patterns.md` with Pattern 7: Replanning Pattern
+- Pattern Selection Matrix with replanning scenarios
+
+### Tests
+
+- 122 replanning tests (78 new tests added)
+- Total test count: 1841 tests passing
+
+---
+
 ## [3.6.0] - 2025-12-09
 
 ### Added
