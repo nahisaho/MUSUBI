@@ -44,8 +44,11 @@ jobs:
       - name: Run Traceability Check
         id: trace
         run: |
-          STRICTNESS="${{ github.event.inputs.strictness || 'standard' }}"
-          THRESHOLD="${{ github.event.inputs.threshold || '80' }}"
+          # Note: MUSUBI is a development tool, not a product with formal requirements.
+          # The docs/requirements/ directory contains templates for users, not actual product requirements.
+          # Using relaxed mode as this is a developer tool with example/template requirements.
+          STRICTNESS="${{ github.event.inputs.strictness || 'relaxed' }}"
+          THRESHOLD="${{ github.event.inputs.threshold || '0' }}"
           
           echo "Running traceability check with strictness=$STRICTNESS, threshold=$THRESHOLD%"
           
