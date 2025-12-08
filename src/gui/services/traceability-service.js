@@ -367,6 +367,35 @@ class TraceabilityService {
 
     return gaps;
   }
+
+  /**
+   * Generate a comprehensive traceability report
+   * @returns {Promise<Object>} Report data
+   */
+  async generateReport() {
+    const matrix = await this.buildMatrix();
+    const coverage = await this.getCoverage();
+    const gaps = await this.findGaps();
+
+    return {
+      generatedAt: new Date().toISOString(),
+      projectPath: this.projectPath,
+      summary: {
+        totalRequirements: coverage.total,
+        linkedRequirements: coverage.linked,
+        implementedRequirements: coverage.implemented,
+        testedRequirements: coverage.tested,
+        coveragePercent: coverage.implementedPercent,
+        gapCount: gaps.length,
+      },
+      coverage,
+      gaps,
+      matrix: {
+        requirements: matrix.requirements,
+        links: matrix.links,
+      },
+    };
+  }
 }
 
 module.exports = TraceabilityService;

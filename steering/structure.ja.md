@@ -1,246 +1,408 @@
-# プロジェクト構造
+# Project Structure
 
-**プロジェクト**: MUSUBI (musubi-sdd)
-**最終更新**: 2025-12-08
-**バージョン**: 3.5.0
-
----
-
-## CodeGraph分析サマリー
-
-> 📊 **CodeGraphMCPServer** による静的解析結果（2025-12-05）
-
-### コードベース指標
-
-| 指標 | 値 | 説明 |
-| --- | --- | --- |
-| **総エンティティ数** | 15 | コードベース内の識別可能な要素 |
-| **リレーション数** | 87 | エンティティ間の依存関係・呼び出し関係 |
-| **インデックス済みファイル** | 155 | 解析対象ファイル |
-| **コミュニティ数** | 6 | Louvain法による機能クラスタ |
-| **モジュラリティ** | 0.52 | グラフ構造の品質指標 |
-| **テスト数** | 483 | Jestテスト（19スイート） |
+**Project**: musubi
+**Last Updated**: 2025-12-08
+**Version**: 1.0
 
 ---
 
-## アーキテクチャパターン
+## Architecture Pattern
 
-**パターン**: CLI Tool with Modular Architecture
+**Primary Pattern**: {{ARCHITECTURE_PATTERN}}
 
-MUSUBIは、Node.js CLIツールとして設計されています。
-
-- **bin/**: CLIエントリーポイント（16コマンド）
-- **src/**: ビジネスロジック（12モジュール）
-- **steering/**: プロジェクトメモリ
-- **storage/**: SDD成果物
+> [Description of the architecture pattern used in this project]
+> Examples: Monorepo with Library-First, Microservices, Modular Monolith, Serverless
 
 ---
 
-## ディレクトリ構造
+## Directory Organization
 
-### ルート構造
+### Root Structure
 
-```text
+```
 musubi/
-├── bin/                  # CLIエントリーポイント（16コマンド）
-│   ├── musubi.js         # メインCLI（init, status, validate, info）
-│   ├── musubi-init.js    # プロジェクト初期化
-│   ├── musubi-requirements.js # EARS要件
-│   ├── musubi-design.js  # C4 + ADR設計
-│   ├── musubi-tasks.js   # タスク分解
-│   ├── musubi-trace.js   # トレーサビリティマトリックス
-│   ├── musubi-gaps.js    # ギャップ検出
-│   ├── musubi-change.js  # ブラウンフィールド変更
-│   ├── musubi-validate.js # 憲法検証 + score
-│   ├── musubi-remember.js # エージェントメモリ管理（v2.2.0）
-│   └── musubi-resolve.js # GitHub Issue自動解決（v2.2.0）
-├── src/                  # ソースモジュール
-│   ├── agents/           # エージェントレジストリ
-│   ├── analyzers/        # コードアナライザー
-│   ├── generators/       # ドキュメントジェネレーター
-│   ├── managers/         # ワークフローマネージャー
-│   ├── templates/        # 組み込みテンプレート
-│   └── validators/       # 憲法バリデーター
-├── tests/                # テストスイート（Jest）
-├── steering/             # プロジェクトメモリ
-│   ├── product.md        # プロダクトコンテキスト
-│   ├── structure.md      # プロジェクト構造
-│   ├── tech.md           # 技術スタック
-│   └── rules/            # 憲法ルール
-└── storage/              # SDD成果物
-    ├── specs/            # 仕様書
-    └── changes/          # デルタ仕様書
+├── lib/                  # Reusable libraries (Article I: Library-First)
+├── app/                  # Application code (Next.js, etc.)
+├── api/                  # API routes/controllers
+├── components/           # UI components
+├── services/             # Business logic services
+├── tests/                # Test suites
+├── docs/                 # Documentation
+├── storage/              # SDD artifacts
+│   ├── specs/            # Requirements, design, tasks
+│   ├── changes/          # Delta specifications (brownfield)
+│   └── validation/       # Validation reports
+├── steering/             # Project memory (this directory)
+│   ├── structure.md      # This file
+│   ├── tech.md           # Technology stack
+│   ├── product.md        # Product context
+│   └── rules/            # Constitutional governance
+├── templates/            # Document templates
+└── [Other directories]
 ```
 
 ---
 
-## MCP Server 連携
+## Library-First Pattern (Article I)
 
-### CodeGraphMCPServer 設定
+All features begin as independent libraries in `lib/`.
 
-MUSUBIはCodeGraphMCPServerと連携して、高度なコード分析機能を提供します。
+### Library Structure
 
-```json
-{
-  "mcpServers": {
-    "CodeGraph": {
-      "command": "npx",
-      "args": ["-y", "@anthropic/codegraph-mcp", "--codebase", "."]
-    }
+Each library follows this structure:
+
+```
+lib/{{feature}}/
+├── src/
+│   ├── index.ts          # Public API exports
+│   ├── service.ts        # Business logic
+│   ├── repository.ts     # Data access
+│   ├── types.ts          # TypeScript types
+│   ├── errors.ts         # Custom errors
+│   └── validators.ts     # Input validation
+├── tests/
+│   ├── service.test.ts   # Unit tests
+│   ├── repository.test.ts # Integration tests (real DB)
+│   └── integration.test.ts # E2E tests
+├── cli.ts                # CLI interface (Article II)
+├── package.json          # Library metadata
+├── tsconfig.json         # TypeScript config
+└── README.md             # Library documentation
+```
+
+### Library Guidelines
+
+- **Independence**: Libraries MUST NOT depend on application code
+- **Public API**: All exports via `src/index.ts`
+- **Testing**: Independent test suite
+- **CLI**: All libraries expose CLI interface (Article II)
+
+---
+
+## Application Structure
+
+### Application Organization
+
+```
+app/
+├── (auth)/               # Route groups (Next.js App Router)
+│   ├── login/
+│   │   └── page.tsx
+│   └── register/
+│       └── page.tsx
+├── dashboard/
+│   └── page.tsx
+├── api/                  # API routes
+│   ├── auth/
+│   │   └── route.ts
+│   └── users/
+│       └── route.ts
+├── layout.tsx            # Root layout
+└── page.tsx              # Home page
+```
+
+### Application Guidelines
+
+- **Library Usage**: Applications import from `lib/` modules
+- **Thin Controllers**: API routes delegate to library services
+- **No Business Logic**: Business logic belongs in libraries
+
+---
+
+## Component Organization
+
+### UI Components
+
+```
+components/
+├── ui/                   # Base UI components (shadcn/ui)
+│   ├── button.tsx
+│   ├── input.tsx
+│   └── card.tsx
+├── auth/                 # Feature-specific components
+│   ├── LoginForm.tsx
+│   └── RegisterForm.tsx
+├── dashboard/
+│   └── StatsCard.tsx
+└── shared/               # Shared components
+    ├── Header.tsx
+    └── Footer.tsx
+```
+
+### Component Guidelines
+
+- **Composition**: Prefer composition over props drilling
+- **Types**: All props typed with TypeScript
+- **Tests**: Component tests with React Testing Library
+
+---
+
+## Database Organization
+
+### Schema Organization
+
+```
+prisma/
+├── schema.prisma         # Prisma schema
+├── migrations/           # Database migrations
+│   ├── 001_create_users_table/
+│   │   └── migration.sql
+│   └── 002_create_sessions_table/
+│       └── migration.sql
+└── seed.ts               # Database seed data
+```
+
+### Database Guidelines
+
+- **Migrations**: All schema changes via migrations
+- **Naming**: snake_case for tables and columns
+- **Indexes**: Index foreign keys and frequently queried columns
+
+---
+
+## Test Organization
+
+### Test Structure
+
+```
+tests/
+├── unit/                 # Unit tests (per library)
+│   └── auth/
+│       └── service.test.ts
+├── integration/          # Integration tests (real services)
+│   └── auth/
+│       └── login.test.ts
+├── e2e/                  # End-to-end tests
+│   └── auth/
+│       └── user-flow.test.ts
+└── fixtures/             # Test data and fixtures
+    └── users.ts
+```
+
+### Test Guidelines
+
+- **Test-First**: Tests written BEFORE implementation (Article III)
+- **Real Services**: Integration tests use real DB/cache (Article IX)
+- **Coverage**: Minimum 80% coverage
+- **Naming**: `*.test.ts` for unit, `*.integration.test.ts` for integration
+
+---
+
+## Documentation Organization
+
+### Documentation Structure
+
+```
+docs/
+├── architecture/         # Architecture documentation
+│   ├── c4-diagrams/
+│   └── adr/              # Architecture Decision Records
+├── api/                  # API documentation
+│   ├── openapi.yaml
+│   └── graphql.schema
+├── guides/               # Developer guides
+│   ├── getting-started.md
+│   └── contributing.md
+└── runbooks/             # Operational runbooks
+    ├── deployment.md
+    └── troubleshooting.md
+```
+
+---
+
+## SDD Artifacts Organization
+
+### Storage Directory
+
+```
+storage/
+├── specs/                # Specifications
+│   ├── auth-requirements.md
+│   ├── auth-design.md
+│   ├── auth-tasks.md
+│   └── payment-requirements.md
+├── changes/              # Delta specifications (brownfield)
+│   ├── add-2fa.md
+│   └── upgrade-jwt.md
+├── features/             # Feature tracking
+│   ├── auth.json
+│   └── payment.json
+└── validation/           # Validation reports
+    ├── auth-validation-report.md
+    └── payment-validation-report.md
+```
+
+---
+
+## Naming Conventions
+
+### File Naming
+
+- **TypeScript**: `PascalCase.tsx` for components, `camelCase.ts` for utilities
+- **React Components**: `PascalCase.tsx` (e.g., `LoginForm.tsx`)
+- **Utilities**: `camelCase.ts` (e.g., `formatDate.ts`)
+- **Tests**: `*.test.ts` or `*.spec.ts`
+- **Constants**: `SCREAMING_SNAKE_CASE.ts` (e.g., `API_ENDPOINTS.ts`)
+
+### Directory Naming
+
+- **Features**: `kebab-case` (e.g., `user-management/`)
+- **Components**: `kebab-case` or `PascalCase` (consistent within project)
+
+### Variable Naming
+
+- **Variables**: `camelCase`
+- **Constants**: `SCREAMING_SNAKE_CASE`
+- **Types/Interfaces**: `PascalCase`
+- **Enums**: `PascalCase`
+
+---
+
+## Integration Patterns
+
+### Library → Application Integration
+
+```typescript
+// ✅ CORRECT: Application imports from library
+import { AuthService } from '@/lib/auth';
+
+const authService = new AuthService(repository);
+const result = await authService.login(credentials);
+```
+
+```typescript
+// ❌ WRONG: Library imports from application
+// Libraries must NOT depend on application code
+import { AuthContext } from '@/app/contexts/auth'; // Violation!
+```
+
+### Service → Repository Pattern
+
+```typescript
+// Service layer (business logic)
+export class AuthService {
+  constructor(private repository: UserRepository) {}
+
+  async login(credentials: LoginRequest): Promise<LoginResponse> {
+    // Business logic here
+    const user = await this.repository.findByEmail(credentials.email);
+    // ...
+  }
+}
+
+// Repository layer (data access)
+export class UserRepository {
+  constructor(private prisma: PrismaClient) {}
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { email } });
   }
 }
 ```
 
-### 利用可能なMCPツール
-
-| ツール | 説明 | 使用エージェント |
-| --- | --- | --- |
-| `init_graph` | コードグラフ初期化 | orchestrator, steering |
-| `get_code_snippet` | ソースコード取得 | software-developer, bug-hunter |
-| `find_callers` | 呼び出し元追跡 | test-engineer, security-auditor |
-| `find_dependencies` | 依存関係分析 | system-architect, change-impact-analyzer |
-| `local_search` | ローカルコンテキスト検索 | software-developer, bug-hunter |
-| `global_search` | グローバル検索 | orchestrator, system-architect |
-| `query_codebase` | コードベースクエリ | 全エージェント |
-| `analyze_module_structure` | モジュール構造分析 | system-architect, constitution-enforcer |
-| `suggest_refactoring` | リファクタリング提案 | code-reviewer |
-| `stats` | コードベース統計 | orchestrator |
-| `community` | コミュニティ検出 | orchestrator, system-architect |
-
-### Orchestrator MCP機能
-
-Orchestratorは以下のCodeGraph MCP機能をサポートします：
-
-- **インストール支援**: 4つのオプション（Python venv, Claude Code, VS Code, Claude Desktop）
-- **プロジェクトインデックス**: `codegraph-mcp index --full` コマンド
-- **コードベース統計**: `codegraph-mcp stats` による分析
-- **コミュニティ検出**: `codegraph-mcp community` によるモジュール境界分析
-
 ---
 
-## モジュール構造
+## Deployment Structure
 
-### コアクラス（CodeGraph検出）
+### Deployment Units
 
-| クラス | モジュール | 責務 |
-| --- | --- | --- |
-| `GapDetector` | `src/analyzers/gap-detector.js` | 要件-実装間ギャップ検出 |
-| `TraceabilityAnalyzer` | `src/analyzers/traceability.js` | 双方向トレーサビリティ分析 |
-| `StuckDetector` | `src/analyzers/stuck-detector.js` | スタックエージェント検出（v2.2.0） |
-| `SecurityAnalyzer` | `src/analyzers/security-analyzer.js` | セキュリティパターン検出（v2.2.0） |
-| `DesignGenerator` | `src/generators/design.js` | C4 + ADR設計ドキュメント生成 |
-| `RequirementsGenerator` | `src/generators/requirements.js` | EARS形式要件生成 |
-| `TasksGenerator` | `src/generators/tasks.js` | タスク分解・依存関係 |
-| `ChangeManager` | `src/managers/change.js` | Brownfieldデルタ仕様管理 |
-| `AgentMemoryManager` | `src/managers/agent-memory.js` | エージェント学習記録管理（v2.2.0） |
-| `MemoryCondenser` | `src/managers/memory-condenser.js` | メモリ自動圧縮（v2.2.0） |
-| `SkillLoader` | `src/managers/skill-loader.js` | 動的スキル読み込み（v2.2.0） |
-| `RepoSkillManager` | `src/managers/repo-skill-manager.js` | プロジェクト固有スキル（v2.2.0） |
-| `IssueResolver` | `src/resolvers/issue-resolver.js` | GitHub Issue自動解決（v2.2.0） |
-| `ConstitutionValidator` | `src/validators/constitution.js` | 9条憲法バリデーション |
-| `CriticSystem` | `src/validators/critic-system.js` | 憲法準拠スコアリング（v2.2.0） |
-| `GitHubClient` | `src/integrations/github-client.js` | GitHub API統合（v2.2.0） |
+**Projects** (independently deployable):
 
-### ソースモジュール
+1. musubi - Main application
 
-```text
-src/
-├── agents/
-│   └── registry.js           # 27エージェントレジストリ（エージェント設定エクスポート）
-├── analyzers/
-│   ├── gap-detector.js       # GapDetectorクラス（ギャップ分析）
-│   ├── stuck-detector.js     # StuckDetectorクラス（スタック検出）v2.2.0
-│   ├── security-analyzer.js  # SecurityAnalyzerクラス（セキュリティ）v2.2.0
-│   └── traceability.js       # TraceabilityAnalyzerクラス（双方向トレース）
-├── generators/
-│   ├── design.js             # DesignGeneratorクラス（C4 + ADR）
-│   ├── requirements.js       # RequirementsGeneratorクラス（EARS）
-│   └── tasks.js              # TasksGeneratorクラス（分解）
-├── integrations/
-│   └── github-client.js      # GitHubClientクラス（API統合）v2.2.0
-├── managers/
-│   ├── agent-memory.js       # AgentMemoryManagerクラス v2.2.0
-│   ├── change.js             # ChangeManagerクラス（デルタ仕様）
-│   ├── memory-condenser.js   # MemoryCondenserクラス v2.2.0
-│   ├── repo-skill-manager.js # RepoSkillManagerクラス v2.2.0
-│   ├── skill-loader.js       # SkillLoaderクラス v2.2.0
-│   └── workflow.js           # WorkflowManagerクラス
-├── resolvers/
-│   └── issue-resolver.js     # IssueResolverクラス v2.2.0
-├── validators/
-│   ├── constitution.js       # ConstitutionValidatorクラス（9条）
-│   └── critic-system.js      # CriticSystemクラス v2.2.0
-└── templates/                # 155テンプレートファイル
-    ├── agents/               # 8プラットフォームテンプレート
-    │   ├── claude-code/      # 27スキル + 9コマンド
-    │   ├── github-copilot/   # 27エージェント
-    │   ├── cursor/           # 25エージェント
-    │   ├── gemini-cli/       # TOML形式
-    │   ├── codex/            # 25エージェント
-    │   ├── qwen-code/        # 25エージェント
-    │   ├── windsurf/         # 25エージェント
-    │   └── shared/           # 共通テンプレート
-    └── skills/               # スキル定義
+> ⚠️ **Simplicity Gate (Article VII)**: Maximum 3 projects initially.
+> If adding more projects, document justification in Phase -1 Gate approval.
+
+### Environment Structure
+
+```
+environments/
+├── development/
+│   └── .env.development
+├── staging/
+│   └── .env.staging
+└── production/
+    └── .env.production
 ```
 
 ---
 
-## 命名規則
+## Multi-Language Support
 
-### ファイル命名
+### Language Policy
 
-- **JavaScript**: `camelCase.js`（例: `gapDetector.js`）
-- **テスト**: `*.test.js`（例: `traceability.test.js`）
-- **CLI**: `musubi-*.js`（例: `musubi-trace.js`）
-- **Markdown**: `kebab-case.md`（例: `change-management.md`）
+- **Primary Language**: English
+- **Documentation**: English first (`.md`), then Japanese (`.ja.md`)
+- **Code Comments**: English
+- **UI Strings**: i18n framework
 
-### ディレクトリ命名
+### i18n Organization
 
-- **機能別**: `kebab-case`（例: `gap-detector/`）
-- **モジュール**: `camelCase`（例: `validators/`）
+```
+locales/
+├── en/
+│   ├── common.json
+│   └── auth.json
+└── ja/
+    ├── common.json
+    └── auth.json
+```
 
 ---
 
-## 憲法準拠
+## Version Control
 
-この構造は以下を強制します：
+### Branch Organization
 
-- **Article I**: `lib/`のLibrary-Firstパターン
-- **Article II**: ライブラリごとのCLIインターフェース
-- **Article III**: Test-Firstをサポートするテスト構造
-- **Article VI**: プロジェクトメモリを維持するステアリングファイル
+- `main` - Production branch
+- `develop` - Development branch
+- `feature/*` - Feature branches
+- `hotfix/*` - Hotfix branches
+- `release/*` - Release branches
+
+### Commit Message Convention
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+**Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+
+**Example**:
+
+```
+feat(auth): implement user login (REQ-AUTH-001)
+
+Add login functionality with email and password authentication.
+Session created with 24-hour expiry.
+
+Closes REQ-AUTH-001
+```
 
 ---
 
-**最終更新**: 2025-12-03
-**管理者**: nahisaho（MUSUBI Contributors）
+## Constitutional Compliance
 
+This structure enforces:
 
-## 新規ディレクトリ (検出日: 2025-12-07)
+- **Article I**: Library-first pattern in `lib/`
+- **Article II**: CLI interfaces per library
+- **Article III**: Test structure supports Test-First
+- **Article VI**: Steering files maintain project memory
 
-```
-tests/
-templates/
-storage/
-steering/
-orchestrator/
-docs/
-coverage/
-bin/
-References/
-```
+---
 
+## Changelog
 
-## 新規ディレクトリ (検出日: 2025-12-07)
+### Version 1.1 (Planned)
 
-```
-tests/
-templates/
-storage/
-steering/
-packages/
-orchestrator/
-docs/
-coverage/
-bin/
-```
+- [Future changes]
+
+---
+
+**Last Updated**: 2025-12-08
+**Maintained By**: {{MAINTAINER}}

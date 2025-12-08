@@ -396,6 +396,86 @@
       border: 1px solid var(--border);
     }
 
+    /* Modal styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--text-muted);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.625rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.875rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+    }
+
     @media (max-width: 1200px) {
       main {
         grid-template-columns: 1fr;
@@ -600,13 +680,13 @@
       <aside class="panel">
         <h3>📌 Quick Actions</h3>
         <div style="margin-bottom: 1rem;">
-          <button class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;">
+          <button class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;" onclick="openModal('requirementModal')">
             ➕ New Requirement
           </button>
-          <button class="btn btn-outline" style="width: 100%; margin-bottom: 0.5rem;">
+          <button class="btn btn-outline" style="width: 100%; margin-bottom: 0.5rem;" onclick="runQuickAction('validate')">
             🔍 Validate Project
           </button>
-          <button class="btn btn-outline" style="width: 100%;">
+          <button class="btn btn-outline" style="width: 100%;" onclick="runQuickAction('export-report')">
             📤 Export Report
           </button>
         </div>
@@ -620,6 +700,53 @@
       </aside>
     </main>
 
+    <!-- New Requirement Modal -->
+    <div class="modal-overlay" id="requirementModal">
+      <div class="modal">
+        <h2>📝 New Requirement</h2>
+        <form id="requirementForm" onsubmit="submitRequirement(event)">
+          <div class="form-group">
+            <label for="reqId">Requirement ID</label>
+            <input type="text" id="reqId" placeholder="REQ-001" required pattern="REQ-\d{3}" title="Format: REQ-001">
+          </div>
+          <div class="form-group">
+            <label for="reqTitle">Title</label>
+            <input type="text" id="reqTitle" placeholder="User can login with email" required>
+          </div>
+          <div class="form-group">
+            <label for="reqType">Type</label>
+            <select id="reqType">
+              <option value="functional">Functional</option>
+              <option value="non-functional">Non-Functional</option>
+              <option value="constraint">Constraint</option>
+              <option value="interface">Interface</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="reqPriority">Priority</label>
+            <select id="reqPriority">
+              <option value="must">Must</option>
+              <option value="should">Should</option>
+              <option value="could">Could</option>
+              <option value="wont">Won't</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="reqDescription">Description (EARS Format)</label>
+            <textarea id="reqDescription" placeholder="When [trigger], the system shall [action]..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="reqFeature">Feature</label>
+            <input type="text" id="reqFeature" placeholder="authentication" required>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-outline" onclick="closeModal('requirementModal')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Requirement</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <footer>
       MUSUBI SDD - Specification Driven Development Dashboard
     </footer>
@@ -630,6 +757,49 @@
     let project = null;
     let ws = null;
     let currentView = 'dashboard';
+
+    // Modal functions
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    async function submitRequirement(event) {
+      event.preventDefault();
+      
+      const requirement = {
+        id: document.getElementById('reqId').value,
+        title: document.getElementById('reqTitle').value,
+        type: document.getElementById('reqType').value,
+        priority: document.getElementById('reqPriority').value,
+        description: document.getElementById('reqDescription').value,
+        feature: document.getElementById('reqFeature').value,
+      };
+
+      try {
+        const response = await fetch('/api/requirements', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requirement)
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          showToast('✅ Requirement created successfully', 'success');
+          closeModal('requirementModal');
+          document.getElementById('requirementForm').reset();
+          loadProject(); // Refresh project data
+        } else {
+          showToast(`❌ ${result.error || 'Failed to create requirement'}`, 'error');
+        }
+      } catch (error) {
+        showToast(`❌ Error: ${error.message}`, 'error');
+      }
+    }
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
@@ -1290,6 +1460,60 @@
           </div>
         </div>
       `;
+    }
+
+    // Quick Actions
+    async function runQuickAction(action) {
+      const button = event.target;
+      const originalText = button.innerHTML;
+      button.disabled = true;
+      button.innerHTML = '⏳ Processing...';
+
+      try {
+        const response = await fetch(`/api/actions/${action}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await response.json();
+
+        if (action === 'validate') {
+          if (result.success) {
+            showToast('✅ Validation passed', 'success');
+          } else {
+            showToast('⚠️ Validation completed with issues', 'warning');
+          }
+          // Show output in console and optionally in a modal
+          if (result.output) {
+            console.log('Validation output:', result.output);
+          }
+          if (result.errors) {
+            console.log('Validation errors:', result.errors);
+          }
+        } else if (result.success) {
+          if (action === 'export-report') {
+            showToast('📤 Report exported', 'success');
+            if (result.report) {
+              // Download report as JSON
+              const blob = new Blob([JSON.stringify(result.report, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'musubi-report.json';
+              a.click();
+              URL.revokeObjectURL(url);
+            }
+          } else if (action === 'new-requirement') {
+            showToast('📝 Requirements wizard started in terminal', 'info');
+          }
+        } else {
+          showToast(`❌ ${result.error || 'Action failed'}`, 'error');
+        }
+      } catch (error) {
+        showToast(`❌ Error: ${error.message}`, 'error');
+      } finally {
+        button.disabled = false;
+        button.innerHTML = originalText;
+      }
     }
 
     // Initial load

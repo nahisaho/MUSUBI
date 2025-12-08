@@ -279,6 +279,122 @@ class GUIServer {
       }
     });
 
+    // Quick Actions routes
+    this.app.post('/api/actions/new-requirement', async (req, res) => {
+      if (this.readonly) {
+        return res.status(403).json({ error: 'Read-only mode' });
+      }
+      try {
+        const { spawn } = require('child_process');
+        const child = spawn('npx', ['musubi-requirements', 'create'], {
+          cwd: this.projectPath,
+          shell: true
+        });
+        res.json({ success: true, message: 'Requirements wizard started' });
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Create requirement via GUI
+    this.app.post('/api/requirements', async (req, res) => {
+      if (this.readonly) {
+        return res.status(403).json({ error: 'Read-only mode' });
+      }
+      try {
+        const { id, title, type, priority, description, feature } = req.body;
+        
+        if (!id || !title || !description || !feature) {
+          return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        const fs = require('fs').promises;
+        const specsDir = path.join(this.projectPath, 'storage', 'specs');
+        
+        // Ensure directory exists
+        await fs.mkdir(specsDir, { recursive: true });
+        
+        const filename = `${feature}-requirements.md`;
+        const filepath = path.join(specsDir, filename);
+        
+        // Check if file exists
+        let content = '';
+        try {
+          content = await fs.readFile(filepath, 'utf-8');
+        } catch {
+          // Create new file with frontmatter
+          content = `---
+title: ${feature.charAt(0).toUpperCase() + feature.slice(1)} Requirements
+feature: ${feature}
+type: requirements
+created: ${new Date().toISOString()}
+---
+
+# ${feature.charAt(0).toUpperCase() + feature.slice(1)} Requirements
+
+`;
+        }
+
+        // Append new requirement
+        const reqContent = `
+### ${id}: ${title}
+
+**Type:** ${type}
+**Priority:** ${priority}
+
+${description}
+
+`;
+        content += reqContent;
+        
+        await fs.writeFile(filepath, content, 'utf-8');
+        
+        res.json({ success: true, file: filepath });
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/actions/validate', async (req, res) => {
+      try {
+        const { spawn } = require('child_process');
+        const result = { stdout: '', stderr: '' };
+        
+        const child = spawn('node', [path.join(__dirname, '../../bin/musubi-validate.js'), 'all'], {
+          cwd: this.projectPath,
+          shell: false,
+          env: { ...process.env, FORCE_COLOR: '0' }
+        });
+        
+        child.stdout.on('data', (data) => result.stdout += data.toString());
+        child.stderr.on('data', (data) => result.stderr += data.toString());
+        
+        child.on('error', (error) => {
+          res.status(500).json({ success: false, error: error.message });
+        });
+        
+        child.on('close', (code) => {
+          res.json({ 
+            success: code === 0, 
+            output: result.stdout || 'Validation completed', 
+            errors: result.stderr,
+            exitCode: code
+          });
+        });
+      } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+      }
+    });
+
+    this.app.post('/api/actions/export-report', async (req, res) => {
+      try {
+        const report = await this.traceabilityService.generateReport();
+        res.json({ success: true, report });
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
     // 404 handler for unknown API routes
     this.app.use('/api/*', (req, res) => {
       res.status(404).json({ error: 'Not found' });
