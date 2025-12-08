@@ -10,12 +10,14 @@ const { LLMProvider } = require('./base-provider');
 const { CopilotLMProvider } = require('./copilot-provider');
 const { AnthropicLMProvider } = require('./anthropic-provider');
 const { OpenAILMProvider } = require('./openai-provider');
+const { OllamaProvider, MODEL_PRESETS, OLLAMA_DEFAULTS } = require('./ollama-provider');
 
 /**
  * Provider priority order for auto-selection
  * GitHub Copilot is preferred when available (in VS Code)
+ * Ollama is checked before cloud providers for local-first preference
  */
-const PROVIDER_PRIORITY = ['github-copilot', 'anthropic', 'openai'];
+const PROVIDER_PRIORITY = ['github-copilot', 'ollama', 'anthropic', 'openai'];
 
 /**
  * Create an LLM provider instance
@@ -55,6 +57,12 @@ function createAutoProvider(config) {
             return provider;
           }
         }
+      } else if (providerName === 'ollama') {
+        // Ollama is available if OLLAMA_HOST is set or default localhost is reachable
+        if (process.env.OLLAMA_HOST || process.env.MUSUBI_USE_OLLAMA) {
+          return provider;
+        }
+        // Otherwise skip to next provider (don't block on availability check)
       } else if (providerName === 'anthropic' && process.env.ANTHROPIC_API_KEY) {
         return provider;
       } else if (providerName === 'openai' && process.env.OPENAI_API_KEY) {
@@ -69,6 +77,7 @@ function createAutoProvider(config) {
     'No LLM provider available. Please configure one of:\n' +
     '  - Run inside VS Code with GitHub Copilot extension\n' +
     '  - Set GITHUB_COPILOT_TOKEN environment variable\n' +
+    '  - Set OLLAMA_HOST or MUSUBI_USE_OLLAMA for local Ollama\n' +
     '  - Set ANTHROPIC_API_KEY environment variable\n' +
     '  - Set OPENAI_API_KEY environment variable'
   );
@@ -95,6 +104,10 @@ function createNamedProvider(name, config) {
     case 'gpt':
       return new OpenAILMProvider(config);
     
+    case 'ollama':
+    case 'local':
+      return new OllamaProvider(config);
+    
     default:
       throw new Error(`Unknown LLM provider: ${name}`);
   }
@@ -109,6 +122,7 @@ async function getAvailableProviders() {
 
   const providers = [
     { name: 'github-copilot', class: CopilotLMProvider },
+    { name: 'ollama', class: OllamaProvider },
     { name: 'anthropic', class: AnthropicLMProvider },
     { name: 'openai', class: OpenAILMProvider }
   ];
@@ -207,7 +221,12 @@ module.exports = {
   CopilotLMProvider,
   AnthropicLMProvider,
   OpenAILMProvider,
+  OllamaProvider,
   MockLLMProvider,
+  
+  // Ollama helpers
+  MODEL_PRESETS,
+  OLLAMA_DEFAULTS,
   
   // Constants
   PROVIDER_PRIORITY
