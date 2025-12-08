@@ -1,0 +1,179 @@
+name: 'MUSUBI SDD Action'
+description: 'Run MUSUBI Specification-Driven Development validation and analysis'
+author: 'MUSUBI Team'
+
+branding:
+  icon: 'check-circle'
+  color: 'purple'
+
+inputs:
+  command:
+    description: 'MUSUBI command to run (validate, analyze, trace, gaps)'
+    required: false
+    default: 'validate'
+  feature:
+    description: 'Feature name to analyze (optional)'
+    required: false
+    default: ''
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '18'
+  working-directory:
+    description: 'Working directory for MUSUBI commands'
+    required: false
+    default: '.'
+  fail-on-gaps:
+    description: 'Fail the workflow if traceability gaps are found'
+    required: false
+    default: 'false'
+  constitution-check:
+    description: 'Run constitutional governance validation'
+    required: false
+    default: 'true'
+  output-format:
+    description: 'Output format (text, json, markdown)'
+    required: false
+    default: 'markdown'
+
+outputs:
+  validation-result:
+    description: 'Validation result (passed/failed)'
+    value: ${{ steps.validate.outputs.result }}
+  coverage:
+    description: 'Requirements coverage percentage'
+    value: ${{ steps.analyze.outputs.coverage }}
+  gaps-count:
+    description: 'Number of traceability gaps found'
+    value: ${{ steps.gaps.outputs.count }}
+  report-path:
+    description: 'Path to generated report file'
+    value: ${{ steps.report.outputs.path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Install MUSUBI
+      shell: bash
+      run: npm install -g musubi-sdd
+
+    - name: Validate Constitution
+      id: constitution
+      if: inputs.constitution-check == 'true'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "🔍 Validating Constitutional Governance..."
+        if [ -f "steering/rules/constitution.md" ]; then
+          npx musubi validate --constitution
+          echo "result=passed" >> $GITHUB_OUTPUT
+        else
+          echo "⚠️ No constitution.md found, skipping constitutional check"
+          echo "result=skipped" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Run Validation
+      id: validate
+      if: inputs.command == 'validate' || inputs.command == 'all'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "🔍 Running MUSUBI Validation..."
+        if npx musubi validate ${{ inputs.feature && format('--feature {0}', inputs.feature) || '' }}; then
+          echo "result=passed" >> $GITHUB_OUTPUT
+        else
+          echo "result=failed" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+    - name: Run Analysis
+      id: analyze
+      if: inputs.command == 'analyze' || inputs.command == 'all'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "📊 Running MUSUBI Analysis..."
+        RESULT=$(npx musubi analyze --format json ${{ inputs.feature && format('--feature {0}', inputs.feature) || '' }} 2>/dev/null || echo '{}')
+        COVERAGE=$(echo "$RESULT" | jq -r '.coverage // 0')
+        echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+        echo "Requirements Coverage: $COVERAGE%"
+
+    - name: Check Traceability Gaps
+      id: gaps
+      if: inputs.command == 'gaps' || inputs.command == 'trace' || inputs.command == 'all'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        echo "🔗 Checking Traceability Gaps..."
+        RESULT=$(npx musubi gaps --format json ${{ inputs.feature && format('--feature {0}', inputs.feature) || '' }} 2>/dev/null || echo '{"gaps":[]}')
+        COUNT=$(echo "$RESULT" | jq '.gaps | length')
+        echo "count=$COUNT" >> $GITHUB_OUTPUT
+        echo "Traceability Gaps: $COUNT"
+        
+        if [ "$COUNT" -gt 0 ] && [ "${{ inputs.fail-on-gaps }}" = "true" ]; then
+          echo "❌ Traceability gaps found, failing workflow"
+          npx musubi gaps ${{ inputs.feature && format('--feature {0}', inputs.feature) || '' }}
+          exit 1
+        fi
+
+    - name: Generate Report
+      id: report
+      if: inputs.output-format == 'markdown'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        REPORT_PATH=".musubi-report.md"
+        echo "# MUSUBI SDD Report" > $REPORT_PATH
+        echo "" >> $REPORT_PATH
+        echo "Generated at: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $REPORT_PATH
+        echo "" >> $REPORT_PATH
+        
+        if [ -n "${{ steps.constitution.outputs.result }}" ]; then
+          echo "## Constitutional Governance" >> $REPORT_PATH
+          echo "Status: ${{ steps.constitution.outputs.result }}" >> $REPORT_PATH
+          echo "" >> $REPORT_PATH
+        fi
+        
+        if [ -n "${{ steps.validate.outputs.result }}" ]; then
+          echo "## Validation" >> $REPORT_PATH
+          echo "Status: ${{ steps.validate.outputs.result }}" >> $REPORT_PATH
+          echo "" >> $REPORT_PATH
+        fi
+        
+        if [ -n "${{ steps.analyze.outputs.coverage }}" ]; then
+          echo "## Analysis" >> $REPORT_PATH
+          echo "Coverage: ${{ steps.analyze.outputs.coverage }}%" >> $REPORT_PATH
+          echo "" >> $REPORT_PATH
+        fi
+        
+        if [ -n "${{ steps.gaps.outputs.count }}" ]; then
+          echo "## Traceability" >> $REPORT_PATH
+          echo "Gaps: ${{ steps.gaps.outputs.count }}" >> $REPORT_PATH
+          echo "" >> $REPORT_PATH
+        fi
+        
+        echo "path=$REPORT_PATH" >> $GITHUB_OUTPUT
+
+    - name: Post PR Comment
+      if: github.event_name == 'pull_request' && inputs.output-format == 'markdown'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const reportPath = '${{ steps.report.outputs.path }}';
+          
+          if (fs.existsSync(reportPath)) {
+            const report = fs.readFileSync(reportPath, 'utf8');
+            
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: report
+            });
+          }
