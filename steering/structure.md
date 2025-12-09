@@ -2,7 +2,7 @@
 
 **Project**: MUSUBI (Ultimate Specification Driven Development)
 **Last Updated**: 2025-12-09
-**Version**: 3.6.1
+**Version**: 3.9.0
 
 ---
 
@@ -40,12 +40,15 @@ musubi/
 │   ├── managers/         # Resource managers
 │   ├── monitoring/       # Monitoring tools
 │   ├── orchestration/    # Task orchestration & replanning
+│   │   ├── guardrails/   # Input/Output validation & safety (v3.9.0)
+│   │   ├── patterns/     # Orchestration patterns (9 types)
+│   │   └── replanning/   # Dynamic replanning engine
 │   ├── reporters/        # Report generators
 │   ├── resolvers/        # Dependency resolvers
 │   ├── steering/         # Steering document handlers
 │   ├── templates/        # Template management
 │   └── validators/       # Validation tools
-├── tests/                # Test suites (1874 tests)
+├── tests/                # Test suites (2332 tests)
 ├── docs/                 # Documentation
 ├── storage/              # SDD artifacts
 │   ├── specs/            # Specifications

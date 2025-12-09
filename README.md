@@ -71,7 +71,31 @@ musubi init --windsurf  # Windsurf IDE
 
 ---
 
-## 📊 What's New in v3.7.1
+## 📊 What's New in v3.9.0
+
+- 🛡️ **Guardrails System** - OpenAI Agents SDK inspired input/output validation and safety checks
+- ✅ **InputGuardrail** - Input validation, PII detection, injection attack prevention
+- ✅ **OutputGuardrail** - Output sanitization, sensitive data redaction, content policy enforcement  
+- ⚖️ **SafetyCheckGuardrail** - Constitutional Articles compliance, content safety analysis
+- 🔧 **GuardrailRules DSL** - Fluent API for building validation rules with RuleBuilder
+- 🔗 **GuardrailChain** - Compose multiple guardrails with sequential/parallel execution
+- 🖥️ **CLI Commands** - `musubi-validate guardrails` and `guardrails-chain` commands
+
+```bash
+# Input validation with security preset
+npx musubi-validate guardrails "user input" --type input --preset security
+
+# Output validation with PII redaction
+npx musubi-validate guardrails "output" --type output --redact
+
+# Safety check with constitutional compliance
+npx musubi-validate guardrails "code" --type safety --constitutional --level high
+
+# Run guardrail chain in parallel
+npx musubi-validate guardrails-chain "content" --parallel
+```
+
+### Previous (v3.7.1)
 
 - 🌐 **WebSocket Real-time GUI** - Live replanning updates with `musubi-browser` dashboard
 - 📋 **GUI Quick Actions** - Modal dialog for New Requirement, Validate Project, Export Report
