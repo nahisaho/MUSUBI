@@ -278,6 +278,15 @@ npx musubi-sdd <command>
 | `musubi-orchestrate path analyze` | Analyze execution path | `npx musubi-orchestrate path analyze <path-id>` |
 | `musubi-orchestrate path optimize` | Optimize execution path | `npx musubi-orchestrate path optimize <path-id>` |
 
+### Guardrails Commands (v3.9.0 NEW)
+
+| Command | Purpose | Example |
+|---------|---------|---------|
+| `musubi-validate guardrails` | Input/Output guardrail validation | `npx musubi-validate guardrails --type input` |
+| `musubi-validate guardrails --type output` | Output content validation | `echo "content" \| npx musubi-validate guardrails --type output` |
+| `musubi-validate guardrails --type safety` | Safety check with constitutional | `npx musubi-validate guardrails --type safety --constitutional` |
+| `musubi-validate guardrails-chain` | Chain multiple guardrails | `npx musubi-validate guardrails-chain --parallel` |
+
 ## Learn More
 
 - [MUSUBI Documentation](https://github.com/your-org/musubi)

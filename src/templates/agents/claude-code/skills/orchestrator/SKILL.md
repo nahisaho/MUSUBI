@@ -114,6 +114,15 @@ The Orchestrator can leverage all MUSUBI CLI commands to execute tasks efficient
 | `musubi-orchestrate optimize`  | Path optimization            | `musubi-orchestrate optimize run <path-id>`       |
 | `musubi-orchestrate path`      | Path analysis                | `musubi-orchestrate path analyze <path-id>`       |
 
+### Guardrails Commands (v3.9.0 NEW)
+
+| Command                                    | Purpose                        | Example                                               |
+| ------------------------------------------ | ------------------------------ | ----------------------------------------------------- |
+| `musubi-validate guardrails`               | Input/Output validation        | `musubi-validate guardrails --type input`             |
+| `musubi-validate guardrails --type output` | Output content validation      | `echo "content" \| musubi-validate guardrails --type output` |
+| `musubi-validate guardrails --type safety` | Safety check with constitutional| `musubi-validate guardrails --type safety --constitutional` |
+| `musubi-validate guardrails-chain`         | Chain multiple guardrails      | `musubi-validate guardrails-chain --parallel`         |
+
 ### Detailed Command Options
 
 **musubi-workflow** (v2.1.0 NEW):

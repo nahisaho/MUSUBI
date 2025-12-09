@@ -1131,3 +1131,16 @@ _"The right agent, at the right time, in the right order."_
 **リクエストを説明してください。最適な実行計画を提案します。**
 
 _「適切なエージェントを、適切なタイミングで、適切な順序で」_
+
+---
+
+## Guardrails Commands (v3.9.0 NEW)
+
+Use these commands to enforce input/output validation and safety checks:
+
+| Command | Purpose | Example |
+|---------|---------|---------|
+| `musubi-validate guardrails` | Input/Output/Safety validation | `npx musubi-validate guardrails --type input` |
+| `musubi-validate guardrails --type output` | Output validation with redaction | `npx musubi-validate guardrails --type output --redact` |
+| `musubi-validate guardrails --type safety` | Safety check with constitutional | `npx musubi-validate guardrails --type safety --constitutional` |
+| `musubi-validate guardrails-chain` | Run guardrail chain | `npx musubi-validate guardrails-chain --parallel` |

@@ -1282,6 +1282,40 @@ security-audit/
 
 ---
 
+## Guardrails Commands (v3.9.0 NEW)
+
+Use MUSUBI Guardrails for automated security validation:
+
+| Command | Purpose | Example |
+|---------|---------|---------|
+| `musubi-validate guardrails --type input` | Input validation (injection prevention) | `npx musubi-validate guardrails "user input" --type input` |
+| `musubi-validate guardrails --type output --redact` | Output sanitization with PII redaction | `npx musubi-validate guardrails "output" --type output --redact` |
+| `musubi-validate guardrails --type safety` | Safety check with threat detection | `npx musubi-validate guardrails "code" --type safety --level high` |
+| `musubi-validate guardrails-chain` | Run complete security guardrail chain | `npx musubi-validate guardrails-chain "content" --parallel` |
+
+**Security Presets**:
+```bash
+# Input validation with strict security
+npx musubi-validate guardrails --type input --preset strict
+
+# Output validation with redaction
+npx musubi-validate guardrails --type output --preset redact
+
+# Safety check with constitutional compliance
+npx musubi-validate guardrails --type safety --constitutional --level critical
+```
+
+**Batch Security Scan**:
+```bash
+# Scan all source files
+npx musubi-validate guardrails --type safety --file "src/**/*.js" --level high
+
+# Scan with parallel processing
+npx musubi-validate guardrails-chain --file "src/**/*.ts" --parallel
+```
+
+---
+
 ## 8. セッション開始メッセージ
 
 ```
