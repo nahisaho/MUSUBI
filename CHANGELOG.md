@@ -78,6 +78,9 @@ Complete implementation of OpenAI Agents SDK inspired skill architecture and adv
 - Error Handler: 50 tests
 - All 2574 tests passing
 
+### Fixed
+- CI/CD pipelines now exclude E2E tests that require Ollama environment
+
 ---
 
 ## [3.10.0] - 2025-12-09
