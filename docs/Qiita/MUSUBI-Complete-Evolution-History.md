@@ -1383,9 +1383,405 @@ musubi-checkpoint archive --older-than 7d
 
 ---
 
-# 第12章 バージョン比較まとめ
+# 第12章 v3.8.0 - Swarm Enhancement Phase 1
 
-## 12.1 機能進化の概要
+> **リリース日**: 2025-12-10
+> **テスト追加**: 73 → 合計2,095テスト
+
+v3.8.0では、OpenAI Swarmフレームワークに触発されたエージェント間連携パターンを導入しました。
+
+## 12.1 HandoffPattern（タスク委譲）
+
+エージェント間でタスクをシームレスに引き継ぐパターンを実装しました。
+
+### 機能
+
+| 機能 | 説明 |
+|------|------|
+| タスク委譲 | エージェント間のスムーズな引き継ぎ |
+| コンテキスト保持 | 引き継ぎ時の状態・履歴の維持 |
+| 条件付きハンドオフ | 条件に基づく動的ルーティング |
+| エスカレーション | 失敗時の上位エージェントへの委譲 |
+
+### 使用方法
+
+```javascript
+const { HandoffPattern } = require('musubi/orchestration');
+
+const handoff = new HandoffPattern({
+  agents: {
+    frontline: frontlineAgent,
+    specialist: specialistAgent,
+    escalation: managerAgent
+  },
+  rules: [
+    { condition: 'complexity > 0.7', target: 'specialist' },
+    { condition: 'priority === "critical"', target: 'escalation' }
+  ]
+});
+
+// タスク委譲実行
+const result = await handoff.execute(task, {
+  initialAgent: 'frontline',
+  context: { userId: 'user-123', history: conversationHistory }
+});
+```
+
+## 12.2 TriagePattern（リクエスト分類）
+
+受信リクエストを適切なエージェントに自動ルーティングするパターンを実装しました。
+
+### 機能
+
+| 機能 | 説明 |
+|------|------|
+| インテント分類 | リクエスト意図の自動判定 |
+| 優先度判定 | 緊急度に基づくキューイング |
+| ロードバランシング | エージェント負荷の分散 |
+| フォールバック | 分類不能時のデフォルトルート |
+
+### 使用方法
+
+```javascript
+const { TriagePattern } = require('musubi/orchestration');
+
+const triage = new TriagePattern({
+  classifiers: [
+    { intent: 'billing', agents: ['billing-agent'] },
+    { intent: 'technical', agents: ['tech-support-1', 'tech-support-2'] },
+    { intent: 'sales', agents: ['sales-agent'] }
+  ],
+  fallback: 'general-agent',
+  loadBalancing: 'round-robin'
+});
+
+// リクエスト分類・ルーティング
+const assignment = await triage.classify(request);
+console.log(assignment.selectedAgent);
+console.log(assignment.confidence);
+console.log(assignment.reasoning);
+```
+
+## 12.3 v3.8.0で可能になったこと
+
+- ✅ **自動タスク委譲**: 複雑なタスクを専門エージェントに自動引き継ぎ
+- ✅ **インテリジェントルーティング**: リクエスト内容に応じた最適エージェント選択
+- ✅ **コンテキスト保持**: 引き継ぎ時の会話履歴・状態の維持
+- ✅ **スケーラブルなエージェント構成**: ロードバランシングによる負荷分散
+- ✅ **73テスト追加**: 合計2,095テスト達成
+
+---
+
+# 第13章 v3.9.0 - Guardrails System
+
+> **リリース日**: 2025-12-10
+> **テスト追加**: 183 → 合計2,278テスト
+
+v3.9.0では、OpenAI Agents SDKのGuardrails概念を参考に、入力・出力・安全性の3層検証システムを実装しました。
+
+## 13.1 BaseGuardrail & GuardrailChain
+
+Guardrailsの基盤クラスと連鎖実行機能を提供します。
+
+### アーキテクチャ
+
+```
+┌─────────────────┐   ┌─────────────────┐   ┌─────────────────┐
+│  InputGuardrail │→→→│ OutputGuardrail │→→→│ SafetyGuardrail │
+└─────────────────┘   └─────────────────┘   └─────────────────┘
+         ↓                    ↓                     ↓
+    入力検証              出力サニタイズ        憲法準拠チェック
+```
+
+### 使用方法
+
+```javascript
+const { GuardrailChain, InputGuardrail, OutputGuardrail } = require('musubi/guardrails');
+
+const chain = new GuardrailChain([
+  new InputGuardrail({ level: 'strict' }),
+  new OutputGuardrail({ redact: true }),
+  new SafetyCheckGuardrail({ constitutional: true })
+]);
+
+try {
+  const result = await chain.run(content);
+  console.log(result.sanitizedContent);
+} catch (error) {
+  if (error instanceof GuardrailTripwireException) {
+    console.error('Guardrail triggered:', error.violations);
+  }
+}
+```
+
+## 13.2 InputGuardrail（入力検証）
+
+ユーザー入力の検証とサニタイズを行います。
+
+### 機能
+
+| 機能 | 説明 |
+|------|------|
+| PII検出 | 個人識別情報の検出・マスキング |
+| インジェクション防止 | プロンプトインジェクション攻撃の検出 |
+| 長さ制限 | 入力長の検証 |
+| 禁止パターン | カスタム禁止ワード/パターンの検出 |
+
+### 使用方法
+
+```javascript
+const { InputGuardrail } = require('musubi/guardrails');
+
+const guardrail = new InputGuardrail({
+  level: 'strict',
+  piiDetection: true,
+  maxLength: 10000,
+  forbiddenPatterns: [/ignore previous instructions/i]
+});
+
+const result = await guardrail.validate(userInput);
+if (!result.valid) {
+  console.error('Input rejected:', result.violations);
+}
+```
+
+## 13.3 OutputGuardrail（出力検証）
+
+エージェント出力のサニタイズと品質保証を行います。
+
+### 機能
+
+| 機能 | 説明 |
+|------|------|
+| 機密データ墨消し | API keys、パスワードなどの自動墨消し |
+| フォーマット検証 | 出力形式の検証 |
+| 長さ制限 | 出力長の制限 |
+| コンテンツフィルタ | 不適切コンテンツの除去 |
+
+### 使用方法
+
+```javascript
+const { OutputGuardrail } = require('musubi/guardrails');
+
+const guardrail = new OutputGuardrail({
+  redact: true,
+  redactPatterns: [
+    /sk-[a-zA-Z0-9]{48}/g,      // OpenAI API key
+    /ghp_[a-zA-Z0-9]{36}/g,     // GitHub PAT
+    /password\s*[:=]\s*\S+/gi   // Passwords
+  ],
+  maxLength: 50000
+});
+
+const sanitized = await guardrail.sanitize(agentOutput);
+console.log(sanitized.content);  // 墨消し済み出力
+console.log(sanitized.redactions);  // 墨消し箇所のログ
+```
+
+## 13.4 SafetyCheckGuardrail（安全性チェック）
+
+憲法（Constitution）に基づくコンテンツ安全性検証を行います。
+
+### 機能
+
+| 機能 | 説明 |
+|------|------|
+| 憲法準拠チェック | 9条項への準拠検証 |
+| リスクスコアリング | コンテンツのリスクレベル評価 |
+| エスカレーション | 高リスク時の自動エスカレーション |
+| 監査ログ | 検証結果の記録 |
+
+### 使用方法
+
+```javascript
+const { SafetyCheckGuardrail } = require('musubi/guardrails');
+
+const guardrail = new SafetyCheckGuardrail({
+  constitutional: true,
+  articles: ['article-1', 'article-2', 'article-3'],
+  riskThreshold: 0.3,
+  escalateOnViolation: true
+});
+
+const result = await guardrail.check(content);
+console.log(result.riskScore);      // 0.0-1.0
+console.log(result.violations);     // 違反条項リスト
+console.log(result.recommendations); // 修正推奨
+```
+
+## 13.5 GuardrailRules DSL
+
+ルールベースのGuardrail設定をコードで定義できるDSLを提供します。
+
+### RuleBuilder
+
+```javascript
+const { RuleBuilder } = require('musubi/guardrails');
+
+const rules = new RuleBuilder()
+  .addRule('no-pii')
+    .pattern(/\b\d{3}-\d{2}-\d{4}\b/)  // SSN
+    .action('redact')
+    .message('PII detected and redacted')
+  .addRule('no-api-keys')
+    .pattern(/sk-[a-zA-Z0-9]{48}/)
+    .action('block')
+    .severity('critical')
+  .addRule('max-tokens')
+    .condition((content) => content.length > 100000)
+    .action('truncate')
+  .build();
+```
+
+### SecurityPatterns
+
+```javascript
+const { SecurityPatterns } = require('musubi/guardrails');
+
+// 事前定義されたセキュリティパターン
+const patterns = SecurityPatterns.getAll();
+console.log(patterns.API_KEYS);      // APIキーパターン
+console.log(patterns.CREDENTIALS);   // 認証情報パターン
+console.log(patterns.PII);           // 個人情報パターン
+console.log(patterns.INJECTION);     // インジェクションパターン
+```
+
+## 13.6 CLI統合
+
+GuardrailsをCLIから直接実行できます。
+
+### コマンド
+
+```bash
+# 単一Guardrail実行
+musubi-validate guardrails "検証したいコンテンツ" --type input --level strict
+
+# PIIチェック
+musubi-validate guardrails "電話番号: 090-1234-5678" --type input --pii
+
+# 出力墨消し
+musubi-validate guardrails "API Key: sk-abc123..." --type output --redact
+
+# 憲法準拠チェック
+musubi-validate guardrails "生成されたコンテンツ" --type safety --constitutional
+
+# Guardrailチェーン実行
+musubi-validate guardrails-chain "コンテンツ" --chain input,output,safety
+
+# ファイルからの検証
+musubi-validate guardrails-chain --file output.txt --chain input,output,safety
+```
+
+### オプション
+
+| オプション | 説明 |
+|-----------|------|
+| `--type` | guardrailタイプ（input, output, safety） |
+| `--level` | 検証レベル（lenient, standard, strict） |
+| `--pii` | PII検出を有効化 |
+| `--redact` | 機密データ墨消しを有効化 |
+| `--constitutional` | 憲法準拠チェックを有効化 |
+| `--chain` | 複数Guardrailの連鎖実行 |
+
+## 13.7 v3.9.0で可能になったこと
+
+- ✅ **入力検証**: PII検出、インジェクション防止
+- ✅ **出力サニタイズ**: 機密データの自動墨消し
+- ✅ **憲法準拠チェック**: 9条項への自動準拠検証
+- ✅ **DSL定義**: コードでルールを柔軟に定義
+- ✅ **CLI統合**: コマンドラインからGuardrail実行
+- ✅ **183テスト追加**: 合計2,278テスト達成
+
+---
+
+# 第14章 v3.10.0 - Phase 3 Documentation
+
+> **リリース日**: 2025-12-10
+> **テスト追加**: 54 → 合計2,332テスト
+
+v3.10.0では、Multi-Skill Orchestration機能の包括的なドキュメントを作成しました。
+
+## 14.1 Orchestration Patterns Guide
+
+9つのオーケストレーションパターンを完全網羅したガイドを作成しました。
+
+### 対応パターン
+
+| パターン | 説明 | ユースケース |
+|----------|------|-------------|
+| auto | 自動モード選択 | 汎用タスク |
+| sequential | 順次実行 | 依存関係のあるタスク |
+| parallel | 並列実行 | 独立タスクの高速処理 |
+| nested | ネスト実行 | 階層的タスク構造 |
+| group-chat | グループチャット | 複数エージェント議論 |
+| swarm | スワーム協調 | 自律的タスク分散 |
+| human-in-loop | 人間介入 | 承認が必要なタスク |
+| handoff | タスク委譲 | エージェント間引き継ぎ |
+| triage | 分類・ルーティング | リクエスト振り分け |
+
+### ガイド内容
+
+- 各パターンの概念説明
+- JavaScript/CLI使用例
+- ベストプラクティス
+- エラーハンドリング
+- パフォーマンス最適化
+
+## 14.2 P-Label Parallelization Tutorial
+
+優先度ラベル（P0-P3）を使用した並列実行のチュートリアルを作成しました。
+
+### 優先度レベル
+
+| レベル | 説明 | 実行戦略 |
+|--------|------|----------|
+| P0 | Critical | 即時実行、他をブロック |
+| P1 | High | 優先実行、P2-P3に先行 |
+| P2 | Medium | 通常実行 |
+| P3 | Low | リソース余剰時に実行 |
+
+### 内容
+
+- 優先度の設計指針
+- 依存関係の定義方法
+- 並列実行の最適化
+- デッドロック回避
+- 実行順序の制御
+
+## 14.3 Guardrails Guide
+
+Guardrailsシステムの包括的なガイドを作成しました。
+
+### ガイド内容
+
+- Guardrailsアーキテクチャ
+- 各Guardrailタイプの詳細
+- カスタムルール定義
+- CLI完全リファレンス
+- トラブルシューティング
+- セキュリティベストプラクティス
+
+## 14.4 作成ドキュメント
+
+| ドキュメント | 行数 | 内容 |
+|-------------|------|------|
+| `docs/guides/orchestration-patterns.md` | 507 | 9パターン完全ガイド |
+| `docs/guides/p-label-parallelization.md` | 406 | P0-P3並列化チュートリアル |
+| `docs/guides/guardrails-guide.md` | 473 | Guardrailsシステムガイド |
+
+## 14.5 v3.10.0で可能になったこと
+
+- ✅ **9パターン理解**: オーケストレーションパターンの選択指針
+- ✅ **優先度設計**: P-Labelによる効率的なタスク並列化
+- ✅ **Guardrails活用**: セキュリティ検証の包括的な理解
+- ✅ **実装ガイド**: 具体的なコード例と使用方法
+- ✅ **54テスト追加**: 合計2,332テスト達成
+
+---
+
+# 第15章 バージョン比較まとめ
+
+## 15.1 機能進化の概要
 
 | プロジェクト/バージョン | リリース日 | 主要機能 | テスト数 | エージェント数 |
 |----------------------|-----------|---------|---------|--------------|
@@ -1412,8 +1808,11 @@ musubi-checkpoint archive --older-than 7d
 | **MUSUBI** v3.6.0 | 2025-12-09 | Dynamic Replanning Engine | 1,797 | 27 |
 | **MUSUBI** v3.6.1 | 2025-12-09 | 高度リプランニングコンポーネント | 1,841 | 27 |
 | **MUSUBI** v3.7.0 | 2025-12-09 | 多言語、Ollama、コスト追跡、チェックポイント | 2,022 | 27 |
+| **MUSUBI** v3.8.0 | 2025-12-10 | Swarm Enhancement Phase 1（Handoff/Triage） | 2,095 | 27 |
+| **MUSUBI** v3.9.0 | 2025-12-10 | Guardrails System（入力/出力/安全性チェック） | 2,278 | 27 |
+| **MUSUBI** v3.10.0 | 2025-12-10 | Phase 3 Documentation（9パターンガイド） | 2,332 | 27 |
 
-## 12.2 各バージョンの「できること」
+## 15.2 各バージョンの「できること」
 
 ### Spec-Copilot
 
@@ -1554,11 +1953,43 @@ musubi-checkpoint archive --older-than 7d
 | Checkpoint Manager（状態スナップショット、44テスト） | ✅ |
 | 2,022テスト（181テスト追加） | ✅ |
 
+### MUSUBI v3.8.0
+
+| 機能 | ステータス |
+|------|----------|
+| Swarm Enhancement Phase 1（Handoff/Triage） | ✅ |
+| HandoffPatternによるエージェント間タスク委譲 | ✅ |
+| TriagePatternによるリクエスト分類・ルーティング | ✅ |
+| Handoff統合テスト（73テスト追加） | ✅ |
+| 2,095テスト達成 | ✅ |
+
+### MUSUBI v3.9.0
+
+| 機能 | ステータス |
+|------|----------|
+| Guardrails System（Phase 2完成） | ✅ |
+| InputGuardrail（入力検証、PII検出） | ✅ |
+| OutputGuardrail（出力サニタイズ、墨消し） | ✅ |
+| SafetyCheckGuardrail（Constitutional連携） | ✅ |
+| GuardrailRules DSL（RuleBuilder、SecurityPatterns） | ✅ |
+| CLI統合（guardrails、guardrails-chain） | ✅ |
+| 183テスト追加、合計2,278テスト | ✅ |
+
+### MUSUBI v3.10.0
+
+| 機能 | ステータス |
+|------|----------|
+| Phase 3 Multi-Skill Orchestration Documentation | ✅ |
+| 9オーケストレーションパターン完全ガイド | ✅ |
+| P0-P3並列化チュートリアル | ✅ |
+| Guardrailsシステム完全ガイド | ✅ |
+| 54テスト追加、合計2,332テスト | ✅ |
+
 ---
 
-# 第13章 アップグレード方法
+# 第16章 アップグレード方法
 
-## 13.1 新規インストール
+## 16.1 新規インストール
 
 ```bash
 # 常に最新版を使用（推奨）
@@ -1570,7 +2001,7 @@ npx musubi-sdd@latest init --copilot      # GitHub Copilot
 npx musubi-sdd@latest init --cursor       # Cursor IDE
 ```
 
-## 13.2 既存プロジェクトのアップグレード
+## 16.2 既存プロジェクトのアップグレード
 
 ```bash
 # 同じコマンドで最新版に更新
@@ -1579,7 +2010,7 @@ npx musubi-sdd@latest init
 # Skills、エージェント、CLIコマンドが自動更新されます
 ```
 
-## 13.3 CodeGraph MCP Server（v2.0.0機能）
+## 16.3 CodeGraph MCP Server（v2.0.0機能）
 
 ```bash
 # pipxでインストール
@@ -1593,7 +2024,7 @@ codegraph-mcp index /path/to/project --full
 
 # まとめ
 
-MUSUBIは、2025年11月5日に公開されたSpec-Copilotを起源とし、MUSUHI、そしてMUSUBIへと進化を遂げたプロジェクトです。約1ヶ月強でv0.1.0からv3.7.0まで劇的な成長を遂げました。
+MUSUBIは、2025年11月5日に公開されたSpec-Copilotを起源とし、MUSUHI、そしてMUSUBIへと進化を遂げたプロジェクトです。約1ヶ月強でv0.1.0からv3.10.0まで劇的な成長を遂げました。
 
 ```mermaid
 flowchart TB
@@ -1627,7 +2058,16 @@ flowchart TB
     subgraph Phase8["🔧 Phase 8: MUSUBI Advanced Integration（v3.7.0）"]
         P8["多言語、Ollama、コスト追跡、チェックポイント、2,022テスト"]
     end
-    Origin --> Evolution --> Phase1 --> Phase2 --> Phase3 --> Phase4 --> Phase5 --> Phase6 --> Phase7 --> Phase8
+    subgraph Phase9["🐝 Phase 9: MUSUBI Swarm Enhancement（v3.8.0）"]
+        P9["Handoff/Triageパターン、エージェント間連携、2,095テスト"]
+    end
+    subgraph Phase10["🛡️ Phase 10: MUSUBI Guardrails（v3.9.0）"]
+        P10["入力/出力/安全性Guardrails、Constitutional連携、2,278テスト"]
+    end
+    subgraph Phase11["📚 Phase 11: MUSUBI Phase 3 Docs（v3.10.0）"]
+        P11["9パターンガイド、並列化チュートリアル、2,332テスト"]
+    end
+    Origin --> Evolution --> Phase1 --> Phase2 --> Phase3 --> Phase4 --> Phase5 --> Phase6 --> Phase7 --> Phase8 --> Phase9 --> Phase10 --> Phase11
 ```
 
 **Key Milestones:**
@@ -1647,8 +2087,11 @@ flowchart TB
 | Dynamic Replanning | MUSUBI v3.6.0 | LLMによる動的リプランニング |
 | 高度リプランニング | MUSUBI v3.6.1 | 目標管理、パス最適化、1,841テスト |
 | Advanced Integration | MUSUBI v3.7.0 | 多言語、Ollama、コスト追跡、2,022テスト |
+| Swarm Enhancement | MUSUBI v3.8.0 | Handoff/Triageパターン、2,095テスト |
+| Guardrails System | MUSUBI v3.9.0 | 入力/出力/安全性検証、2,278テスト |
+| Phase 3 Documentation | MUSUBI v3.10.0 | 9パターンガイド、完全ドキュメント化、2,332テスト |
 
-Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて、MUSUBIは単なる仕様管理ツールから、**包括的なAI支援開発プラットフォーム**へと成長しました。v3.7.0では、7言語対応の多言語テンプレート、OllamaによるローカルLLM統合、LLM APIコスト追跡、開発チェックポイント管理など、開発ワークフロー全体を強化する8つの重要な機能を追加しました。2,022のテストと20のCLIコマンドで、堅牢で信頼性の高いSDD体験を提供します。
+Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて、MUSUBIは単なる仕様管理ツールから、**包括的なAI支援開発プラットフォーム**へと成長しました。v3.10.0では、Swarm Enhancement（Handoff/Triageパターン）、Guardrails System（入力/出力/安全性の3層検証）、そして包括的なドキュメントを追加し、開発ワークフロー全体をさらに強化しました。2,332のテストと20のCLIコマンドで、堅牢で信頼性の高いSDD体験を提供します。
 
 ---
 
@@ -1657,6 +2100,8 @@ Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて�
 - [MUSUBI GitHub](https://github.com/nahisaho/musubi)
 - [MUSUHI GitHub](https://github.com/nahisaho/musuhi)（前身プロジェクト）
 - [Spec-Copilot GitHub](https://github.com/nahisaho/spec-copilot)（起源プロジェクト）
+- [MUSUBI v3.10.0 Orchestration Guide](https://qiita.com/nahisaho/items/musubi-v3-orchestration)
+- [MUSUBI v3.9.0 Guardrails Guide](https://qiita.com/nahisaho/items/musubi-v3-guardrails)
 - [MUSUBI v3.7.0 Integration Guide](https://qiita.com/nahisaho/items/musubi-v3-integration)
 - [MUSUBI v3.6.1 Replanning Guide](https://qiita.com/nahisaho/items/musubi-v3-replanning)
 - [MUSUBI v3.0.0 完全ガイド](https://qiita.com/nahisaho/items/musubi-v3-agents)
@@ -1665,4 +2110,4 @@ Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて�
 
 ## タグ
 
-`#MUSUBI` `#MUSUHI` `#Spec-Copilot` `#SDD` `#仕様駆動開発` `#AIエージェント` `#ClaudeCode` `#GitHubCopilot` `#MCP` `#Replanning` `#Ollama` `#i18n`
+`#MUSUBI` `#MUSUHI` `#Spec-Copilot` `#SDD` `#仕様駆動開発` `#AIエージェント` `#ClaudeCode` `#GitHubCopilot` `#MCP` `#Replanning` `#Ollama` `#Guardrails` `#Swarm` `#Orchestration`
