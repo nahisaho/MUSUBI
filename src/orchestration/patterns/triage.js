@@ -303,8 +303,21 @@ class TriagePattern extends BasePattern {
       query,
       history = [],
       agents = [],
-      sharedContext = {}
+      sharedContext = {},
+      enableHandoff
     } = context.input;
+
+    // Override enableHandoff from input if provided
+    const shouldHandoff = enableHandoff !== undefined 
+      ? enableHandoff 
+      : this.options.enableHandoff;
+
+    // Auto-register agents from input if registry is empty
+    if (this.agentRegistry.size === 0 && agents.length > 0) {
+      for (const agent of agents) {
+        this.registerAgent(agent, agent.capability);
+      }
+    }
 
     const inputText = message || text || query;
     const startTime = Date.now();
@@ -360,7 +373,7 @@ class TriagePattern extends BasePattern {
 
       // Step 4: Perform handoff if enabled
       let result;
-      if (this.options.enableHandoff && classification.selectedAgent) {
+      if (shouldHandoff && classification.selectedAgent) {
         engine.emit('triage:routing', {
           context,
           targetAgent: this._getAgentName(classification.selectedAgent)
