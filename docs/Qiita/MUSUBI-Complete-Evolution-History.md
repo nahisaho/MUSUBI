@@ -6,7 +6,7 @@ title: MUSUBIの軌跡：Spec-CopilotからMUSUHI、そしてMUSUBIへの完全�
 
 **MUSUBI（Specification Driven Development）** は、AIエージェントを活用した仕様駆動開発フレームワークです。しかし、MUSUBIは突然生まれたわけではありません。**Spec-Copilot** → **MUSUHI** → **MUSUBI** という3つのプロジェクトを経て、現在の形に進化してきました。
 
-本記事では、2025年11月の最初のプロジェクトから現在のv3.7.0までの完全な変遷を振り返り、各段階で何が追加され、どのような開発体験が可能になったかを詳説します。
+本記事では、2025年11月の最初のプロジェクトから現在のv3.11.0までの完全な変遷を振り返り、各段階で何が追加され、どのような開発体験が可能になったかを詳説します。
 
 **対象読者:**
 - MUSUBIを使用中/検討中の開発者
@@ -22,6 +22,8 @@ title: MUSUBIの軌跡：Spec-CopilotからMUSUHI、そしてMUSUBIへの完全�
 - MUSUBI v3.3.0-v3.5.1: モニタリング、Steering高度化、CLI統合
 - MUSUBI v3.6.0-v3.6.1: Dynamic Replanning Engine、目標管理、パス最適化
 - MUSUBI v3.7.0: 多言語テンプレート、Ollama統合、コスト追跡、チェックポイント
+- MUSUBI v3.8.0-v3.10.0: Swarm Enhancement、Guardrails、Documentation
+- MUSUBI v3.11.0: Skill System Architecture、Advanced Workflows
 
 ---
 
@@ -1779,6 +1781,217 @@ Guardrailsシステムの包括的なガイドを作成しました。
 
 ---
 
+# 第14.5章 v3.11.0 - Skill System Architecture & Advanced Workflows
+
+> **リリース日**: 2025-12-10
+> **テスト追加**: 242 → 合計2,574テスト
+
+## 14.5.1 概要
+
+v3.11.0は、**Phase 3の完全実装版**です。OpenAI Agents SDKにインスパイアされたSkill System Architectureと、高度なワークフロー実行エンジンを追加しました。
+
+```mermaid
+flowchart TB
+    subgraph V3_11["MUSUBI v3.11.0"]
+        direction TB
+        SR["Skill Registry<br/>スキル登録・発見"]
+        SE["Skill Executor<br/>P-label並列実行"]
+        ASB["Agent-Skill Binding<br/>動的スキル割当"]
+        MCP["MCP Tool Adapters<br/>双方向連携"]
+        WE["Workflow Executor<br/>8ステップタイプ"]
+        EH["Error Handler<br/>Circuit Breaker"]
+    end
+    
+    SR --> SE
+    SE --> ASB
+    ASB --> MCP
+    WE --> EH
+```
+
+## 14.5.2 Skill System Architecture
+
+### Skill Registry
+スキルの集中管理と発見機能を提供：
+
+```javascript
+const { SkillRegistry } = require('musubi-sdd');
+const registry = new SkillRegistry();
+
+// スキル登録
+registry.registerSkill({
+  id: 'analyze-requirements',
+  name: 'Requirements Analyzer',
+  category: 'analysis',
+  tags: ['requirements', 'ears'],
+  inputs: [{ name: 'spec', type: 'string', required: true }],
+  outputs: [{ name: 'requirements', type: 'array' }]
+});
+
+// カテゴリ・タグで検索
+const analysisSkills = registry.findByCategory('analysis');
+const earsSkills = registry.findByTags(['ears']);
+```
+
+### Skill Executor
+P-label優先度による並列実行：
+
+```javascript
+const { SkillExecutor } = require('musubi-sdd');
+const executor = new SkillExecutor(registry);
+
+// P0: 最高優先度（単独実行）
+// P1: 高優先度（P0完了後）
+// P2: 中優先度（P1完了後）
+// P3: 低優先度（バックグラウンド）
+
+const result = await executor.executeParallel([
+  { skillId: 'analyze', priority: 'P0' },
+  { skillId: 'design', priority: 'P1' },
+  { skillId: 'implement', priority: 'P2' }
+]);
+```
+
+### Agent-Skill Binding
+エージェントの能力に基づく動的スキル割当：
+
+```javascript
+const { AgentSkillBinding } = require('musubi-sdd');
+const binding = new AgentSkillBinding(registry);
+
+// エージェント登録
+binding.registerAgent({
+  id: 'architect-agent',
+  capabilities: ['design', 'c4-diagram', 'adr'],
+  maxConcurrentTasks: 3
+});
+
+// 最適なエージェント選択
+const agent = binding.findBestAgentForSkill('create-c4-diagram');
+```
+
+### MCP Tool Adapters
+MCP（Model Context Protocol）との双方向連携：
+
+```javascript
+const { MCPToSkillAdapter, SkillToMCPAdapter } = require('musubi-sdd');
+
+// 外部MCPツールをスキルとして利用
+const mcpAdapter = new MCPToSkillAdapter(mcpClient);
+const skill = mcpAdapter.adaptTool(mcpTool);
+
+// MUSUBIスキルをMCPツールとして公開
+const skillAdapter = new SkillToMCPAdapter(registry);
+const mcpTool = skillAdapter.adaptSkill('analyze-requirements');
+```
+
+## 14.5.3 Advanced Workflows
+
+### Workflow Executor
+8種類のステップタイプをサポート：
+
+| ステップタイプ | 説明 |
+|--------------|------|
+| `task` | 単一タスク実行 |
+| `parallel` | 並列タスク実行 |
+| `conditional` | 条件分岐 |
+| `loop` | ループ処理 |
+| `human-approval` | 人間の承認待ち |
+| `error-handler` | エラーハンドリング |
+| `transform` | データ変換 |
+| `aggregate` | 結果集約 |
+
+```javascript
+const { WorkflowExecutor, WorkflowDefinition } = require('musubi-sdd');
+
+const workflow = new WorkflowDefinition('feature-dev', 'Feature Development', [
+  { id: 'analyze', type: 'task', skillId: 'analyze-requirements' },
+  { 
+    id: 'design-impl', 
+    type: 'parallel',
+    steps: [
+      { id: 'design', type: 'task', skillId: 'create-design' },
+      { id: 'impl', type: 'task', skillId: 'implement-code' }
+    ]
+  },
+  { 
+    id: 'review', 
+    type: 'conditional',
+    when: { $eq: ['${analyze.complexity}', 'high'] },
+    then: { id: 'manual-review', type: 'human-approval' }
+  }
+]);
+
+const executor = new WorkflowExecutor();
+const result = await executor.execute(workflow);
+```
+
+### Error Handler
+Circuit BreakerとGraceful Degradation：
+
+```javascript
+const { ErrorHandler } = require('musubi-sdd');
+const handler = new ErrorHandler();
+
+// エラー分類
+handler.handle(error); // 自動分類（network, timeout, validation等）
+
+// Circuit Breaker
+const breaker = handler.getCircuitBreaker('external-api');
+// closed → open（障害時）→ half-open（回復テスト）→ closed
+
+// リトライ with Exponential Backoff
+const result = await handler.executeWithRetry(
+  () => callExternalAPI(),
+  { maxRetries: 3, backoffMs: 1000, backoffMultiplier: 2 }
+);
+```
+
+## 14.5.4 Workflow Templates
+
+5つの実世界ワークフローテンプレートを提供：
+
+| テンプレート | 説明 | ステップ数 |
+|------------|------|-----------|
+| `feature-development` | 機能開発フロー | 8 |
+| `cicd-pipeline` | CI/CDパイプライン | 6 |
+| `code-review` | コードレビュー | 5 |
+| `incident-response` | インシデント対応 | 7 |
+| `documentation` | ドキュメント作成 | 4 |
+
+```javascript
+const { WorkflowExamples } = require('musubi-sdd');
+
+// テンプレート取得
+const featureWorkflow = WorkflowExamples.getFeatureDevelopmentWorkflow();
+const cicdWorkflow = WorkflowExamples.getCICDPipelineWorkflow();
+```
+
+## 14.5.5 新規ファイル
+
+| ファイル | 行数 | 説明 |
+|---------|-----|------|
+| `src/orchestration/skill-registry.js` | 450 | スキル登録・発見 |
+| `src/orchestration/skill-executor.js` | 520 | P-label並列実行 |
+| `src/orchestration/agent-skill-binding.js` | 380 | 動的スキル割当 |
+| `src/orchestration/mcp-tool-adapters.js` | 420 | MCP双方向連携 |
+| `src/orchestration/workflow-executor.js` | 780 | ワークフロー実行 |
+| `src/orchestration/error-handler.js` | 830 | エラーハンドリング |
+| `src/orchestration/workflow-examples.js` | 350 | テンプレート集 |
+| `docs/guides/incremental-adoption.md` | 300 | 移行ガイド |
+
+## 14.5.6 v3.11.0で可能になったこと
+
+- ✅ **スキル管理**: 集中管理と動的発見
+- ✅ **P-label実行**: 優先度ベースの並列処理
+- ✅ **動的バインディング**: 能力ベースのエージェント選択
+- ✅ **MCP連携**: 外部ツールとの双方向統合
+- ✅ **ワークフロー実行**: 8ステップタイプのフロー制御
+- ✅ **エラー耐性**: Circuit BreakerとGraceful Degradation
+- ✅ **テンプレート**: 5つの実世界ワークフロー
+- ✅ **242テスト追加**: 合計2,574テスト達成
+
+---
+
 # 第15章 バージョン比較まとめ
 
 ## 15.1 機能進化の概要
@@ -1811,6 +2024,7 @@ Guardrailsシステムの包括的なガイドを作成しました。
 | **MUSUBI** v3.8.0 | 2025-12-10 | Swarm Enhancement Phase 1（Handoff/Triage） | 2,095 | 27 |
 | **MUSUBI** v3.9.0 | 2025-12-10 | Guardrails System（入力/出力/安全性チェック） | 2,278 | 27 |
 | **MUSUBI** v3.10.0 | 2025-12-10 | Phase 3 Documentation（9パターンガイド） | 2,332 | 27 |
+| **MUSUBI** v3.11.0 | 2025-12-10 | Skill System & Advanced Workflows | 2,574 | 27 |
 
 ## 15.2 各バージョンの「できること」
 
@@ -1985,6 +2199,19 @@ Guardrailsシステムの包括的なガイドを作成しました。
 | Guardrailsシステム完全ガイド | ✅ |
 | 54テスト追加、合計2,332テスト | ✅ |
 
+### MUSUBI v3.11.0
+
+| 機能 | ステータス |
+|------|----------|
+| Skill Registry（スキル登録・発見） | ✅ |
+| Skill Executor（P-label並列実行） | ✅ |
+| Agent-Skill Binding（動的スキル割当） | ✅ |
+| MCP Tool Adapters（双方向連携） | ✅ |
+| Workflow Executor（8ステップタイプ） | ✅ |
+| Error Handler（Circuit Breaker） | ✅ |
+| 5 Workflow Templates | ✅ |
+| 242テスト追加、合計2,574テスト | ✅ |
+
 ---
 
 # 第16章 アップグレード方法
@@ -2024,7 +2251,7 @@ codegraph-mcp index /path/to/project --full
 
 # まとめ
 
-MUSUBIは、2025年11月5日に公開されたSpec-Copilotを起源とし、MUSUHI、そしてMUSUBIへと進化を遂げたプロジェクトです。約1ヶ月強でv0.1.0からv3.10.0まで劇的な成長を遂げました。
+MUSUBIは、2025年11月5日に公開されたSpec-Copilotを起源とし、MUSUHI、そしてMUSUBIへと進化を遂げたプロジェクトです。約1ヶ月強でv0.1.0からv3.11.0まで劇的な成長を遂げました。
 
 ```mermaid
 flowchart TB
@@ -2067,7 +2294,10 @@ flowchart TB
     subgraph Phase11["📚 Phase 11: MUSUBI Phase 3 Docs（v3.10.0）"]
         P11["9パターンガイド、並列化チュートリアル、2,332テスト"]
     end
-    Origin --> Evolution --> Phase1 --> Phase2 --> Phase3 --> Phase4 --> Phase5 --> Phase6 --> Phase7 --> Phase8 --> Phase9 --> Phase10 --> Phase11
+    subgraph Phase12["🎯 Phase 12: MUSUBI Skill System（v3.11.0）"]
+        P12["Skill Registry、Workflow Executor、2,574テスト"]
+    end
+    Origin --> Evolution --> Phase1 --> Phase2 --> Phase3 --> Phase4 --> Phase5 --> Phase6 --> Phase7 --> Phase8 --> Phase9 --> Phase10 --> Phase11 --> Phase12
 ```
 
 **Key Milestones:**
@@ -2090,8 +2320,9 @@ flowchart TB
 | Swarm Enhancement | MUSUBI v3.8.0 | Handoff/Triageパターン、2,095テスト |
 | Guardrails System | MUSUBI v3.9.0 | 入力/出力/安全性検証、2,278テスト |
 | Phase 3 Documentation | MUSUBI v3.10.0 | 9パターンガイド、完全ドキュメント化、2,332テスト |
+| Skill System | MUSUBI v3.11.0 | Skill Registry、Workflow Executor、2,574テスト |
 
-Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて、MUSUBIは単なる仕様管理ツールから、**包括的なAI支援開発プラットフォーム**へと成長しました。v3.10.0では、Swarm Enhancement（Handoff/Triageパターン）、Guardrails System（入力/出力/安全性の3層検証）、そして包括的なドキュメントを追加し、開発ワークフロー全体をさらに強化しました。2,332のテストと20のCLIコマンドで、堅牢で信頼性の高いSDD体験を提供します。
+Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて、MUSUBIは単なる仕様管理ツールから、**包括的なAI支援開発プラットフォーム**へと成長しました。v3.11.0では、OpenAI Agents SDKにインスパイアされたSkill System Architecture、高度なWorkflow Executor、そしてCircuit BreakerやGraceful Degradationを備えたError Handlerを追加しました。2,574のテストと20のCLIコマンドで、堅牢で信頼性の高いSDD体験を提供します。
 
 ---
 
@@ -2100,6 +2331,7 @@ Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて�
 - [MUSUBI GitHub](https://github.com/nahisaho/musubi)
 - [MUSUHI GitHub](https://github.com/nahisaho/musuhi)（前身プロジェクト）
 - [Spec-Copilot GitHub](https://github.com/nahisaho/spec-copilot)（起源プロジェクト）
+- [MUSUBI v3.11.0 Skill System Guide](https://qiita.com/nahisaho/items/musubi-v3-skill-system)
 - [MUSUBI v3.10.0 Orchestration Guide](https://qiita.com/nahisaho/items/musubi-v3-orchestration)
 - [MUSUBI v3.9.0 Guardrails Guide](https://qiita.com/nahisaho/items/musubi-v3-guardrails)
 - [MUSUBI v3.7.0 Integration Guide](https://qiita.com/nahisaho/items/musubi-v3-integration)
@@ -2110,4 +2342,4 @@ Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて�
 
 ## タグ
 
-`#MUSUBI` `#MUSUHI` `#Spec-Copilot` `#SDD` `#仕様駆動開発` `#AIエージェント` `#ClaudeCode` `#GitHubCopilot` `#MCP` `#Replanning` `#Ollama` `#Guardrails` `#Swarm` `#Orchestration`
+`#MUSUBI` `#MUSUHI` `#Spec-Copilot` `#SDD` `#仕様駆動開発` `#AIエージェント` `#ClaudeCode` `#GitHubCopilot` `#MCP` `#Replanning` `#Ollama` `#Guardrails` `#Swarm` `#Orchestration` `#SkillSystem` `#Workflow`
