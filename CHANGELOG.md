@@ -5,6 +5,122 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.0] - 2025-12-09
+
+### Added
+
+**Swarm Enhancement Phase 2 - Guardrails System** 🛡️
+
+OpenAI Agents SDK inspired guardrails for input/output validation, safety checks, and constitutional compliance.
+
+#### BaseGuardrail - Core Guardrail Infrastructure
+- **BaseGuardrail class** (`src/orchestration/guardrails/base-guardrail.js`)
+  - Abstract base class for all guardrails
+  - Tripwire functionality for immediate failure handling
+  - Configurable severity levels (info, warning, error, critical)
+  - Execution time tracking and metadata
+
+- **GuardrailChain** - Compose multiple guardrails
+  - Sequential and parallel execution modes
+  - Stop-on-first-failure option
+  - Aggregated results with all violations
+
+- **GuardrailTripwireException** - Custom exception for tripwire failures
+
+#### InputGuardrail - Input Validation & Sanitization
+- **InputGuardrail class** (`src/orchestration/guardrails/input-guardrail.js`)
+  - Input validation with configurable rules
+  - Sanitization: trim, normalize whitespace, remove HTML, escape, truncate
+  - PII detection: email, phone, credit card, SSN
+  - Injection attack detection: SQL, XSS, command injection
+  - Field-level validation for structured input
+
+- **Factory function** `createInputGuardrail(preset, options)`
+  - Presets: `userInput`, `security`, `strict`, `minimal`
+
+#### OutputGuardrail - Output Validation & Redaction
+- **OutputGuardrail class** (`src/orchestration/guardrails/output-guardrail.js`)
+  - Output content validation
+  - Sensitive data redaction: email, phone, API keys, passwords, connection strings
+  - Content policy enforcement
+  - Quality checks for output content
+
+- **Factory function** `createOutputGuardrail(preset, options)`
+  - Presets: `safe`, `security`, `strict`, `redact`
+
+#### GuardrailRules DSL - Rule Definition System
+- **RuleBuilder** - Fluent API for building validation rules
+  - `.required()`, `.minLength(n)`, `.maxLength(n)`
+  - `.pattern(regex)`, `.noPII()`, `.noInjection()`
+  - `.custom(fn, message)`, `.noHarmful()`
+
+- **RuleRegistry** - Central registry for rule sets
+  - Register and retrieve named rule sets
+  - List all registered rules
+
+- **CommonRuleSets** - Pre-built rule sets
+  - `security` - Security-focused rules
+  - `strictContent` - Strict content validation
+  - `userInput` - Standard user input rules
+  - `agentOutput` - Agent output validation
+
+- **SecurityPatterns** - Regex patterns for detection
+  - EMAIL, PHONE, CREDIT_CARD, SSN, API_KEY
+  - SQL_INJECTION, XSS, COMMAND_INJECTION
+
+#### SafetyCheckGuardrail - Constitutional Compliance
+- **SafetyCheckGuardrail class** (`src/orchestration/guardrails/safety-check.js`)
+  - Content safety analysis
+  - Constitutional Articles compliance checking
+  - PII detection and flagging
+
+- **SafetyLevel enum** - LOW, MEDIUM, HIGH, CRITICAL
+
+- **ContentCategory enum** - SAFE, HARMFUL, HATE_SPEECH, VIOLENCE, SEXUAL, MISINFORMATION, PII_EXPOSURE, ILLEGAL
+
+- **ConstitutionalArticleChecker** - 9 Constitutional Articles validation
+  - Article I: Spec Supremacy (`[SPEC:xxx]` reference required)
+  - Article II: Traceability Mandate (`[TRACE:xxx]` required)
+  - Article III-VI: Context-dependent checks
+  - Article VII: Simplicity Gate (no over-abstraction)
+  - Article VIII-IX: Governance checks
+
+- **Factory function** `createSafetyCheckGuardrail(preset, options)`
+  - Presets: `minimal`, `standard`, `strict`, `constitutional`
+
+#### CLI Integration
+- **musubi-validate guardrails** command
+  - `--type <input|output|safety>` - Guardrail type
+  - `--level <basic|standard|strict|paranoid>` - Safety level
+  - `--constitutional` - Enable constitutional compliance
+  - `--redact` - Enable output redaction
+  - Rich console output with violations and redaction details
+
+- **musubi-validate guardrails-chain** command
+  - Chain multiple guardrails together
+  - `--parallel` - Run guardrails in parallel
+  - `--stop-on-failure` - Stop on first failure
+
+### Testing
+- **183 guardrails tests** across 5 test suites
+  - base-guardrail.test.js - Core guardrail infrastructure
+  - guardrail-rules.test.js - Rules DSL
+  - input-guardrail.test.js - Input validation
+  - output-guardrail.test.js - Output validation
+  - safety-check.test.js - Safety checks
+  - guardrails-integration.test.js - E2E integration tests
+
+- **Total test count: 2332 tests**
+
+### Technical Details
+- OpenAI Agents SDK guardrails pattern implementation
+- Full tripwire support for critical violations
+- Composable guardrail chains
+- Extensible rule system
+- Constitutional governance integration
+
+---
+
 ## [3.8.0] - 2025-12-09
 
 ### Added
