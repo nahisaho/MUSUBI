@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.7.2] - 2025-12-11
+
+### Added
+
+**Phase 6 P2: Startup Time Optimization Module** ⚡
+
+New `src/performance/startup-optimizer.js` for optimized application startup:
+
+- **InitStage Enum**
+  - Staged initialization: CORE, EXTENDED, OPTIONAL, ON_DEMAND
+  - Priority-based ordering within stages
+
+- **InitModule**
+  - Deferred initialization with dependency resolution
+  - State tracking: PENDING, LOADING, READY, ERROR
+  - Duration measurement for profiling
+
+- **StartupOptimizer**
+  - Parallel module loading with configurable concurrency limit
+  - Automatic dependency resolution
+  - Stage-based initialization (core first, optional deferred)
+  - Initialization profiling and statistics
+
+- **WarmupCache**
+  - Pre-computed cache for frequently accessed data
+  - Parallel warmup execution
+  - Hit tracking for optimization
+
+- **InitProfiler**
+  - High-resolution timing with `process.hrtime.bigint()`
+  - Named marks and measurements
+  - Duration summary and slowest module identification
+
+### Changed
+
+- Added 44 new tests for startup optimizer (3,998 → 4,042 total)
+- Test suites increased from 133 to 134
+- Updated phase6-planning.md with P0/P1/P2 completion status
+
 ## [5.7.1] - 2025-12-11
 
 ### Added
