@@ -205,7 +205,7 @@ describe('ModuleCategory', () => {
 
 describe('MODULE_REGISTRY', () => {
   it('should have valid entries', () => {
-    for (const [name, entry] of Object.entries(MODULE_REGISTRY)) {
+    for (const [_name, entry] of Object.entries(MODULE_REGISTRY)) {
       expect(entry.path).toBeDefined();
       expect(entry.category).toBeDefined();
       expect(entry.exports).toBeDefined();
