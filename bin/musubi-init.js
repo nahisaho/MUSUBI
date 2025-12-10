@@ -27,6 +27,121 @@ const SHARED_TEMPLATE_DIR = path.join(TEMPLATE_DIR, 'shared');
 const AGENTS_TEMPLATE_DIR = path.join(TEMPLATE_DIR, 'agents');
 
 /**
+ * Language recommendation engine
+ * @param {object} requirements - User's answers about app types, performance, expertise
+ * @returns {Array} Recommended languages with reasons
+ */
+function recommendLanguages(requirements) {
+  const { appTypes, performanceNeeds, teamExpertise } = requirements;
+  const scores = {};
+  const reasons = {};
+
+  // Initialize scores
+  const allLangs = [
+    'javascript',
+    'python',
+    'rust',
+    'go',
+    'java',
+    'csharp',
+    'cpp',
+    'swift',
+    'ruby',
+    'php',
+  ];
+  for (const lang of allLangs) {
+    scores[lang] = 0;
+    reasons[lang] = [];
+  }
+
+  // Score by application type
+  const appTypeScores = {
+    'web-frontend': { javascript: 10, reason: 'Best ecosystem for web frontend' },
+    'web-backend': {
+      javascript: 6,
+      python: 7,
+      go: 8,
+      rust: 7,
+      java: 7,
+      csharp: 6,
+      ruby: 5,
+      php: 5,
+      reason: 'Strong backend frameworks',
+    },
+    cli: { rust: 9, go: 9, python: 6, reason: 'Fast startup, single binary' },
+    desktop: { rust: 7, csharp: 8, cpp: 7, swift: 6, java: 6, reason: 'Native GUI support' },
+    mobile: { swift: 9, java: 8, javascript: 6, reason: 'Mobile platform support' },
+    data: { python: 10, rust: 6, reason: 'Rich data science ecosystem' },
+    ml: { python: 10, rust: 5, cpp: 5, reason: 'ML/AI libraries and frameworks' },
+    embedded: { rust: 10, cpp: 9, reason: 'Memory safety, no runtime' },
+    game: { cpp: 9, csharp: 8, rust: 6, reason: 'Game engine support' },
+    systems: { rust: 10, go: 8, cpp: 9, reason: 'Systems programming' },
+  };
+
+  for (const appType of appTypes || []) {
+    const typeScores = appTypeScores[appType];
+    if (typeScores) {
+      for (const [lang, score] of Object.entries(typeScores)) {
+        if (typeof score === 'number') {
+          scores[lang] += score;
+          if (!reasons[lang].includes(typeScores.reason)) {
+            reasons[lang].push(typeScores.reason);
+          }
+        }
+      }
+    }
+  }
+
+  // Score by performance needs
+  if (performanceNeeds === 'high') {
+    scores.rust += 8;
+    scores.go += 6;
+    scores.cpp += 7;
+    reasons.rust.push('High performance, zero-cost abstractions');
+    reasons.go.push('Fast compilation, efficient runtime');
+  } else if (performanceNeeds === 'rapid') {
+    scores.python += 5;
+    scores.javascript += 5;
+    scores.ruby += 4;
+    reasons.python.push('Rapid development, extensive libraries');
+    reasons.javascript.push('Fast iteration, universal runtime');
+  }
+
+  // Boost by team expertise
+  for (const lang of teamExpertise || []) {
+    scores[lang] += 5;
+    reasons[lang].push('Team has expertise');
+  }
+
+  // Sort and return top recommendations
+  const sorted = Object.entries(scores)
+    .filter(([, score]) => score > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+
+  const langInfo = {
+    javascript: { name: 'JavaScript/TypeScript', emoji: '🟨' },
+    python: { name: 'Python', emoji: '🐍' },
+    rust: { name: 'Rust', emoji: '🦀' },
+    go: { name: 'Go', emoji: '🐹' },
+    java: { name: 'Java/Kotlin', emoji: '☕' },
+    csharp: { name: 'C#/.NET', emoji: '💜' },
+    cpp: { name: 'C/C++', emoji: '⚙️' },
+    swift: { name: 'Swift', emoji: '🍎' },
+    ruby: { name: 'Ruby', emoji: '💎' },
+    php: { name: 'PHP', emoji: '🐘' },
+  };
+
+  return sorted.map(([lang]) => ({
+    value: lang,
+    name: langInfo[lang].name,
+    emoji: langInfo[lang].emoji,
+    reason: reasons[lang].slice(0, 2).join('; ') || 'General purpose',
+    score: scores[lang],
+  }));
+}
+
+/**
  * Main initialization function
  * @param {object} agent - Agent definition from registry
  * @param {string} agentKey - Agent key (e.g., 'claude-code', 'cursor')
@@ -98,11 +213,128 @@ async function main(agent, agentKey) {
       message: 'Project type:',
       choices: ['Greenfield (0→1)', 'Brownfield (1→n)', 'Both'],
     },
+    {
+      type: 'list',
+      name: 'techStackApproach',
+      message: 'Technology stack approach:',
+      choices: [
+        { name: 'Single language', value: 'single' },
+        { name: 'Multiple languages', value: 'multiple' },
+        { name: 'Undecided (decide later)', value: 'undecided' },
+        { name: 'Help me decide (recommend based on requirements)', value: 'recommend' },
+      ],
+      default: 'single',
+    },
   ];
 
-  // Skills selection is only for Claude Code (Skills API exclusive)
+  // Language selection based on approach
+  const languageChoices = [
+    { name: 'JavaScript/TypeScript', value: 'javascript' },
+    { name: 'Python', value: 'python' },
+    { name: 'Rust', value: 'rust' },
+    { name: 'Go', value: 'go' },
+    { name: 'Java/Kotlin', value: 'java' },
+    { name: 'C#/.NET', value: 'csharp' },
+    { name: 'C/C++', value: 'cpp' },
+    { name: 'Swift', value: 'swift' },
+    { name: 'Ruby', value: 'ruby' },
+    { name: 'PHP', value: 'php' },
+    { name: 'Other', value: 'other' },
+  ];
+
+  // Recommendation questions for 'Help me decide' mode
+  const recommendationPrompts = [
+    {
+      type: 'checkbox',
+      name: 'appTypes',
+      message: 'What type of application(s) are you building?',
+      choices: [
+        { name: 'Web Frontend (SPA, SSR)', value: 'web-frontend' },
+        { name: 'Web Backend / API', value: 'web-backend' },
+        { name: 'CLI Tool', value: 'cli' },
+        { name: 'Desktop Application', value: 'desktop' },
+        { name: 'Mobile App', value: 'mobile' },
+        { name: 'Data Pipeline / ETL', value: 'data' },
+        { name: 'AI/ML Application', value: 'ml' },
+        { name: 'Embedded / IoT', value: 'embedded' },
+        { name: 'Game Development', value: 'game' },
+        { name: 'Systems / Infrastructure', value: 'systems' },
+      ],
+    },
+    {
+      type: 'list',
+      name: 'performanceNeeds',
+      message: 'Performance requirements:',
+      choices: [
+        { name: 'High performance / Low latency critical', value: 'high' },
+        { name: 'Moderate (typical web app)', value: 'moderate' },
+        { name: 'Rapid development prioritized', value: 'rapid' },
+      ],
+    },
+    {
+      type: 'checkbox',
+      name: 'teamExpertise',
+      message: 'Team expertise (select all that apply):',
+      choices: languageChoices.filter(c => c.value !== 'other'),
+    },
+  ];
+
+  // Get initial answers to determine language prompts
+  const initialAnswers = await inquirer.default.prompt(prompts);
+  let answers = { ...initialAnswers };
+
+  // Handle tech stack approach
+  if (answers.techStackApproach === 'single') {
+    const langAnswer = await inquirer.default.prompt([
+      {
+        type: 'list',
+        name: 'primaryLanguage',
+        message: 'Select primary language:',
+        choices: languageChoices,
+      },
+    ]);
+    answers.languages = [langAnswer.primaryLanguage];
+  } else if (answers.techStackApproach === 'multiple') {
+    const langAnswer = await inquirer.default.prompt([
+      {
+        type: 'checkbox',
+        name: 'languages',
+        message: 'Select languages (check all that apply):',
+        choices: languageChoices,
+        validate: input => (input.length > 0 ? true : 'Select at least one language'),
+      },
+    ]);
+    answers.languages = langAnswer.languages;
+  } else if (answers.techStackApproach === 'recommend') {
+    // Ask recommendation questions
+    const recAnswers = await inquirer.default.prompt(recommendationPrompts);
+    const recommended = recommendLanguages(recAnswers);
+
+    console.log(chalk.cyan('\n📊 Recommended languages based on your requirements:\n'));
+    for (const rec of recommended) {
+      console.log(chalk.white(`  ${rec.emoji} ${chalk.bold(rec.name)}: ${rec.reason}`));
+    }
+    console.log('');
+
+    const confirmAnswer = await inquirer.default.prompt([
+      {
+        type: 'checkbox',
+        name: 'languages',
+        message: 'Confirm languages to use:',
+        choices: recommended.map(r => ({ name: r.name, value: r.value, checked: true })),
+      },
+    ]);
+    answers.languages = confirmAnswer.languages;
+    answers.recommendationContext = recAnswers;
+  } else {
+    // undecided
+    answers.languages = ['undecided'];
+  }
+
+  // Continue with remaining prompts
+  const remainingPrompts = [];
   if (agentKey === 'claude-code' && agent.layout.skillsDir) {
-    prompts.push({
+    remainingPrompts.push({
       type: 'checkbox',
       name: 'skills',
       message: 'Select skills to install (all recommended):',
@@ -147,7 +379,7 @@ async function main(agent, agentKey) {
     });
   }
 
-  prompts.push(
+  remainingPrompts.push(
     {
       type: 'confirm',
       name: 'createSteering',
@@ -162,7 +394,8 @@ async function main(agent, agentKey) {
     }
   );
 
-  const answers = await inquirer.default.prompt(prompts);
+  const finalAnswers = await inquirer.default.prompt(remainingPrompts);
+  answers = { ...answers, ...finalAnswers };
 
   console.log(chalk.green('\n✨ Initializing MUSUBI...\n'));
 
@@ -341,9 +574,10 @@ async function copyAgentsFile(agent) {
 async function generateSteering(answers) {
   const steeringTemplates = path.join(SHARED_TEMPLATE_DIR, 'steering');
   const locale = answers.locale || 'en';
+  const languages = answers.languages || ['undecided'];
 
   // Copy and customize steering files
-  const files = ['structure.md', 'tech.md', 'product.md'];
+  const files = ['structure.md', 'product.md'];
   for (const file of files) {
     // Try locale-specific file first (e.g., structure.ja.md)
     let templatePath = path.join(steeringTemplates, file.replace('.md', `.${locale}.md`));
@@ -371,15 +605,255 @@ async function generateSteering(answers) {
     await fs.writeFile(path.join('steering', outputFile), content);
   }
 
-  // Create project.yml with locale setting
+  // Generate tech.md based on selected languages
+  const techContent = generateTechMd(languages, answers, locale);
+  const techFile = locale !== 'en' ? `tech.${locale}.md` : 'tech.md';
+  await fs.writeFile(path.join('steering', techFile), techContent);
+
+  // Create project.yml with locale and language settings
   const projectYml = `# MUSUBI Project Configuration
 name: ${answers.projectName}
 description: ${answers.description}
 locale: ${locale}
 version: "0.1.0"
 created: ${new Date().toISOString().split('T')[0]}
+
+# Technology Stack
+tech_stack:
+  approach: ${answers.techStackApproach}
+  languages:
+${languages[0] === 'undecided' ? '    - undecided  # To be determined' : languages.map(l => `    - ${l}`).join('\n')}
 `;
   await fs.writeFile(path.join('steering', 'project.yml'), projectYml);
+}
+
+/**
+ * Generate language-specific tech.md content
+ */
+function generateTechMd(languages, answers, _locale) {
+  const langInfo = {
+    javascript: {
+      name: 'JavaScript/TypeScript',
+      version: 'ES2022+ / TypeScript 5.0+',
+      runtime: 'Node.js 20+ LTS, Bun, Deno',
+      packageManager: 'npm, pnpm, yarn',
+      frameworks: 'React, Vue, Next.js, Express, Fastify',
+      testing: 'Jest, Vitest, Playwright',
+    },
+    python: {
+      name: 'Python',
+      version: '3.11+',
+      runtime: 'CPython, PyPy',
+      packageManager: 'pip, poetry, uv',
+      frameworks: 'FastAPI, Django, Flask',
+      testing: 'pytest, unittest',
+    },
+    rust: {
+      name: 'Rust',
+      version: '1.75+ stable',
+      runtime: 'Native binary',
+      packageManager: 'Cargo',
+      frameworks: 'Axum, Actix-web, Tokio',
+      testing: 'cargo test, criterion',
+    },
+    go: {
+      name: 'Go',
+      version: '1.21+',
+      runtime: 'Native binary',
+      packageManager: 'Go modules',
+      frameworks: 'Gin, Echo, Chi',
+      testing: 'go test, testify',
+    },
+    java: {
+      name: 'Java/Kotlin',
+      version: 'Java 21 LTS / Kotlin 1.9+',
+      runtime: 'JVM, GraalVM',
+      packageManager: 'Maven, Gradle',
+      frameworks: 'Spring Boot, Quarkus, Ktor',
+      testing: 'JUnit 5, Kotest',
+    },
+    csharp: {
+      name: 'C#/.NET',
+      version: '.NET 8+',
+      runtime: '.NET Runtime',
+      packageManager: 'NuGet',
+      frameworks: 'ASP.NET Core, MAUI',
+      testing: 'xUnit, NUnit',
+    },
+    cpp: {
+      name: 'C/C++',
+      version: 'C++20',
+      runtime: 'Native binary',
+      packageManager: 'vcpkg, Conan',
+      frameworks: 'Qt, Boost',
+      testing: 'GoogleTest, Catch2',
+    },
+    swift: {
+      name: 'Swift',
+      version: '5.9+',
+      runtime: 'Native binary',
+      packageManager: 'Swift Package Manager',
+      frameworks: 'SwiftUI, Vapor',
+      testing: 'XCTest',
+    },
+    ruby: {
+      name: 'Ruby',
+      version: '3.2+',
+      runtime: 'CRuby, JRuby',
+      packageManager: 'Bundler, RubyGems',
+      frameworks: 'Rails, Sinatra',
+      testing: 'RSpec, Minitest',
+    },
+    php: {
+      name: 'PHP',
+      version: '8.2+',
+      runtime: 'PHP-FPM, Swoole',
+      packageManager: 'Composer',
+      frameworks: 'Laravel, Symfony',
+      testing: 'PHPUnit, Pest',
+    },
+  };
+
+  const isUndecided = languages[0] === 'undecided';
+  const date = new Date().toISOString().split('T')[0];
+
+  if (isUndecided) {
+    return `# Technology Stack
+
+**Project**: ${answers.projectName}
+**Last Updated**: ${date}
+**Status**: Technology stack to be determined
+
+---
+
+## Overview
+
+The technology stack for this project has not yet been decided. This document will be updated once the technical decisions are made.
+
+## Decision Criteria
+
+When selecting technologies, consider:
+
+1. **Application Type**: What type of application is being built?
+2. **Performance Requirements**: What are the performance constraints?
+3. **Team Expertise**: What technologies is the team familiar with?
+4. **Ecosystem**: What libraries and tools are available?
+5. **Long-term Maintainability**: How well-supported is the technology?
+
+## Candidates Under Consideration
+
+| Aspect | Options | Decision |
+|--------|---------|----------|
+| Primary Language | TBD | ⏳ Pending |
+| Web Framework | TBD | ⏳ Pending |
+| Database | TBD | ⏳ Pending |
+| Hosting | TBD | ⏳ Pending |
+
+## Next Steps
+
+1. [ ] Define functional requirements
+2. [ ] Identify performance constraints
+3. [ ] Evaluate team skills
+4. [ ] Create proof-of-concept
+5. [ ] Make final decision and update this document
+
+---
+
+*Run \`musubi steering\` to update this document after decisions are made.*
+`;
+  }
+
+  // Generate tech.md for selected languages
+  const primaryLang = languages[0];
+  const primary = langInfo[primaryLang] || { name: primaryLang, version: 'Latest' };
+
+  let languageTable = `### Programming Languages
+
+| Language | Version | Role | Notes |
+|----------|---------|------|-------|
+`;
+
+  for (let i = 0; i < languages.length; i++) {
+    const lang = languages[i];
+    const info = langInfo[lang] || { name: lang, version: 'Latest' };
+    const role = i === 0 ? 'Primary' : 'Secondary';
+    languageTable += `| ${info.name} | ${info.version} | ${role} | ${info.runtime || ''} |\n`;
+  }
+
+  let frameworksSection = '';
+  for (const lang of languages) {
+    const info = langInfo[lang];
+    if (info && info.frameworks) {
+      frameworksSection += `
+### ${info.name} Ecosystem
+
+- **Package Manager**: ${info.packageManager}
+- **Frameworks**: ${info.frameworks}
+- **Testing**: ${info.testing}
+`;
+    }
+  }
+
+  return `# Technology Stack
+
+**Project**: ${answers.projectName}
+**Last Updated**: ${date}
+**Version**: 0.1.0
+
+---
+
+## Overview
+
+${answers.description}
+
+---
+
+## Primary Technologies
+
+${languageTable}
+${frameworksSection}
+
+---
+
+## Development Environment
+
+### Required Tools
+
+- Primary language runtime (see above)
+- Git 2.40+
+- IDE: VS Code / JetBrains / Neovim
+
+### Recommended Extensions
+
+- Language-specific LSP
+- Linter/Formatter integration
+- Test runner integration
+
+---
+
+## Architecture Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Primary Language | ${primary.name} | Selected during project initialization |
+| Package Manager | ${primary.packageManager || 'TBD'} | Standard for ${primary.name} |
+
+---
+
+## Dependencies
+
+### Production Dependencies
+
+*To be documented as dependencies are added.*
+
+### Development Dependencies
+
+*To be documented as dependencies are added.*
+
+---
+
+*Generated by MUSUBI SDD - Update with \`musubi steering\`*
+`;
 }
 
 async function createConstitution() {
