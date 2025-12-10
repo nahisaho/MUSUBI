@@ -199,6 +199,38 @@ npx musubi-sdd <command>
 | `musubi-validate guardrails --type safety` | Safety check with constitutional  | `npx musubi-validate guardrails --type safety --constitutional`  |
 | `musubi-validate guardrails-chain`         | Chain multiple guardrails         | `npx musubi-validate guardrails-chain --parallel`                |
 
+## Enterprise Scale Modules (v5.5.0 NEW)
+
+MUSUBI v5.5.0 adds advanced modules for analyzing enterprise-scale projects (10,000+ files):
+
+| Module                     | Purpose                              | Import                                       |
+| -------------------------- | ------------------------------------ | -------------------------------------------- |
+| **LargeProjectAnalyzer**   | Streaming analysis for 100K+ files   | `src/analyzers/large-project-analyzer.js`    |
+| **ComplexityAnalyzer**     | Cyclomatic & cognitive complexity    | `src/analyzers/complexity-analyzer.js`       |
+| **RustMigrationGenerator** | C/C++ to Rust migration analysis     | `src/generators/rust-migration-generator.js` |
+| **CodeGraphMCP**           | MCP-based code intelligence server   | `src/integrations/code-graph-mcp.js`         |
+| **HierarchicalReporter**   | Drilldown reports for large projects | `src/reporters/hierarchical-reporter.js`     |
+
+### Usage Examples
+
+```javascript
+// Analyze large projects (100,000+ files)
+const { LargeProjectAnalyzer } = require('musubi-sdd');
+const analyzer = new LargeProjectAnalyzer('/path/to/project');
+const result = await analyzer.analyze();
+console.log(result.stats.totalFiles);
+
+// Calculate code complexity
+const { ComplexityAnalyzer } = require('musubi-sdd');
+const complexity = new ComplexityAnalyzer();
+const score = complexity.calculateCyclomaticComplexity(code, 'javascript');
+
+// Analyze C/C++ for Rust migration
+const { RustMigrationGenerator } = require('musubi-sdd');
+const generator = new RustMigrationGenerator('/path/to/cpp-project');
+const analysis = await generator.analyze();
+```
+
 ## Learn More
 
 - [MUSUBI Documentation](https://github.com/nahisaho/musubi)
