@@ -501,3 +501,19 @@ This structure enforces:
 
 **Last Updated**: 2025-12-10
 **Maintained By**: {{MAINTAINER}}
+
+
+## 新規ディレクトリ (検出日: 2025-12-10)
+
+```
+website/
+tests/
+templates/
+storage/
+steering/
+src/
+packages/
+orchestrator/
+docs/
+coverage/
+```

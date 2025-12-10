@@ -1,5 +1,20 @@
 # Architecture Decisions
 
+## [2025-12-10] Steering Sync - Automatic Update
+
+**Decision**: Synchronized steering documents with codebase changes
+
+**Changes Detected**:
+- Version in project.yml (0.1.0) differs from package.json (5.6.0)
+- New languages detected: javascript, typescript, python, ruby
+- New frameworks detected: Express, Jest, ESLint, Prettier
+- Update tech.md with new frameworks: Express, Jest, ESLint, Prettier
+- New directories detected: website, tests, templates, storage, steering, src, packages, orchestrator, docs, coverage
+
+**Action**: Automatically updated steering documents via `musubi-sync`
+
+---
+
 ## [2025-12-07] Steering Sync - Automatic Update
 
 **Decision**: Synchronized steering documents with codebase changes
