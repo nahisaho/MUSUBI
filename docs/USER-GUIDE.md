@@ -1,6 +1,6 @@
 # MUSUBI User Guide
 
-**Version 5.6.0** | Complete Reference for Specification Driven Development
+**Version 5.6.1** | Complete Reference for Specification Driven Development
 
 ---
 
@@ -568,6 +568,6 @@ const report = reporter.generateReport(analysis);
 
 ---
 
-**MUSUBI v5.6.0** - Specification Driven Development for the AI Age
+**MUSUBI v5.6.1** - Specification Driven Development for the AI Age
 
 [GitHub](https://github.com/nahisaho/musubi) | [npm](https://www.npmjs.com/package/musubi-sdd) | [Documentation](https://nahisaho.github.io/musubi)
