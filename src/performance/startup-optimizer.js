@@ -279,7 +279,7 @@ class StartupOptimizer {
    * Record initialization profile
    * @private
    */
-  _recordProfile(startTime, endTime) {
+  _recordProfile(_startTime, _endTime) {
     this.profile = Array.from(this.modules.values())
       .filter(m => m.duration !== null)
       .map(m => ({
