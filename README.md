@@ -71,26 +71,33 @@ musubi init --windsurf  # Windsurf IDE
 
 ---
 
-## 📊 What's New in v5.3.0
+## 📊 What's New in v5.4.0
 
-### Multi-Language Support 🌐
+### GitHub Reference & Repository Analysis 📦
+- 🔗 **`--reference` / `-r` Option** - Reference multiple GitHub repositories for pattern analysis
+- 📊 **Repository Analysis** - Fetch metadata, structure, and key files via GitHub API
+- 🏗️ **Pattern Detection** - Clean Architecture, Hexagonal, DDD, Monorepo patterns
+- 💡 **Improvement Suggestions** - Architecture and technology recommendations
+- 📁 **Analysis Output** - Saved to `steering/references/github-references-YYYY-MM-DD.md`
+
+```bash
+# Reference multiple repositories for improvement suggestions
+musubi init -r facebook/react -r vercel/next.js -r denoland/deno
+
+# With branch specification
+musubi init --reference tokio-rs/tokio@main
+
+# Full URL format
+musubi init --reference https://github.com/rust-lang/rust
+```
+
+### v5.3.0: Multi-Language Support 🌐
 - 🔄 **Technology Stack Selection** - Single, Multiple, Undecided, or Help me decide
 - 🤖 **Language Recommendation Engine** - AI-powered suggestions based on app type, performance needs, team expertise
 - 🌍 **10 Languages Supported** - JS/TS, Python, Rust, Go, Java, C#, C++, Swift, Ruby, PHP
 - 📄 **Dynamic tech.md** - Language-specific templates with frameworks and tools
 
-```bash
-# Initialize with language selection
-npx musubi-sdd init --copilot
-
-? Technology stack approach:
-  ❯ Single language        # Select one primary language
-    Multiple languages     # Polyglot projects
-    Undecided             # Decide later
-    Help me decide        # Get AI recommendations
-```
-
-### Phase 5: Advanced Features 🚀
+### v5.0.0: Phase 5 Advanced Features 🚀
 - 🔄 **Steering Auto-Update** - Automatic project memory synchronization with 5 trigger types
 - ✅ **Steering Validator** - Comprehensive validation for steering documents
 - 📋 **Template Constraints** - Enforce structure requirements with ThinkingChecklist
@@ -98,7 +105,7 @@ npx musubi-sdd init --copilot
 - 🔍 **Advanced Validation** - Cross-artifact consistency, gap detection, traceability validation
 - 🎯 **Phase 5 Integration** - Unified access to all advanced features
 
-### Phase 4: Agent Loop & Agentic Features 🤖
+### v4.0.0: Phase 4 Agent Loop & Agentic Features 🤖
 - 🧠 **Codebase Intelligence** - RepositoryMap, ASTExtractor, ContextOptimizer
 - 💭 **Agentic Reasoning** - ReasoningEngine, PlanningEngine, SelfCorrection
 - ⚡ **Code Generation** - CodeGenerator, CodeReviewer with multiple modes

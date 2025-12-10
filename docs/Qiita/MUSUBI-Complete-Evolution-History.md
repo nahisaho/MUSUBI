@@ -27,6 +27,7 @@ title: MUSUBIの軌跡：Spec-CopilotからMUSUHI、そしてMUSUBIへの完全�
 - MUSUBI v4.0.0: Agent Loop、Codebase Intelligence、Agentic Reasoning
 - MUSUBI v5.0.0: Advanced Features、Steering Auto-Update、Quality Dashboard
 - MUSUBI v5.2.0-v5.3.0: マルチ言語対応、言語推薦エンジン
+- MUSUBI v5.4.0: GitHubリポジトリ参照、パターン分析、改善提案
 
 ---
 
@@ -2516,11 +2517,206 @@ When selecting technologies, consider:
 
 ---
 
+# 第17章 MUSUBI v5.4.0: GitHub参照と改良提案（2025年12月10日）
+
+## 17.1 概要
+
+v5.4.0では、**GitHubリポジトリを参照して学習する機能**を追加しました。複数のリポジトリを分析し、アーキテクチャパターン、使用技術、ベストプラクティスを抽出して改良提案を生成します。
+
+```mermaid
+flowchart LR
+    subgraph Input["入力"]
+        R1["リポジトリ1"]
+        R2["リポジトリ2"]
+        R3["リポジトリN"]
+    end
+    
+    subgraph Analysis["分析エンジン"]
+        F["GitHub API<br/>メタデータ取得"]
+        S["構造分析<br/>ディレクトリ構成"]
+        P["パターン検出<br/>アーキテクチャ"]
+        T["技術検出<br/>フレームワーク"]
+    end
+    
+    subgraph Output["出力"]
+        O["steering/references/<br/>github-references-YYYY-MM-DD.md"]
+    end
+    
+    R1 --> F
+    R2 --> F
+    R3 --> F
+    F --> S --> P --> T --> O
+```
+
+## 17.2 新オプション: `--reference` / `-r`
+
+### 基本使用法
+
+```bash
+# 単一リポジトリ参照
+musubi init --reference facebook/react
+
+# 複数リポジトリ参照（短縮形）
+musubi init -r vercel/next.js -r facebook/react -r denoland/deno
+
+# フルURL形式
+musubi init --reference https://github.com/tokio-rs/tokio
+
+# ブランチ指定
+musubi init -r owner/repo@develop
+
+# サブパス指定
+musubi init -r owner/repo#packages/core
+```
+
+### サポートするフォーマット
+
+| フォーマット | 例 |
+|-------------|---|
+| owner/repo | `facebook/react` |
+| HTTPS URL | `https://github.com/owner/repo` |
+| SSH URL | `git@github.com:owner/repo.git` |
+| ブランチ指定 | `owner/repo@develop` |
+| サブパス指定 | `owner/repo#src/lib` |
+
+## 17.3 GitHub API統合
+
+### メタデータ取得
+
+```javascript
+// 取得される情報
+{
+  name: "react",
+  description: "A JavaScript library for building user interfaces",
+  language: "JavaScript",
+  stars: 220000,
+  topics: ["react", "javascript", "frontend"],
+  license: "MIT",
+  defaultBranch: "main",
+  updatedAt: "2025-12-10T00:00:00Z"
+}
+```
+
+### 主要ファイル分析
+
+以下のファイルを自動取得・分析:
+- `README.md` - プロジェクト概要
+- `package.json` - JS/TS依存関係
+- `Cargo.toml` - Rust依存関係
+- `pyproject.toml` - Python依存関係
+- `go.mod` - Go依存関係
+- `pom.xml` - Java依存関係
+
+### GITHUB_TOKENサポート
+
+```bash
+# レート制限回避のため環境変数設定
+export GITHUB_TOKEN=ghp_xxxxxxxxxxxx
+musubi init -r facebook/react -r vercel/next.js
+```
+
+## 17.4 パターン検出
+
+### アーキテクチャパターン
+
+| パターン | 検出条件 |
+|---------|---------|
+| Clean Architecture | `domain/`, `application/`, `infrastructure/`, `interface/` |
+| Hexagonal Architecture | `adapters/`, `ports/`, `core/`, `hexagon/` |
+| Domain-Driven Design | `aggregates/`, `entities/`, `valueobjects/` |
+| Monorepo | `packages/`, `apps/`, `pnpm-workspace.yaml` |
+| Rust Workspace | `Cargo.toml`に`[workspace]` |
+
+### テクノロジー検出
+
+**JavaScript/TypeScript:**
+- React, Vue, Angular, Next.js
+- Express, Fastify
+- Jest, Vitest, Mocha
+- ESLint, Prettier, Biome
+
+**Rust:**
+- Tokio, Actix, Axum
+
+**Python:**
+- FastAPI, Django, Flask
+- pytest
+
+## 17.5 改良提案生成
+
+### 出力例
+
+```markdown
+# GitHub Reference Repositories
+
+> Analyzed on 2025-12-10T12:00:00.000Z
+
+## Referenced Repositories
+
+### react
+- **URL**: https://github.com/facebook/react
+- **Language**: JavaScript
+- **Stars**: 220000
+- **Topics**: react, javascript, frontend
+
+**Directory Structure:**
+📁 packages
+📁 scripts
+📄 package.json
+📄 README.md
+
+## Analysis Results
+
+### Architecture Patterns Detected
+- **monorepo** in `react`
+  - Evidence: packages
+
+### Technologies Used
+- **react**: react, typescript
+
+## Improvement Suggestions
+
+1. **Architecture**: Consider using monorepo pattern
+   - Found in 1 repository(ies): react
+
+2. **Technology**: Consider using typescript
+   - Used by 1 repository(ies): react
+```
+
+## 17.6 実装詳細
+
+### 主要関数
+
+| 関数 | 説明 |
+|------|------|
+| `parseGitHubRepo()` | リポジトリ参照を解析 |
+| `fetchGitHubRepo()` | GitHub APIからデータ取得 |
+| `fetchGitHubRepos()` | 複数リポジトリを順次取得 |
+| `analyzeReposForImprovements()` | パターン・技術を分析 |
+| `saveReferenceRepos()` | 分析結果をMarkdownで保存 |
+
+### 出力ファイル
+
+```
+steering/
+└── references/
+    └── github-references-2025-12-10.md
+```
+
+## 17.7 テスト
+
+- 59件の新規テスト追加
+- 全3,571テストパス
+- ESLint/Prettier準拠
+
+---
+
 ## 関連リンク
 
 - [MUSUBI GitHub](https://github.com/nahisaho/musubi)
 - [MUSUHI GitHub](https://github.com/nahisaho/musuhi)（前身プロジェクト）
 - [Spec-Copilot GitHub](https://github.com/nahisaho/spec-copilot)（起源プロジェクト）
+- [MUSUBI v5.4.0 GitHub Reference Guide](https://qiita.com/nahisaho/items/musubi-v5-github-reference)
 - [MUSUBI v5.3.0 Multi-Language Guide](https://qiita.com/nahisaho/items/musubi-v5-multilang)
 - [MUSUBI v5.0.0 Advanced Features Guide](https://qiita.com/nahisaho/items/musubi-v5-advanced-features)
 - [MUSUBI v4.0.0 Agent Loop Guide](https://qiita.com/nahisaho/items/musubi-v4-agent-loop)
@@ -2535,4 +2731,4 @@ When selecting technologies, consider:
 
 ## タグ
 
-`#MUSUBI` `#MUSUHI` `#Spec-Copilot` `#SDD` `#仕様駆動開発` `#AIエージェント` `#ClaudeCode` `#GitHubCopilot` `#MCP` `#Replanning` `#Ollama` `#Guardrails` `#Swarm` `#Orchestration` `#SkillSystem` `#Workflow` `#AgentLoop` `#CodebaseIntelligence` `#QualityDashboard` `#MultiLanguage` `#Rust` `#ODS-RAM`
+`#MUSUBI` `#MUSUHI` `#Spec-Copilot` `#SDD` `#仕様駆動開発` `#AIエージェント` `#ClaudeCode` `#GitHubCopilot` `#MCP` `#Replanning` `#Ollama` `#Guardrails` `#Swarm` `#Orchestration` `#SkillSystem` `#Workflow` `#AgentLoop` `#CodebaseIntelligence` `#QualityDashboard` `#MultiLanguage` `#Rust` `#ODS-RAM` `#GitHubReference` `#PatternDetection`

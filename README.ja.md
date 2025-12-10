@@ -71,35 +71,41 @@ musubi init --windsurf  # Windsurf IDE
 
 ---
 
-## 📊 v3.9.0 の新機能
+## 📊 v5.4.0 の新機能
 
-- 🛡️ **Guardrailsシステム** - OpenAI Agents SDK inspired 入出力検証とセーフティチェック
-- ✅ **InputGuardrail** - 入力検証、PII検出、インジェクション攻撃防止
-- ✅ **OutputGuardrail** - 出力サニタイズ、機密データ墨消し、コンテンツポリシー適用
-- ⚖️ **SafetyCheckGuardrail** - 憲法条項準拠、コンテンツ安全性分析
-- 🔧 **GuardrailRules DSL** - RuleBuilderによる検証ルール構築のFluent API
-- 🔗 **GuardrailChain** - 複数Guardrailの順次/並列実行
-- 🖥️ **CLIコマンド** - `musubi-validate guardrails` と `guardrails-chain` コマンド
+- 🔗 **GitHub参照機能** - 成功したリポジトリからパターンとプラクティスを参照
+- 📦 **複数リポジトリ対応** - `-r` / `--reference` オプションで複数指定可能
+- 🔍 **パターン検出** - Clean Architecture、Hexagonal、DDD、Monorepo等を自動検出
+- 🛠️ **テクノロジー検出** - React、Vue、Next.js、TypeScript、Rust等を分析
+- 📈 **改良提案** - 参照リポジトリから改良ポイントを自動生成
+- 💾 **結果保存** - `steering/references/github-references-YYYY-MM-DD.md` に保存
 
 ```bash
-# セキュリティプリセットで入力検証
-npx musubi-validate guardrails "user input" --type input --preset security
+# 単一リポジトリ参照
+musubi init --reference facebook/react
 
-# PII墨消しで出力検証
-npx musubi-validate guardrails "output" --type output --redact
+# 複数リポジトリ参照（省略形式）
+musubi init -r vercel/next.js -r facebook/react -r denoland/deno
 
-# 憲法準拠でセーフティチェック
-npx musubi-validate guardrails "code" --type safety --constitutional --level high
+# URL形式
+musubi init --reference https://github.com/tokio-rs/tokio
 
-# Guardrailチェーンを並列実行
-npx musubi-validate guardrails-chain "content" --parallel
+# ブランチ指定
+musubi init -r owner/repo@develop
 ```
 
-### 以前のバージョン (v3.7.1)
+### 以前のバージョン (v5.3.0)
 
+- 📚 **外部仕様参照システム** - API仕様（OpenAPI）やプロトコル（GraphQL）を自動取得・統合
+- 📁 **カスタムワークスペースパス** - `--workspace` / `-w` オプションで任意ディレクトリにステアリング生成
+- 🏛️ **アーキテクチャレイヤ検出** - Clean Architecture、Hexagonal、Layered構造を自動認識
+- 📦 **依存関係ファイル検出** - 6エコシステム対応（Node.js、Python、Rust、Go、Java、Ruby）
+- 🎯 **参照アーキテクチャパターン** - 事前定義パターン適用（`--pattern` オプション）
+
+### 以前のバージョン (v3.9.0)
+
+- 🛡️ **Guardrailsシステム** - 入出力検証とセーフティチェック
 - 🌐 **WebSocketリアルタイムGUI** - `musubi-browser`ダッシュボードでライブ更新
-- 📋 **GUIクイックアクション** - 新規要件モーダル、プロジェクト検証、レポートエクスポート
-- 🔄 **GitHub Actions統合** - `musubi-action`でCI/CD検証
 - 🔧 **OpenAPIコンバーター** - OpenAPI 3.x/Swagger 2.xスペックをMUSUBI形式に変換
 - 🌍 **多言語テンプレート** - 7言語対応（EN, JA, ZH, KO, ES, DE, FR）
 - 🤖 **Ollama統合** - 9つのモデルプリセットでローカルLLMをサポート
