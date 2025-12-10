@@ -193,6 +193,63 @@ const {
   MCPAdapterManager
 } = require('./mcp-tool-adapters');
 
+// Phase 4: Agent Loop & Agentic Features
+const phase4 = require('../phase4-integration');
+const {
+  createIntegratedAgent,
+  // Sprint 4.2
+  CodebaseIntelligence,
+  createCodebaseIntelligence,
+  // Sprint 4.3
+  ReasoningEngine,
+  PlanningEngine,
+  SelfCorrection,
+  createReasoningEngine,
+  createPlanningEngine,
+  createSelfCorrection,
+  // Sprint 4.4
+  CodeGenerator,
+  CodeReviewer,
+  createCodeGenerator,
+  createCodeReviewer
+} = phase4;
+
+// Phase 5: Advanced Features
+const {
+  Phase5Integration,
+  createPhase5Integration,
+  INTEGRATION_STATUS,
+  // Sprint 5.1
+  SteeringAutoUpdate,
+  SteeringValidator,
+  createSteeringAutoUpdate,
+  createSteeringValidator,
+  TRIGGER,
+  STEERING_TYPE,
+  SEVERITY,
+  RULE_TYPE,
+  // Sprint 5.2
+  TemplateConstraints,
+  ThinkingChecklist,
+  createTemplateConstraints,
+  createThinkingChecklist,
+  CONSTRAINT_TYPE,
+  UNCERTAINTY,
+  MARKER_TYPE,
+  // Sprint 5.3
+  QualityDashboard,
+  createQualityDashboard,
+  METRIC_CATEGORY,
+  HEALTH_STATUS,
+  CONSTITUTIONAL_ARTICLES,
+  // Sprint 5.4
+  AdvancedValidation,
+  createAdvancedValidation,
+  VALIDATION_TYPE,
+  ARTIFACT_TYPE,
+  GAP_SEVERITY
+} = require('../phase5-integration');
+
 /**
  * Create a fully configured orchestration engine
  * with default patterns registered
@@ -393,5 +450,51 @@ module.exports = {
   SchemaTranslator,
   MCPToSkillAdapter,
   SkillToMCPAdapter,
-  MCPAdapterManager
+  MCPAdapterManager,
+
+  // Phase 4: Agent Loop & Agentic Features
+  phase4,
+  createIntegratedAgent,
+  CodebaseIntelligence,
+  createCodebaseIntelligence,
+  ReasoningEngine,
+  PlanningEngine,
+  SelfCorrection,
+  createReasoningEngine,
+  createPlanningEngine,
+  createSelfCorrection,
+  CodeGenerator,
+  CodeReviewer,
+  createCodeGenerator,
+  createCodeReviewer,
+
+  // Phase 5: Advanced Features
+  Phase5Integration,
+  createPhase5Integration,
+  INTEGRATION_STATUS,
+  SteeringAutoUpdate,
+  SteeringValidator,
+  createSteeringAutoUpdate,
+  createSteeringValidator,
+  TRIGGER,
+  STEERING_TYPE,
+  SEVERITY,
+  RULE_TYPE,
+  TemplateConstraints,
+  ThinkingChecklist,
+  createTemplateConstraints,
+  createThinkingChecklist,
+  CONSTRAINT_TYPE,
+  UNCERTAINTY,
+  MARKER_TYPE,
+  QualityDashboard,
+  createQualityDashboard,
+  METRIC_CATEGORY,
+  HEALTH_STATUS,
+  CONSTITUTIONAL_ARTICLES,
+  AdvancedValidation,
+  createAdvancedValidation,
+  VALIDATION_TYPE,
+  ARTIFACT_TYPE,
+  GAP_SEVERITY
 };
