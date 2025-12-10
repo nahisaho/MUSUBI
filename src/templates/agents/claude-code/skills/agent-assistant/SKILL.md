@@ -31,13 +31,14 @@ Detects when an AI agent is stuck in various patterns:
 - **Stage Oscillation**: Back-and-forth between stages
 
 **Usage Example**:
+
 ```javascript
 const { StuckDetector } = require('musubi/src/analyzers/stuck-detector');
 
 const detector = new StuckDetector({
-  repeatThreshold: 3,       // Detect after 3 repeats
-  monologueThreshold: 10,   // Detect after 10 messages
-  minHistoryLength: 5       // Minimum events for detection
+  repeatThreshold: 3, // Detect after 3 repeats
+  monologueThreshold: 10, // Detect after 10 messages
+  minHistoryLength: 5, // Minimum events for detection
 });
 
 // Add events from agent session
@@ -63,6 +64,7 @@ Compresses long session history to fit context window:
 - **AmortizedCondenser**: Gradual compression with summaries
 
 **Usage Example**:
+
 ```javascript
 const { MemoryCondenser } = require('musubi/src/managers/memory-condenser');
 
@@ -111,13 +113,14 @@ musubi-remember clear
 ```
 
 **Usage Example**:
+
 ```javascript
 const { AgentMemoryManager } = require('musubi/src/managers/agent-memory');
 
 const manager = new AgentMemoryManager({
   projectRoot: process.cwd(),
   autoSave: true,
-  minConfidence: 0.5
+  minConfidence: 0.5,
 });
 
 await manager.initialize();
@@ -125,7 +128,7 @@ await manager.initialize();
 // Extract learnings from session events
 const events = [
   { content: 'npm run test で単体テストを実行しました' },
-  { content: 'Error: Module not found → npm install で解決' }
+  { content: 'Error: Module not found → npm install で解決' },
 ];
 const learnings = manager.extractLearnings(events);
 
@@ -214,11 +217,13 @@ musubi-analyze learnings --session ./session.log --export markdown
 **Message**: エージェントが同じアクションを繰り返しています
 
 ### Event History
+
 1. [action] Read file.js
 2. [action] Read file.js
 3. [action] Read file.js
 
 ### Recommended Actions
+
 - Try a different approach to access the file
 - Check file permissions
 - Consider alternative file paths
@@ -230,14 +235,17 @@ musubi-analyze learnings --session ./session.log --export markdown
 ## 📚 Session Learnings
 
 ### Commands (2 items)
+
 - `npm run test` - 単体テストを実行
 - `npm install` - 依存関係をインストール
 
 ### Error Solutions (1 item)
+
 - **Error**: Module not found
 - **Solution**: npm install で解決
 - **Confidence**: 0.85
 
 ### Project Structure (1 item)
+
 - テストファイルは `tests/` ディレクトリに配置
 ```

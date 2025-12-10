@@ -9,16 +9,19 @@ Patterns for building and analyzing dependency graphs in software systems.
 ## Types of Dependencies
 
 ### Direct Dependencies
+
 ```
 A → B: A directly uses B
 ```
 
 ### Transitive Dependencies
+
 ```
 A → B → C: A depends on C through B
 ```
 
 ### Circular Dependencies
+
 ```
 A → B → C → A: Problematic cycle
 ```
@@ -43,7 +46,7 @@ const graph: DependencyGraph = {
   edges: new Map([
     ['auth.ts', new Set(['user.ts', 'db.ts'])],
     ['user.ts', new Set(['db.ts'])],
-  ])
+  ]),
 };
 ```
 
@@ -52,12 +55,12 @@ const graph: DependencyGraph = {
 ```dot
 digraph Dependencies {
   rankdir=TB;
-  
+
   // Nodes
   auth [label="auth.ts"];
   user [label="user.ts"];
   db [label="db.ts"];
-  
+
   // Edges
   auth -> user;
   auth -> db;
@@ -78,14 +81,14 @@ function getAllDependencies(
   visited = new Set<string>()
 ): Set<string> {
   if (visited.has(node)) return visited;
-  
+
   visited.add(node);
-  
+
   const deps = graph.edges.get(node) || new Set();
   for (const dep of deps) {
     getAllDependencies(graph, dep, visited);
   }
-  
+
   return visited;
 }
 ```
@@ -93,18 +96,16 @@ function getAllDependencies(
 ### Find Circular Dependencies
 
 ```typescript
-function findCircularDependencies(
-  graph: DependencyGraph
-): string[][] {
+function findCircularDependencies(graph: DependencyGraph): string[][] {
   const cycles: string[][] = [];
   const visited = new Set<string>();
   const recursionStack = new Set<string>();
-  
+
   function dfs(node: string, path: string[]): void {
     visited.add(node);
     recursionStack.add(node);
     path.push(node);
-    
+
     const deps = graph.edges.get(node) || new Set();
     for (const dep of deps) {
       if (!visited.has(dep)) {
@@ -115,17 +116,17 @@ function findCircularDependencies(
         cycles.push(path.slice(cycleStart));
       }
     }
-    
+
     path.pop();
     recursionStack.delete(node);
   }
-  
+
   for (const node of graph.nodes.keys()) {
     if (!visited.has(node)) {
       dfs(node, []);
     }
   }
-  
+
   return cycles;
 }
 ```
@@ -137,29 +138,29 @@ function topologicalSort(graph: DependencyGraph): string[] {
   const inDegree = new Map<string, number>();
   const result: string[] = [];
   const queue: string[] = [];
-  
+
   // Initialize in-degrees
   for (const node of graph.nodes.keys()) {
     inDegree.set(node, 0);
   }
-  
+
   for (const deps of graph.edges.values()) {
     for (const dep of deps) {
       inDegree.set(dep, (inDegree.get(dep) || 0) + 1);
     }
   }
-  
+
   // Start with nodes that have no dependencies
   for (const [node, degree] of inDegree) {
     if (degree === 0) {
       queue.push(node);
     }
   }
-  
+
   while (queue.length > 0) {
     const node = queue.shift()!;
     result.push(node);
-    
+
     const deps = graph.edges.get(node) || new Set();
     for (const dep of deps) {
       inDegree.set(dep, inDegree.get(dep)! - 1);
@@ -168,7 +169,7 @@ function topologicalSort(graph: DependencyGraph): string[] {
       }
     }
   }
-  
+
   return result;
 }
 ```
@@ -178,13 +179,11 @@ function topologicalSort(graph: DependencyGraph): string[] {
 ## Impact Scoring
 
 ### Afferent Coupling (Ca)
+
 Number of modules that depend on this module.
 
 ```typescript
-function getAfferentCoupling(
-  graph: DependencyGraph,
-  node: string
-): number {
+function getAfferentCoupling(graph: DependencyGraph, node: string): number {
   let count = 0;
   for (const [source, deps] of graph.edges) {
     if (deps.has(node)) {
@@ -196,13 +195,11 @@ function getAfferentCoupling(
 ```
 
 ### Efferent Coupling (Ce)
+
 Number of modules this module depends on.
 
 ```typescript
-function getEfferentCoupling(
-  graph: DependencyGraph,
-  node: string
-): number {
+function getEfferentCoupling(graph: DependencyGraph, node: string): number {
   return graph.edges.get(node)?.size || 0;
 }
 ```
@@ -269,10 +266,10 @@ function extractImports(filePath: string): string[] {
     ts.ScriptTarget.Latest,
     true
   );
-  
+
   const imports: string[] = [];
-  
-  ts.forEachChild(sourceFile, (node) => {
+
+  ts.forEachChild(sourceFile, node => {
     if (ts.isImportDeclaration(node)) {
       const moduleSpecifier = node.moduleSpecifier;
       if (ts.isStringLiteral(moduleSpecifier)) {
@@ -280,7 +277,7 @@ function extractImports(filePath: string): string[] {
       }
     }
   });
-  
+
   return imports;
 }
 ```
@@ -290,10 +287,7 @@ function extractImports(filePath: string): string[] {
 ```typescript
 function getDependencies(packagePath: string): string[] {
   const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-  return [
-    ...Object.keys(pkg.dependencies || {}),
-    ...Object.keys(pkg.devDependencies || {})
-  ];
+  return [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.devDependencies || {})];
 }
 ```
 
@@ -302,12 +296,9 @@ function getDependencies(packagePath: string): string[] {
 ## Change Impact from Graph
 
 ```typescript
-function getImpactedModules(
-  graph: DependencyGraph,
-  changedModules: string[]
-): Set<string> {
+function getImpactedModules(graph: DependencyGraph, changedModules: string[]): Set<string> {
   const impacted = new Set<string>();
-  
+
   // Find all modules that depend on changed modules
   for (const changed of changedModules) {
     // Reverse DFS to find dependents
@@ -321,7 +312,7 @@ function getImpactedModules(
       }
     }
   }
-  
+
   return impacted;
 }
 ```
@@ -331,18 +322,21 @@ function getImpactedModules(
 ## Dependency Analysis Checklist
 
 ### Build Graph
+
 - [ ] Parse source files
 - [ ] Extract import statements
 - [ ] Resolve module paths
 - [ ] Store in graph structure
 
 ### Analyze
+
 - [ ] Find circular dependencies
 - [ ] Calculate coupling metrics
 - [ ] Identify hotspots
 - [ ] Generate reports
 
 ### Visualize
+
 - [ ] Create diagrams
 - [ ] Highlight problem areas
 - [ ] Show change impact

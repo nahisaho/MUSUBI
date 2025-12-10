@@ -31,11 +31,11 @@ describe('AIComparator', () => {
     test('should accept custom options', () => {
       const c = new AIComparator({
         model: 'claude-3-opus-20240229',
-        threshold: 0.90,
+        threshold: 0.9,
         apiKey: 'test-key',
       });
       expect(c.model).toBe('claude-3-opus-20240229');
-      expect(c.threshold).toBe(0.90);
+      expect(c.threshold).toBe(0.9);
       expect(c.apiKey).toBe('test-key');
     });
   });
@@ -53,9 +53,9 @@ describe('AIComparator', () => {
       const expectedPath = path.join(TEST_DIR, 'expected.png');
       await fs.writeFile(expectedPath, Buffer.from('fake image data'));
 
-      await expect(
-        comparator.compare(expectedPath, '/nonexistent/actual.png')
-      ).rejects.toThrow('Actual screenshot not found');
+      await expect(comparator.compare(expectedPath, '/nonexistent/actual.png')).rejects.toThrow(
+        'Actual screenshot not found'
+      );
     });
 
     test('should use fallback comparison when no API key', async () => {
@@ -63,7 +63,7 @@ describe('AIComparator', () => {
       await fs.ensureDir(TEST_DIR);
       const expectedPath = path.join(TEST_DIR, 'expected.png');
       const actualPath = path.join(TEST_DIR, 'actual.png');
-      
+
       const imageData = Buffer.from('PNG image data here');
       await fs.writeFile(expectedPath, imageData);
       await fs.writeFile(actualPath, imageData);
@@ -80,7 +80,7 @@ describe('AIComparator', () => {
       await fs.ensureDir(TEST_DIR);
       const expectedPath = path.join(TEST_DIR, 'expected.png');
       const actualPath = path.join(TEST_DIR, 'actual.png');
-      
+
       const imageData = Buffer.from('identical image data');
       await fs.writeFile(expectedPath, imageData);
       await fs.writeFile(actualPath, imageData);
@@ -97,7 +97,7 @@ describe('AIComparator', () => {
       await fs.ensureDir(TEST_DIR);
       const expectedPath = path.join(TEST_DIR, 'expected.png');
       const actualPath = path.join(TEST_DIR, 'actual.png');
-      
+
       await fs.writeFile(expectedPath, Buffer.from('data1'));
       await fs.writeFile(actualPath, Buffer.from('completely different data here'));
 

@@ -1,7 +1,7 @@
 /**
  * Delta Specification Manager
  * Handles ADDED/MODIFIED/REMOVED/RENAMED delta specifications for brownfield projects
- * 
+ *
  * @module managers/delta-spec
  */
 
@@ -15,7 +15,7 @@ const DeltaType = {
   ADDED: 'ADDED',
   MODIFIED: 'MODIFIED',
   REMOVED: 'REMOVED',
-  RENAMED: 'RENAMED'
+  RENAMED: 'RENAMED',
 };
 
 /**
@@ -68,7 +68,7 @@ class DeltaSpecManager {
       rationale,
       impactedAreas = [],
       before = null,
-      after = null
+      after = null,
     } = options;
 
     // Validate required fields
@@ -99,7 +99,7 @@ class DeltaSpecManager {
       after,
       status: 'proposed',
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
 
     // Save delta spec
@@ -114,7 +114,7 @@ class DeltaSpecManager {
    */
   save(deltaSpec) {
     this.init();
-    
+
     const changeDir = path.join(this.changesDir, deltaSpec.id);
     if (!fs.existsSync(changeDir)) {
       fs.mkdirSync(changeDir, { recursive: true });
@@ -206,7 +206,7 @@ class DeltaSpecManager {
    */
   list(options = {}) {
     const { status, type } = options;
-    
+
     if (!fs.existsSync(this.changesDir)) {
       return [];
     }
@@ -285,7 +285,7 @@ class DeltaSpecManager {
     return {
       archived: true,
       id,
-      archivePath: archiveFile
+      archivePath: archiveFile,
     };
   }
 
@@ -306,7 +306,7 @@ class DeltaSpecManager {
           type,
           id,
           description: description.trim(),
-          line: content.substring(0, match.index).split('\n').length
+          line: content.substring(0, match.index).split('\n').length,
         });
       }
     }
@@ -363,7 +363,7 @@ class DeltaSpecManager {
     return {
       valid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 
@@ -386,7 +386,7 @@ class DeltaSpecManager {
       impactedAreas: delta.impactedAreas,
       status: delta.status,
       affectedFiles: this.findAffectedFiles(delta),
-      recommendations: this.generateRecommendations(delta)
+      recommendations: this.generateRecommendations(delta),
     };
   }
 
@@ -401,16 +401,16 @@ class DeltaSpecManager {
     const affected = [];
     const targetPattern = new RegExp(delta.target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
 
-    const scanDir = (dir) => {
+    const scanDir = dir => {
       if (!fs.existsSync(dir)) return;
-      
+
       const entries = fs.readdirSync(dir, { withFileTypes: true });
       for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
-        
+
         // Skip node_modules and hidden directories
         if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
-        
+
         if (entry.isDirectory()) {
           scanDir(fullPath);
         } else if (entry.isFile() && /\.(js|ts|md|json)$/.test(entry.name)) {
@@ -428,7 +428,7 @@ class DeltaSpecManager {
 
     scanDir(path.join(this.projectRoot, 'src'));
     scanDir(path.join(this.projectRoot, 'storage'));
-    
+
     return affected;
   }
 
@@ -446,19 +446,19 @@ class DeltaSpecManager {
         recommendations.push('Update traceability matrix');
         recommendations.push('Add test cases for new functionality');
         break;
-        
+
       case DeltaType.MODIFIED:
         recommendations.push('Review existing tests for compatibility');
         recommendations.push('Update design documents if architecture affected');
         recommendations.push('Check for breaking changes in APIs');
         break;
-        
+
       case DeltaType.REMOVED:
         recommendations.push('Remove obsolete test cases');
         recommendations.push('Update documentation to reflect removal');
         recommendations.push('Check for orphaned code dependencies');
         break;
-        
+
       case DeltaType.RENAMED:
         recommendations.push('Update all references to renamed entity');
         recommendations.push('Update import statements');
@@ -480,5 +480,5 @@ class DeltaSpecManager {
 
 module.exports = {
   DeltaSpecManager,
-  DeltaType
+  DeltaType,
 };

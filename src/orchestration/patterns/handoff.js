@@ -1,9 +1,9 @@
 /**
  * HandoffPattern - Agent delegation pattern
- * 
+ *
  * Enables conversation control transfer between agents.
  * Implements OpenAI Agents SDK-style handoff mechanism for MUSUBI.
- * 
+ *
  * @module orchestration/patterns/handoff
  * @version 1.0.0
  */
@@ -17,17 +17,17 @@ const { PatternType, ExecutionContext, _ExecutionStatus } = require('../orchestr
 const HandoffPatternType = {
   ...PatternType,
   HANDOFF: 'handoff',
-  TRIAGE: 'triage'
+  TRIAGE: 'triage',
 };
 
 /**
  * Handoff strategy options
  */
 const HandoffStrategy = {
-  FIRST_MATCH: 'first-match',     // Use first matching agent
-  BEST_MATCH: 'best-match',       // Use best scoring agent
-  ROUND_ROBIN: 'round-robin',     // Rotate through agents
-  WEIGHTED: 'weighted'            // Use weighted selection
+  FIRST_MATCH: 'first-match', // Use first matching agent
+  BEST_MATCH: 'best-match', // Use best scoring agent
+  ROUND_ROBIN: 'round-robin', // Rotate through agents
+  WEIGHTED: 'weighted', // Use weighted selection
 };
 
 /**
@@ -37,49 +37,51 @@ const HandoffFilters = {
   /**
    * Remove all tool calls from history
    */
-  removeAllTools: (history) => {
+  removeAllTools: history => {
     return history.filter(msg => msg.type !== 'tool_call' && msg.type !== 'tool_result');
   },
 
   /**
    * Remove tool results only (keep calls)
    */
-  removeToolResults: (history) => {
+  removeToolResults: history => {
     return history.filter(msg => msg.type !== 'tool_result');
   },
 
   /**
    * Keep only user messages
    */
-  userMessagesOnly: (history) => {
+  userMessagesOnly: history => {
     return history.filter(msg => msg.role === 'user');
   },
 
   /**
    * Keep last N messages
    */
-  lastN: (n) => (history) => {
+  lastN: n => history => {
     return history.slice(-n);
   },
 
   /**
    * Keep everything (no filter)
    */
-  keepAll: (history) => history,
+  keepAll: history => history,
 
   /**
    * Summarize history to single message
    */
-  summarize: (history) => {
+  summarize: history => {
     if (history.length === 0) return [];
-    const summary = history.map(msg => 
-      `[${msg.role || msg.type}]: ${msg.content?.substring(0, 100) || '...'}`
-    ).join('\n');
-    return [{
-      role: 'system',
-      content: `Previous conversation summary:\n${summary}`
-    }];
-  }
+    const summary = history
+      .map(msg => `[${msg.role || msg.type}]: ${msg.content?.substring(0, 100) || '...'}`)
+      .join('\n');
+    return [
+      {
+        role: 'system',
+        content: `Previous conversation summary:\n${summary}`,
+      },
+    ];
+  },
 };
 
 /**
@@ -102,7 +104,7 @@ class EscalationData {
       sourceAgent: this.sourceAgent,
       context: this.context,
       timestamp: this.timestamp.toISOString(),
-      metadata: this.metadata
+      metadata: this.metadata,
     };
   }
 }
@@ -112,13 +114,13 @@ class EscalationData {
  */
 class HandoffConfig {
   constructor(options = {}) {
-    this.agent = options.agent;                    // Target agent
+    this.agent = options.agent; // Target agent
     this.toolNameOverride = options.toolNameOverride || null;
     this.inputType = options.inputType || EscalationData;
     this.inputFilter = options.inputFilter || HandoffFilters.keepAll;
-    this.onHandoff = options.onHandoff || null;    // Callback when handoff occurs
-    this.condition = options.condition || null;    // Condition function
-    this.priority = options.priority || 0;         // Selection priority
+    this.onHandoff = options.onHandoff || null; // Callback when handoff occurs
+    this.condition = options.condition || null; // Condition function
+    this.priority = options.priority || 0; // Selection priority
   }
 }
 
@@ -151,12 +153,12 @@ class HandoffPattern extends BasePattern {
         'Escalation workflows',
         'Customer service routing',
         'Multi-expert consultation',
-        'Fallback handling'
+        'Fallback handling',
       ],
       complexity: 'medium',
       supportsParallel: false,
       supportsReplanning: true,
-      requiresHuman: false
+      requiresHuman: false,
     });
 
     this.options = {
@@ -167,7 +169,7 @@ class HandoffPattern extends BasePattern {
       inputFilter: options.inputFilter || HandoffFilters.keepAll,
       onHandoff: options.onHandoff || null,
       onHandoffComplete: options.onHandoffComplete || null,
-      ...options
+      ...options,
     };
 
     // Track handoff chain
@@ -199,7 +201,7 @@ class HandoffPattern extends BasePattern {
       for (let i = 0; i < input.targetAgents.length; i++) {
         const target = input.targetAgents[i];
         const agent = target.agent || target;
-        
+
         // Check if agent is a HandoffConfig or direct agent
         if (!agent) {
           errors.push(`Target agent ${i} is invalid`);
@@ -216,7 +218,7 @@ class HandoffPattern extends BasePattern {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -238,7 +240,7 @@ class HandoffPattern extends BasePattern {
       message,
       history = [],
       escalationData = null,
-      sharedContext = {}
+      sharedContext = {},
     } = context.input;
 
     const startTime = Date.now();
@@ -248,7 +250,7 @@ class HandoffPattern extends BasePattern {
       context,
       sourceAgent: this._getAgentName(sourceAgent),
       targetAgents: targetAgents.map(t => this._getAgentName(t.agent || t)),
-      escalationData
+      escalationData,
     });
 
     try {
@@ -256,33 +258,32 @@ class HandoffPattern extends BasePattern {
       engine.emit('handoff:selecting', {
         context,
         strategy: this.options.strategy,
-        candidates: targetAgents.length
+        candidates: targetAgents.length,
       });
 
-      const selectedTarget = await this.selectTargetAgent(
-        context,
-        targetAgents,
-        engine
-      );
+      const selectedTarget = await this.selectTargetAgent(context, targetAgents, engine);
 
       if (!selectedTarget) {
         throw new Error('No suitable target agent found for handoff');
       }
 
-      const selectedConfig = selectedTarget instanceof HandoffConfig 
-        ? selectedTarget 
-        : new HandoffConfig({ agent: selectedTarget });
+      const selectedConfig =
+        selectedTarget instanceof HandoffConfig
+          ? selectedTarget
+          : new HandoffConfig({ agent: selectedTarget });
 
       // Step 2: Apply input filter to history
       const inputFilter = selectedConfig.inputFilter || this.options.inputFilter;
       const filteredHistory = inputFilter(history);
 
       // Step 3: Create escalation data if not provided
-      const escalation = escalationData || new EscalationData({
-        reason: context.input.reason || 'Agent handoff',
-        sourceAgent: this._getAgentName(sourceAgent),
-        context: sharedContext
-      });
+      const escalation =
+        escalationData ||
+        new EscalationData({
+          reason: context.input.reason || 'Agent handoff',
+          sourceAgent: this._getAgentName(sourceAgent),
+          context: sharedContext,
+        });
 
       // Step 4: Execute onHandoff callback if provided
       if (selectedConfig.onHandoff) {
@@ -297,7 +298,7 @@ class HandoffPattern extends BasePattern {
         from: this._getAgentName(sourceAgent),
         to: this._getAgentName(selectedConfig.agent),
         reason: escalation.reason,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       // Step 6: Perform handoff (execute target agent)
@@ -308,7 +309,7 @@ class HandoffPattern extends BasePattern {
           message,
           history: filteredHistory,
           escalation,
-          sharedContext
+          sharedContext,
         },
         context,
         engine
@@ -328,7 +329,7 @@ class HandoffPattern extends BasePattern {
         targetAgent: this._getAgentName(selectedConfig.agent),
         result,
         duration: endTime - startTime,
-        handoffChain: this.handoffChain
+        handoffChain: this.handoffChain,
       });
 
       return {
@@ -337,15 +338,14 @@ class HandoffPattern extends BasePattern {
         targetAgent: this._getAgentName(selectedConfig.agent),
         result,
         handoffChain: [...this.handoffChain],
-        duration: endTime - startTime
+        duration: endTime - startTime,
       };
-
     } catch (error) {
       engine.emit('handoff:failed', {
         context,
         sourceAgent: this._getAgentName(sourceAgent),
         error: error.message,
-        handoffChain: this.handoffChain
+        handoffChain: this.handoffChain,
       });
 
       throw error;
@@ -385,8 +385,9 @@ class HandoffPattern extends BasePattern {
    */
   async _selectFirstMatch(targetAgents, context) {
     for (const target of targetAgents) {
-      const config = target instanceof HandoffConfig ? target : new HandoffConfig({ agent: target });
-      
+      const config =
+        target instanceof HandoffConfig ? target : new HandoffConfig({ agent: target });
+
       if (config.condition) {
         const matches = await config.condition(context);
         if (matches) return config;
@@ -405,8 +406,9 @@ class HandoffPattern extends BasePattern {
     let bestTarget = null;
 
     for (const target of targetAgents) {
-      const config = target instanceof HandoffConfig ? target : new HandoffConfig({ agent: target });
-      
+      const config =
+        target instanceof HandoffConfig ? target : new HandoffConfig({ agent: target });
+
       let score = config.priority || 0;
 
       // If condition function exists, use it for scoring
@@ -473,7 +475,7 @@ class HandoffPattern extends BasePattern {
    */
   async performHandoff(source, target, handoffData, parentContext, engine) {
     const targetName = this._getAgentName(target);
-    
+
     // Create child context for target execution
     const childContext = new ExecutionContext({
       parentId: parentContext.id,
@@ -485,12 +487,12 @@ class HandoffPattern extends BasePattern {
         escalation: handoffData.escalation?.toJSON?.() || handoffData.escalation,
         sharedContext: handoffData.sharedContext,
         isHandoff: true,
-        sourceAgent: this._getAgentName(source)
+        sourceAgent: this._getAgentName(source),
       },
       metadata: {
         handoffChain: this.handoffChain,
-        handoffDepth: this.handoffChain.length
-      }
+        handoffDepth: this.handoffChain.length,
+      },
     });
 
     parentContext.children.push(childContext);
@@ -554,5 +556,5 @@ module.exports = {
   HandoffConfig,
   EscalationData,
   handoff,
-  createHandoffPattern
+  createHandoffPattern,
 };

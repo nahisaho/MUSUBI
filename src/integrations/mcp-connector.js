@@ -2,7 +2,7 @@
  * @fileoverview MCP (Model Context Protocol) Connector
  * @description Base MCP client integration for tool ecosystem connectivity
  * @version 3.11.0
- * 
+ *
  * Supports:
  * - Standard MCP server connections (stdio, SSE, HTTP)
  * - Tool discovery and invocation
@@ -23,7 +23,7 @@ const ConnectionState = {
   CONNECTING: 'connecting',
   CONNECTED: 'connected',
   RECONNECTING: 'reconnecting',
-  ERROR: 'error'
+  ERROR: 'error',
 };
 
 /**
@@ -33,7 +33,7 @@ const TransportType = {
   STDIO: 'stdio',
   SSE: 'sse',
   HTTP: 'http',
-  WEBSOCKET: 'websocket'
+  WEBSOCKET: 'websocket',
 };
 
 /**
@@ -46,7 +46,7 @@ const DEFAULT_CONFIG = {
   keepAlive: true,
   keepAliveInterval: 30000,
   maxConcurrentRequests: 10,
-  enableLogging: false
+  enableLogging: false,
 };
 
 /**
@@ -94,7 +94,7 @@ class MCPTool {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -103,7 +103,7 @@ class MCPTool {
       name: this.name,
       description: this.description,
       inputSchema: this.inputSchema,
-      annotations: this.annotations
+      annotations: this.annotations,
     };
   }
 }
@@ -126,7 +126,7 @@ class MCPResource {
       name: this.name,
       description: this.description,
       mimeType: this.mimeType,
-      annotations: this.annotations
+      annotations: this.annotations,
     };
   }
 }
@@ -145,7 +145,7 @@ class MCPPrompt {
     return {
       name: this.name,
       description: this.description,
-      arguments: this.arguments
+      arguments: this.arguments,
     };
   }
 }
@@ -199,7 +199,7 @@ class MCPServerConnection extends EventEmitter {
       await this._initializeTransport();
       await this._initialize();
       await this._discoverCapabilities();
-      
+
       this.state = ConnectionState.CONNECTED;
       this.emit('connected', this.serverInfo);
 
@@ -245,12 +245,12 @@ class MCPServerConnection extends EventEmitter {
     this.transport = {
       type: this.transportType,
       connected: true,
-      send: async (message) => {
+      send: async message => {
         if (this.options.enableLogging) {
           console.log(`[MCP ${this.name}] Sending:`, JSON.stringify(message));
         }
         return this._handleMessage(message);
-      }
+      },
     };
   }
 
@@ -274,12 +274,12 @@ class MCPServerConnection extends EventEmitter {
       protocolVersion: '2024-11-05',
       capabilities: {
         roots: { listChanged: true },
-        sampling: {}
+        sampling: {},
       },
       clientInfo: {
         name: 'musubi-sdd',
-        version: '3.11.0'
-      }
+        version: '3.11.0',
+      },
     });
 
     this.serverInfo = response.serverInfo || {};
@@ -329,7 +329,7 @@ class MCPServerConnection extends EventEmitter {
       jsonrpc: '2.0',
       id,
       method,
-      params
+      params,
     };
 
     return new Promise((resolve, reject) => {
@@ -341,19 +341,22 @@ class MCPServerConnection extends EventEmitter {
       this.pendingRequests.set(id, { resolve, reject, timeout });
 
       if (this.transport) {
-        this.transport.send(message).then(response => {
-          clearTimeout(timeout);
-          this.pendingRequests.delete(id);
-          if (response.error) {
-            reject(new Error(response.error.message || 'Unknown error'));
-          } else {
-            resolve(response.result || {});
-          }
-        }).catch(error => {
-          clearTimeout(timeout);
-          this.pendingRequests.delete(id);
-          reject(error);
-        });
+        this.transport
+          .send(message)
+          .then(response => {
+            clearTimeout(timeout);
+            this.pendingRequests.delete(id);
+            if (response.error) {
+              reject(new Error(response.error.message || 'Unknown error'));
+            } else {
+              resolve(response.result || {});
+            }
+          })
+          .catch(error => {
+            clearTimeout(timeout);
+            this.pendingRequests.delete(id);
+            reject(error);
+          });
       } else {
         clearTimeout(timeout);
         this.pendingRequests.delete(id);
@@ -370,7 +373,7 @@ class MCPServerConnection extends EventEmitter {
     const message = {
       jsonrpc: '2.0',
       method,
-      params
+      params,
     };
 
     if (this.transport) {
@@ -385,7 +388,7 @@ class MCPServerConnection extends EventEmitter {
   async _handleMessage(message) {
     // Mock responses for testing
     const method = message.method;
-    
+
     if (method === 'initialize') {
       return {
         result: {
@@ -393,37 +396,37 @@ class MCPServerConnection extends EventEmitter {
           capabilities: {
             tools: { listChanged: true },
             resources: { subscribe: true, listChanged: true },
-            prompts: { listChanged: true }
+            prompts: { listChanged: true },
           },
           serverInfo: {
             name: this.config.name || 'mock-server',
-            version: '1.0.0'
-          }
-        }
+            version: '1.0.0',
+          },
+        },
       };
     }
 
     if (method === 'tools/list') {
       return {
         result: {
-          tools: this.config.mockTools || []
-        }
+          tools: this.config.mockTools || [],
+        },
       };
     }
 
     if (method === 'resources/list') {
       return {
         result: {
-          resources: this.config.mockResources || []
-        }
+          resources: this.config.mockResources || [],
+        },
       };
     }
 
     if (method === 'prompts/list') {
       return {
         result: {
-          prompts: this.config.mockPrompts || []
-        }
+          prompts: this.config.mockPrompts || [],
+        },
       };
     }
 
@@ -433,10 +436,10 @@ class MCPServerConnection extends EventEmitter {
           content: [
             {
               type: 'text',
-              text: `Tool ${message.params.name} executed successfully`
-            }
-          ]
-        }
+              text: `Tool ${message.params.name} executed successfully`,
+            },
+          ],
+        },
       };
     }
 
@@ -447,10 +450,10 @@ class MCPServerConnection extends EventEmitter {
             {
               uri: message.params.uri,
               mimeType: 'text/plain',
-              text: `Content of ${message.params.uri}`
-            }
-          ]
-        }
+              text: `Content of ${message.params.uri}`,
+            },
+          ],
+        },
       };
     }
 
@@ -462,11 +465,11 @@ class MCPServerConnection extends EventEmitter {
               role: 'user',
               content: {
                 type: 'text',
-                text: `Prompt: ${message.params.name}`
-              }
-            }
-          ]
-        }
+                text: `Prompt: ${message.params.name}`,
+              },
+            },
+          ],
+        },
       };
     }
 
@@ -522,7 +525,7 @@ class MCPServerConnection extends EventEmitter {
 
     const response = await this._sendRequest('tools/call', {
       name: toolName,
-      arguments: args
+      arguments: args,
     });
 
     return response;
@@ -547,7 +550,7 @@ class MCPServerConnection extends EventEmitter {
   async getPrompt(promptName, args = {}) {
     const response = await this._sendRequest('prompts/get', {
       name: promptName,
-      arguments: args
+      arguments: args,
     });
     return response;
   }
@@ -565,7 +568,7 @@ class MCPServerConnection extends EventEmitter {
       resourceCount: this.resources.size,
       promptCount: this.prompts.size,
       serverInfo: this.serverInfo,
-      capabilities: this.capabilities
+      capabilities: this.capabilities,
     };
   }
 }
@@ -596,9 +599,9 @@ class MCPConnector extends EventEmitter {
     const connection = new MCPServerConnection(serverConfig, this.options);
 
     // Forward events
-    connection.on('connected', (info) => this.emit('serverConnected', name, info));
+    connection.on('connected', info => this.emit('serverConnected', name, info));
     connection.on('disconnected', () => this.emit('serverDisconnected', name));
-    connection.on('error', (error) => this.emit('serverError', name, error));
+    connection.on('error', error => this.emit('serverError', name, error));
 
     this.servers.set(name, connection);
     return connection;
@@ -640,7 +643,7 @@ class MCPConnector extends EventEmitter {
   async connectAll() {
     const results = {
       success: [],
-      failed: []
+      failed: [],
     };
 
     for (const [name, connection] of this.servers) {
@@ -735,7 +738,7 @@ class MCPConnector extends EventEmitter {
 
     const connection = this.servers.get(serverName);
     const tool = connection?.tools.get(toolName);
-    
+
     return tool ? { tool, server: serverName } : null;
   }
 
@@ -767,10 +770,11 @@ class MCPConnector extends EventEmitter {
 
     return {
       serverCount: this.servers.size,
-      connectedCount: Array.from(this.servers.values())
-        .filter(c => c.state === ConnectionState.CONNECTED).length,
+      connectedCount: Array.from(this.servers.values()).filter(
+        c => c.state === ConnectionState.CONNECTED
+      ).length,
       totalTools: this.toolIndex.size,
-      servers
+      servers,
     };
   }
 
@@ -781,7 +785,7 @@ class MCPConnector extends EventEmitter {
    */
   loadConfig(config) {
     const servers = config.mcpServers || config.servers || {};
-    
+
     for (const [name, serverConfig] of Object.entries(servers)) {
       this.addServer(name, serverConfig);
     }
@@ -798,7 +802,7 @@ class MCPConnector extends EventEmitter {
     for (const [name, connection] of this.servers) {
       servers[name] = {
         transport: connection.transportType,
-        ...connection.config
+        ...connection.config,
       };
     }
 
@@ -814,5 +818,5 @@ module.exports = {
   MCPPrompt,
   ConnectionState,
   TransportType,
-  DEFAULT_CONFIG
+  DEFAULT_CONFIG,
 };

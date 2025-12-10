@@ -1,6 +1,6 @@
 /**
  * ProactivePathOptimizer Tests
- * 
+ *
  * Tests for proactive path optimization functionality
  */
 
@@ -9,12 +9,12 @@
 const {
   ProactivePathOptimizer,
   PathMetrics,
-  OptimizationOpportunity
+  OptimizationOpportunity,
 } = require('../../../src/orchestration/replanning/proactive-path-optimizer');
 
 // Mock LLM provider
 const mockLLMProvider = {
-  complete: async () => JSON.stringify({ suggestions: [] })
+  complete: async () => JSON.stringify({ suggestions: [] }),
 };
 
 describe('ProactivePathOptimizer', () => {
@@ -34,8 +34,8 @@ describe('ProactivePathOptimizer', () => {
       const custom = new ProactivePathOptimizer(mockLLMProvider, {
         config: {
           enabled: false,
-          evaluateEvery: 5
-        }
+          evaluateEvery: 5,
+        },
       });
       expect(custom.config.enabled).toBe(false);
       expect(custom.config.evaluateEvery).toBe(5);
@@ -58,10 +58,10 @@ describe('ProactivePathOptimizer', () => {
 
     it('should optimize on configured interval', async () => {
       optimizer.config.evaluateEvery = 2;
-      
+
       const result1 = await optimizer.onTaskSuccess({ id: 't1' }, { pending: [] }, {});
       expect(result1).toBeNull();
-      
+
       const result2 = await optimizer.onTaskSuccess({ id: 't2' }, { pending: [] }, {});
       expect(result2).toBeDefined();
       expect(result2.optimized).toBeDefined();
@@ -73,14 +73,18 @@ describe('ProactivePathOptimizer', () => {
       const context = {
         pending: [
           { id: 't1', name: 'Task 1' },
-          { id: 't2', name: 'Task 2' }
-        ]
+          { id: 't2', name: 'Task 2' },
+        ],
       };
 
       const result = await optimizer.optimize(context);
       // Result may be undefined if no LLM is configured or no opportunities
       // When defined, should have expected structure
-      expect(result === undefined || result.currentMetrics !== undefined || result.optimized !== undefined).toBe(true);
+      expect(
+        result === undefined ||
+          result.currentMetrics !== undefined ||
+          result.optimized !== undefined
+      ).toBe(true);
     });
 
     it('should report when no opportunities found', async () => {
@@ -96,8 +100,8 @@ describe('ProactivePathOptimizer', () => {
       const context = {
         pending: [
           { id: 't1', estimatedDuration: 1000 },
-          { id: 't2', estimatedDuration: 2000 }
-        ]
+          { id: 't2', estimatedDuration: 2000 },
+        ],
       };
 
       const metrics = optimizer.calculatePathMetrics(context);
@@ -119,13 +123,13 @@ describe('ProactivePathOptimizer', () => {
 
       // Force an optimization with opportunities
       optimizer.config.minImprovementThreshold = 0;
-      
+
       // Manually trigger optimization that would emit
       const context = {
         pending: [
           { id: 't1', name: 'Task 1', dependencies: [] },
-          { id: 't2', name: 'Task 2', dependencies: [] }
-        ]
+          { id: 't2', name: 'Task 2', dependencies: [] },
+        ],
       };
 
       await optimizer.optimize(context);
@@ -155,7 +159,7 @@ describe('PathMetrics', () => {
     it('should accept data', () => {
       const metrics = new PathMetrics({
         estimatedTime: 1000,
-        riskScore: 0.5
+        riskScore: 0.5,
       });
       expect(metrics.estimatedTime).toBe(1000);
       expect(metrics.riskScore).toBe(0.5);
@@ -168,7 +172,7 @@ describe('PathMetrics', () => {
         estimatedTime: 100,
         estimatedCost: 50,
         parallelizationFactor: 0.8,
-        riskScore: 0.2
+        riskScore: 0.2,
       });
 
       const score = metrics.getScore();
@@ -207,7 +211,7 @@ describe('OptimizationOpportunity', () => {
       const opp = new OptimizationOpportunity({
         type: 'parallelize',
         estimatedImprovement: 0.25,
-        confidence: 0.8
+        confidence: 0.8,
       });
       expect(opp.type).toBe('parallelize');
       expect(opp.estimatedImprovement).toBe(0.25);
@@ -219,7 +223,7 @@ describe('OptimizationOpportunity', () => {
     it('should calculate weighted score', () => {
       const opp = new OptimizationOpportunity({
         estimatedImprovement: 0.5,
-        confidence: 0.8
+        confidence: 0.8,
       });
 
       expect(opp.getWeightedScore()).toBe(0.4);

@@ -9,7 +9,13 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { AgentMemoryManager, LearningItem, MemoryStore, LearningCategory, EXTRACTION_PATTERNS } = require('../../src/managers/agent-memory');
+const {
+  AgentMemoryManager,
+  LearningItem,
+  MemoryStore,
+  LearningCategory,
+  EXTRACTION_PATTERNS,
+} = require('../../src/managers/agent-memory');
 
 describe('AgentMemoryManager', () => {
   let manager;
@@ -73,7 +79,11 @@ describe('AgentMemoryManager', () => {
         sessions: [],
         lastUpdated: new Date().toISOString(),
       };
-      fs.writeFileSync(path.join(dirPath, 'agent-memory.json'), JSON.stringify(existingData), 'utf8');
+      fs.writeFileSync(
+        path.join(dirPath, 'agent-memory.json'),
+        JSON.stringify(existingData),
+        'utf8'
+      );
 
       const store = await manager.initialize();
       expect(store.learnings.length).toBe(1);
@@ -83,32 +93,43 @@ describe('AgentMemoryManager', () => {
 
   describe('extractLearnings', () => {
     test('should extract command patterns', () => {
-      const events = [{ content: 'Run `npm run test:unit` to execute unit tests.' }, { content: 'Use `npm run build` to create production build.' }];
+      const events = [
+        { content: 'Run `npm run test:unit` to execute unit tests.' },
+        { content: 'Use `npm run build` to create production build.' },
+      ];
 
       const learnings = manager.extractLearnings(events, 'test-session');
       expect(learnings.length).toBeGreaterThan(0);
-      expect(learnings.some((l) => l.category === LearningCategory.COMMANDS)).toBe(true);
+      expect(learnings.some(l => l.category === LearningCategory.COMMANDS)).toBe(true);
     });
 
     test('should extract best practices', () => {
-      const events = [{ content: 'Best practice: always use TypeScript for type safety.' }, { content: 'Convention: Use camelCase for variable names.' }];
+      const events = [
+        { content: 'Best practice: always use TypeScript for type safety.' },
+        { content: 'Convention: Use camelCase for variable names.' },
+      ];
 
       const learnings = manager.extractLearnings(events, 'test-session');
-      expect(learnings.some((l) => l.category === LearningCategory.PRACTICES)).toBe(true);
+      expect(learnings.some(l => l.category === LearningCategory.PRACTICES)).toBe(true);
     });
 
     test('should extract error solutions', () => {
-      const events = [{ content: 'Error: Module not found. Fix: Run npm install to restore dependencies.' }];
+      const events = [
+        { content: 'Error: Module not found. Fix: Run npm install to restore dependencies.' },
+      ];
 
       const learnings = manager.extractLearnings(events, 'test-session');
-      expect(learnings.some((l) => l.category === LearningCategory.ERRORS)).toBe(true);
+      expect(learnings.some(l => l.category === LearningCategory.ERRORS)).toBe(true);
     });
 
     test('should extract structure knowledge', () => {
-      const events = [{ content: 'Configuration is located in `config/app.json`.' }, { content: 'Directory `src/components` contains React components.' }];
+      const events = [
+        { content: 'Configuration is located in `config/app.json`.' },
+        { content: 'Directory `src/components` contains React components.' },
+      ];
 
       const learnings = manager.extractLearnings(events, 'test-session');
-      expect(learnings.some((l) => l.category === LearningCategory.STRUCTURE)).toBe(true);
+      expect(learnings.some(l => l.category === LearningCategory.STRUCTURE)).toBe(true);
     });
 
     test('should filter by minimum confidence', () => {

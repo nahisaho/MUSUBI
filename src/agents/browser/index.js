@@ -102,7 +102,7 @@ class BrowserAgent {
 
     // Parse natural language to actions
     const parseResult = this.parser.parse(command);
-    
+
     if (!parseResult.success) {
       return {
         success: false,
@@ -122,9 +122,9 @@ class BrowserAgent {
         screenshot: this.screenshot,
         timeout: this.options.timeout,
       });
-      
+
       results.push(result);
-      
+
       if (!result.success) {
         return {
           success: false,
@@ -150,11 +150,11 @@ class BrowserAgent {
    */
   async executeSequence(commands) {
     const results = [];
-    
+
     for (const command of commands) {
       const result = await this.execute(command);
       results.push(result);
-      
+
       if (!result.success) {
         return {
           success: false,

@@ -12,21 +12,24 @@ Templates for project planning, tracking, and reporting.
 # Project Charter: [Project Name]
 
 ## Overview
-| Field | Value |
-|-------|-------|
-| Project Name | [Name] |
-| Project Manager | [Name] |
-| Sponsor | [Name] |
-| Start Date | YYYY-MM-DD |
-| Target End Date | YYYY-MM-DD |
-| Status | Planning / Active / Complete |
+
+| Field           | Value                        |
+| --------------- | ---------------------------- |
+| Project Name    | [Name]                       |
+| Project Manager | [Name]                       |
+| Sponsor         | [Name]                       |
+| Start Date      | YYYY-MM-DD                   |
+| Target End Date | YYYY-MM-DD                   |
+| Status          | Planning / Active / Complete |
 
 ---
 
 ## 1. Project Purpose
+
 [Why are we doing this project?]
 
 ## 2. Objectives
+
 - [Objective 1]
 - [Objective 2]
 - [Objective 3]
@@ -34,46 +37,54 @@ Templates for project planning, tracking, and reporting.
 ## 3. Scope
 
 ### In Scope
+
 - [Item 1]
 - [Item 2]
 
 ### Out of Scope
+
 - [Item 1]
 - [Item 2]
 
 ## 4. Deliverables
-| Deliverable | Description | Due Date |
-|-------------|-------------|----------|
-| [D1] | [Description] | [Date] |
-| [D2] | [Description] | [Date] |
+
+| Deliverable | Description   | Due Date |
+| ----------- | ------------- | -------- |
+| [D1]        | [Description] | [Date]   |
+| [D2]        | [Description] | [Date]   |
 
 ## 5. Success Criteria
+
 - [Criterion 1]
 - [Criterion 2]
 
 ## 6. Stakeholders
-| Name | Role | Involvement |
-|------|------|-------------|
-| [Name] | Sponsor | Approver |
+
+| Name   | Role           | Involvement |
+| ------ | -------------- | ----------- |
+| [Name] | Sponsor        | Approver    |
 | [Name] | Lead Developer | Contributor |
 
 ## 7. Risks
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| [Risk 1] | High | High | [Mitigation] |
+
+| Risk     | Probability | Impact | Mitigation   |
+| -------- | ----------- | ------ | ------------ |
+| [Risk 1] | High        | High   | [Mitigation] |
 
 ## 8. Budget
-| Category | Amount |
-|----------|--------|
-| Development | $X |
-| Infrastructure | $Y |
-| Total | $Z |
+
+| Category       | Amount |
+| -------------- | ------ |
+| Development    | $X     |
+| Infrastructure | $Y     |
+| Total          | $Z     |
 
 ## 9. Approvals
-| Name | Role | Date | Signature |
-|------|------|------|-----------|
-| [Name] | Sponsor | | |
-| [Name] | PM | | |
+
+| Name   | Role    | Date | Signature |
+| ------ | ------- | ---- | --------- |
+| [Name] | Sponsor |      |           |
+| [Name] | PM      |      |           |
 ```
 
 ---
@@ -90,37 +101,37 @@ Templates for project planning, tracking, and reporting.
 
 ## Capacity
 
-| Team Member | Capacity (days) | Notes |
-|-------------|-----------------|-------|
-| [Name] | 8 | PTO Friday |
-| [Name] | 10 | Full capacity |
-| **Total** | **18** | |
+| Team Member | Capacity (days) | Notes         |
+| ----------- | --------------- | ------------- |
+| [Name]      | 8               | PTO Friday    |
+| [Name]      | 10              | Full capacity |
+| **Total**   | **18**          |               |
 
 ---
 
 ## Sprint Backlog
 
-| ID | Story | Points | Assignee | Status |
-|----|-------|--------|----------|--------|
-| US-001 | [User story] | 5 | [Name] | To Do |
-| US-002 | [User story] | 3 | [Name] | To Do |
-| **Total** | | **8** | | |
+| ID        | Story        | Points | Assignee | Status |
+| --------- | ------------ | ------ | -------- | ------ |
+| US-001    | [User story] | 5      | [Name]   | To Do  |
+| US-002    | [User story] | 3      | [Name]   | To Do  |
+| **Total** |              | **8**  |          |        |
 
 ---
 
 ## Technical Tasks
 
-| Task | Story | Estimate | Assignee |
-|------|-------|----------|----------|
-| [Task 1] | US-001 | 4h | [Name] |
-| [Task 2] | US-001 | 2h | [Name] |
+| Task     | Story  | Estimate | Assignee |
+| -------- | ------ | -------- | -------- |
+| [Task 1] | US-001 | 4h       | [Name]   |
+| [Task 2] | US-001 | 2h       | [Name]   |
 
 ---
 
 ## Dependencies
 
-| Dependency | From | Status |
-|------------|------|--------|
+| Dependency   | From          | Status  |
+| ------------ | ------------- | ------- |
 | [Dependency] | [Team/System] | Pending |
 
 ---
@@ -173,24 +184,26 @@ Templates for project planning, tracking, and reporting.
 
 ## Metrics
 
-| Metric | Target | Actual | Status |
-|--------|--------|--------|--------|
-| Sprint velocity | 30 pts | 28 pts | 🟢 |
-| Bug count | < 5 | 3 | 🟢 |
-| Test coverage | > 80% | 75% | 🟡 |
+| Metric          | Target | Actual | Status |
+| --------------- | ------ | ------ | ------ |
+| Sprint velocity | 30 pts | 28 pts | 🟢     |
+| Bug count       | < 5    | 3      | 🟢     |
+| Test coverage   | > 80%  | 75%    | 🟡     |
 
 ---
 
 ## Risks and Issues
 
 ### Risks
-| Risk | Probability | Impact | Mitigation | Owner |
-|------|-------------|--------|------------|-------|
-| [Risk] | Medium | High | [Mitigation] | [Name] |
+
+| Risk   | Probability | Impact | Mitigation   | Owner  |
+| ------ | ----------- | ------ | ------------ | ------ |
+| [Risk] | Medium      | High   | [Mitigation] | [Name] |
 
 ### Issues
-| Issue | Impact | Action | Owner | Due |
-|-------|--------|--------|-------|-----|
+
+| Issue   | Impact   | Action   | Owner  | Due    |
+| ------- | -------- | -------- | ------ | ------ |
 | [Issue] | [Impact] | [Action] | [Name] | [Date] |
 
 ---
@@ -232,11 +245,13 @@ Templates for project planning, tracking, and reporting.
 ## Discussion Notes
 
 ### Topic 1: [Name]
+
 - [Key point]
 - [Key point]
 - **Decision**: [Decision made]
 
 ### Topic 2: [Name]
+
 - [Key point]
 - **Decision**: [Decision made]
 
@@ -244,10 +259,10 @@ Templates for project planning, tracking, and reporting.
 
 ## Action Items
 
-| Action | Owner | Due Date |
-|--------|-------|----------|
-| [Action 1] | [Name] | [Date] |
-| [Action 2] | [Name] | [Date] |
+| Action     | Owner  | Due Date |
+| ---------- | ------ | -------- |
+| [Action 1] | [Name] | [Date]   |
+| [Action 2] | [Name] | [Date]   |
 
 ---
 
@@ -295,30 +310,30 @@ Templates for project planning, tracking, and reporting.
 
 ## Action Items
 
-| Action | Owner | Status |
-|--------|-------|--------|
-| [Action 1] | [Name] | Open |
-| [Action 2] | [Name] | Open |
+| Action     | Owner  | Status |
+| ---------- | ------ | ------ |
+| [Action 1] | [Name] | Open   |
+| [Action 2] | [Name] | Open   |
 
 ---
 
 ## Previous Action Items
 
-| Action | Owner | Status |
-|--------|-------|--------|
-| [Previous action] | [Name] | ✅ Done |
+| Action            | Owner  | Status         |
+| ----------------- | ------ | -------------- |
+| [Previous action] | [Name] | ✅ Done        |
 | [Previous action] | [Name] | 🔄 In Progress |
 
 ---
 
 ## Team Health
 
-| Category | Score (1-5) |
-|----------|-------------|
-| Collaboration | ⭐⭐⭐⭐ |
-| Velocity | ⭐⭐⭐ |
-| Quality | ⭐⭐⭐⭐ |
-| Morale | ⭐⭐⭐⭐ |
+| Category      | Score (1-5) |
+| ------------- | ----------- |
+| Collaboration | ⭐⭐⭐⭐    |
+| Velocity      | ⭐⭐⭐      |
+| Quality       | ⭐⭐⭐⭐    |
+| Morale        | ⭐⭐⭐⭐    |
 ```
 
 ---
@@ -328,16 +343,17 @@ Templates for project planning, tracking, and reporting.
 ```markdown
 # RACI Matrix
 
-| Task | PM | Dev Lead | Developer | QA | Stakeholder |
-|------|:--:|:--------:|:---------:|:--:|:-----------:|
-| Requirements | A | C | I | C | R |
-| Architecture | C | R | C | I | I |
-| Development | I | A | R | C | I |
-| Testing | I | C | C | R | I |
-| Deployment | A | R | C | C | I |
-| Sign-off | A | I | I | I | R |
+| Task         | PM  | Dev Lead | Developer | QA  | Stakeholder |
+| ------------ | :-: | :------: | :-------: | :-: | :---------: |
+| Requirements |  A  |    C     |     I     |  C  |      R      |
+| Architecture |  C  |    R     |     C     |  I  |      I      |
+| Development  |  I  |    A     |     R     |  C  |      I      |
+| Testing      |  I  |    C     |     C     |  R  |      I      |
+| Deployment   |  A  |    R     |     C     |  C  |      I      |
+| Sign-off     |  A  |    I     |     I     |  I  |      R      |
 
 **Legend**:
+
 - **R** = Responsible (does the work)
 - **A** = Accountable (final decision)
 - **C** = Consulted (provides input)

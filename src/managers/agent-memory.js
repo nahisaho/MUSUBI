@@ -32,58 +32,58 @@ const EXTRACTION_PATTERNS = {
   commands: [
     {
       pattern: /(?:run|execute|use)\s+`([^`]+)`/gi,
-      extract: (match) => match[1],
+      extract: match => match[1],
       confidence: 0.8,
     },
     {
       pattern: /npm\s+(?:run\s+)?([a-z][a-z0-9:-]*)/gi,
-      extract: (match) => `npm run ${match[1]}`,
+      extract: match => `npm run ${match[1]}`,
       confidence: 0.9,
     },
     {
       pattern: /(?:command|cmd):\s*`([^`]+)`/gi,
-      extract: (match) => match[1],
+      extract: match => match[1],
       confidence: 0.85,
     },
   ],
   practices: [
     {
       pattern: /(?:always|should|must|convention|rule):\s*([^.]+\.)/gi,
-      extract: (match) => match[1].trim(),
+      extract: match => match[1].trim(),
       confidence: 0.7,
     },
     {
       pattern: /(?:best practice|recommended):\s*([^.]+\.)/gi,
-      extract: (match) => match[1].trim(),
+      extract: match => match[1].trim(),
       confidence: 0.8,
     },
     {
       pattern: /use\s+(\w+)\s+(?:format|style|convention)/gi,
-      extract: (match) => `Use ${match[1]} format/style`,
+      extract: match => `Use ${match[1]} format/style`,
       confidence: 0.75,
     },
   ],
   errors: [
     {
       pattern: /(?:error|issue|problem):\s*([^.]+)\.\s*(?:fix|solution|resolve):\s*([^.]+\.)/gi,
-      extract: (match) => ({ error: match[1], solution: match[2] }),
+      extract: match => ({ error: match[1], solution: match[2] }),
       confidence: 0.85,
     },
     {
       pattern: /(?:fixed|resolved|solved)\s+(?:by|with)\s+([^.]+\.)/gi,
-      extract: (match) => match[1].trim(),
+      extract: match => match[1].trim(),
       confidence: 0.8,
     },
   ],
   structure: [
     {
       pattern: /(?:located|found)\s+(?:in|at)\s+`([^`]+)`/gi,
-      extract: (match) => match[1],
+      extract: match => match[1],
       confidence: 0.75,
     },
     {
       pattern: /(?:directory|folder|file)\s+`([^`]+)`\s+(?:contains|has)/gi,
-      extract: (match) => match[1],
+      extract: match => match[1],
       confidence: 0.8,
     },
   ],
@@ -194,7 +194,7 @@ class MemoryStore {
    */
   addLearning(item) {
     // Check for duplicates
-    const existing = this.learnings.find((l) => l.isSimilarTo(item));
+    const existing = this.learnings.find(l => l.isSimilarTo(item));
     if (existing) {
       // Boost confidence of existing
       existing.confidence = Math.min(1, existing.confidence + 0.05);
@@ -211,7 +211,7 @@ class MemoryStore {
    * @param {string} category
    */
   getByCategory(category) {
-    return this.learnings.filter((l) => l.category === category);
+    return this.learnings.filter(l => l.category === category);
   }
 
   /**
@@ -219,7 +219,7 @@ class MemoryStore {
    * @param {number} threshold
    */
   getHighConfidence(threshold = 0.8) {
-    return this.learnings.filter((l) => l.confidence >= threshold);
+    return this.learnings.filter(l => l.confidence >= threshold);
   }
 
   /**
@@ -235,7 +235,7 @@ class MemoryStore {
 
   toJSON() {
     return {
-      learnings: this.learnings.map((l) => l.toJSON()),
+      learnings: this.learnings.map(l => l.toJSON()),
       sessions: this.sessions,
       lastUpdated: this.lastUpdated.toISOString(),
     };
@@ -247,7 +247,7 @@ class MemoryStore {
    */
   static fromJSON(json) {
     const store = new MemoryStore();
-    store.learnings = (json.learnings || []).map((l) => LearningItem.fromJSON(l));
+    store.learnings = (json.learnings || []).map(l => LearningItem.fromJSON(l));
     store.sessions = json.sessions || [];
     store.lastUpdated = new Date(json.lastUpdated);
     return store;
@@ -341,7 +341,7 @@ class AgentMemoryManager {
     }
 
     // Filter by minimum confidence
-    return learnings.filter((l) => l.confidence >= this.minConfidence);
+    return learnings.filter(l => l.confidence >= this.minConfidence);
   }
 
   /**
@@ -462,7 +462,9 @@ class AgentMemoryManager {
         const extracted = pattern.extract(match);
         if (extracted) {
           const isComplex = typeof extracted === 'object';
-          const content_ = isComplex ? `Error: ${extracted.error}\nSolution: ${extracted.solution}` : extracted;
+          const content_ = isComplex
+            ? `Error: ${extracted.error}\nSolution: ${extracted.solution}`
+            : extracted;
 
           learnings.push(
             new LearningItem({
@@ -494,7 +496,7 @@ class AgentMemoryManager {
       return {
         status: 'pending',
         message: 'Learnings require confirmation before saving',
-        items: items.map((i) => i.toJSON()),
+        items: items.map(i => i.toJSON()),
       };
     }
 
@@ -511,7 +513,7 @@ class AgentMemoryManager {
     return {
       status: 'saved',
       message: `Saved ${saved.length} learnings`,
-      items: saved.map((i) => i.toJSON()),
+      items: saved.map(i => i.toJSON()),
     };
   }
 
@@ -564,7 +566,10 @@ class AgentMemoryManager {
     await this.ensureInitialized();
     const queryLower = query.toLowerCase();
 
-    return this.store.learnings.filter((l) => l.title.toLowerCase().includes(queryLower) || l.content.toLowerCase().includes(queryLower));
+    return this.store.learnings.filter(
+      l =>
+        l.title.toLowerCase().includes(queryLower) || l.content.toLowerCase().includes(queryLower)
+    );
   }
 
   /**
@@ -573,7 +578,7 @@ class AgentMemoryManager {
    */
   async deleteLearning(id) {
     await this.ensureInitialized();
-    const index = this.store.learnings.findIndex((l) => l.id === id);
+    const index = this.store.learnings.findIndex(l => l.id === id);
 
     if (index === -1) {
       return { success: false, message: `Learning ${id} not found` };
@@ -591,7 +596,12 @@ class AgentMemoryManager {
   async exportToMarkdown() {
     await this.ensureInitialized();
 
-    const lines = ['# Agent Memory', '', `Last Updated: ${this.store.lastUpdated.toISOString()}`, ''];
+    const lines = [
+      '# Agent Memory',
+      '',
+      `Last Updated: ${this.store.lastUpdated.toISOString()}`,
+      '',
+    ];
 
     // Group by category
     for (const category of Object.values(LearningCategory)) {
@@ -660,8 +670,10 @@ class AgentMemoryManager {
     }
 
     if (this.store.learnings.length > 0) {
-      stats.confirmedCount = this.store.learnings.filter((l) => l.confirmed).length;
-      stats.averageConfidence = this.store.learnings.reduce((sum, l) => sum + l.confidence, 0) / this.store.learnings.length;
+      stats.confirmedCount = this.store.learnings.filter(l => l.confirmed).length;
+      stats.averageConfidence =
+        this.store.learnings.reduce((sum, l) => sum + l.confidence, 0) /
+        this.store.learnings.length;
     }
 
     return stats;

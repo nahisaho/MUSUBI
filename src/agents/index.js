@@ -1,9 +1,9 @@
 /**
  * MUSUBI Agents Module
- * 
+ *
  * Exports agent-related functionality including Agent Loop,
  * Function Tools, Schema Generation, and Agent Registry.
- * 
+ *
  * @module agents
  */
 
@@ -16,7 +16,7 @@ const {
   parseJSDoc,
   paramsToSchema,
   SchemaBuilder,
-  validateArgs
+  validateArgs,
 } = require('./function-tool');
 const { SchemaGenerator, createSchemaGenerator } = require('./schema-generator');
 const agentDefinitions = require('./registry');
@@ -25,7 +25,7 @@ module.exports = {
   // Agent Loop
   AgentLoop,
   createMockLLMProvider,
-  
+
   // Function Tools
   functionTool,
   functionTools,
@@ -35,11 +35,11 @@ module.exports = {
   paramsToSchema,
   SchemaBuilder,
   validateArgs,
-  
+
   // Schema Generator
   SchemaGenerator,
   createSchemaGenerator,
-  
+
   // Agent Registry
-  agentDefinitions
+  agentDefinitions,
 };

@@ -6,7 +6,11 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const { CheckpointManager, CheckpointState, DEFAULT_CONFIG } = require('../../src/managers/checkpoint-manager');
+const {
+  CheckpointManager,
+  CheckpointState,
+  DEFAULT_CONFIG,
+} = require('../../src/managers/checkpoint-manager');
 
 describe('CheckpointManager', () => {
   const testDir = path.join(__dirname, '../test-output/checkpoint-test');
@@ -402,7 +406,9 @@ describe('CheckpointManager', () => {
     });
 
     test('should throw for non-existent checkpoint', async () => {
-      await expect(manager.addTags('non-existent', ['tag'])).rejects.toThrow('Checkpoint not found');
+      await expect(manager.addTags('non-existent', ['tag'])).rejects.toThrow(
+        'Checkpoint not found'
+      );
     });
   });
 

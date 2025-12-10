@@ -26,7 +26,7 @@ describe('SchemaGenerator', () => {
       const gen = new SchemaGenerator({
         strict: true,
         includeExamples: false,
-        defaultType: 'object'
+        defaultType: 'object',
       });
       expect(gen.strict).toBe(true);
       expect(gen.includeExamples).toBe(false);
@@ -58,7 +58,8 @@ describe('SchemaGenerator', () => {
 
     test('should handle async functions', () => {
       async function fetchData(url, options) {
-        void url; void options;
+        void url;
+        void options;
         return {};
       }
 
@@ -70,7 +71,9 @@ describe('SchemaGenerator', () => {
 
     test('should handle functions with default values', () => {
       function search(query, limit = 10, offset = 0) {
-        void query; void limit; void offset;
+        void query;
+        void limit;
+        void offset;
         return [];
       }
 
@@ -84,14 +87,12 @@ describe('SchemaGenerator', () => {
     });
 
     test('should infer types from default values', () => {
-      function example(
-        str = 'default',
-        num = 42,
-        bool = true,
-        arr = [],
-        obj = {}
-      ) {
-        void str; void num; void bool; void arr; void obj;
+      function example(str = 'default', num = 42, bool = true, arr = [], obj = {}) {
+        void str;
+        void num;
+        void bool;
+        void arr;
+        void obj;
       }
 
       const schema = generator.fromFunction(example);
@@ -271,35 +272,33 @@ describe('SchemaGenerator', () => {
 
   describe('toOpenAITool', () => {
     test('should generate OpenAI tool format', () => {
-      const tool = generator.toOpenAITool(
-        'search',
-        'Search for items',
-        { type: 'object', properties: { query: { type: 'string' } } }
-      );
+      const tool = generator.toOpenAITool('search', 'Search for items', {
+        type: 'object',
+        properties: { query: { type: 'string' } },
+      });
 
       expect(tool).toEqual({
         type: 'function',
         function: {
           name: 'search',
           description: 'Search for items',
-          parameters: { type: 'object', properties: { query: { type: 'string' } } }
-        }
+          parameters: { type: 'object', properties: { query: { type: 'string' } } },
+        },
       });
     });
   });
 
   describe('toAnthropicTool', () => {
     test('should generate Anthropic tool format', () => {
-      const tool = generator.toAnthropicTool(
-        'search',
-        'Search for items',
-        { type: 'object', properties: { query: { type: 'string' } } }
-      );
+      const tool = generator.toAnthropicTool('search', 'Search for items', {
+        type: 'object',
+        properties: { query: { type: 'string' } },
+      });
 
       expect(tool).toEqual({
         name: 'search',
         description: 'Search for items',
-        input_schema: { type: 'object', properties: { query: { type: 'string' } } }
+        input_schema: { type: 'object', properties: { query: { type: 'string' } } },
       });
     });
   });
@@ -307,7 +306,7 @@ describe('SchemaGenerator', () => {
   describe('strict mode', () => {
     test('should add additionalProperties: false in strict mode', () => {
       const strictGenerator = new SchemaGenerator({ strict: true });
-      
+
       function example(_a, _b) {}
       const schema = strictGenerator.fromFunction(example);
 

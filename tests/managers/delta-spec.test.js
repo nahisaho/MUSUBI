@@ -29,7 +29,7 @@ describe('DeltaSpecManager', () => {
         target: 'REQ-AUTH-005',
         description: 'Add OAuth2 support',
         rationale: 'User requested social login',
-        impactedAreas: ['api', 'backend']
+        impactedAreas: ['api', 'backend'],
       });
 
       expect(delta.id).toBe('DELTA-AUTH-001');
@@ -43,28 +43,29 @@ describe('DeltaSpecManager', () => {
         id: 'DELTA-TEST-001',
         type: DeltaType.ADDED,
         target: 'REQ-TEST-001',
-        description: 'Test delta'
+        description: 'Test delta',
       });
 
       const jsonPath = path.join(tempDir, 'storage', 'changes', 'DELTA-TEST-001', 'delta.json');
       const mdPath = path.join(tempDir, 'storage', 'changes', 'DELTA-TEST-001', 'delta.md');
-      
+
       expect(fs.existsSync(jsonPath)).toBe(true);
       expect(fs.existsSync(mdPath)).toBe(true);
     });
 
     it('should throw error for missing required fields', () => {
-      expect(() => manager.create({ type: DeltaType.ADDED }))
-        .toThrow('Delta ID is required');
+      expect(() => manager.create({ type: DeltaType.ADDED })).toThrow('Delta ID is required');
     });
 
     it('should throw error for invalid type', () => {
-      expect(() => manager.create({
-        id: 'DELTA-TEST-001',
-        type: 'INVALID',
-        target: 'REQ-TEST-001',
-        description: 'Test'
-      })).toThrow(/Invalid delta type/);
+      expect(() =>
+        manager.create({
+          id: 'DELTA-TEST-001',
+          type: 'INVALID',
+          target: 'REQ-TEST-001',
+          description: 'Test',
+        })
+      ).toThrow(/Invalid delta type/);
     });
   });
 
@@ -74,7 +75,7 @@ describe('DeltaSpecManager', () => {
         id: 'DELTA-LOAD-001',
         type: DeltaType.ADDED,
         target: 'REQ-TEST-001',
-        description: 'Test delta'
+        description: 'Test delta',
       });
 
       const loaded = manager.load('DELTA-LOAD-001');
@@ -90,17 +91,39 @@ describe('DeltaSpecManager', () => {
 
   describe('list', () => {
     it('should list all deltas', () => {
-      manager.create({ id: 'DELTA-A-001', type: DeltaType.ADDED, target: 'REQ-A', description: 'A' });
-      manager.create({ id: 'DELTA-B-001', type: DeltaType.MODIFIED, target: 'REQ-B', description: 'B', before: 'old' });
-      
+      manager.create({
+        id: 'DELTA-A-001',
+        type: DeltaType.ADDED,
+        target: 'REQ-A',
+        description: 'A',
+      });
+      manager.create({
+        id: 'DELTA-B-001',
+        type: DeltaType.MODIFIED,
+        target: 'REQ-B',
+        description: 'B',
+        before: 'old',
+      });
+
       const list = manager.list();
       expect(list.length).toBe(2);
     });
 
     it('should filter by type', () => {
-      manager.create({ id: 'DELTA-A-001', type: DeltaType.ADDED, target: 'REQ-A', description: 'A' });
-      manager.create({ id: 'DELTA-B-001', type: DeltaType.MODIFIED, target: 'REQ-B', description: 'B', before: 'old' });
-      
+      manager.create({
+        id: 'DELTA-A-001',
+        type: DeltaType.ADDED,
+        target: 'REQ-A',
+        description: 'A',
+      });
+      manager.create({
+        id: 'DELTA-B-001',
+        type: DeltaType.MODIFIED,
+        target: 'REQ-B',
+        description: 'B',
+        before: 'old',
+      });
+
       const added = manager.list({ type: DeltaType.ADDED });
       expect(added.length).toBe(1);
       expect(added[0].type).toBe('ADDED');
@@ -109,41 +132,61 @@ describe('DeltaSpecManager', () => {
 
   describe('updateStatus', () => {
     it('should update status', () => {
-      manager.create({ id: 'DELTA-STATUS-001', type: DeltaType.ADDED, target: 'REQ-A', description: 'A' });
-      
+      manager.create({
+        id: 'DELTA-STATUS-001',
+        type: DeltaType.ADDED,
+        target: 'REQ-A',
+        description: 'A',
+      });
+
       const updated = manager.updateStatus('DELTA-STATUS-001', 'approved');
       expect(updated.status).toBe('approved');
     });
 
     it('should throw for invalid status', () => {
-      manager.create({ id: 'DELTA-STATUS-002', type: DeltaType.ADDED, target: 'REQ-A', description: 'A' });
-      
-      expect(() => manager.updateStatus('DELTA-STATUS-002', 'invalid'))
-        .toThrow(/Invalid status/);
+      manager.create({
+        id: 'DELTA-STATUS-002',
+        type: DeltaType.ADDED,
+        target: 'REQ-A',
+        description: 'A',
+      });
+
+      expect(() => manager.updateStatus('DELTA-STATUS-002', 'invalid')).toThrow(/Invalid status/);
     });
   });
 
   describe('archive', () => {
     it('should archive implemented delta', () => {
-      manager.create({ id: 'DELTA-ARCH-001', type: DeltaType.ADDED, target: 'REQ-A', description: 'A' });
+      manager.create({
+        id: 'DELTA-ARCH-001',
+        type: DeltaType.ADDED,
+        target: 'REQ-A',
+        description: 'A',
+      });
       manager.updateStatus('DELTA-ARCH-001', 'implemented');
-      
+
       const result = manager.archive('DELTA-ARCH-001');
       expect(result.archived).toBe(true);
-      
+
       // Should be removed from changes
       expect(manager.load('DELTA-ARCH-001')).toBeNull();
-      
+
       // Should exist in archive
       const archivePath = path.join(tempDir, 'storage', 'archive', 'DELTA-ARCH-001.json');
       expect(fs.existsSync(archivePath)).toBe(true);
     });
 
     it('should throw for non-implemented delta', () => {
-      manager.create({ id: 'DELTA-ARCH-002', type: DeltaType.ADDED, target: 'REQ-A', description: 'A' });
-      
-      expect(() => manager.archive('DELTA-ARCH-002'))
-        .toThrow('Only implemented deltas can be archived');
+      manager.create({
+        id: 'DELTA-ARCH-002',
+        type: DeltaType.ADDED,
+        target: 'REQ-A',
+        description: 'A',
+      });
+
+      expect(() => manager.archive('DELTA-ARCH-002')).toThrow(
+        'Only implemented deltas can be archived'
+      );
     });
   });
 
@@ -171,7 +214,7 @@ describe('DeltaSpecManager', () => {
         id: 'DELTA-VAL-001',
         type: DeltaType.ADDED,
         target: 'REQ-AUTH-001',
-        description: 'Add feature'
+        description: 'Add feature',
       };
 
       const result = manager.validate(delta);
@@ -183,7 +226,7 @@ describe('DeltaSpecManager', () => {
         id: 'invalid-id',
         type: 'INVALID',
         target: '',
-        description: ''
+        description: '',
       };
 
       const result = manager.validate(delta);
@@ -210,7 +253,7 @@ describe('DeltaFormatValidator', () => {
         status: 'proposed',
         impactedAreas: ['api', 'backend'],
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       const result = validator.validate(delta);
@@ -221,7 +264,7 @@ describe('DeltaFormatValidator', () => {
     it('should detect missing fields', () => {
       const delta = {};
       const result = validator.validate(delta);
-      
+
       expect(result.valid).toBe(false);
       expect(result.errors.some(e => e.rule === 'required-id')).toBe(true);
       expect(result.errors.some(e => e.rule === 'required-type')).toBe(true);
@@ -232,7 +275,7 @@ describe('DeltaFormatValidator', () => {
         id: 'invalid',
         type: 'ADDED',
         target: 'REQ-TEST-001',
-        description: 'Test'
+        description: 'Test',
       };
 
       const result = validator.validate(delta);
@@ -244,7 +287,7 @@ describe('DeltaFormatValidator', () => {
         id: 'DELTA-TEST-001',
         type: 'ADDED',
         target: 'REQ-TEST-001',
-        description: 'This should maybe work'
+        description: 'This should maybe work',
       };
 
       const result = validator.validate(delta);
@@ -256,7 +299,7 @@ describe('DeltaFormatValidator', () => {
         id: 'DELTA-MOD-001',
         type: 'MODIFIED',
         target: 'REQ-TEST-001',
-        description: 'Modified test'
+        description: 'Modified test',
       };
 
       const result = validator.validate(delta);
@@ -268,7 +311,7 @@ describe('DeltaFormatValidator', () => {
         id: 'DELTA-REN-001',
         type: 'RENAMED',
         target: 'REQ-TEST-001',
-        description: 'Renamed test'
+        description: 'Renamed test',
       };
 
       const result = validator.validate(delta);
@@ -306,13 +349,13 @@ describe('DeltaFormatValidator', () => {
   describe('strict mode', () => {
     it('should enforce stricter validation in strict mode', () => {
       const strictValidator = new DeltaFormatValidator({ strict: true });
-      
+
       const delta = {
         id: 'DELTA-STR-001',
         type: 'ADDED',
         target: 'REQ-TEST-001',
         description: 'Test',
-        impactedAreas: ['custom-area']
+        impactedAreas: ['custom-area'],
       };
 
       const result = strictValidator.validate(delta);

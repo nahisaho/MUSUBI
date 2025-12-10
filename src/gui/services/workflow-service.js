@@ -46,7 +46,7 @@ class WorkflowService {
     // Check steering
     const steeringPath = path.join(this.projectPath, 'steering');
     const constitutionPath = path.join(steeringPath, 'rules', 'constitution.md');
-    
+
     try {
       await fs.access(constitutionPath);
       state.completedStages.push('steering');
@@ -61,7 +61,12 @@ class WorkflowService {
     }
 
     // Check requirements
-    const requirementsPath = path.join(this.projectPath, 'storage', 'specs', `${featureId}-requirements.md`);
+    const requirementsPath = path.join(
+      this.projectPath,
+      'storage',
+      'specs',
+      `${featureId}-requirements.md`
+    );
     if (await this.fileExists(requirementsPath)) {
       state.completedStages.push('requirements');
       state.currentStage = 'design';
@@ -100,7 +105,7 @@ class WorkflowService {
 
     try {
       const files = await fs.readdir(specsPath);
-      
+
       for (const file of files) {
         const match = file.match(/^(.+)-(requirements|design|tasks)\.md$/);
         if (match) {
@@ -133,7 +138,9 @@ class WorkflowService {
     }
 
     if (targetIndex > currentIndex + 1) {
-      throw new Error(`Cannot skip stages. Current: ${currentState.currentStage}, Target: ${targetStage}`);
+      throw new Error(
+        `Cannot skip stages. Current: ${currentState.currentStage}, Target: ${targetStage}`
+      );
     }
 
     // The actual transition is done by creating the artifact
@@ -190,7 +197,7 @@ class WorkflowService {
 
     return {
       featureId,
-      valid: issues.filter((i) => i.type === 'error').length === 0,
+      valid: issues.filter(i => i.type === 'error').length === 0,
       issues,
       state,
     };
@@ -219,11 +226,11 @@ class WorkflowService {
     try {
       const content = await fs.readFile(filePath, 'utf-8');
       const { data: frontmatter, content: body } = matter(content);
-      
+
       const sections = [];
       const sectionRegex = /^##\s+(.+)$/gm;
       let match;
-      
+
       while ((match = sectionRegex.exec(body)) !== null) {
         sections.push(match[1]);
       }

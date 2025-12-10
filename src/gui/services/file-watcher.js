@@ -18,7 +18,7 @@ class FileWatcher extends EventEmitter {
    */
   constructor(projectPath, options = {}) {
     super();
-    
+
     this.projectPath = projectPath;
     this.options = {
       ignored: options.ignored || /(^|[/\\])\.|node_modules/,
@@ -49,19 +49,19 @@ class FileWatcher extends EventEmitter {
 
     this.watcher = chokidar.watch(watchPaths, this.options);
 
-    this.watcher.on('change', (filePath) => {
+    this.watcher.on('change', filePath => {
       this.debounce('change', filePath);
     });
 
-    this.watcher.on('add', (filePath) => {
+    this.watcher.on('add', filePath => {
       this.debounce('add', filePath);
     });
 
-    this.watcher.on('unlink', (filePath) => {
+    this.watcher.on('unlink', filePath => {
       this.debounce('unlink', filePath);
     });
 
-    this.watcher.on('error', (error) => {
+    this.watcher.on('error', error => {
       this.emit('error', error);
     });
 
@@ -77,7 +77,7 @@ class FileWatcher extends EventEmitter {
    */
   debounce(event, filePath) {
     const key = `${event}:${filePath}`;
-    
+
     if (this.debounceTimers.has(key)) {
       clearTimeout(this.debounceTimers.get(key));
     }

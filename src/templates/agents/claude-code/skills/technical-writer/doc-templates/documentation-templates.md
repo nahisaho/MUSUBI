@@ -25,10 +25,13 @@ Brief description of what this project does.
 ## Quick Start
 
 \`\`\`bash
+
 # Install
+
 npm install project-name
 
 # Run
+
 npx project-name
 \`\`\`
 
@@ -72,10 +75,10 @@ See [Advanced Guide](docs/advanced.md) for more options.
 
 ## Configuration
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `port` | number | 3000 | Server port |
-| `debug` | boolean | false | Enable debug mode |
+| Option  | Type    | Default | Description       |
+| ------- | ------- | ------- | ----------------- |
+| `port`  | number  | 3000    | Server port       |
+| `debug` | boolean | false   | Enable debug mode |
 
 ## API Reference
 
@@ -117,26 +120,26 @@ GET /api/v1/users
 
 **Query Parameters**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| page | integer | No | Page number (default: 1) |
-| limit | integer | No | Items per page (default: 20) |
+| Parameter | Type    | Required | Description                  |
+| --------- | ------- | -------- | ---------------------------- |
+| page      | integer | No       | Page number (default: 1)     |
+| limit     | integer | No       | Items per page (default: 20) |
 
 **Response**
 
 \`\`\`json
 {
-  "data": [
-    {
-      "id": "123",
-      "name": "John Doe",
-      "email": "john@example.com"
-    }
-  ],
-  "meta": {
-    "total": 100,
-    "page": 1
-  }
+"data": [
+{
+"id": "123",
+"name": "John Doe",
+"email": "john@example.com"
+}
+],
+"meta": {
+"total": 100,
+"page": 1
+}
 }
 \`\`\`
 
@@ -148,19 +151,19 @@ GET /api/v1/users/:id
 
 **Path Parameters**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | string | User ID |
+| Parameter | Type   | Description |
+| --------- | ------ | ----------- |
+| id        | string | User ID     |
 
 **Response**
 
 \`\`\`json
 {
-  "data": {
-    "id": "123",
-    "name": "John Doe",
-    "email": "john@example.com"
-  }
+"data": {
+"id": "123",
+"name": "John Doe",
+"email": "john@example.com"
+}
 }
 \`\`\`
 
@@ -174,9 +177,9 @@ POST /api/v1/users
 
 \`\`\`json
 {
-  "name": "John Doe",
-  "email": "john@example.com",
-  "password": "secret123"
+"name": "John Doe",
+"email": "john@example.com",
+"password": "secret123"
 }
 \`\`\`
 
@@ -184,38 +187,38 @@ POST /api/v1/users
 
 \`\`\`json
 {
-  "data": {
-    "id": "123",
-    "name": "John Doe",
-    "email": "john@example.com"
-  }
+"data": {
+"id": "123",
+"name": "John Doe",
+"email": "john@example.com"
+}
 }
 \`\`\`
 
 ## Error Responses
 
-| Status | Code | Description |
-|--------|------|-------------|
-| 400 | VALIDATION_ERROR | Invalid request data |
-| 401 | UNAUTHORIZED | Authentication required |
-| 403 | FORBIDDEN | Insufficient permissions |
-| 404 | NOT_FOUND | Resource not found |
-| 500 | INTERNAL_ERROR | Server error |
+| Status | Code             | Description              |
+| ------ | ---------------- | ------------------------ |
+| 400    | VALIDATION_ERROR | Invalid request data     |
+| 401    | UNAUTHORIZED     | Authentication required  |
+| 403    | FORBIDDEN        | Insufficient permissions |
+| 404    | NOT_FOUND        | Resource not found       |
+| 500    | INTERNAL_ERROR   | Server error             |
 
 **Error Format**
 
 \`\`\`json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Invalid request data",
-    "details": [
-      {
-        "field": "email",
-        "message": "Invalid email format"
-      }
-    ]
-  }
+"error": {
+"code": "VALIDATION_ERROR",
+"message": "Invalid request data",
+"details": [
+{
+"field": "email",
+"message": "Invalid email format"
+}
+]
+}
 }
 \`\`\`
 ```
@@ -270,17 +273,22 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md).
 ## Development Setup
 
 \`\`\`bash
+
 # Clone
+
 git clone https://github.com/org/project.git
 cd project
 
 # Install
+
 npm install
 
 # Run tests
+
 npm test
 
 # Run dev server
+
 npm run dev
 \`\`\`
 
@@ -322,23 +330,28 @@ YYYY-MM-DD
 ## Consequences
 
 ### Positive
+
 - [Benefit 1]
 - [Benefit 2]
 
 ### Negative
+
 - [Downside 1]
 - [Downside 2]
 
 ### Neutral
+
 - [Trade-off 1]
 
 ## Alternatives Considered
 
 ### Option A
+
 - Pros: [...]
 - Cons: [...]
 
 ### Option B
+
 - Pros: [...]
 - Cons: [...]
 
@@ -398,9 +411,11 @@ If something goes wrong:
 ## Troubleshooting
 
 ### Issue: [Description]
+
 **Solution**: [How to fix]
 
 ### Issue: [Description]
+
 **Solution**: [How to fix]
 
 ## Contacts
@@ -414,6 +429,7 @@ If something goes wrong:
 ## Documentation Checklist
 
 ### README
+
 - [ ] Project description
 - [ ] Quick start guide
 - [ ] Installation steps
@@ -423,6 +439,7 @@ If something goes wrong:
 - [ ] License
 
 ### API Docs
+
 - [ ] Authentication explained
 - [ ] All endpoints documented
 - [ ] Request/response examples
@@ -430,6 +447,7 @@ If something goes wrong:
 - [ ] Rate limits mentioned
 
 ### Code Docs
+
 - [ ] Functions documented
 - [ ] Parameters described
 - [ ] Return values explained

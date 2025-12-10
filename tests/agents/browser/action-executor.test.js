@@ -12,7 +12,7 @@ describe('ActionExecutor', () => {
 
   beforeEach(() => {
     executor = new ActionExecutor();
-    
+
     mockPage = {
       goto: jest.fn().mockResolvedValue(undefined),
       url: jest.fn().mockReturnValue('https://example.com'),
@@ -47,7 +47,7 @@ describe('ActionExecutor', () => {
 
     it('should catch and return errors', async () => {
       mockPage.goto.mockRejectedValue(new Error('Navigation failed'));
-      
+
       const action = { type: 'navigate', url: 'https://example.com' };
       const result = await executor.execute(action, mockContext);
 
@@ -71,7 +71,7 @@ describe('ActionExecutor', () => {
 
     it('should return current URL in result', async () => {
       mockPage.url.mockReturnValue('https://example.com/redirect');
-      
+
       const action = { type: 'navigate', url: 'https://example.com' };
       const result = await executor.execute(action, mockContext);
 
@@ -90,10 +90,8 @@ describe('ActionExecutor', () => {
     });
 
     it('should try multiple selectors', async () => {
-      mockPage.click
-        .mockRejectedValueOnce(new Error('Not found'))
-        .mockResolvedValueOnce(undefined);
-      
+      mockPage.click.mockRejectedValueOnce(new Error('Not found')).mockResolvedValueOnce(undefined);
+
       const action = { type: 'click', selector: '#button1, #button2' };
       const result = await executor.execute(action, mockContext);
 
@@ -113,10 +111,8 @@ describe('ActionExecutor', () => {
     });
 
     it('should try multiple selectors for fill', async () => {
-      mockPage.fill
-        .mockRejectedValueOnce(new Error('Not found'))
-        .mockResolvedValueOnce(undefined);
-      
+      mockPage.fill.mockRejectedValueOnce(new Error('Not found')).mockResolvedValueOnce(undefined);
+
       const action = { type: 'fill', selector: '#email1, #email2', value: 'test@example.com' };
       const result = await executor.execute(action, mockContext);
 
@@ -139,7 +135,7 @@ describe('ActionExecutor', () => {
       mockPage.selectOption
         .mockRejectedValueOnce(new Error('Not found'))
         .mockResolvedValueOnce(undefined);
-      
+
       const action = { type: 'select', selector: '#dropdown1, #dropdown2', value: 'option1' };
       const result = await executor.execute(action, mockContext);
 
@@ -151,10 +147,10 @@ describe('ActionExecutor', () => {
   describe('executeWait', () => {
     it('should wait for specified duration', async () => {
       jest.useFakeTimers();
-      
+
       const action = { type: 'wait', delay: 1000 };
       const promise = executor.execute(action, mockContext);
-      
+
       jest.advanceTimersByTime(1000);
       const result = await promise;
 
@@ -231,7 +227,7 @@ describe('ActionExecutor', () => {
   describe('default timeout', () => {
     it('should use default timeout if not provided', async () => {
       const contextWithoutTimeout = { page: mockPage, screenshot: mockScreenshot };
-      
+
       const action = { type: 'navigate', url: 'https://example.com' };
       await executor.execute(action, contextWithoutTimeout);
 

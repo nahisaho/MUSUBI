@@ -1,6 +1,6 @@
 /**
  * PatternRegistry - Registry for orchestration patterns
- * 
+ *
  * Manages pattern lifecycle and provides pattern discovery
  */
 
@@ -26,10 +26,13 @@ class PatternMetadata {
   matches(criteria = {}) {
     if (criteria.type && this.type !== criteria.type) return false;
     if (criteria.complexity && this.complexity !== criteria.complexity) return false;
-    if (criteria.supportsParallel !== undefined && 
-        this.supportsParallel !== criteria.supportsParallel) return false;
-    if (criteria.requiresHuman !== undefined && 
-        this.requiresHuman !== criteria.requiresHuman) return false;
+    if (
+      criteria.supportsParallel !== undefined &&
+      this.supportsParallel !== criteria.supportsParallel
+    )
+      return false;
+    if (criteria.requiresHuman !== undefined && this.requiresHuman !== criteria.requiresHuman)
+      return false;
     if (criteria.tags && criteria.tags.length > 0) {
       if (!criteria.tags.some(t => this.tags.includes(t))) return false;
     }
@@ -47,7 +50,7 @@ class PatternMetadata {
       useCases: this.useCases,
       complexity: this.complexity,
       supportsParallel: this.supportsParallel,
-      requiresHuman: this.requiresHuman
+      requiresHuman: this.requiresHuman,
     };
   }
 }
@@ -127,11 +130,14 @@ class PatternRegistry {
 
     // Extract or create metadata
     const patternMeta = pattern.metadata || pattern.getMetadata?.() || {};
-    this.metadata.set(name, new PatternMetadata({
+    this.metadata.set(
       name,
-      ...patternMeta,
-      ...metadata
-    }));
+      new PatternMetadata({
+        name,
+        ...patternMeta,
+        ...metadata,
+      })
+    );
 
     return this;
   }
@@ -188,18 +194,18 @@ class PatternRegistry {
    */
   find(criteria = {}) {
     const results = [];
-    
+
     for (const [name, pattern] of this.patterns) {
       const meta = this.metadata.get(name);
       if (meta && meta.matches(criteria)) {
         results.push({
           name,
           pattern,
-          metadata: meta
+          metadata: meta,
         });
       }
     }
-    
+
     return results;
   }
 
@@ -210,49 +216,59 @@ class PatternRegistry {
    */
   findBestPattern(task) {
     const taskLower = task.toLowerCase();
-    
+
     // Check for parallel keywords
-    if (taskLower.includes('parallel') || 
-        taskLower.includes('concurrent') ||
-        taskLower.includes('simultaneous')) {
+    if (
+      taskLower.includes('parallel') ||
+      taskLower.includes('concurrent') ||
+      taskLower.includes('simultaneous')
+    ) {
       const swarm = this.find({ supportsParallel: true });
       if (swarm.length > 0) return swarm[0].name;
     }
-    
+
     // Check for sequential keywords
-    if (taskLower.includes('sequential') || 
-        taskLower.includes('step by step') ||
-        taskLower.includes('one by one')) {
+    if (
+      taskLower.includes('sequential') ||
+      taskLower.includes('step by step') ||
+      taskLower.includes('one by one')
+    ) {
       if (this.has(PatternType.SEQUENTIAL)) return PatternType.SEQUENTIAL;
     }
-    
+
     // Check for collaboration keywords
-    if (taskLower.includes('discuss') || 
-        taskLower.includes('review') ||
-        taskLower.includes('collaborate')) {
+    if (
+      taskLower.includes('discuss') ||
+      taskLower.includes('review') ||
+      taskLower.includes('collaborate')
+    ) {
       if (this.has(PatternType.GROUP_CHAT)) return PatternType.GROUP_CHAT;
     }
-    
+
     // Check for nested/hierarchical keywords
-    if (taskLower.includes('break down') || 
-        taskLower.includes('decompose') ||
-        taskLower.includes('hierarchical')) {
+    if (
+      taskLower.includes('break down') ||
+      taskLower.includes('decompose') ||
+      taskLower.includes('hierarchical')
+    ) {
       if (this.has(PatternType.NESTED)) return PatternType.NESTED;
     }
-    
+
     // Check for human validation keywords
-    if (taskLower.includes('validate') || 
-        taskLower.includes('approve') ||
-        taskLower.includes('review')) {
+    if (
+      taskLower.includes('validate') ||
+      taskLower.includes('approve') ||
+      taskLower.includes('review')
+    ) {
       if (this.has(PatternType.HUMAN_IN_LOOP)) return PatternType.HUMAN_IN_LOOP;
     }
-    
+
     // Default to auto pattern
     if (this.has(PatternType.AUTO)) return PatternType.AUTO;
-    
+
     // Fall back to sequential
     if (this.has(PatternType.SEQUENTIAL)) return PatternType.SEQUENTIAL;
-    
+
     // Return first available pattern
     const patterns = this.list();
     return patterns.length > 0 ? patterns[0] : null;
@@ -277,18 +293,17 @@ class PatternRegistry {
       total: this.patterns.size,
       patterns: [],
       byType: {},
-      byComplexity: {}
+      byComplexity: {},
     };
 
     for (const [_name, meta] of this.metadata) {
       summary.patterns.push(meta.toJSON());
-      
+
       // Count by type
       summary.byType[meta.type] = (summary.byType[meta.type] || 0) + 1;
-      
+
       // Count by complexity
-      summary.byComplexity[meta.complexity] = 
-        (summary.byComplexity[meta.complexity] || 0) + 1;
+      summary.byComplexity[meta.complexity] = (summary.byComplexity[meta.complexity] || 0) + 1;
     }
 
     return summary;
@@ -315,5 +330,5 @@ module.exports = {
   PatternRegistry,
   PatternMetadata,
   BasePattern,
-  createDefaultRegistry
+  createDefaultRegistry,
 };

@@ -1,6 +1,6 @@
 /**
  * AdaptiveGoalModifier Tests
- * 
+ *
  * Tests for adaptive goal modification functionality
  */
 
@@ -12,7 +12,7 @@ const {
   ModificationStrategy,
   ModificationHistoryManager,
   ModificationReason,
-  ModificationType
+  ModificationType,
 } = require('../../../src/orchestration/replanning/adaptive-goal-modifier');
 
 describe('AdaptiveGoalModifier', () => {
@@ -32,7 +32,7 @@ describe('AdaptiveGoalModifier', () => {
     it('should accept custom config', () => {
       const custom = new AdaptiveGoalModifier({
         requireApproval: false,
-        autoModifyThreshold: 0.5
+        autoModifyThreshold: 0.5,
       });
       expect(custom.config.requireApproval).toBe(false);
       expect(custom.config.autoModifyThreshold).toBe(0.5);
@@ -45,7 +45,7 @@ describe('AdaptiveGoalModifier', () => {
         id: 'goal-1',
         name: 'Test Goal',
         priority: 'high',
-        targetDate: '2025-12-31'
+        targetDate: '2025-12-31',
       };
 
       const result = modifier.registerGoal(goal);
@@ -75,14 +75,14 @@ describe('AdaptiveGoalModifier', () => {
         id: 'mod-goal',
         name: 'Modification Test Goal',
         priority: 'high',
-        targetDate: new Date(Date.now() + 86400000 * 14).toISOString()
+        targetDate: new Date(Date.now() + 86400000 * 14).toISOString(),
       });
     });
 
     it('should trigger timeline extension modification', async () => {
       const result = await modifier.triggerModification('mod-goal', {
         reason: ModificationReason.TIME_CONSTRAINT,
-        gap: 0.3
+        gap: 0.3,
       });
 
       expect(result.status).toBe('applied');
@@ -95,20 +95,21 @@ describe('AdaptiveGoalModifier', () => {
         name: 'Scope Test',
         deliverables: [
           { id: 'd1', name: 'Core Feature', priority: 'critical' },
-          { id: 'd2', name: 'Nice to Have', priority: 'low' }
-        ]
+          { id: 'd2', name: 'Nice to Have', priority: 'low' },
+        ],
       });
 
       const result = await modifier.triggerModification('scope-goal', {
-        reason: ModificationReason.RESOURCE_CONSTRAINT
+        reason: ModificationReason.RESOURCE_CONSTRAINT,
       });
 
       expect(result.status).toBe('applied');
     });
 
     it('should throw error for non-existent goal', async () => {
-      await expect(modifier.triggerModification('non-existent', {}))
-        .rejects.toThrow('Goal not found');
+      await expect(modifier.triggerModification('non-existent', {})).rejects.toThrow(
+        'Goal not found'
+      );
     });
   });
 
@@ -116,21 +117,21 @@ describe('AdaptiveGoalModifier', () => {
     let approvalModifier;
 
     beforeEach(() => {
-      approvalModifier = new AdaptiveGoalModifier({ 
+      approvalModifier = new AdaptiveGoalModifier({
         requireApproval: true,
-        autoModifyThreshold: 0 // Force approval for all
+        autoModifyThreshold: 0, // Force approval for all
       });
 
       approvalModifier.registerGoal({
         id: 'approval-goal',
         name: 'Approval Test Goal',
-        priority: 'critical'
+        priority: 'critical',
       });
     });
 
     it('should create pending modification when approval required', async () => {
       const result = await approvalModifier.triggerModification('approval-goal', {
-        reason: ModificationReason.TIME_CONSTRAINT
+        reason: ModificationReason.TIME_CONSTRAINT,
       });
 
       expect(result.status).toBe('pending_approval');
@@ -139,7 +140,7 @@ describe('AdaptiveGoalModifier', () => {
 
     it('should approve pending modification', async () => {
       const pending = await approvalModifier.triggerModification('approval-goal', {
-        reason: ModificationReason.TIME_CONSTRAINT
+        reason: ModificationReason.TIME_CONSTRAINT,
       });
 
       const result = approvalModifier.approveModification(pending.modification.id);
@@ -148,13 +149,10 @@ describe('AdaptiveGoalModifier', () => {
 
     it('should reject pending modification', async () => {
       const pending = await approvalModifier.triggerModification('approval-goal', {
-        reason: ModificationReason.TIME_CONSTRAINT
+        reason: ModificationReason.TIME_CONSTRAINT,
       });
 
-      const result = approvalModifier.rejectModification(
-        pending.modification.id,
-        'Not acceptable'
-      );
+      const result = approvalModifier.rejectModification(pending.modification.id, 'Not acceptable');
       expect(result.status).toBe('rejected');
       expect(result.modification.rejectionReason).toBe('Not acceptable');
     });
@@ -165,7 +163,7 @@ describe('AdaptiveGoalModifier', () => {
       modifier.registerGoal({ id: 'hist-goal', name: 'History Goal' });
 
       await modifier.triggerModification('hist-goal', {
-        reason: ModificationReason.TIME_CONSTRAINT
+        reason: ModificationReason.TIME_CONSTRAINT,
       });
 
       const history = modifier.getGoalHistory('hist-goal');
@@ -179,13 +177,13 @@ describe('AdaptiveGoalModifier', () => {
       modifier.registerGoal({
         id: 'suggest-goal',
         name: 'Suggestion Goal',
-        targetDate: new Date(Date.now() + 86400000 * 7).toISOString()
+        targetDate: new Date(Date.now() + 86400000 * 7).toISOString(),
       });
 
       const suggestions = modifier.generateSuggestions('suggest-goal', {
         progress: 0.2,
         timeElapsed: 0.7,
-        resourceUtilization: 0.5
+        resourceUtilization: 0.5,
       });
 
       expect(suggestions.goalId).toBe('suggest-goal');
@@ -201,7 +199,7 @@ describe('AdaptiveGoalModifier', () => {
 
       modifier.registerGoal({ id: 'event-goal', name: 'Event Goal' });
       await modifier.triggerModification('event-goal', {
-        reason: ModificationReason.PRIORITY_SHIFT
+        reason: ModificationReason.PRIORITY_SHIFT,
       });
 
       expect(handler).toHaveBeenCalled();
@@ -245,9 +243,7 @@ describe('ImpactAnalyzer', () => {
       const goal = { id: 'parent-goal' };
       const modification = { type: ModificationType.TIMELINE_EXTENSION };
       const context = {
-        goals: [
-          { id: 'child-goal', dependencies: ['parent-goal'], dependencyStrength: 0.8 }
-        ]
+        goals: [{ id: 'child-goal', dependencies: ['parent-goal'], dependencyStrength: 0.8 }],
       };
 
       const impact = analyzer.analyzeImpact(goal, modification, context);
@@ -311,9 +307,13 @@ describe('ModificationHistoryManager', () => {
 
   describe('recordModification', () => {
     it('should record modification to history', () => {
-      manager.recordModification('goal-1', {
-        type: ModificationType.TIMELINE_EXTENSION
-      }, { totalScore: 0.4 });
+      manager.recordModification(
+        'goal-1',
+        {
+          type: ModificationType.TIMELINE_EXTENSION,
+        },
+        { totalScore: 0.4 }
+      );
 
       const history = manager.getHistory('goal-1');
       expect(history).toHaveLength(1);
@@ -323,9 +323,13 @@ describe('ModificationHistoryManager', () => {
       const limitedManager = new ModificationHistoryManager({ maxHistoryPerGoal: 3 });
 
       for (let i = 0; i < 5; i++) {
-        limitedManager.recordModification('goal-1', {
-          type: ModificationType.PRIORITY_ADJUSTMENT
-        }, {});
+        limitedManager.recordModification(
+          'goal-1',
+          {
+            type: ModificationType.PRIORITY_ADJUSTMENT,
+          },
+          {}
+        );
       }
 
       expect(limitedManager.getHistory('goal-1')).toHaveLength(3);
@@ -335,18 +339,30 @@ describe('ModificationHistoryManager', () => {
   describe('analyzePatterns', () => {
     it('should analyze modification patterns', () => {
       // Record multiple modifications
-      manager.recordModification('pattern-goal', {
-        type: ModificationType.TIMELINE_EXTENSION,
-        reason: ModificationReason.TIME_CONSTRAINT
-      }, {});
-      manager.recordModification('pattern-goal', {
-        type: ModificationType.TIMELINE_EXTENSION,
-        reason: ModificationReason.TIME_CONSTRAINT
-      }, {});
-      manager.recordModification('pattern-goal', {
-        type: ModificationType.SCOPE_REDUCTION,
-        reason: ModificationReason.RESOURCE_CONSTRAINT
-      }, {});
+      manager.recordModification(
+        'pattern-goal',
+        {
+          type: ModificationType.TIMELINE_EXTENSION,
+          reason: ModificationReason.TIME_CONSTRAINT,
+        },
+        {}
+      );
+      manager.recordModification(
+        'pattern-goal',
+        {
+          type: ModificationType.TIMELINE_EXTENSION,
+          reason: ModificationReason.TIME_CONSTRAINT,
+        },
+        {}
+      );
+      manager.recordModification(
+        'pattern-goal',
+        {
+          type: ModificationType.SCOPE_REDUCTION,
+          reason: ModificationReason.RESOURCE_CONSTRAINT,
+        },
+        {}
+      );
 
       const patterns = manager.analyzePatterns('pattern-goal');
 
@@ -356,9 +372,13 @@ describe('ModificationHistoryManager', () => {
 
     it('should generate insights for volatile goals', () => {
       for (let i = 0; i < 6; i++) {
-        manager.recordModification('volatile-goal', {
-          type: ModificationType.PRIORITY_ADJUSTMENT
-        }, {});
+        manager.recordModification(
+          'volatile-goal',
+          {
+            type: ModificationType.PRIORITY_ADJUSTMENT,
+          },
+          {}
+        );
       }
 
       const patterns = manager.analyzePatterns('volatile-goal');
@@ -369,9 +389,13 @@ describe('ModificationHistoryManager', () => {
 
   describe('rollback', () => {
     it('should rollback modification', () => {
-      manager.recordModification('rollback-goal', {
-        type: ModificationType.SCOPE_REDUCTION
-      }, {});
+      manager.recordModification(
+        'rollback-goal',
+        {
+          type: ModificationType.SCOPE_REDUCTION,
+        },
+        {}
+      );
 
       const history = manager.getHistory('rollback-goal');
       const result = manager.rollback('rollback-goal', history[0].id);

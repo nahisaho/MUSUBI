@@ -1,7 +1,7 @@
 /**
  * Template Constraints Engine
  * LLM制約テンプレート構文と不確実性マーカー
- * 
+ *
  * @module templates/template-constraints
  */
 
@@ -17,18 +17,18 @@ const CONSTRAINT_TYPE = {
   CONDITIONAL: 'conditional',
   PATTERN: 'pattern',
   RANGE: 'range',
-  ENUM: 'enum'
+  ENUM: 'enum',
 };
 
 /**
  * Uncertainty levels
  */
 const UNCERTAINTY = {
-  CERTAIN: 'certain',       // 100% confidence
-  HIGH: 'high',             // 80-99%
-  MEDIUM: 'medium',         // 50-79%
-  LOW: 'low',               // 20-49%
-  UNCERTAIN: 'uncertain'    // <20%
+  CERTAIN: 'certain', // 100% confidence
+  HIGH: 'high', // 80-99%
+  MEDIUM: 'medium', // 50-79%
+  LOW: 'low', // 20-49%
+  UNCERTAIN: 'uncertain', // <20%
 };
 
 /**
@@ -41,45 +41,45 @@ const MARKER_TYPE = {
   TODO: 'todo',
   QUESTION: 'question',
   VERIFIED: 'verified',
-  UNCERTAIN: 'uncertain'
+  UNCERTAIN: 'uncertain',
 };
 
 /**
  * Default constraint templates
  */
 const DEFAULT_TEMPLATES = {
-  'requirements': {
+  requirements: {
     name: 'Requirements Template',
     sections: [
       { name: 'overview', required: true, minLength: 50 },
       { name: 'functional', required: true, format: 'ears' },
       { name: 'non-functional', required: false },
       { name: 'constraints', required: false },
-      { name: 'assumptions', required: true }
+      { name: 'assumptions', required: true },
     ],
-    markers: [MARKER_TYPE.ASSUMPTION, MARKER_TYPE.RISK]
+    markers: [MARKER_TYPE.ASSUMPTION, MARKER_TYPE.RISK],
   },
-  'design': {
+  design: {
     name: 'Design Template',
     sections: [
       { name: 'architecture', required: true },
       { name: 'components', required: true, format: 'c4' },
       { name: 'decisions', required: true, format: 'adr' },
       { name: 'interfaces', required: false },
-      { name: 'data-model', required: false }
+      { name: 'data-model', required: false },
     ],
-    markers: [MARKER_TYPE.DECISION, MARKER_TYPE.ASSUMPTION]
+    markers: [MARKER_TYPE.DECISION, MARKER_TYPE.ASSUMPTION],
   },
-  'implementation': {
+  implementation: {
     name: 'Implementation Template',
     sections: [
       { name: 'approach', required: true },
       { name: 'tasks', required: true, format: 'checklist' },
       { name: 'dependencies', required: false },
-      { name: 'testing', required: true }
+      { name: 'testing', required: true },
     ],
-    markers: [MARKER_TYPE.TODO, MARKER_TYPE.RISK]
-  }
+    markers: [MARKER_TYPE.TODO, MARKER_TYPE.RISK],
+  },
 };
 
 /**
@@ -94,12 +94,12 @@ class TemplateConstraints extends EventEmitter {
    */
   constructor(options = {}) {
     super();
-    
+
     this.templates = {
       ...DEFAULT_TEMPLATES,
-      ...(options.templates || {})
+      ...(options.templates || {}),
     };
-    
+
     this.strict = options.strict ?? false;
     this.trackUncertainty = options.trackUncertainty ?? true;
     this.customConstraints = new Map();
@@ -119,7 +119,7 @@ class TemplateConstraints extends EventEmitter {
         valid: false,
         errors: [{ type: 'unknown_template', message: `Unknown template: ${templateId}` }],
         warnings: [],
-        score: 0
+        score: 0,
       };
     }
 
@@ -130,15 +130,13 @@ class TemplateConstraints extends EventEmitter {
 
     // Validate required sections
     for (const section of template.sections) {
-      const found = sections.find(s => 
-        s.name.toLowerCase().includes(section.name.toLowerCase())
-      );
+      const found = sections.find(s => s.name.toLowerCase().includes(section.name.toLowerCase()));
 
       if (section.required && !found) {
         errors.push({
           type: 'missing_section',
           section: section.name,
-          message: `Required section missing: ${section.name}`
+          message: `Required section missing: ${section.name}`,
         });
       } else if (found) {
         // Validate section content
@@ -146,7 +144,7 @@ class TemplateConstraints extends EventEmitter {
           warnings.push({
             type: 'short_section',
             section: section.name,
-            message: `Section "${section.name}" is too short (${found.content.length} < ${section.minLength})`
+            message: `Section "${section.name}" is too short (${found.content.length} < ${section.minLength})`,
           });
         }
 
@@ -157,7 +155,7 @@ class TemplateConstraints extends EventEmitter {
               type: 'format_mismatch',
               section: section.name,
               format: section.format,
-              message: `Section "${section.name}" doesn't match expected format: ${section.format}`
+              message: `Section "${section.name}" doesn't match expected format: ${section.format}`,
             });
           }
         }
@@ -172,7 +170,7 @@ class TemplateConstraints extends EventEmitter {
           warnings.push({
             type: 'missing_marker',
             markerType,
-            message: `Expected marker type not found: ${markerType}`
+            message: `Expected marker type not found: ${markerType}`,
           });
         }
       }
@@ -202,7 +200,7 @@ class TemplateConstraints extends EventEmitter {
       markers,
       sections: sections.map(s => s.name),
       score,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     this.validationHistory.push(result);
@@ -226,7 +224,7 @@ class TemplateConstraints extends EventEmitter {
       matches.push({
         level: match[1].length,
         name: match[2].trim(),
-        index: match.index
+        index: match.index,
       });
     }
 
@@ -239,7 +237,7 @@ class TemplateConstraints extends EventEmitter {
         level: matches[i].level,
         name: matches[i].name,
         content: sectionContent,
-        length: sectionContent.length
+        length: sectionContent.length,
       });
     }
 
@@ -260,7 +258,7 @@ class TemplateConstraints extends EventEmitter {
       [MARKER_TYPE.TODO]: /\[TODO\]:\s*(.+?)(?:\n|$)/gi,
       [MARKER_TYPE.QUESTION]: /\[QUESTION\]:\s*(.+?)(?:\n|$)/gi,
       [MARKER_TYPE.VERIFIED]: /\[VERIFIED\]:\s*(.+?)(?:\n|$)/gi,
-      [MARKER_TYPE.UNCERTAIN]: /\[UNCERTAIN(?:\s*:\s*(\d+)%)?\]:\s*(.+?)(?:\n|$)/gi
+      [MARKER_TYPE.UNCERTAIN]: /\[UNCERTAIN(?:\s*:\s*(\d+)%)?\]:\s*(.+?)(?:\n|$)/gi,
     };
 
     for (const [type, pattern] of Object.entries(markerPatterns)) {
@@ -271,13 +269,13 @@ class TemplateConstraints extends EventEmitter {
             type,
             confidence: match[1] ? parseInt(match[1]) : 50,
             text: match[2].trim(),
-            index: match.index
+            index: match.index,
           });
         } else {
           markers.push({
             type,
             text: match[1].trim(),
-            index: match.index
+            index: match.index,
           });
         }
       }
@@ -294,22 +292,22 @@ class TemplateConstraints extends EventEmitter {
    */
   validateFormat(content, format) {
     const formatValidators = {
-      ears: (c) => {
+      ears: c => {
         // EARS format: When/While/If/Where patterns
         return /\b(when|while|if|where|shall|should|must)\b/i.test(c);
       },
-      c4: (c) => {
+      c4: c => {
         // C4 model references
         return /\b(system|container|component|context|boundary)\b/i.test(c);
       },
-      adr: (c) => {
+      adr: c => {
         // ADR format: Status, Context, Decision, Consequences
         return /\b(status|context|decision|consequences|accepted|proposed|deprecated)\b/i.test(c);
       },
-      checklist: (c) => {
+      checklist: c => {
         // Checklist format
         return /^\s*[-*[\]]\s+/m.test(c);
-      }
+      },
     };
 
     const validator = formatValidators[format];
@@ -375,7 +373,7 @@ class TemplateConstraints extends EventEmitter {
     }
     this.customConstraints.set(name, {
       severity: 'warning',
-      ...constraint
+      ...constraint,
     });
   }
 
@@ -418,9 +416,8 @@ class TemplateConstraints extends EventEmitter {
   getStats() {
     const total = this.validationHistory.length;
     const valid = this.validationHistory.filter(h => h.valid).length;
-    const avgScore = total > 0
-      ? this.validationHistory.reduce((sum, h) => sum + h.score, 0) / total
-      : 0;
+    const avgScore =
+      total > 0 ? this.validationHistory.reduce((sum, h) => sum + h.score, 0) / total : 0;
 
     const byTemplate = {};
     for (const h of this.validationHistory) {
@@ -445,7 +442,7 @@ class TemplateConstraints extends EventEmitter {
       avgScore: Math.round(avgScore),
       byTemplate,
       templateCount: Object.keys(this.templates).length,
-      constraintCount: this.customConstraints.size
+      constraintCount: this.customConstraints.size,
     };
   }
 
@@ -459,7 +456,7 @@ class TemplateConstraints extends EventEmitter {
       name: template.name,
       sections: template.sections.length,
       requiredSections: template.sections.filter(s => s.required).length,
-      markers: template.markers || []
+      markers: template.markers || [],
     }));
   }
 
@@ -483,7 +480,7 @@ class ThinkingChecklist extends EventEmitter {
    */
   constructor(options = {}) {
     super();
-    
+
     this.name = options.name || 'Thinking Checklist';
     this.items = options.items || this.getDefaultItems();
     this.completedItems = new Set();
@@ -504,7 +501,7 @@ class ThinkingChecklist extends EventEmitter {
       { id: 'risks', category: 'Risk', text: 'What could go wrong?' },
       { id: 'dependencies', category: 'Risk', text: 'What are the dependencies?' },
       { id: 'testing', category: 'Quality', text: 'How will this be tested?' },
-      { id: 'maintainability', category: 'Quality', text: 'Is this maintainable?' }
+      { id: 'maintainability', category: 'Quality', text: 'Is this maintainable?' },
     ];
   }
 
@@ -559,7 +556,7 @@ class ThinkingChecklist extends EventEmitter {
       remaining: remaining.map(i => i.id),
       percentage: Math.round((completed / total) * 100),
       byCategory,
-      isComplete: completed === total
+      isComplete: completed === total,
     };
   }
 
@@ -606,7 +603,7 @@ class ThinkingChecklist extends EventEmitter {
     }
     this.items.push({
       category: 'Custom',
-      ...item
+      ...item,
     });
   }
 
@@ -642,5 +639,5 @@ module.exports = {
   CONSTRAINT_TYPE,
   UNCERTAINTY,
   MARKER_TYPE,
-  DEFAULT_TEMPLATES
+  DEFAULT_TEMPLATES,
 };

@@ -1,8 +1,8 @@
 /**
  * MUSUBI Repository Skill Manager
- * 
+ *
  * リポジトリ固有スキル（.musubi/skills/）の管理と自動生成
- * 
+ *
  * @module src/managers/repo-skill-manager
  * @see REQ-P0-B003
  * @inspired-by OpenHands openhands/microagent/microagent.py
@@ -80,9 +80,11 @@ ${analysis.description || 'Repository information for AI assistants.'}
 
 ## General Setup
 
-${analysis.setupCommands.length > 0 
-  ? analysis.setupCommands.map(cmd => `- \`${cmd}\``).join('\n')
-  : '- Check the README for setup instructions'}
+${
+  analysis.setupCommands.length > 0
+    ? analysis.setupCommands.map(cmd => `- \`${cmd}\``).join('\n')
+    : '- Check the README for setup instructions'
+}
 
 ## Repository Structure
 
@@ -90,10 +92,14 @@ ${analysis.setupCommands.length > 0
 ${analysis.structureTree}
 \`\`\`
 
-${analysis.patterns.length > 0 ? `### Detected Patterns
+${
+  analysis.patterns.length > 0
+    ? `### Detected Patterns
 
 ${analysis.patterns.map(p => `- **${p.name}**: ${p.description}`).join('\n')}
-` : ''}
+`
+    : ''
+}
 
 ## Common Commands
 
@@ -101,15 +107,23 @@ ${analysis.patterns.map(p => `- **${p.name}**: ${p.description}`).join('\n')}
 |---------|-------------|
 ${analysis.commands.map(c => `| \`${c.cmd}\` | ${c.desc} |`).join('\n')}
 
-${analysis.testingInfo ? `## Testing
+${
+  analysis.testingInfo
+    ? `## Testing
 
 ${analysis.testingInfo}
-` : ''}
+`
+    : ''
+}
 
-${analysis.cicdInfo ? `## CI/CD Workflows
+${
+  analysis.cicdInfo
+    ? `## CI/CD Workflows
 
 ${analysis.cicdInfo}
-` : ''}
+`
+    : ''
+}
 
 ## Important Conventions
 
@@ -145,26 +159,26 @@ ${analysis.conventions.map(c => `- ${c}`).join('\n')}
         const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
         analysis.name = pkg.name || analysis.name;
         analysis.description = pkg.description || '';
-        
+
         // セットアップコマンド
         analysis.setupCommands.push('npm install');
-        
+
         // スクリプト
         if (pkg.scripts) {
           const scriptMapping = {
-            'start': 'Start the application',
-            'dev': 'Start in development mode',
-            'build': 'Build the application',
-            'test': 'Run tests',
-            'lint': 'Run linter',
-            'format': 'Format code',
+            start: 'Start the application',
+            dev: 'Start in development mode',
+            build: 'Build the application',
+            test: 'Run tests',
+            lint: 'Run linter',
+            format: 'Format code',
           };
-          
+
           for (const [script, desc] of Object.entries(scriptMapping)) {
             if (pkg.scripts[script]) {
-              analysis.commands.push({ 
-                cmd: `npm run ${script}`, 
-                desc 
+              analysis.commands.push({
+                cmd: `npm run ${script}`,
+                desc,
               });
             }
           }
@@ -177,7 +191,7 @@ ${analysis.conventions.map(c => `- ${c}`).join('\n')}
             name: 'Testing',
             description: deps['jest'] ? 'Jest' : 'Vitest',
           });
-          analysis.testingInfo = deps['jest'] 
+          analysis.testingInfo = deps['jest']
             ? '- Run `npm test` to execute Jest tests'
             : '- Run `npm test` to execute Vitest tests';
         }
@@ -215,7 +229,10 @@ ${analysis.conventions.map(c => `- ${c}`).join('\n')}
     const pyprojectPath = path.join(this.projectRoot, 'pyproject.toml');
     if (fs.existsSync(requirementsPath)) {
       analysis.setupCommands.push('pip install -r requirements.txt');
-      analysis.commands.push({ cmd: 'pip install -r requirements.txt', desc: 'Install dependencies' });
+      analysis.commands.push({
+        cmd: 'pip install -r requirements.txt',
+        desc: 'Install dependencies',
+      });
     }
     if (fs.existsSync(pyprojectPath)) {
       analysis.setupCommands.push('pip install -e .');
@@ -229,7 +246,7 @@ ${analysis.conventions.map(c => `- ${c}`).join('\n')}
       { path: 'Jenkinsfile', desc: 'Jenkins pipeline' },
       { path: '.circleci/config.yml', desc: 'CircleCI configuration' },
     ];
-    
+
     for (const ci of cicdPaths) {
       const ciPath = path.join(this.projectRoot, ci.path);
       if (fs.existsSync(ciPath)) {
@@ -245,8 +262,10 @@ ${analysis.conventions.map(c => `- ${c}`).join('\n')}
     if (fs.existsSync(path.join(this.projectRoot, '.editorconfig'))) {
       analysis.conventions.push('Follow .editorconfig settings');
     }
-    if (fs.existsSync(path.join(this.projectRoot, '.prettierrc')) || 
-        fs.existsSync(path.join(this.projectRoot, '.prettierrc.json'))) {
+    if (
+      fs.existsSync(path.join(this.projectRoot, '.prettierrc')) ||
+      fs.existsSync(path.join(this.projectRoot, '.prettierrc.json'))
+    ) {
       analysis.conventions.push('Use Prettier for code formatting');
     }
     if (fs.existsSync(path.join(this.projectRoot, 'steering'))) {
@@ -264,8 +283,15 @@ ${analysis.conventions.map(c => `- ${c}`).join('\n')}
     const maxDepth = 2;
     const maxItems = 15;
     const ignoreDirs = [
-      'node_modules', '.git', '.next', 'dist', 'build', 
-      'coverage', '__pycache__', '.venv', 'venv',
+      'node_modules',
+      '.git',
+      '.next',
+      'dist',
+      'build',
+      'coverage',
+      '__pycache__',
+      '.venv',
+      'venv',
     ];
 
     const lines = [];
@@ -386,7 +412,7 @@ ${options.content || '<!-- Add skill content here -->'}
 
   /**
    * スキルを削除
-   * @param {string} name 
+   * @param {string} name
    * @returns {boolean}
    */
   removeSkill(name) {

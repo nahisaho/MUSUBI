@@ -1,9 +1,9 @@
 /**
  * @fileoverview Base Guardrail class for MUSUBI Orchestration
- * 
+ *
  * Guardrails provide safety checks for agent inputs and outputs.
  * Inspired by OpenAI Agents SDK guardrails pattern.
- * 
+ *
  * @module orchestration/guardrails/base-guardrail
  * @version 3.9.0
  */
@@ -77,7 +77,7 @@ class BaseGuardrail {
     this.failFast = config.failFast || false;
     this.defaultSeverity = config.severity || 'error';
     this.options = config.options || {};
-    
+
     // Tripwire: if true, throws exception on failure instead of returning result
     this.tripwireEnabled = config.tripwireEnabled || false;
   }
@@ -105,12 +105,12 @@ class BaseGuardrail {
     }
 
     const startTime = Date.now();
-    
+
     try {
       const result = await this.check(input, context);
       result.executionTimeMs = Date.now() - startTime;
       result.guardrailName = this.name;
-      
+
       // Handle tripwire
       if (this.tripwireEnabled && !result.passed) {
         throw new GuardrailTripwireException(
@@ -118,22 +118,24 @@ class BaseGuardrail {
           result
         );
       }
-      
+
       return result;
     } catch (error) {
       if (error instanceof GuardrailTripwireException) {
         throw error; // Re-throw tripwire exceptions
       }
-      
+
       // Wrap unexpected errors
       return this.createResult(
         false,
-        [{
-          code: 'GUARDRAIL_ERROR',
-          message: error.message,
-          severity: 'error',
-          context: { errorName: error.name, stack: error.stack }
-        }],
+        [
+          {
+            code: 'GUARDRAIL_ERROR',
+            message: error.message,
+            severity: 'error',
+            context: { errorName: error.name, stack: error.stack },
+          },
+        ],
         `Guardrail execution failed: ${error.message}`,
         Date.now() - startTime
       );
@@ -157,7 +159,7 @@ class BaseGuardrail {
       message,
       violations,
       metadata,
-      executionTimeMs
+      executionTimeMs,
     };
   }
 
@@ -175,7 +177,7 @@ class BaseGuardrail {
       code,
       message,
       severity: severity || this.defaultSeverity,
-      context
+      context,
     };
   }
 
@@ -218,7 +220,7 @@ class BaseGuardrail {
       enabled: this.enabled,
       failFast: this.failFast,
       tripwireEnabled: this.tripwireEnabled,
-      defaultSeverity: this.defaultSeverity
+      defaultSeverity: this.defaultSeverity,
     };
   }
 }
@@ -278,16 +280,16 @@ class GuardrailChain {
     if (this.parallel) {
       // Parallel execution with optional early termination
       const promises = this.guardrails.map(g => g.run(input, context));
-      
+
       if (this.stopOnFirstFailure) {
         // Use Promise.race pattern for early termination
         const settledResults = await Promise.allSettled(promises);
-        
+
         for (const settled of settledResults) {
           if (settled.status === 'fulfilled') {
             const result = settled.value;
             results.push(result);
-            
+
             if (!result.passed) {
               overallPassed = false;
               allViolations.push(...result.violations);
@@ -312,11 +314,11 @@ class GuardrailChain {
       for (const guardrail of this.guardrails) {
         const result = await guardrail.run(input, context);
         results.push(result);
-        
+
         if (!result.passed) {
           overallPassed = false;
           allViolations.push(...result.violations);
-          
+
           if (this.stopOnFirstFailure) {
             break;
           }
@@ -331,7 +333,7 @@ class GuardrailChain {
       violations: allViolations,
       guardrailCount: this.guardrails.length,
       executedCount: results.length,
-      executionTimeMs: Date.now() - startTime
+      executionTimeMs: Date.now() - startTime,
     };
   }
 
@@ -354,5 +356,5 @@ class GuardrailChain {
 module.exports = {
   BaseGuardrail,
   GuardrailChain,
-  GuardrailTripwireException
+  GuardrailTripwireException,
 };

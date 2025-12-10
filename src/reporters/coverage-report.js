@@ -90,10 +90,18 @@ class CoverageReporter {
     lines.push('-'.repeat(30));
     lines.push(`Total Requirements: ${coverage.totalRequirements}`);
     lines.push('');
-    lines.push(`Design Coverage:  ${this.formatBar(coverage.designCoverage)}  ${coverage.designCoverage}%`);
-    lines.push(`Tasks Coverage:   ${this.formatBar(coverage.tasksCoverage)}  ${coverage.tasksCoverage}%`);
-    lines.push(`Code Coverage:    ${this.formatBar(coverage.codeCoverage)}  ${coverage.codeCoverage}%`);
-    lines.push(`Test Coverage:    ${this.formatBar(coverage.testsCoverage)}  ${coverage.testsCoverage}%`);
+    lines.push(
+      `Design Coverage:  ${this.formatBar(coverage.designCoverage)}  ${coverage.designCoverage}%`
+    );
+    lines.push(
+      `Tasks Coverage:   ${this.formatBar(coverage.tasksCoverage)}  ${coverage.tasksCoverage}%`
+    );
+    lines.push(
+      `Code Coverage:    ${this.formatBar(coverage.codeCoverage)}  ${coverage.codeCoverage}%`
+    );
+    lines.push(
+      `Test Coverage:    ${this.formatBar(coverage.testsCoverage)}  ${coverage.testsCoverage}%`
+    );
     lines.push('-'.repeat(30));
     lines.push(`OVERALL:          ${this.formatBar(coverage.overall)}  ${coverage.overall}%`);
     lines.push('');
@@ -137,7 +145,12 @@ class CoverageReporter {
     lines.push('');
 
     // Overall status
-    const status = coverage.overall >= 80 ? '✅ Good' : coverage.overall >= 60 ? '⚠️ Needs Improvement' : '❌ Critical';
+    const status =
+      coverage.overall >= 80
+        ? '✅ Good'
+        : coverage.overall >= 60
+          ? '⚠️ Needs Improvement'
+          : '❌ Critical';
     lines.push(`## Overall Status: ${status}`);
     lines.push('');
 
@@ -146,32 +159,55 @@ class CoverageReporter {
     lines.push('');
     lines.push('| Category | Covered | Total | Coverage |');
     lines.push('|----------|---------|-------|----------|');
-    lines.push(`| Design | ${coverage.withDesign} | ${coverage.totalRequirements} | ${this.formatProgressBar(coverage.designCoverage)} ${coverage.designCoverage}% |`);
-    lines.push(`| Tasks | ${coverage.withTasks} | ${coverage.totalRequirements} | ${this.formatProgressBar(coverage.tasksCoverage)} ${coverage.tasksCoverage}% |`);
-    lines.push(`| Code | ${coverage.withCode} | ${coverage.totalRequirements} | ${this.formatProgressBar(coverage.codeCoverage)} ${coverage.codeCoverage}% |`);
-    lines.push(`| Tests | ${coverage.withTests} | ${coverage.totalRequirements} | ${this.formatProgressBar(coverage.testsCoverage)} ${coverage.testsCoverage}% |`);
-    lines.push(`| **Overall** | - | - | ${this.formatProgressBar(coverage.overall)} **${coverage.overall}%** |`);
+    lines.push(
+      `| Design | ${coverage.withDesign} | ${coverage.totalRequirements} | ${this.formatProgressBar(coverage.designCoverage)} ${coverage.designCoverage}% |`
+    );
+    lines.push(
+      `| Tasks | ${coverage.withTasks} | ${coverage.totalRequirements} | ${this.formatProgressBar(coverage.tasksCoverage)} ${coverage.tasksCoverage}% |`
+    );
+    lines.push(
+      `| Code | ${coverage.withCode} | ${coverage.totalRequirements} | ${this.formatProgressBar(coverage.codeCoverage)} ${coverage.codeCoverage}% |`
+    );
+    lines.push(
+      `| Tests | ${coverage.withTests} | ${coverage.totalRequirements} | ${this.formatProgressBar(coverage.testsCoverage)} ${coverage.testsCoverage}% |`
+    );
+    lines.push(
+      `| **Overall** | - | - | ${this.formatProgressBar(coverage.overall)} **${coverage.overall}%** |`
+    );
     lines.push('');
 
     // Gaps
     if (gaps) {
       lines.push('## Gaps Analysis');
       lines.push('');
-      
-      const totalGaps = gaps.orphanedRequirements.length + gaps.orphanedDesign.length + 
-                        gaps.orphanedTasks.length + gaps.untestedCode.length + 
-                        gaps.missingTests.length;
-      
+
+      const totalGaps =
+        gaps.orphanedRequirements.length +
+        gaps.orphanedDesign.length +
+        gaps.orphanedTasks.length +
+        gaps.untestedCode.length +
+        gaps.missingTests.length;
+
       lines.push(`**Total Gaps Found**: ${totalGaps}`);
       lines.push('');
 
       lines.push('| Gap Type | Count | Status |');
       lines.push('|----------|-------|--------|');
-      lines.push(`| Orphaned Requirements | ${gaps.orphanedRequirements.length} | ${gaps.orphanedRequirements.length === 0 ? '✅' : '⚠️'} |`);
-      lines.push(`| Orphaned Design | ${gaps.orphanedDesign.length} | ${gaps.orphanedDesign.length === 0 ? '✅' : '⚠️'} |`);
-      lines.push(`| Orphaned Tasks | ${gaps.orphanedTasks.length} | ${gaps.orphanedTasks.length === 0 ? '✅' : '⚠️'} |`);
-      lines.push(`| Untested Code | ${gaps.untestedCode.length} | ${gaps.untestedCode.length === 0 ? '✅' : '⚠️'} |`);
-      lines.push(`| Missing Tests | ${gaps.missingTests.length} | ${gaps.missingTests.length === 0 ? '✅' : '❌'} |`);
+      lines.push(
+        `| Orphaned Requirements | ${gaps.orphanedRequirements.length} | ${gaps.orphanedRequirements.length === 0 ? '✅' : '⚠️'} |`
+      );
+      lines.push(
+        `| Orphaned Design | ${gaps.orphanedDesign.length} | ${gaps.orphanedDesign.length === 0 ? '✅' : '⚠️'} |`
+      );
+      lines.push(
+        `| Orphaned Tasks | ${gaps.orphanedTasks.length} | ${gaps.orphanedTasks.length === 0 ? '✅' : '⚠️'} |`
+      );
+      lines.push(
+        `| Untested Code | ${gaps.untestedCode.length} | ${gaps.untestedCode.length === 0 ? '✅' : '⚠️'} |`
+      );
+      lines.push(
+        `| Missing Tests | ${gaps.missingTests.length} | ${gaps.missingTests.length === 0 ? '✅' : '❌'} |`
+      );
       lines.push('');
 
       // Show details for each gap type
@@ -217,19 +253,27 @@ class CoverageReporter {
     // Recommendations
     lines.push('## Recommendations');
     lines.push('');
-    
+
     if (coverage.overall < 100) {
       if (coverage.testsCoverage < 80) {
-        lines.push('1. 🧪 **Increase test coverage**: Add tests for requirements that are missing test links');
+        lines.push(
+          '1. 🧪 **Increase test coverage**: Add tests for requirements that are missing test links'
+        );
       }
       if (coverage.designCoverage < 80) {
-        lines.push('2. 📐 **Complete design documentation**: Link requirements to design documents');
+        lines.push(
+          '2. 📐 **Complete design documentation**: Link requirements to design documents'
+        );
       }
       if (coverage.codeCoverage < 80) {
-        lines.push('3. 💻 **Link code to requirements**: Add requirement references in code comments');
+        lines.push(
+          '3. 💻 **Link code to requirements**: Add requirement references in code comments'
+        );
       }
       if (gaps && gaps.orphanedRequirements.length > 0) {
-        lines.push('4. 🔗 **Address orphaned requirements**: Link them to design, tasks, or remove if obsolete');
+        lines.push(
+          '4. 🔗 **Address orphaned requirements**: Link them to design, tasks, or remove if obsolete'
+        );
       }
     } else {
       lines.push('✅ Excellent! Full traceability coverage achieved.');
@@ -360,7 +404,9 @@ class CoverageReporter {
     </table>
   </div>
 
-  ${gaps ? `
+  ${
+    gaps
+      ? `
   <div class="card">
     <h2>Gaps Analysis</h2>
     <table>
@@ -396,17 +442,23 @@ class CoverageReporter {
       </tr>
     </table>
   </div>
-  ` : ''}
+  `
+      : ''
+  }
 
   <div class="card">
     <h2>Recommendations</h2>
     <ul>
-      ${coverage.overall < 100 ? `
+      ${
+        coverage.overall < 100
+          ? `
         ${coverage.testsCoverage < 80 ? '<li>🧪 <strong>Increase test coverage</strong>: Add tests for requirements that are missing test links</li>' : ''}
         ${coverage.designCoverage < 80 ? '<li>📐 <strong>Complete design documentation</strong>: Link requirements to design documents</li>' : ''}
         ${coverage.codeCoverage < 80 ? '<li>💻 <strong>Link code to requirements</strong>: Add requirement references in code comments</li>' : ''}
         ${gaps && gaps.orphanedRequirements.length > 0 ? '<li>🔗 <strong>Address orphaned requirements</strong>: Link them to design, tasks, or remove if obsolete</li>' : ''}
-      ` : '<li>✅ Excellent! Full traceability coverage achieved.</li>'}
+      `
+          : '<li>✅ Excellent! Full traceability coverage achieved.</li>'
+      }
     </ul>
   </div>
 

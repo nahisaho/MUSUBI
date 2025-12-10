@@ -166,11 +166,13 @@ musubi-workflow next deployment
 ### テスト結果に応じたアクション
 
 **テスト成功の場合**:
+
 ```bash
 musubi-workflow next deployment
 ```
 
 **テスト失敗の場合（フィードバックループ）**:
+
 ```bash
 # 実装に問題がある場合
 musubi-workflow feedback testing implementation -r "テスト失敗: バグを発見"

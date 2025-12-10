@@ -39,17 +39,17 @@ jobs:
           else
             FILES=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(js|ts|py|json|yml|yaml)$' || true)
           fi
-          
+
           if [ -z "$FILES" ]; then
             echo "No relevant files changed"
             echo "risks=[]" >> $GITHUB_OUTPUT
             echo "blocked=false" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
+
           # セキュリティ分析実行
           echo "$FILES" | xargs musubi-analyze security --format json > security-report.json 2>/dev/null || true
-          
+
           if [ -f security-report.json ]; then
             CRITICAL=$(jq '[.risks[] | select(.severity == "critical")] | length' security-report.json 2>/dev/null || echo "0")
             HIGH=$(jq '[.risks[] | select(.severity == "high")] | length' security-report.json 2>/dev/null || echo "0")

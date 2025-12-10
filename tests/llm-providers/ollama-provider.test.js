@@ -2,7 +2,11 @@
  * @fileoverview Tests for OllamaProvider - Local LLM integration
  */
 
-const { OllamaProvider, MODEL_PRESETS, OLLAMA_DEFAULTS } = require('../../src/llm-providers/ollama-provider');
+const {
+  OllamaProvider,
+  MODEL_PRESETS,
+  OLLAMA_DEFAULTS,
+} = require('../../src/llm-providers/ollama-provider');
 
 // Mock fetch globally
 const mockFetch = jest.fn();
@@ -97,12 +101,10 @@ describe('OllamaProvider', () => {
     test('should populate availableModels from API', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          models: [
-            { name: 'llama3.2:latest' },
-            { name: 'codellama:7b' },
-          ],
-        }),
+        json: () =>
+          Promise.resolve({
+            models: [{ name: 'llama3.2:latest' }, { name: 'codellama:7b' }],
+          }),
       });
 
       const models = await provider.refreshModels();
@@ -152,10 +154,11 @@ describe('OllamaProvider', () => {
     test('should include system prompt in messages', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          message: { content: 'Response' },
-          done: true,
-        }),
+        json: () =>
+          Promise.resolve({
+            message: { content: 'Response' },
+            done: true,
+          }),
       });
 
       await provider.complete('User message', {
@@ -182,10 +185,11 @@ describe('OllamaProvider', () => {
     test('should use custom temperature and maxTokens', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          message: { content: 'OK' },
-          done: true,
-        }),
+        json: () =>
+          Promise.resolve({
+            message: { content: 'OK' },
+            done: true,
+          }),
       });
 
       await provider.complete('Test', {
@@ -201,7 +205,9 @@ describe('OllamaProvider', () => {
 
   describe('embed', () => {
     test('should return embedding vector', async () => {
-      const mockEmbedding = Array(384).fill(0).map(() => Math.random());
+      const mockEmbedding = Array(384)
+        .fill(0)
+        .map(() => Math.random());
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -235,13 +241,14 @@ describe('OllamaProvider', () => {
     test('should return model information', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          license: 'MIT',
-          modelfile: 'FROM llama3.2',
-          parameters: 'temperature 0.7',
-          template: '{{ .Prompt }}',
-          details: { format: 'gguf' },
-        }),
+        json: () =>
+          Promise.resolve({
+            license: 'MIT',
+            modelfile: 'FROM llama3.2',
+            parameters: 'temperature 0.7',
+            template: '{{ .Prompt }}',
+            details: { format: 'gguf' },
+          }),
       });
 
       const info = await provider.getModelInfo('llama3.2');
@@ -337,9 +344,7 @@ describe('OllamaProvider', () => {
     test('should omit system message when not provided', () => {
       const messages = provider.formatMessages(null, 'User message');
 
-      expect(messages).toEqual([
-        { role: 'user', content: 'User message' },
-      ]);
+      expect(messages).toEqual([{ role: 'user', content: 'User message' }]);
     });
   });
 

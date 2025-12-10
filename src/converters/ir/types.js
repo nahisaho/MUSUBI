@@ -1,6 +1,6 @@
 /**
  * Intermediate Representation (IR) Types for Cross-Format Conversion
- * 
+ *
  * Enables bidirectional conversion between MUSUBI and Spec Kit formats
  * with minimal information loss.
  */
@@ -369,7 +369,7 @@ function createEmptyFeatureIR(id, name) {
 function createRequirementFromEARS(id, statement) {
   const pattern = detectEARSPattern(statement);
   const parsed = parseEARSStatement(statement, pattern);
-  
+
   return {
     id,
     title: '',
@@ -390,7 +390,7 @@ function createRequirementFromEARS(id, statement) {
  */
 function detectEARSPattern(statement) {
   const upper = statement.toUpperCase();
-  
+
   if (upper.includes('WHILE') && upper.includes('WHEN')) {
     return 'complex';
   }
@@ -414,31 +414,31 @@ function detectEARSPattern(statement) {
  */
 function parseEARSStatement(statement, _pattern) {
   const result = { action: '' };
-  
+
   // Extract SHALL clause
   const shallMatch = statement.match(/SHALL\s+(.+?)(?:\.|$)/i);
   if (shallMatch) {
     result.action = shallMatch[1].trim();
   }
-  
+
   // Extract WHEN clause
   const whenMatch = statement.match(/WHEN\s+(.+?),/i);
   if (whenMatch) {
     result.trigger = whenMatch[1].trim();
   }
-  
+
   // Extract WHILE clause
   const whileMatch = statement.match(/WHILE\s+(.+?),/i);
   if (whileMatch) {
     result.condition = whileMatch[1].trim();
   }
-  
+
   // Extract WHERE clause
   const whereMatch = statement.match(/WHERE\s+(.+?),/i);
   if (whereMatch) {
     result.condition = whereMatch[1].trim();
   }
-  
+
   return result;
 }
 
@@ -452,7 +452,7 @@ function userScenarioToRequirement(userScenario, reqId) {
   // Convert "As a [actor], I want [action] so that [benefit]"
   // to "WHEN the [actor] [action], the system SHALL [provide benefit]"
   const statement = `WHEN the ${userScenario.actor} ${userScenario.action}, the system SHALL ${userScenario.benefit}.`;
-  
+
   return {
     id: reqId,
     title: userScenario.title,
@@ -477,7 +477,7 @@ function requirementToUserScenario(requirement, storyId) {
   let actor = 'user';
   let action = requirement.trigger || 'performs an action';
   let benefit = requirement.action;
-  
+
   // Try to extract actor from trigger
   if (requirement.trigger) {
     const actorMatch = requirement.trigger.match(/the\s+(\w+)/i);
@@ -485,7 +485,7 @@ function requirementToUserScenario(requirement, storyId) {
       actor = actorMatch[1];
     }
   }
-  
+
   return {
     id: storyId,
     title: requirement.title || `Story for ${requirement.id}`,

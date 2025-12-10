@@ -1,20 +1,20 @@
 /**
  * SequentialPattern Tests
- * 
+ *
  * Tests for sequential skill execution pattern
  */
 
 const {
   SequentialPattern,
   SequentialOptions,
-  createSequentialPattern
+  createSequentialPattern,
 } = require('../../src/orchestration/patterns/sequential');
 
 const {
   OrchestrationEngine,
   ExecutionContext,
   ExecutionStatus,
-  PatternType
+  PatternType,
 } = require('../../src/orchestration/orchestration-engine');
 
 describe('SequentialPattern', () => {
@@ -27,19 +27,21 @@ describe('SequentialPattern', () => {
 
     // Register test skills
     engine.registerSkill('skill-a', {
-      execute: async (input) => ({ a: input.value || 1, result: 'A' })
+      execute: async input => ({ a: input.value || 1, result: 'A' }),
     });
 
     engine.registerSkill('skill-b', {
-      execute: async (input) => ({ b: input.a * 2, result: 'B' })
+      execute: async input => ({ b: input.a * 2, result: 'B' }),
     });
 
     engine.registerSkill('skill-c', {
-      execute: async (input) => ({ c: input.b + 10, result: 'C' })
+      execute: async input => ({ c: input.b + 10, result: 'C' }),
     });
 
     engine.registerSkill('fail-skill', {
-      execute: async () => { throw new Error('Skill failed'); }
+      execute: async () => {
+        throw new Error('Skill failed');
+      },
     });
 
     engine.registerPattern(PatternType.SEQUENTIAL, pattern);
@@ -55,7 +57,7 @@ describe('SequentialPattern', () => {
     it('should accept custom options', () => {
       const custom = new SequentialPattern({
         errorHandling: SequentialOptions.CONTINUE_ON_ERROR,
-        maxRetries: 5
+        maxRetries: 5,
       });
 
       expect(custom.options.errorHandling).toBe(SequentialOptions.CONTINUE_ON_ERROR);
@@ -81,7 +83,7 @@ describe('SequentialPattern', () => {
 
     it('should fail with empty skills array', () => {
       const context = new ExecutionContext({
-        input: { skills: [] }
+        input: { skills: [] },
       });
       const result = pattern.validate(context, engine);
 
@@ -91,7 +93,7 @@ describe('SequentialPattern', () => {
 
     it('should fail with unknown skill', () => {
       const context = new ExecutionContext({
-        input: { skills: ['unknown-skill'] }
+        input: { skills: ['unknown-skill'] },
       });
       const result = pattern.validate(context, engine);
 
@@ -101,7 +103,7 @@ describe('SequentialPattern', () => {
 
     it('should pass with valid skills', () => {
       const context = new ExecutionContext({
-        input: { skills: ['skill-a', 'skill-b'] }
+        input: { skills: ['skill-a', 'skill-b'] },
       });
       const result = pattern.validate(context, engine);
 
@@ -113,20 +115,18 @@ describe('SequentialPattern', () => {
   describe('execute', () => {
     it('should throw on validation failure', async () => {
       const context = new ExecutionContext({
-        input: {}
+        input: {},
       });
 
-      await expect(pattern.execute(context, engine)).rejects.toThrow(
-        'Validation failed'
-      );
+      await expect(pattern.execute(context, engine)).rejects.toThrow('Validation failed');
     });
 
     it('should execute skills sequentially', async () => {
       const context = new ExecutionContext({
         input: {
           skills: ['skill-a', 'skill-b', 'skill-c'],
-          initialInput: { value: 5 }
-        }
+          initialInput: { value: 5 },
+        },
       });
 
       const result = await pattern.execute(context, engine);
@@ -141,8 +141,8 @@ describe('SequentialPattern', () => {
       const context = new ExecutionContext({
         input: {
           skills: ['skill-a', 'skill-b', 'skill-c'],
-          initialInput: { value: 5 }
-        }
+          initialInput: { value: 5 },
+        },
       });
 
       const result = await pattern.execute(context, engine);
@@ -156,8 +156,8 @@ describe('SequentialPattern', () => {
     it('should stop on error by default', async () => {
       const context = new ExecutionContext({
         input: {
-          skills: ['skill-a', 'fail-skill', 'skill-c']
-        }
+          skills: ['skill-a', 'fail-skill', 'skill-c'],
+        },
       });
 
       await expect(pattern.execute(context, engine)).rejects.toThrow(
@@ -167,13 +167,13 @@ describe('SequentialPattern', () => {
 
     it('should continue on error when configured', async () => {
       const continuePattern = new SequentialPattern({
-        errorHandling: SequentialOptions.CONTINUE_ON_ERROR
+        errorHandling: SequentialOptions.CONTINUE_ON_ERROR,
       });
 
       const context = new ExecutionContext({
         input: {
-          skills: ['skill-a', 'fail-skill', 'skill-c']
-        }
+          skills: ['skill-a', 'fail-skill', 'skill-c'],
+        },
       });
 
       const result = await continuePattern.execute(context, engine);
@@ -186,8 +186,8 @@ describe('SequentialPattern', () => {
     it('should add children to context', async () => {
       const context = new ExecutionContext({
         input: {
-          skills: ['skill-a', 'skill-b']
-        }
+          skills: ['skill-a', 'skill-b'],
+        },
       });
 
       await pattern.execute(context, engine);
@@ -213,8 +213,8 @@ describe('SequentialPattern', () => {
 
       const context = new ExecutionContext({
         input: {
-          skills: ['skill-a', 'skill-b']
-        }
+          skills: ['skill-a', 'skill-b'],
+        },
       });
 
       await pattern.execute(context, engine);
@@ -228,8 +228,8 @@ describe('SequentialPattern', () => {
     it('should include step metadata', async () => {
       const context = new ExecutionContext({
         input: {
-          skills: ['skill-a', 'skill-b']
-        }
+          skills: ['skill-a', 'skill-b'],
+        },
       });
 
       await pattern.execute(context, engine);
@@ -243,8 +243,8 @@ describe('SequentialPattern', () => {
     it('should return results array', async () => {
       const context = new ExecutionContext({
         input: {
-          skills: ['skill-a', 'skill-b']
-        }
+          skills: ['skill-a', 'skill-b'],
+        },
       });
 
       const result = await pattern.execute(context, engine);
@@ -262,16 +262,16 @@ describe('SequentialPattern', () => {
         transformOutput: (output, context) => ({
           ...output,
           transformed: true,
-          previousSkill: context.skill
-        })
+          previousSkill: context.skill,
+        }),
       });
 
       engine.registerPattern('custom-seq', customPattern);
 
       const context = new ExecutionContext({
         input: {
-          skills: ['skill-a', 'skill-b']
-        }
+          skills: ['skill-a', 'skill-b'],
+        },
       });
 
       await customPattern.execute(context, engine);
@@ -286,8 +286,8 @@ describe('SequentialPattern', () => {
     it('should calculate success rate', async () => {
       const context = new ExecutionContext({
         input: {
-          skills: ['skill-a', 'skill-b']
-        }
+          skills: ['skill-a', 'skill-b'],
+        },
       });
 
       const result = await pattern.execute(context, engine);
@@ -297,13 +297,13 @@ describe('SequentialPattern', () => {
 
     it('should handle partial success', async () => {
       const continuePattern = new SequentialPattern({
-        errorHandling: SequentialOptions.CONTINUE_ON_ERROR
+        errorHandling: SequentialOptions.CONTINUE_ON_ERROR,
       });
 
       const context = new ExecutionContext({
         input: {
-          skills: ['skill-a', 'fail-skill', 'skill-b', 'skill-c']
-        }
+          skills: ['skill-a', 'fail-skill', 'skill-b', 'skill-c'],
+        },
       });
 
       const result = await continuePattern.execute(context, engine);
@@ -333,7 +333,7 @@ describe('createSequentialPattern', () => {
 
   it('should create pattern with custom options', () => {
     const pattern = createSequentialPattern({
-      maxRetries: 10
+      maxRetries: 10,
     });
     expect(pattern.options.maxRetries).toBe(10);
   });

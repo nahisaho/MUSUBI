@@ -39,6 +39,7 @@ Implementation Begins
 **Purpose**: Ensure project memory is consulted before work begins.
 
 **Validation**:
+
 ```bash
 # Check if steering files exist
 required_files=(
@@ -58,6 +59,7 @@ PASS "Steering files exist and will be consulted"
 ```
 
 **Pass Criteria**:
+
 - [ ] `steering/structure.md` exists
 - [ ] `steering/tech.md` exists
 - [ ] `steering/product.md` exists
@@ -73,6 +75,7 @@ PASS "Steering files exist and will be consulted"
 **Purpose**: Ensure requirements use EARS format.
 
 **Validation**:
+
 ```python
 def validate_ears_format(requirements_file):
     """
@@ -85,20 +88,21 @@ def validate_ears_format(requirements_file):
         r"IF .+ THEN .+ (SHALL|MUST)",     # Conditional
         r"The system (SHALL|MUST)",        # Ubiquitous
     ]
-    
+
     invalid_keywords = ["should", "may", "could", "might"]
-    
+
     for line in requirements_file:
         if any(kw in line.lower() for kw in invalid_keywords):
             FAIL(f"Ambiguous keyword found: {line}")
-        
+
         if "REQ-" in line and not any(re.match(p, line) for p in valid_patterns):
             WARN(f"Requirement may not follow EARS: {line}")
-    
+
     PASS("All requirements follow EARS format")
 ```
 
 **Pass Criteria**:
+
 - [ ] All requirements use SHALL/MUST (not should/may)
 - [ ] Requirements follow EARS patterns
 - [ ] Each requirement has unique ID (REQ-XXX)
@@ -113,6 +117,7 @@ def validate_ears_format(requirements_file):
 **Purpose**: Ensure features are implemented as standalone libraries first.
 
 **Validation**:
+
 ```bash
 # For new features, check target directory
 feature_path="$1"
@@ -120,7 +125,7 @@ feature_path="$1"
 if [[ "$feature_path" == *"/app/"* ]] || [[ "$feature_path" == *"/web/"* ]]; then
     # Check if corresponding lib exists
     lib_path=$(echo "$feature_path" | sed 's/app\//lib\//; s/web\//lib\//')
-    
+
     if [ ! -d "$lib_path" ]; then
         FAIL "Feature must be in lib/ first before app/ or web/"
     fi
@@ -130,6 +135,7 @@ PASS "Library-First principle satisfied"
 ```
 
 **Pass Criteria**:
+
 - [ ] New feature targets `lib/` directory first
 - [ ] OR: Existing `lib/` module exists for the feature
 - [ ] Library has no framework dependencies
@@ -144,6 +150,7 @@ PASS "Library-First principle satisfied"
 **Purpose**: Confirm tests will be written before implementation.
 
 **Validation**:
+
 ```bash
 # This is a confirmation gate - agent must commit to test-first
 echo "TEST-FIRST CONFIRMATION REQUIRED"
@@ -163,6 +170,7 @@ PASS "Test-First commitment confirmed"
 ```
 
 **Pass Criteria**:
+
 - [ ] Agent confirms test-first commitment
 - [ ] Test file paths identified
 - [ ] Test framework confirmed in steering/tech.md
@@ -177,6 +185,7 @@ PASS "Test-First commitment confirmed"
 **Purpose**: Ensure traceability chain is established.
 
 **Validation**:
+
 ```python
 def validate_traceability_setup(feature_name):
     """
@@ -187,18 +196,19 @@ def validate_traceability_setup(feature_name):
         "design": f"storage/features/{feature_name}/design.md",
         "tasks": f"storage/features/{feature_name}/tasks.md",
     }
-    
+
     for artifact, path in required_artifacts.items():
         if artifact == "requirements":
             # Requirements MUST exist before design
             if not os.path.exists(path):
                 FAIL(f"Requirements must exist before implementation: {path}")
-    
+
     # Confirm traceability matrix will be maintained
     PASS("Traceability setup confirmed")
 ```
 
 **Pass Criteria**:
+
 - [ ] Requirements file exists or will be created first
 - [ ] Design will reference requirements
 - [ ] Tasks will reference design
@@ -215,6 +225,7 @@ def validate_traceability_setup(feature_name):
 **Purpose**: Enforce simplest viable solution.
 
 **Validation**:
+
 ```markdown
 ## Simplicity Checklist
 
@@ -242,6 +253,7 @@ For the proposed solution, verify:
 ```
 
 **Pass Criteria**:
+
 - [ ] Solution is the simplest that satisfies requirements
 - [ ] No unnecessary complexity identified
 - [ ] Dependencies are minimal and justified
@@ -256,6 +268,7 @@ For the proposed solution, verify:
 **Purpose**: Prevent unnecessary abstraction layers.
 
 **Validation**:
+
 ```markdown
 ## Anti-Abstraction Checklist
 
@@ -279,6 +292,7 @@ For the proposed solution, verify:
 ```
 
 **Pass Criteria**:
+
 - [ ] No premature abstraction patterns
 - [ ] Concrete implementations prioritized
 - [ ] Any abstraction is justified by requirements
@@ -331,21 +345,22 @@ ALL GATES PASSED → Proceed to implementation
 
 ## Gate Results
 
-| Gate | Status | Notes |
-|------|--------|-------|
-| 1. Steering Check | ✅ PASS | All files exist |
-| 2. EARS Validation | ✅ PASS | 5/5 requirements valid |
-| 3. Library-First | ✅ PASS | Target: lib/auth/ |
-| 4. Test-First | ✅ PASS | Commitment confirmed |
-| 5. Traceability | ✅ PASS | Requirements exist |
-| 6. Simplicity | ✅ PASS | Minimal approach |
-| 7. Anti-Abstraction | ✅ PASS | No premature patterns |
+| Gate                | Status  | Notes                  |
+| ------------------- | ------- | ---------------------- |
+| 1. Steering Check   | ✅ PASS | All files exist        |
+| 2. EARS Validation  | ✅ PASS | 5/5 requirements valid |
+| 3. Library-First    | ✅ PASS | Target: lib/auth/      |
+| 4. Test-First       | ✅ PASS | Commitment confirmed   |
+| 5. Traceability     | ✅ PASS | Requirements exist     |
+| 6. Simplicity       | ✅ PASS | Minimal approach       |
+| 7. Anti-Abstraction | ✅ PASS | No premature patterns  |
 
 ## Overall Result: ✅ PASS
 
 Implementation may proceed.
 
 ## Next Steps
+
 1. Write tests (test-engineer)
 2. Implement code (software-developer)
 3. Review (code-reviewer)
@@ -356,20 +371,24 @@ Implementation may proceed.
 ## Gate Failure Escalation
 
 ### Automatic Remediation
+
 - Gate 1: Auto-run steering skill
 - Gate 2: Auto-run requirements-analyst
 - Gate 5: Auto-create requirements template
 
 ### Manual Intervention Required
+
 - Gate 3: Requires architectural decision
 - Gate 4: Requires developer commitment
 - Gate 6: Requires design simplification
 - Gate 7: Requires refactoring proposal
 
 ### Blocking Gates
+
 - Gate 4 (Test-First): MUST pass - no exceptions
 - Gate 2 (EARS): MUST pass - no exceptions
 
 ### Waivable Gates (with justification)
+
 - Gate 6 (Simplicity): Waivable with documented reason
 - Gate 7 (Anti-Abstraction): Waivable with documented reason

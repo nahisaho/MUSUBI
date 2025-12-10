@@ -3,14 +3,14 @@
  * @see src/analyzers/stuck-detector.js
  */
 
-const { 
-  StuckDetector, 
-  StuckAnalysis, 
-  EventType, 
-  Stage, 
-  LoopType, 
+const {
+  StuckDetector,
+  StuckAnalysis,
+  EventType,
+  Stage,
+  LoopType,
   Severity,
-  hashEvent 
+  hashEvent,
 } = require('../../src/analyzers/stuck-detector');
 
 describe('StuckDetector', () => {
@@ -83,10 +83,10 @@ describe('StuckDetector', () => {
   describe('detect - repeating action', () => {
     it('should detect repeating same action', () => {
       for (let i = 0; i < 4; i++) {
-        detector.addEvent({ 
-          type: EventType.ACTION, 
+        detector.addEvent({
+          type: EventType.ACTION,
           stage: Stage.IMPLEMENT,
-          content: 'npm install foo' 
+          content: 'npm install foo',
         });
       }
 
@@ -109,9 +109,9 @@ describe('StuckDetector', () => {
     it('should detect repeating same error', () => {
       const errorContent = 'Error: Module not found';
       for (let i = 0; i < 3; i++) {
-        detector.addEvent({ 
-          type: EventType.ERROR, 
-          content: errorContent 
+        detector.addEvent({
+          type: EventType.ERROR,
+          content: errorContent,
         });
       }
 
@@ -133,9 +133,9 @@ describe('StuckDetector', () => {
     it('should detect extended monologue', () => {
       // Add varied short messages (different content to avoid repeating_action detection)
       for (let i = 0; i < 10; i++) {
-        detector.addEvent({ 
-          type: EventType.MESSAGE, 
-          content: `I am thinking about step ${i}...` 
+        detector.addEvent({
+          type: EventType.MESSAGE,
+          content: `I am thinking about step ${i}...`,
         });
       }
 
@@ -147,12 +147,12 @@ describe('StuckDetector', () => {
     it('should not detect if messages contain code blocks', () => {
       // Varied content with code blocks - should not be detected as monologue
       for (let i = 0; i < 10; i++) {
-        detector.addEvent({ 
-          type: EventType.MESSAGE, 
-          content: `Here is code ${i}: \`\`\`console.log(${i})\`\`\`` 
+        detector.addEvent({
+          type: EventType.MESSAGE,
+          content: `Here is code ${i}: \`\`\`console.log(${i})\`\`\``,
         });
       }
-      // This may detect as repeating_action if last 4 are same hash, 
+      // This may detect as repeating_action if last 4 are same hash,
       // but shouldn't detect as monologue due to code blocks
       const analysis = detector.detect();
       if (analysis) {
@@ -169,11 +169,11 @@ describe('StuckDetector', () => {
         'context_length_exceeded: maximum tokens reached for request 2',
         'context_length_exceeded: maximum tokens reached for request 3',
       ];
-      
+
       for (const error of contextErrors) {
-        detector.addEvent({ 
-          type: EventType.ERROR, 
-          content: error 
+        detector.addEvent({
+          type: EventType.ERROR,
+          content: error,
         });
       }
 
@@ -188,14 +188,14 @@ describe('StuckDetector', () => {
     it('should detect token limit errors', () => {
       const tokenErrors = [
         'Error: token limit reached - part 1',
-        'Error: token limit reached - part 2', 
+        'Error: token limit reached - part 2',
         'Error: token limit reached - part 3',
       ];
-      
+
       for (const error of tokenErrors) {
-        detector.addEvent({ 
-          type: EventType.ERROR, 
-          content: error 
+        detector.addEvent({
+          type: EventType.ERROR,
+          content: error,
         });
       }
 
@@ -210,10 +210,10 @@ describe('StuckDetector', () => {
     it('should detect stage back-and-forth', () => {
       for (let i = 0; i < 6; i++) {
         const stage = i % 2 === 0 ? Stage.DESIGN : Stage.IMPLEMENT;
-        detector.addEvent({ 
-          type: EventType.ACTION, 
+        detector.addEvent({
+          type: EventType.ACTION,
           stage: stage,
-          content: `action ${i}` 
+          content: `action ${i}`,
         });
       }
 

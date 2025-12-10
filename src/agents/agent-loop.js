@@ -1,10 +1,10 @@
 /**
  * MUSUBI Agent Loop
- * 
+ *
  * Implements agentic tool-calling loop inspired by OpenAI Agents SDK
  * and AutoGen patterns. Executes tool calls, processes results, and
  * continues until completion or limit is reached.
- * 
+ *
  * @module agents/agent-loop
  */
 
@@ -53,30 +53,30 @@ class AgentLoop extends EventEmitter {
    */
   constructor(config = {}) {
     super();
-    
+
     this.maxIterations = config.maxIterations ?? 10;
     this.timeout = config.timeout ?? 60000;
     this.iterationTimeout = config.iterationTimeout ?? 30000;
     this.continueOnError = config.continueOnError ?? false;
     this.completionCheck = config.completionCheck ?? this.defaultCompletionCheck.bind(this);
     this.guardrails = config.guardrails ?? null;
-    
+
     /** @type {Map<string, ToolDefinition>} */
     this.tools = new Map();
-    
+
     /** @type {Array} */
     this.messages = [];
-    
+
     /** @type {Array<ToolCall>} */
     this.toolCallHistory = [];
-    
+
     /** @type {boolean} */
     this.isRunning = false;
-    
+
     /** @type {AbortController|null} */
     this.abortController = null;
   }
-  
+
   /**
    * Register a tool for the agent to use
    * @param {ToolDefinition} tool
@@ -85,18 +85,18 @@ class AgentLoop extends EventEmitter {
     if (!tool.name || typeof tool.handler !== 'function') {
       throw new Error('Tool must have name and handler function');
     }
-    
+
     this.tools.set(tool.name, {
       name: tool.name,
       description: tool.description || '',
       parameters: tool.parameters || { type: 'object', properties: {} },
-      handler: tool.handler
+      handler: tool.handler,
     });
-    
+
     this.emit('tool:registered', { name: tool.name });
     return this;
   }
-  
+
   /**
    * Register multiple tools at once
    * @param {ToolDefinition[]} tools
@@ -107,7 +107,7 @@ class AgentLoop extends EventEmitter {
     }
     return this;
   }
-  
+
   /**
    * Unregister a tool
    * @param {string} name
@@ -119,7 +119,7 @@ class AgentLoop extends EventEmitter {
     }
     return deleted;
   }
-  
+
   /**
    * Get all registered tools in OpenAI function format
    * @returns {Array}
@@ -130,11 +130,11 @@ class AgentLoop extends EventEmitter {
       function: {
         name: tool.name,
         description: tool.description,
-        parameters: tool.parameters
-      }
+        parameters: tool.parameters,
+      },
     }));
   }
-  
+
   /**
    * Run the agent loop with an LLM provider
    * @param {Object} options
@@ -148,62 +148,62 @@ class AgentLoop extends EventEmitter {
     if (this.isRunning) {
       throw new Error('Agent loop is already running');
     }
-    
+
     this.isRunning = true;
     this.abortController = new AbortController();
     this.messages = [];
     this.toolCallHistory = [];
-    
+
     const startTime = Date.now();
     const timeoutId = setTimeout(() => this.abort('timeout'), this.timeout);
-    
+
     const metrics = {
       iterations: 0,
       toolCalls: 0,
       startTime,
       endTime: null,
       duration: null,
-      tokensUsed: 0
+      tokensUsed: 0,
     };
-    
+
     try {
       // Initialize messages
       this.messages.push({ role: 'system', content: systemPrompt });
-      
+
       // Apply input guardrails if configured
       const processedInput = await this.applyInputGuardrails(userMessage, context);
       this.messages.push({ role: 'user', content: processedInput });
-      
+
       let iteration = 0;
       let completed = false;
       let finalOutput = null;
-      
+
       while (iteration < this.maxIterations && !completed) {
         if (this.abortController.signal.aborted) {
           return this.createResult('aborted', finalOutput, metrics);
         }
-        
+
         iteration++;
         metrics.iterations = iteration;
         this.emit('iteration:start', { iteration, maxIterations: this.maxIterations });
-        
+
         // Call LLM
         const response = await this.callLLMWithTimeout(llmProvider, {
           messages: this.messages,
           tools: this.getToolSchemas(),
-          context
+          context,
         });
-        
+
         if (response.usage) {
           metrics.tokensUsed += response.usage.total_tokens || 0;
         }
-        
+
         // Check for tool calls
         if (response.toolCalls && response.toolCalls.length > 0) {
           // Execute tool calls
           const toolResults = await this.executeToolCalls(response.toolCalls);
           metrics.toolCalls += response.toolCalls.length;
-          
+
           // Add assistant message with tool calls
           this.messages.push({
             role: 'assistant',
@@ -213,68 +213,67 @@ class AgentLoop extends EventEmitter {
               type: 'function',
               function: {
                 name: tc.tool || tc.name,
-                arguments: JSON.stringify(tc.arguments)
-              }
-            }))
+                arguments: JSON.stringify(tc.arguments),
+              },
+            })),
           });
-          
+
           // Add tool results
           for (const result of toolResults) {
             this.messages.push({
               role: 'tool',
               tool_call_id: result.callId,
-              content: JSON.stringify(result.output)
+              content: JSON.stringify(result.output),
             });
           }
-          
+
           this.emit('iteration:complete', {
             iteration,
             toolCalls: response.toolCalls.length,
-            hasMore: true
+            hasMore: true,
           });
         } else {
           // No tool calls - LLM response is final
           finalOutput = response.content;
-          
+
           // Apply output guardrails
           finalOutput = await this.applyOutputGuardrails(finalOutput, context);
-          
+
           // Add final assistant message
           this.messages.push({
             role: 'assistant',
-            content: finalOutput
+            content: finalOutput,
           });
-          
+
           // Check completion
           completed = await this.completionCheck(finalOutput, this.messages, context);
-          
+
           this.emit('iteration:complete', {
             iteration,
             toolCalls: 0,
-            hasMore: !completed
+            hasMore: !completed,
           });
         }
       }
-      
+
       metrics.endTime = Date.now();
       metrics.duration = metrics.endTime - startTime;
-      
+
       if (iteration >= this.maxIterations && !completed) {
         return this.createResult('max_iterations', finalOutput, metrics);
       }
-      
+
       return this.createResult('completed', finalOutput, metrics);
-      
     } catch (error) {
       metrics.endTime = Date.now();
       metrics.duration = metrics.endTime - startTime;
-      
+
       this.emit('error', error);
-      
+
       if (error.message === 'timeout') {
         return this.createResult('timeout', null, metrics);
       }
-      
+
       return this.createResult('error', null, metrics, error);
     } finally {
       clearTimeout(timeoutId);
@@ -282,7 +281,7 @@ class AgentLoop extends EventEmitter {
       this.abortController = null;
     }
   }
-  
+
   /**
    * Call LLM with per-iteration timeout
    * @param {Object} llmProvider
@@ -294,8 +293,9 @@ class AgentLoop extends EventEmitter {
       const timeoutId = setTimeout(() => {
         reject(new Error('Iteration timeout'));
       }, this.iterationTimeout);
-      
-      llmProvider.chat(options)
+
+      llmProvider
+        .chat(options)
         .then(response => {
           clearTimeout(timeoutId);
           resolve(response);
@@ -306,7 +306,7 @@ class AgentLoop extends EventEmitter {
         });
     });
   }
-  
+
   /**
    * Execute tool calls and collect results
    * @param {ToolCall[]} toolCalls
@@ -314,73 +314,72 @@ class AgentLoop extends EventEmitter {
    */
   async executeToolCalls(toolCalls) {
     const results = [];
-    
+
     for (const call of toolCalls) {
       const toolName = call.tool || call.name;
       const callId = call.id || `call_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       this.emit('tool:call', { name: toolName, arguments: call.arguments, id: callId });
-      
+
       try {
         const tool = this.tools.get(toolName);
-        
+
         if (!tool) {
           throw new Error(`Unknown tool: ${toolName}`);
         }
-        
+
         const output = await tool.handler(call.arguments);
-        
+
         this.toolCallHistory.push({
           id: callId,
           tool: toolName,
           arguments: call.arguments,
           output,
-          status: 'success'
+          status: 'success',
         });
-        
+
         results.push({
           callId,
           tool: toolName,
           output,
-          status: 'success'
+          status: 'success',
         });
-        
+
         this.emit('tool:result', { name: toolName, output, id: callId, status: 'success' });
-        
       } catch (error) {
         const _errorResult = {
           callId,
           tool: toolName,
           error: error.message,
-          status: 'error'
+          status: 'error',
         };
-        
+
         this.toolCallHistory.push({
           id: callId,
           tool: toolName,
           arguments: call.arguments,
           error: error.message,
-          status: 'error'
+          status: 'error',
         });
-        
+
         this.emit('tool:error', { name: toolName, error: error.message, id: callId });
-        
+
         if (this.continueOnError) {
           results.push({
             callId,
             tool: toolName,
             output: { error: error.message },
-            status: 'error'
+            status: 'error',
           });
         } else {
           throw error;
         }
       }
     }
-    
+
     return results;
   }
-  
+
   /**
    * Default completion check - returns true when LLM provides final response
    * @param {*} output
@@ -392,7 +391,7 @@ class AgentLoop extends EventEmitter {
     // By default, if we reach here (no tool calls), we're done
     return true;
   }
-  
+
   /**
    * Apply input guardrails if configured
    * @param {string} input
@@ -403,7 +402,7 @@ class AgentLoop extends EventEmitter {
     if (!this.guardrails?.input) {
       return input;
     }
-    
+
     try {
       const result = await this.guardrails.input.validate(input, context);
       if (!result.valid) {
@@ -415,7 +414,7 @@ class AgentLoop extends EventEmitter {
       throw error;
     }
   }
-  
+
   /**
    * Apply output guardrails if configured
    * @param {string} output
@@ -426,7 +425,7 @@ class AgentLoop extends EventEmitter {
     if (!this.guardrails?.output) {
       return output;
     }
-    
+
     try {
       const result = await this.guardrails.output.validate(output, context);
       if (!result.valid) {
@@ -439,7 +438,7 @@ class AgentLoop extends EventEmitter {
       return output;
     }
   }
-  
+
   /**
    * Create standardized result object
    * @param {string} status
@@ -458,12 +457,12 @@ class AgentLoop extends EventEmitter {
         ...metrics,
         toolCallCount: this.toolCallHistory.length,
         successfulCalls: this.toolCallHistory.filter(tc => tc.status === 'success').length,
-        failedCalls: this.toolCallHistory.filter(tc => tc.status === 'error').length
+        failedCalls: this.toolCallHistory.filter(tc => tc.status === 'error').length,
       },
-      ...(error && { error: error.message })
+      ...(error && { error: error.message }),
     };
   }
-  
+
   /**
    * Abort the running loop
    * @param {string} [reason='aborted']
@@ -474,7 +473,7 @@ class AgentLoop extends EventEmitter {
       this.emit('abort', { reason });
     }
   }
-  
+
   /**
    * Get current loop state
    * @returns {Object}
@@ -484,10 +483,10 @@ class AgentLoop extends EventEmitter {
       isRunning: this.isRunning,
       messageCount: this.messages.length,
       toolCallCount: this.toolCallHistory.length,
-      registeredTools: Array.from(this.tools.keys())
+      registeredTools: Array.from(this.tools.keys()),
     };
   }
-  
+
   /**
    * Reset the loop state
    */
@@ -495,7 +494,7 @@ class AgentLoop extends EventEmitter {
     if (this.isRunning) {
       throw new Error('Cannot reset while loop is running');
     }
-    
+
     this.messages = [];
     this.toolCallHistory = [];
     this.emit('reset');
@@ -509,24 +508,24 @@ class AgentLoop extends EventEmitter {
  */
 function createMockLLMProvider(responses) {
   let callIndex = 0;
-  
+
   return {
     async chat(_options) {
       if (callIndex >= responses.length) {
         return { content: 'Done', toolCalls: [] };
       }
-      
+
       const response = responses[callIndex++];
       return {
         content: response.content || null,
         toolCalls: response.toolCalls || [],
-        usage: response.usage || { total_tokens: 100 }
+        usage: response.usage || { total_tokens: 100 },
       };
-    }
+    },
   };
 }
 
 module.exports = {
   AgentLoop,
-  createMockLLMProvider
+  createMockLLMProvider,
 };

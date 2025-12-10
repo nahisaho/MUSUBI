@@ -10,7 +10,7 @@ const {
   CONSTRAINT_TYPE,
   UNCERTAINTY,
   MARKER_TYPE,
-  DEFAULT_TEMPLATES
+  DEFAULT_TEMPLATES,
 } = require('../../src/templates/template-constraints');
 
 describe('TemplateConstraints', () => {
@@ -25,7 +25,7 @@ describe('TemplateConstraints', () => {
     test('should accept custom options', () => {
       const tc = new TemplateConstraints({
         strict: true,
-        trackUncertainty: false
+        trackUncertainty: false,
       });
       expect(tc.strict).toBe(true);
       expect(tc.trackUncertainty).toBe(false);
@@ -34,8 +34,8 @@ describe('TemplateConstraints', () => {
     test('should merge custom templates', () => {
       const tc = new TemplateConstraints({
         templates: {
-          custom: { name: 'Custom', sections: [] }
-        }
+          custom: { name: 'Custom', sections: [] },
+        },
       });
       expect(tc.templates.custom).toBeDefined();
       expect(tc.templates.requirements).toBeDefined();
@@ -171,7 +171,9 @@ Content 3
     });
 
     test('should validate EARS format', () => {
-      expect(tc.validateFormat('When user logs in, the system shall display dashboard', 'ears')).toBe(true);
+      expect(
+        tc.validateFormat('When user logs in, the system shall display dashboard', 'ears')
+      ).toBe(true);
       expect(tc.validateFormat('Random text', 'ears')).toBe(false);
     });
 
@@ -205,7 +207,7 @@ Content 3
     test('should add a template', () => {
       tc.addTemplate('custom', {
         name: 'Custom Template',
-        sections: [{ name: 'main', required: true }]
+        sections: [{ name: 'main', required: true }],
       });
       expect(tc.templates.custom).toBeDefined();
     });
@@ -216,7 +218,7 @@ Content 3
 
       tc.addTemplate('custom', {
         name: 'Custom',
-        sections: []
+        sections: [],
       });
 
       expect(handler).toHaveBeenCalled();
@@ -250,10 +252,10 @@ Content 3
 
     test('should add a custom constraint', () => {
       tc.addConstraint('noTodos', {
-        validate: (content) => ({
+        validate: content => ({
           valid: !content.includes('TODO'),
-          message: 'No TODOs allowed'
-        })
+          message: 'No TODOs allowed',
+        }),
       });
       expect(tc.customConstraints.has('noTodos')).toBe(true);
     });
@@ -265,10 +267,10 @@ Content 3
     test('should apply custom constraint during validation', () => {
       tc.addConstraint('noTodos', {
         severity: 'error',
-        validate: (content) => ({
+        validate: content => ({
           valid: !content.includes('TODO'),
-          message: 'No TODOs allowed'
-        })
+          message: 'No TODOs allowed',
+        }),
       });
 
       const result = tc.validate('# Overview\nTODO: fix this', 'requirements');
@@ -354,7 +356,7 @@ describe('ThinkingChecklist', () => {
     test('should accept custom items', () => {
       const checklist = new ThinkingChecklist({
         name: 'Custom',
-        items: [{ id: 'custom', category: 'Test', text: 'Custom item' }]
+        items: [{ id: 'custom', category: 'Test', text: 'Custom item' }],
       });
       expect(checklist.items.length).toBe(1);
       expect(checklist.name).toBe('Custom');

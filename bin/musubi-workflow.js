@@ -2,9 +2,9 @@
 
 /**
  * MUSUBI Workflow CLI
- * 
+ *
  * Manage workflow state, transitions, and metrics.
- * 
+ *
  * Commands:
  *   init <feature>    - Initialize workflow for a feature
  *   status            - Show current workflow status
@@ -32,7 +32,7 @@ const STAGE_ICONS = {
   testing: '🧪',
   deployment: '🚀',
   monitoring: '📊',
-  retrospective: '🔄'
+  retrospective: '🔄',
 };
 
 /**
@@ -48,9 +48,11 @@ function formatStage(stage) {
  */
 async function showStatus() {
   const state = await engine.getState();
-  
+
   if (!state) {
-    console.log(chalk.yellow('\n⚠️  No active workflow. Use "musubi-workflow init <feature>" to start.'));
+    console.log(
+      chalk.yellow('\n⚠️  No active workflow. Use "musubi-workflow init <feature>" to start.')
+    );
     return;
   }
 
@@ -58,18 +60,18 @@ async function showStatus() {
   console.log(chalk.white(`Feature: ${chalk.cyan(state.feature)}`));
   console.log(chalk.white(`Current Stage: ${formatStage(state.currentStage)}`));
   console.log(chalk.white(`Started: ${new Date(state.startedAt).toLocaleString()}`));
-  
+
   // Show stage progress
   console.log(chalk.bold('\n📈 Stage Progress:\n'));
-  
+
   const allStages = Object.keys(WORKFLOW_STAGES);
   const currentIndex = allStages.indexOf(state.currentStage);
-  
+
   allStages.forEach((stage, index) => {
     const data = state.stages[stage];
     let status = '';
     let color = chalk.gray;
-    
+
     if (data?.status === 'completed') {
       status = `✅ Completed (${data.duration})`;
       color = chalk.green;
@@ -83,7 +85,7 @@ async function showStatus() {
       status = '⏳ Pending';
       color = chalk.gray;
     }
-    
+
     console.log(color(`  ${formatStage(stage).padEnd(25)} ${status}`));
   });
 
@@ -102,18 +104,18 @@ async function showStatus() {
  */
 async function showHistory() {
   const state = await engine.getState();
-  
+
   if (!state || !state.history) {
     console.log(chalk.yellow('\n⚠️  No workflow history available.'));
     return;
   }
 
   console.log(chalk.bold('\n📜 Workflow History\n'));
-  
+
   state.history.forEach(event => {
     const time = new Date(event.timestamp).toLocaleString();
     let desc = '';
-    
+
     switch (event.action) {
       case 'workflow-started':
         desc = `Started workflow for "${event.feature}" at ${formatStage(event.stage)}`;
@@ -132,7 +134,7 @@ async function showHistory() {
       default:
         desc = event.action;
     }
-    
+
     console.log(chalk.white(`  ${chalk.gray(time)} ${desc}`));
   });
 }
@@ -142,9 +144,9 @@ async function showHistory() {
  */
 async function showMetrics() {
   const summary = await engine.getMetricsSummary();
-  
+
   console.log(chalk.bold('\n📊 Workflow Metrics Summary\n'));
-  
+
   if (summary.message) {
     console.log(chalk.yellow(`  ${summary.message}`));
     return;
@@ -154,7 +156,7 @@ async function showMetrics() {
   console.log(chalk.white(`  Completed:           ${summary.completedWorkflows}`));
   console.log(chalk.white(`  Stage Transitions:   ${summary.stageTransitions}`));
   console.log(chalk.white(`  Feedback Loops:      ${summary.feedbackLoops}`));
-  
+
   if (summary.averageDuration) {
     console.log(chalk.white(`  Average Duration:    ${summary.averageDuration}`));
   }
@@ -190,10 +192,7 @@ program
     }
   });
 
-program
-  .command('status')
-  .description('Show current workflow status')
-  .action(showStatus);
+program.command('status').description('Show current workflow status').action(showStatus);
 
 program
   .command('next [stage]')
@@ -232,7 +231,9 @@ program
     try {
       await engine.recordFeedbackLoop(from, to, options.reason);
       await engine.transitionTo(to, `Feedback: ${options.reason}`);
-      console.log(chalk.yellow(`\n🔄 Feedback loop recorded: ${formatStage(from)} → ${formatStage(to)}`));
+      console.log(
+        chalk.yellow(`\n🔄 Feedback loop recorded: ${formatStage(from)} → ${formatStage(to)}`)
+      );
       console.log(chalk.gray(`   Reason: ${options.reason}`));
     } catch (error) {
       console.error(chalk.red(`\n❌ Error: ${error.message}`));
@@ -244,21 +245,25 @@ program
   .command('complete')
   .description('Complete the current workflow')
   .option('-n, --notes <notes>', 'Completion notes')
-  .action(async (options) => {
+  .action(async options => {
     try {
       const summary = await engine.completeWorkflow(options.notes);
-      
+
       console.log(chalk.green('\n✅ Workflow Completed!\n'));
       console.log(chalk.bold('📊 Summary:'));
       console.log(chalk.white(`  Feature:        ${summary.feature}`));
       console.log(chalk.white(`  Total Duration: ${summary.totalDuration}`));
       console.log(chalk.white(`  Stages:         ${summary.stages.length}`));
       console.log(chalk.white(`  Feedback Loops: ${summary.feedbackLoops}`));
-      
+
       if (summary.stages.length > 0) {
         console.log(chalk.bold('\n📈 Stage Breakdown:'));
         summary.stages.forEach(s => {
-          console.log(chalk.white(`  ${formatStage(s.name).padEnd(25)} ${s.duration} (${s.attempts} attempt${s.attempts > 1 ? 's' : ''})`));
+          console.log(
+            chalk.white(
+              `  ${formatStage(s.name).padEnd(25)} ${s.duration} (${s.attempts} attempt${s.attempts > 1 ? 's' : ''})`
+            )
+          );
         });
       }
     } catch (error) {
@@ -267,14 +272,8 @@ program
     }
   });
 
-program
-  .command('history')
-  .description('Show workflow history')
-  .action(showHistory);
+program.command('history').description('Show workflow history').action(showHistory);
 
-program
-  .command('metrics')
-  .description('Show workflow metrics summary')
-  .action(showMetrics);
+program.command('metrics').description('Show workflow metrics summary').action(showMetrics);
 
 program.parse();

@@ -9,6 +9,7 @@ Best practices for database backup and recovery strategies.
 ## Backup Types
 
 ### Full Backup
+
 Complete copy of entire database.
 
 ```bash
@@ -20,6 +21,7 @@ mysqldump --all-databases > backup_full_$(date +%Y%m%d).sql
 ```
 
 ### Incremental Backup
+
 Only changes since last backup.
 
 ```bash
@@ -31,6 +33,7 @@ mysqlbinlog --start-datetime="2024-01-01 00:00:00" binlog.000001 > incremental.s
 ```
 
 ### Differential Backup
+
 All changes since last full backup.
 
 ---
@@ -45,11 +48,11 @@ All changes since last full backup.
 
 ### Retention Policy
 
-| Backup Type | Frequency | Retention |
-|-------------|-----------|-----------|
-| Full | Weekly | 4 weeks |
-| Differential | Daily | 1 week |
-| WAL/Binlog | Continuous | 2 weeks |
+| Backup Type  | Frequency  | Retention |
+| ------------ | ---------- | --------- |
+| Full         | Weekly     | 4 weeks   |
+| Differential | Daily      | 1 week    |
+| WAL/Binlog   | Continuous | 2 weeks   |
 
 ---
 
@@ -210,21 +213,25 @@ chown -R mysql:mysql /var/lib/mysql
 # Recovery Test Checklist
 
 ## Preparation
+
 - [ ] Identify test environment
 - [ ] Get latest backup
 - [ ] Document start time
 
 ## Restore
+
 - [ ] Restore database
 - [ ] Apply incremental backups
 - [ ] Verify data integrity
 
 ## Validation
+
 - [ ] Count records in key tables
 - [ ] Run application tests
 - [ ] Verify recent transactions
 
 ## Documentation
+
 - [ ] Record recovery time
 - [ ] Note any issues
 - [ ] Update runbook
@@ -232,10 +239,10 @@ chown -R mysql:mysql /var/lib/mysql
 
 ### RTO/RPO Calculation
 
-| Metric | Definition | Target |
-|--------|------------|--------|
-| RTO | Recovery Time Objective | < 1 hour |
-| RPO | Recovery Point Objective | < 15 min |
+| Metric | Definition               | Target   |
+| ------ | ------------------------ | -------- |
+| RTO    | Recovery Time Objective  | < 1 hour |
+| RPO    | Recovery Point Objective | < 15 min |
 
 ---
 
@@ -281,15 +288,15 @@ chown -R mysql:mysql /var/lib/mysql
 metrics:
   - name: backup_last_success_timestamp
     type: gauge
-    help: "Timestamp of last successful backup"
-    
+    help: 'Timestamp of last successful backup'
+
   - name: backup_duration_seconds
     type: histogram
-    help: "Backup duration in seconds"
-    
+    help: 'Backup duration in seconds'
+
   - name: backup_size_bytes
     type: gauge
-    help: "Size of latest backup"
+    help: 'Size of latest backup'
 ```
 
 ### Alerts
@@ -301,14 +308,14 @@ alerts:
     for: 1h
     severity: critical
     annotations:
-      summary: "No successful backup in 24 hours"
-      
+      summary: 'No successful backup in 24 hours'
+
   - alert: BackupTooSmall
     expr: backup_size_bytes < backup_size_bytes offset 1d * 0.5
     for: 5m
     severity: warning
     annotations:
-      summary: "Backup size decreased significantly"
+      summary: 'Backup size decreased significantly'
 ```
 
 ---
@@ -316,16 +323,19 @@ alerts:
 ## Checklist
 
 ### Daily
+
 - [ ] Verify backup completed
 - [ ] Check backup size
 - [ ] Review backup logs
 
 ### Weekly
+
 - [ ] Test restore to dev
 - [ ] Verify offsite replication
 - [ ] Check retention policy
 
 ### Monthly
+
 - [ ] Full recovery drill
 - [ ] Update RTO/RPO metrics
 - [ ] Review backup strategy

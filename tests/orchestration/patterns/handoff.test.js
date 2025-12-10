@@ -1,6 +1,6 @@
 /**
  * Tests for HandoffPattern
- * 
+ *
  * @module tests/orchestration/patterns/handoff.test
  */
 
@@ -11,32 +11,38 @@ const {
   HandoffFilters,
   HandoffConfig,
   EscalationData,
-  handoff
+  handoff,
 } = require('../../../src/orchestration/patterns/handoff');
 
-const { ExecutionContext, _PatternType } = require('../../../src/orchestration/orchestration-engine');
+const {
+  ExecutionContext,
+  _PatternType,
+} = require('../../../src/orchestration/orchestration-engine');
 const { BasePattern } = require('../../../src/orchestration/pattern-registry');
 
 // Mock engine
 const createMockEngine = (skills = {}) => ({
   skills: new Map(Object.entries(skills)),
-  getSkill: jest.fn((name) => skills[name]),
+  getSkill: jest.fn(name => skills[name]),
   executeSkill: jest.fn(async (name, context) => ({
     skill: name,
     result: `Result from ${name}`,
-    context: context.input
+    context: context.input,
   })),
-  emit: jest.fn()
+  emit: jest.fn(),
 });
 
 // Mock agents
 const createMockAgent = (name, executeResult = null) => ({
   name,
-  execute: jest.fn(async (context) => executeResult || {
-    agent: name,
-    result: `Executed by ${name}`,
-    input: context.input
-  })
+  execute: jest.fn(
+    async context =>
+      executeResult || {
+        agent: name,
+        result: `Executed by ${name}`,
+        input: context.input,
+      }
+  ),
 });
 
 describe('HandoffPattern', () => {
@@ -48,7 +54,7 @@ describe('HandoffPattern', () => {
     engine = createMockEngine({
       'billing-agent': { name: 'billing-agent' },
       'support-agent': { name: 'support-agent' },
-      'refund-agent': { name: 'refund-agent' }
+      'refund-agent': { name: 'refund-agent' },
     });
   });
 
@@ -69,7 +75,7 @@ describe('HandoffPattern', () => {
       const customPattern = new HandoffPattern({
         strategy: HandoffStrategy.BEST_MATCH,
         maxHandoffs: 5,
-        timeout: 60000
+        timeout: 60000,
       });
 
       expect(customPattern.options.strategy).toBe(HandoffStrategy.BEST_MATCH);
@@ -88,8 +94,8 @@ describe('HandoffPattern', () => {
         input: {
           sourceAgent: 'triage-agent',
           targetAgents: [{ agent: 'billing-agent' }],
-          message: 'I need help with billing'
-        }
+          message: 'I need help with billing',
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -100,8 +106,8 @@ describe('HandoffPattern', () => {
     test('should reject missing sourceAgent', () => {
       const context = new ExecutionContext({
         input: {
-          targetAgents: [{ agent: 'billing-agent' }]
-        }
+          targetAgents: [{ agent: 'billing-agent' }],
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -112,8 +118,8 @@ describe('HandoffPattern', () => {
     test('should reject missing targetAgents', () => {
       const context = new ExecutionContext({
         input: {
-          sourceAgent: 'triage-agent'
-        }
+          sourceAgent: 'triage-agent',
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -125,8 +131,8 @@ describe('HandoffPattern', () => {
       const context = new ExecutionContext({
         input: {
           sourceAgent: 'triage-agent',
-          targetAgents: []
-        }
+          targetAgents: [],
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -138,8 +144,8 @@ describe('HandoffPattern', () => {
       const context = new ExecutionContext({
         input: {
           sourceAgent: 'triage-agent',
-          targetAgents: ['unknown-agent']
-        }
+          targetAgents: ['unknown-agent'],
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -151,13 +157,13 @@ describe('HandoffPattern', () => {
   describe('execute', () => {
     test('should perform handoff to target agent', async () => {
       const targetAgent = createMockAgent('billing-agent');
-      
+
       const context = new ExecutionContext({
         input: {
           sourceAgent: 'triage-agent',
           targetAgents: [targetAgent],
-          message: 'I need help with billing'
-        }
+          message: 'I need help with billing',
+        },
       });
 
       const result = await pattern.execute(context, engine);
@@ -170,13 +176,13 @@ describe('HandoffPattern', () => {
 
     test('should emit handoff events', async () => {
       const targetAgent = createMockAgent('billing-agent');
-      
+
       const context = new ExecutionContext({
         input: {
           sourceAgent: 'triage-agent',
           targetAgents: [targetAgent],
-          message: 'Test message'
-        }
+          message: 'Test message',
+        },
       });
 
       await pattern.execute(context, engine);
@@ -188,13 +194,13 @@ describe('HandoffPattern', () => {
 
     test('should record handoff in chain', async () => {
       const targetAgent = createMockAgent('billing-agent');
-      
+
       const context = new ExecutionContext({
         input: {
           sourceAgent: 'triage-agent',
           targetAgents: [targetAgent],
-          message: 'Test message'
-        }
+          message: 'Test message',
+        },
       });
 
       const result = await pattern.execute(context, engine);
@@ -208,22 +214,22 @@ describe('HandoffPattern', () => {
       const targetAgent = createMockAgent('billing-agent');
       const targetConfig = handoff({
         agent: targetAgent,
-        inputFilter: HandoffFilters.userMessagesOnly
+        inputFilter: HandoffFilters.userMessagesOnly,
       });
 
       const history = [
         { role: 'user', content: 'Hello' },
         { role: 'assistant', content: 'Hi there' },
-        { role: 'user', content: 'I need billing help' }
+        { role: 'user', content: 'I need billing help' },
       ];
-      
+
       const context = new ExecutionContext({
         input: {
           sourceAgent: 'triage-agent',
           targetAgents: [targetConfig],
           message: 'Test',
-          history
-        }
+          history,
+        },
       });
 
       await pattern.execute(context, engine);
@@ -237,16 +243,16 @@ describe('HandoffPattern', () => {
       const targetAgent = createMockAgent('billing-agent');
       const escalation = new EscalationData({
         reason: 'Customer wants refund',
-        priority: 'high'
+        priority: 'high',
       });
-      
+
       const context = new ExecutionContext({
         input: {
           sourceAgent: 'triage-agent',
           targetAgents: [targetAgent],
           message: 'Refund request',
-          escalationData: escalation
-        }
+          escalationData: escalation,
+        },
       });
 
       await pattern.execute(context, engine);
@@ -260,13 +266,13 @@ describe('HandoffPattern', () => {
       const onHandoff = jest.fn();
       const customPattern = new HandoffPattern({ onHandoff });
       const targetAgent = createMockAgent('billing-agent');
-      
+
       const context = new ExecutionContext({
         input: {
           sourceAgent: 'triage-agent',
           targetAgents: [targetAgent],
-          message: 'Test'
-        }
+          message: 'Test',
+        },
       });
 
       await customPattern.execute(context, engine);
@@ -277,13 +283,13 @@ describe('HandoffPattern', () => {
     test('should emit failed event on error', async () => {
       const targetAgent = createMockAgent('billing-agent');
       targetAgent.execute.mockRejectedValue(new Error('Agent failed'));
-      
+
       const context = new ExecutionContext({
         input: {
           sourceAgent: 'triage-agent',
           targetAgents: [targetAgent],
-          message: 'Test'
-        }
+          message: 'Test',
+        },
       });
 
       await expect(pattern.execute(context, engine)).rejects.toThrow('Agent failed');
@@ -296,7 +302,7 @@ describe('HandoffPattern', () => {
       const agents = [
         handoff({ agent: createMockAgent('agent1'), condition: () => false }),
         handoff({ agent: createMockAgent('agent2'), condition: () => true }),
-        handoff({ agent: createMockAgent('agent3'), condition: () => true })
+        handoff({ agent: createMockAgent('agent3'), condition: () => true }),
       ];
 
       const context = new ExecutionContext({ input: { message: 'test' } });
@@ -310,7 +316,7 @@ describe('HandoffPattern', () => {
       const agents = [
         handoff({ agent: createMockAgent('agent1'), priority: 5 }),
         handoff({ agent: createMockAgent('agent2'), priority: 10 }),
-        handoff({ agent: createMockAgent('agent3'), priority: 3 })
+        handoff({ agent: createMockAgent('agent3'), priority: 3 }),
       ];
 
       const context = new ExecutionContext({ input: { message: 'test' } });
@@ -324,11 +330,11 @@ describe('HandoffPattern', () => {
       const agents = [
         createMockAgent('agent1'),
         createMockAgent('agent2'),
-        createMockAgent('agent3')
+        createMockAgent('agent3'),
       ];
 
       const context = new ExecutionContext({ input: { message: 'test' } });
-      
+
       // First selection
       const selected1 = await customPattern.selectTargetAgent(context, agents, engine);
       expect(selected1.agent.name).toBe('agent1');
@@ -349,13 +355,15 @@ describe('HandoffFilters', () => {
       { role: 'user', content: 'Hello' },
       { type: 'tool_call', content: 'Calling tool' },
       { type: 'tool_result', content: 'Tool result' },
-      { role: 'assistant', content: 'Response' }
+      { role: 'assistant', content: 'Response' },
     ];
 
     const filtered = HandoffFilters.removeAllTools(history);
 
     expect(filtered).toHaveLength(2);
-    expect(filtered.every(msg => msg.type !== 'tool_call' && msg.type !== 'tool_result')).toBe(true);
+    expect(filtered.every(msg => msg.type !== 'tool_call' && msg.type !== 'tool_result')).toBe(
+      true
+    );
   });
 
   test('userMessagesOnly should keep only user messages', () => {
@@ -363,7 +371,7 @@ describe('HandoffFilters', () => {
       { role: 'user', content: 'Hello' },
       { role: 'assistant', content: 'Hi' },
       { role: 'user', content: 'Help' },
-      { role: 'system', content: 'System' }
+      { role: 'system', content: 'System' },
     ];
 
     const filtered = HandoffFilters.userMessagesOnly(history);
@@ -378,7 +386,7 @@ describe('HandoffFilters', () => {
       { role: 'user', content: '2' },
       { role: 'user', content: '3' },
       { role: 'user', content: '4' },
-      { role: 'user', content: '5' }
+      { role: 'user', content: '5' },
     ];
 
     const filterLast3 = HandoffFilters.lastN(3);
@@ -392,7 +400,7 @@ describe('HandoffFilters', () => {
   test('summarize should create summary message', () => {
     const history = [
       { role: 'user', content: 'Hello world' },
-      { role: 'assistant', content: 'Hi there' }
+      { role: 'assistant', content: 'Hi there' },
     ];
 
     const filtered = HandoffFilters.summarize(history);
@@ -425,7 +433,7 @@ describe('EscalationData', () => {
       reason: 'Customer upset',
       priority: 'urgent',
       sourceAgent: 'triage-agent',
-      context: { customerId: '123' }
+      context: { customerId: '123' },
     });
 
     expect(data.reason).toBe('Customer upset');
@@ -437,7 +445,7 @@ describe('EscalationData', () => {
   test('should serialize to JSON', () => {
     const data = new EscalationData({
       reason: 'Test reason',
-      priority: 'high'
+      priority: 'high',
     });
 
     const json = data.toJSON();
@@ -460,12 +468,12 @@ describe('handoff helper function', () => {
   test('should create HandoffConfig from options', () => {
     const agent = createMockAgent('test-agent');
     const onHandoff = jest.fn();
-    
+
     const config = handoff({
       agent,
       onHandoff,
       priority: 10,
-      inputFilter: HandoffFilters.userMessagesOnly
+      inputFilter: HandoffFilters.userMessagesOnly,
     });
 
     expect(config).toBeInstanceOf(HandoffConfig);
@@ -494,13 +502,13 @@ describe('HandoffConfig', () => {
     const agent = createMockAgent('test-agent');
     const condition = () => true;
     const inputFilter = HandoffFilters.userMessagesOnly;
-    
+
     const config = new HandoffConfig({
       agent,
       toolNameOverride: 'custom_handoff',
       condition,
       inputFilter,
-      priority: 5
+      priority: 5,
     });
 
     expect(config.toolNameOverride).toBe('custom_handoff');

@@ -1,6 +1,6 @@
 /**
  * Workflow Engine for MUSUBI SDD
- * 
+ *
  * Manages workflow state, stage transitions, and metrics collection.
  */
 
@@ -22,7 +22,7 @@ const WORKFLOW_STAGES = {
   testing: { next: ['deployment', 'implementation', 'requirements'] }, // Feedback loops
   deployment: { next: ['monitoring'] },
   monitoring: { next: ['retrospective'] },
-  retrospective: { next: ['requirements'] } // New iteration
+  retrospective: { next: ['requirements'] }, // New iteration
 };
 
 /**
@@ -51,20 +51,20 @@ class WorkflowEngine {
       currentStage: options.startStage || 'requirements',
       startedAt: new Date().toISOString(),
       stages: {},
-      history: []
+      history: [],
     };
 
     // Record initial stage
     state.stages[state.currentStage] = {
       enteredAt: new Date().toISOString(),
-      status: 'in-progress'
+      status: 'in-progress',
     };
 
     state.history.push({
       timestamp: new Date().toISOString(),
       action: 'workflow-started',
       stage: state.currentStage,
-      feature: featureName
+      feature: featureName,
     });
 
     await this.saveState(state);
@@ -77,7 +77,7 @@ class WorkflowEngine {
    * Get current workflow state
    */
   async getState() {
-    if (!await fs.pathExists(this.stateFile)) {
+    if (!(await fs.pathExists(this.stateFile))) {
       return null;
     }
     const content = await fs.readFile(this.stateFile, 'utf8');
@@ -107,7 +107,7 @@ class WorkflowEngine {
     if (!validTransitions.includes(targetStage)) {
       throw new Error(
         `Invalid transition: ${currentStage} → ${targetStage}. ` +
-        `Valid transitions: ${validTransitions.join(', ')}`
+          `Valid transitions: ${validTransitions.join(', ')}`
       );
     }
 
@@ -135,14 +135,14 @@ class WorkflowEngine {
       action: 'stage-transition',
       from: currentStage,
       to: targetStage,
-      notes
+      notes,
     });
 
     await this.saveState(state);
     await this.recordMetric('stage_transition', {
       from: currentStage,
       to: targetStage,
-      feature: state.feature
+      feature: state.feature,
     });
 
     return state;
@@ -160,7 +160,7 @@ class WorkflowEngine {
       action: 'feedback-loop',
       from: fromStage,
       to: toStage,
-      reason
+      reason,
     });
 
     await this.saveState(state);
@@ -168,7 +168,7 @@ class WorkflowEngine {
       from: fromStage,
       to: toStage,
       reason,
-      feature: state.feature
+      feature: state.feature,
     });
   }
 
@@ -194,14 +194,14 @@ class WorkflowEngine {
     state.history.push({
       timestamp: new Date().toISOString(),
       action: 'workflow-completed',
-      notes
+      notes,
     });
 
     await this.saveState(state);
     await this.recordMetric('workflow_completed', {
       feature: state.feature,
       totalDuration: state.totalDuration,
-      stageCount: Object.keys(state.stages).length
+      stageCount: Object.keys(state.stages).length,
     });
 
     // Generate summary
@@ -221,7 +221,7 @@ class WorkflowEngine {
     metrics.push({
       timestamp: new Date().toISOString(),
       name,
-      data
+      data,
     });
 
     await fs.ensureDir(path.dirname(this.metricsFile));
@@ -232,7 +232,7 @@ class WorkflowEngine {
    * Get workflow metrics summary
    */
   async getMetricsSummary() {
-    if (!await fs.pathExists(this.metricsFile)) {
+    if (!(await fs.pathExists(this.metricsFile))) {
       return { message: 'No metrics recorded yet.' };
     }
 
@@ -245,7 +245,7 @@ class WorkflowEngine {
       feedbackLoops: 0,
       stageTransitions: 0,
       averageDuration: null,
-      stageStats: {}
+      stageStats: {},
     };
 
     const durations = [];
@@ -289,7 +289,7 @@ class WorkflowEngine {
     const stages = Object.entries(state.stages).map(([name, data]) => ({
       name,
       duration: data.duration || 'N/A',
-      attempts: data.attempts || 1
+      attempts: data.attempts || 1,
     }));
 
     const feedbackLoops = state.history.filter(h => h.action === 'feedback-loop');
@@ -299,7 +299,7 @@ class WorkflowEngine {
       totalDuration: state.totalDuration,
       stages,
       feedbackLoops: feedbackLoops.length,
-      feedbackDetails: feedbackLoops
+      feedbackDetails: feedbackLoops,
     };
   }
 
@@ -338,10 +338,18 @@ class WorkflowEngine {
       const value = parseInt(part);
       const unit = part.slice(-1);
       switch (unit) {
-        case 'd': ms += value * 24 * 60 * 60 * 1000; break;
-        case 'h': ms += value * 60 * 60 * 1000; break;
-        case 'm': ms += value * 60 * 1000; break;
-        case 's': ms += value * 1000; break;
+        case 'd':
+          ms += value * 24 * 60 * 60 * 1000;
+          break;
+        case 'h':
+          ms += value * 60 * 60 * 1000;
+          break;
+        case 'm':
+          ms += value * 60 * 1000;
+          break;
+        case 's':
+          ms += value * 1000;
+          break;
       }
     });
     return ms;

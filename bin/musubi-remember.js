@@ -73,19 +73,19 @@ program
   .action(async (memory, options) => {
     try {
       const memories = await loadMemories();
-      
+
       const entry = {
         id: `mem_${Date.now()}`,
         content: memory,
         type: options.type,
         priority: options.priority,
         timestamp: new Date().toISOString(),
-        session: process.env.SESSION_ID || 'cli'
+        session: process.env.SESSION_ID || 'cli',
       };
-      
+
       memories.entries.push(entry);
       await saveMemories(memories);
-      
+
       console.log(chalk.green('✓ Memory added:'), memory);
       console.log(chalk.dim(`  ID: ${entry.id}`));
       console.log(chalk.dim(`  Type: ${entry.type} | Priority: ${entry.priority}`));
@@ -106,24 +106,24 @@ program
     try {
       const memories = await loadMemories();
       let entries = memories.entries;
-      
+
       // Filter by type
       if (options.type) {
         entries = entries.filter(e => e.type === options.type);
       }
-      
+
       // Sort by timestamp (newest first)
       entries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      
+
       // Limit entries
       const limit = parseInt(options.limit) || 20;
       entries = entries.slice(0, limit);
-      
+
       if (options.format === 'json') {
         console.log(JSON.stringify(entries, null, 2));
         return;
       }
-      
+
       if (options.format === 'markdown') {
         console.log('# Agent Memories\n');
         entries.forEach(entry => {
@@ -133,39 +133,43 @@ program
         });
         return;
       }
-      
+
       // Console format
       console.log(chalk.bold('\n📝 Agent Memories\n'));
       console.log(chalk.bold('━'.repeat(70)));
-      
+
       if (entries.length === 0) {
         console.log(chalk.dim('\n  No memories found.\n'));
         return;
       }
-      
+
       entries.forEach((entry, _i) => {
         const typeColors = {
           decision: chalk.blue,
           insight: chalk.green,
           context: chalk.cyan,
-          todo: chalk.yellow
+          todo: chalk.yellow,
         };
         const color = typeColors[entry.type] || chalk.white;
-        
+
         const priorityIcons = {
           critical: '🔴',
           high: '🟠',
           medium: '🟡',
-          low: '🟢'
+          low: '🟢',
         };
         const icon = priorityIcons[entry.priority] || '⚪';
-        
+
         console.log(`\n${icon} ${color(`[${entry.type.toUpperCase()}]`)} ${entry.content}`);
-        console.log(chalk.dim(`   ID: ${entry.id} | ${new Date(entry.timestamp).toLocaleString()}`));
+        console.log(
+          chalk.dim(`   ID: ${entry.id} | ${new Date(entry.timestamp).toLocaleString()}`)
+        );
       });
-      
+
       console.log('\n' + chalk.bold('━'.repeat(70)));
-      console.log(chalk.dim(`\nTotal: ${memories.entries.length} memories | Showing: ${entries.length}`));
+      console.log(
+        chalk.dim(`\nTotal: ${memories.entries.length} memories | Showing: ${entries.length}`)
+      );
       console.log();
     } catch (error) {
       console.error(chalk.red('✗ Failed to list memories:'), error.message);
@@ -181,22 +185,22 @@ program
   .action(async options => {
     try {
       const memories = await loadMemories();
-      
+
       if (memories.entries.length < 10) {
         console.log(chalk.yellow('⚠ Not enough memories to condense (need at least 10)'));
         console.log(chalk.dim(`  Current count: ${memories.entries.length}`));
         return;
       }
-      
+
       console.log(chalk.dim('🔄 Condensing memory bank...\n'));
-      
+
       // Group entries by type
       const grouped = {};
       memories.entries.forEach(entry => {
         if (!grouped[entry.type]) grouped[entry.type] = [];
         grouped[entry.type].push(entry);
       });
-      
+
       // Create condensed summaries
       const condensedEntries = [];
       for (const [type, entries] of Object.entries(grouped)) {
@@ -205,39 +209,43 @@ program
             id: `condensed_${type}_${Date.now()}`,
             type: 'condensed',
             originalType: type,
-            content: `Summary of ${entries.length} ${type} entries:\n` +
-              entries.slice(0, 5).map(e => `• ${e.content}`).join('\n') +
+            content:
+              `Summary of ${entries.length} ${type} entries:\n` +
+              entries
+                .slice(0, 5)
+                .map(e => `• ${e.content}`)
+                .join('\n') +
               (entries.length > 5 ? `\n• ... and ${entries.length - 5} more` : ''),
             count: entries.length,
             timestamp: new Date().toISOString(),
-            originalIds: entries.map(e => e.id)
+            originalIds: entries.map(e => e.id),
           };
           condensedEntries.push(summary);
         }
       }
-      
+
       console.log(chalk.bold('Condensation Summary:'));
       console.log(chalk.dim('━'.repeat(50)));
       condensedEntries.forEach(c => {
         console.log(`  ${c.originalType}: ${c.count} entries → 1 summary`);
       });
-      
+
       if (options.dryRun) {
         console.log(chalk.yellow('\n[DRY RUN] No changes saved.'));
         return;
       }
-      
+
       // Keep only high-priority individual entries
-      const keepEntries = memories.entries.filter(e => 
-        e.priority === 'critical' || e.priority === 'high'
+      const keepEntries = memories.entries.filter(
+        e => e.priority === 'critical' || e.priority === 'high'
       );
-      
+
       memories.condensed.push(...condensedEntries);
       memories.entries = keepEntries;
       memories.lastCondensed = new Date().toISOString();
-      
+
       await saveMemories(memories);
-      
+
       console.log(chalk.green('\n✓ Memory bank condensed'));
       console.log(chalk.dim(`  Kept: ${keepEntries.length} high-priority entries`));
       console.log(chalk.dim(`  Created: ${condensedEntries.length} summaries`));
@@ -255,43 +263,46 @@ program
   .action(async (query, options) => {
     try {
       const memories = await loadMemories();
-      
+
       const queryLower = query.toLowerCase();
-      const results = memories.entries.filter(entry => 
-        entry.content.toLowerCase().includes(queryLower) ||
-        entry.type.toLowerCase().includes(queryLower)
+      const results = memories.entries.filter(
+        entry =>
+          entry.content.toLowerCase().includes(queryLower) ||
+          entry.type.toLowerCase().includes(queryLower)
       );
-      
+
       // Also search condensed
       const condensedResults = memories.condensed.filter(entry =>
         entry.content.toLowerCase().includes(queryLower)
       );
-      
+
       if (options.format === 'json') {
         console.log(JSON.stringify({ entries: results, condensed: condensedResults }, null, 2));
         return;
       }
-      
+
       console.log(chalk.bold(`\n🔍 Search Results for "${query}"\n`));
-      
+
       if (results.length === 0 && condensedResults.length === 0) {
         console.log(chalk.dim('  No matching memories found.\n'));
         return;
       }
-      
+
       results.forEach(entry => {
         console.log(chalk.cyan(`[${entry.type}]`), entry.content);
         console.log(chalk.dim(`  ${entry.id} | ${entry.timestamp}\n`));
       });
-      
+
       if (condensedResults.length > 0) {
         console.log(chalk.bold('\nFrom Condensed Summaries:'));
         condensedResults.forEach(entry => {
           console.log(chalk.yellow(`[${entry.originalType}]`), entry.content.split('\n')[0]);
         });
       }
-      
-      console.log(chalk.dim(`\nFound: ${results.length} entries, ${condensedResults.length} condensed`));
+
+      console.log(
+        chalk.dim(`\nFound: ${results.length} entries, ${condensedResults.length} condensed`)
+      );
     } catch (error) {
       console.error(chalk.red('✗ Search failed:'), error.message);
       process.exit(1);
@@ -308,20 +319,22 @@ program
     try {
       if (!options.force) {
         console.log(chalk.yellow('⚠ This will delete all agent memories.'));
-        console.log(chalk.dim('  Use --force to confirm, or --keep-condensed to preserve summaries.\n'));
+        console.log(
+          chalk.dim('  Use --force to confirm, or --keep-condensed to preserve summaries.\n')
+        );
         return;
       }
-      
+
       const memories = await loadMemories();
       const oldCount = memories.entries.length;
-      
+
       memories.entries = [];
       if (!options.keepCondensed) {
         memories.condensed = [];
       }
-      
+
       await saveMemories(memories);
-      
+
       console.log(chalk.green('✓ Memories cleared'));
       console.log(chalk.dim(`  Deleted: ${oldCount} entries`));
       if (options.keepCondensed) {

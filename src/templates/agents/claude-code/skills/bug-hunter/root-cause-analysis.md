@@ -32,17 +32,20 @@ Ask "Why?" five times to get to the root cause.
 
 ```markdown
 ## Reproduction Steps
+
 1. [Step to reproduce]
 2. [Step to reproduce]
 3. [Observe behavior]
 
 ## Environment
+
 - OS: [OS version]
-- Browser: [Browser version]  
+- Browser: [Browser version]
 - Version: [App version]
 - User role: [Role]
 
 ## Expected vs Actual
+
 - Expected: [Expected behavior]
 - Actual: [Actual behavior]
 ```
@@ -51,15 +54,18 @@ Ask "Why?" five times to get to the root cause.
 
 ```markdown
 ## Error Information
+
 - Error message: [message]
 - Stack trace: [trace]
 - Error code: [code]
 
 ## Logs
+
 - Timestamp: [time]
 - Relevant logs: [logs]
 
 ## Metrics
+
 - CPU/Memory: [values]
 - Request rate: [rate]
 - Error rate: [rate]
@@ -78,16 +84,20 @@ Ask "Why?" five times to get to the root cause.
 ## Root Cause Analysis
 
 ### Direct Cause
+
 [What directly caused the symptom]
 
 ### Contributing Factors
+
 - [Factor 1]
 - [Factor 2]
 
 ### Root Cause
+
 [The underlying issue that should be fixed]
 
 ### Evidence
+
 [How we know this is the root cause]
 ```
 
@@ -97,12 +107,15 @@ Ask "Why?" five times to get to the root cause.
 ## Resolution
 
 ### Immediate Fix
+
 [What was done to resolve the issue]
 
 ### Prevention
+
 [What will prevent recurrence]
 
 ### Verification
+
 [How we verified the fix works]
 ```
 
@@ -114,37 +127,46 @@ Ask "Why?" five times to get to the root cause.
 # Bug Report: [Title]
 
 ## Summary
+
 [Brief description]
 
 ## Severity
+
 - [ ] Critical (system down)
 - [ ] High (major feature broken)
 - [ ] Medium (feature degraded)
 - [ ] Low (minor issue)
 
 ## Steps to Reproduce
-1. 
-2. 
-3. 
+
+1.
+2.
+3.
 
 ## Expected Behavior
+
 [What should happen]
 
 ## Actual Behavior
+
 [What actually happens]
 
 ## Environment
-- Version: 
-- Browser: 
-- OS: 
+
+- Version:
+- Browser:
+- OS:
 
 ## Logs/Screenshots
+
 [Attach relevant evidence]
 
 ## Root Cause (after investigation)
+
 [The identified root cause]
 
 ## Fix
+
 [The solution implemented]
 ```
 
@@ -152,14 +174,14 @@ Ask "Why?" five times to get to the root cause.
 
 ## Common Bug Categories
 
-| Category | Symptoms | Typical Causes |
-|----------|----------|----------------|
-| Logic Error | Wrong output | Incorrect algorithm, edge case |
-| Null Reference | Crash | Missing null check |
-| Race Condition | Intermittent | Concurrency issue |
-| Memory Leak | Slow degradation | Uncleaned resources |
-| Timeout | Slow/hang | Network, long query |
-| Security | Unauthorized access | Missing validation |
+| Category       | Symptoms            | Typical Causes                 |
+| -------------- | ------------------- | ------------------------------ |
+| Logic Error    | Wrong output        | Incorrect algorithm, edge case |
+| Null Reference | Crash               | Missing null check             |
+| Race Condition | Intermittent        | Concurrency issue              |
+| Memory Leak    | Slow degradation    | Uncleaned resources            |
+| Timeout        | Slow/hang           | Network, long query            |
+| Security       | Unauthorized access | Missing validation             |
 
 ---
 

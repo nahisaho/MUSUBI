@@ -9,7 +9,7 @@ const {
   CustomSteeringRules,
   SteeringFileType,
   UpdateTrigger,
-  createSteeringAutoUpdater
+  createSteeringAutoUpdater,
 } = require('../../src/steering/auto-updater');
 
 describe('Steering Auto-Update', () => {
@@ -42,11 +42,7 @@ describe('Steering Auto-Update', () => {
     });
 
     test('should detect multiple affected steering files', () => {
-      const changedFiles = [
-        'src/index.js',
-        'package.json',
-        'README.md'
-      ];
+      const changedFiles = ['src/index.js', 'package.json', 'README.md'];
       const affected = detector.detectAffectedSteering(changedFiles);
 
       expect(affected).toContain('structure');
@@ -58,7 +54,7 @@ describe('Steering Auto-Update', () => {
       const changes = [
         { type: 'add', path: 'src/new-file.js' },
         { type: 'modify', path: 'package.json' },
-        { type: 'delete', path: 'src/old-file.js' }
+        { type: 'delete', path: 'src/old-file.js' },
       ];
 
       const analysis = detector.analyzeChanges(changes);
@@ -73,8 +69,8 @@ describe('Steering Auto-Update', () => {
     test('should use custom patterns', () => {
       const customDetector = new ChangeDetector({
         patterns: {
-          custom: [/^custom\//]
-        }
+          custom: [/^custom\//],
+        },
       });
 
       const affected = customDetector.detectAffectedSteering(['custom/file.js']);
@@ -93,7 +89,7 @@ describe('Steering Auto-Update', () => {
       const analysis = {
         addedFiles: ['src/components/Button.js', 'lib/utils.js'],
         modifiedFiles: [],
-        deletedFiles: []
+        deletedFiles: [],
       };
 
       const updates = updater.generateStructureUpdate(analysis);
@@ -107,7 +103,7 @@ describe('Steering Auto-Update', () => {
       const analysis = {
         addedFiles: [],
         modifiedFiles: [],
-        deletedFiles: ['old-dir/file.js']
+        deletedFiles: ['old-dir/file.js'],
       };
 
       const updates = updater.generateStructureUpdate(analysis);
@@ -120,19 +116,19 @@ describe('Steering Auto-Update', () => {
       const analysis = { addedFiles: [], modifiedFiles: [], deletedFiles: [] };
       const packageJson = {
         dependencies: {
-          'react': '^18.0.0',
-          'express': '^4.0.0'
+          react: '^18.0.0',
+          express: '^4.0.0',
         },
         devDependencies: {
-          'jest': '^29.0.0',
-          'typescript': '^5.0.0'
-        }
+          jest: '^29.0.0',
+          typescript: '^5.0.0',
+        },
       };
 
       const updates = updater.generateTechUpdate(analysis, packageJson);
 
       expect(updates.length).toBeGreaterThan(0);
-      
+
       const frameworkUpdate = updates.find(u => u.section === 'frameworks');
       expect(frameworkUpdate).toBeDefined();
       expect(frameworkUpdate.content).toContain('React');
@@ -151,7 +147,7 @@ This is a description of my project.
       const updates = updater.generateProductUpdate(analysis, readme);
 
       expect(updates.length).toBeGreaterThan(0);
-      
+
       const nameUpdate = updates.find(u => u.section === 'name');
       expect(nameUpdate).toBeDefined();
       expect(nameUpdate.content).toBe('My Project');
@@ -162,9 +158,7 @@ This is a description of my project.
     });
 
     test('should apply updates in dry-run mode', () => {
-      const updates = [
-        { section: 'directories', action: 'add', content: ['- `src/`'] }
-      ];
+      const updates = [{ section: 'directories', action: 'add', content: ['- `src/`'] }];
 
       const results = updater.applyUpdates('steering/structure.md', updates);
 
@@ -210,7 +204,7 @@ features:
         version: '2.0.0',
         description: 'Test description',
         tech_stack: ['React', 'Node.js'],
-        features: ['Auth', 'Dashboard']
+        features: ['Auth', 'Dashboard'],
       };
 
       const content = sync.generate(data);
@@ -225,19 +219,19 @@ features:
       const projectData = {
         name: 'old-name',
         version: '1.0.0',
-        tech_stack: ['Node.js']
+        tech_stack: ['Node.js'],
       };
 
       const packageJson = {
         name: 'new-name',
         version: '2.0.0',
         dependencies: {
-          'react': '^18.0.0',
-          'prisma': '^5.0.0'
+          react: '^18.0.0',
+          prisma: '^5.0.0',
         },
         devDependencies: {
-          'typescript': '^5.0.0'
-        }
+          typescript: '^5.0.0',
+        },
       };
 
       const updated = sync.syncWithPackageJson(projectData, packageJson);
@@ -285,7 +279,7 @@ Message: Config changes need review
         name: 'test-rule',
         pattern: '\\.test\\.js$',
         action: 'warn',
-        message: 'Test file changed'
+        message: 'Test file changed',
       });
 
       expect(rules.rules.has('test-rule')).toBe(true);
@@ -296,12 +290,12 @@ Message: Config changes need review
         name: 'config-rule',
         pattern: '\\.config\\.js$',
         action: 'warn',
-        message: 'Config changed'
+        message: 'Config changed',
       });
 
       const changes = [
         { path: 'webpack.config.js', type: 'modify' },
-        { path: 'src/index.js', type: 'modify' }
+        { path: 'src/index.js', type: 'modify' },
       ];
 
       const results = rules.applyRules(changes);
@@ -317,7 +311,7 @@ Message: Config changes need review
 
     beforeEach(() => {
       autoUpdater = createSteeringAutoUpdater({
-        dryRun: true
+        dryRun: true,
       });
     });
 
@@ -329,14 +323,14 @@ Message: Config changes need review
     test('should analyze project changes', () => {
       const changes = [
         { type: 'add', path: 'src/new-component.js' },
-        { type: 'modify', path: 'package.json' }
+        { type: 'modify', path: 'package.json' },
       ];
 
       const context = {
         packageJson: {
-          dependencies: { 'react': '^18.0.0' },
-          devDependencies: { 'jest': '^29.0.0' }
-        }
+          dependencies: { react: '^18.0.0' },
+          devDependencies: { jest: '^29.0.0' },
+        },
       };
 
       const result = autoUpdater.analyze(changes, context);
@@ -348,14 +342,10 @@ Message: Config changes need review
 
     test('should apply updates', () => {
       const suggestions = {
-        structure: [
-          { section: 'directories', action: 'add', content: ['- `src/`'] }
-        ],
-        tech: [
-          { section: 'frameworks', action: 'update', content: ['React'] }
-        ],
+        structure: [{ section: 'directories', action: 'add', content: ['- `src/`'] }],
+        tech: [{ section: 'frameworks', action: 'update', content: ['React'] }],
         product: [],
-        custom: []
+        custom: [],
       };
 
       const results = autoUpdater.applyUpdates(suggestions);
@@ -364,14 +354,14 @@ Message: Config changes need review
       expect(results.errors).toHaveLength(0);
     });
 
-    test('should emit events on updates', (done) => {
-      autoUpdater.on('updated', (event) => {
+    test('should emit events on updates', done => {
+      autoUpdater.on('updated', event => {
         expect(event.type).toBeDefined();
         done();
       });
 
       autoUpdater.applyUpdates({
-        structure: [{ section: 'test', action: 'add', content: [] }]
+        structure: [{ section: 'test', action: 'add', content: [] }],
       });
     });
 
@@ -379,13 +369,13 @@ Message: Config changes need review
       const projectData = {
         name: 'old',
         version: '1.0.0',
-        tech_stack: []
+        tech_stack: [],
       };
 
       const packageJson = {
         name: 'new',
         version: '2.0.0',
-        dependencies: { 'express': '^4.0.0' }
+        dependencies: { express: '^4.0.0' },
       };
 
       const updated = autoUpdater.syncProjectYml(projectData, packageJson);
@@ -400,7 +390,7 @@ Message: Config changes need review
         name: 'api-change',
         pattern: 'api/',
         action: 'warn',
-        message: 'API changed'
+        message: 'API changed',
       });
 
       const changes = [{ type: 'modify', path: 'api/routes.js' }];
@@ -411,7 +401,7 @@ Message: Config changes need review
 
     test('should track update history', () => {
       autoUpdater.applyUpdates({
-        structure: [{ section: 'test', action: 'add', content: [] }]
+        structure: [{ section: 'test', action: 'add', content: [] }],
       });
 
       const history = autoUpdater.getHistory();

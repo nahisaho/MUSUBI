@@ -66,14 +66,14 @@ class ContextManager {
    */
   async getOrCreatePage(contextName = 'default') {
     const pageKey = `${contextName}:main`;
-    
+
     if (this.pages.has(pageKey)) {
       return this.pages.get(pageKey);
     }
 
     const context = await this.getOrCreateContext(contextName);
     const page = await context.newPage();
-    
+
     this.pages.set(pageKey, page);
     return page;
   }
@@ -87,10 +87,10 @@ class ContextManager {
   async createPage(contextName = 'default', pageName) {
     const context = await this.getOrCreateContext(contextName);
     const page = await context.newPage();
-    
+
     const pageKey = `${contextName}:${pageName}`;
     this.pages.set(pageKey, page);
-    
+
     return page;
   }
 
@@ -162,7 +162,7 @@ class ContextManager {
     if (context) {
       await context.close();
       this.contexts.delete(name);
-      
+
       // Remove associated pages
       for (const [key, _page] of this.pages.entries()) {
         if (key.startsWith(`${name}:`)) {

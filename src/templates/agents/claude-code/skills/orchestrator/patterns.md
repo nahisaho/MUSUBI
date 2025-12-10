@@ -23,11 +23,13 @@ Consolidate Results
 ```
 
 **Use When**:
+
 - User request is complex or ambiguous
 - Multiple agents might be needed
 - Optimal agent selection is unclear
 
 **Example**:
+
 ```
 User: "Create a new authentication feature"
 
@@ -51,6 +53,7 @@ Agent A → Agent B → Agent C → Result
 ```
 
 **Use When**:
+
 - Clear dependency chain exists
 - Output of one agent is input for next
 - Order is non-negotiable
@@ -58,6 +61,7 @@ Agent A → Agent B → Agent C → Result
 **Common Chains**:
 
 ### SDD Full Workflow Chain
+
 ```
 1. steering          → Analyze project context
 2. requirements-analyst → Create EARS requirements
@@ -70,6 +74,7 @@ Agent A → Agent B → Agent C → Result
 ```
 
 ### Quick Implementation Chain
+
 ```
 1. requirements-analyst → EARS requirements
 2. software-developer   → Implementation
@@ -92,11 +97,13 @@ Orchestrator
 ```
 
 **Use When**:
+
 - Complex task requires sub-delegation
 - Specialized sub-agents needed for specific aspects
 - Hierarchical coordination is natural
 
 **Example**:
+
 ```
 User: "Design the entire backend architecture"
 
@@ -120,11 +127,13 @@ Orchestrator
 ```
 
 **Use When**:
+
 - Multiple perspectives needed
 - Collaborative refinement required
 - Cross-domain expertise needed
 
 **Example**:
+
 ```
 User: "Review and improve the authentication design"
 
@@ -153,11 +162,13 @@ Request ────┼── Agent B ──┼── Consolidate → Result
 ```
 
 **Use When**:
+
 - Subtasks are independent
 - Time efficiency is critical
 - No dependencies between agents
 
 **Example**:
+
 ```
 User: "Audit the codebase for security, performance, and code quality"
 
@@ -180,6 +191,7 @@ Agent Work → Validation Gate → Human Review → Continue/Reject
 ```
 
 **Use When**:
+
 - Critical decisions require human approval
 - Constitutional gates require validation
 - High-risk changes need oversight
@@ -187,6 +199,7 @@ Agent Work → Validation Gate → Human Review → Continue/Reject
 **Validation Gates**:
 
 ### Phase -1 Gates (Constitution Enforcer)
+
 ```
 Before Implementation:
 □ Library-First validated
@@ -197,6 +210,7 @@ Before Implementation:
 ```
 
 ### Design Review Gate
+
 ```
 After Architecture Design:
 □ C4 diagrams reviewed
@@ -206,6 +220,7 @@ After Architecture Design:
 ```
 
 ### Release Gate
+
 ```
 Before Production Release:
 □ All tests passing
@@ -218,16 +233,16 @@ Before Production Release:
 
 ## Pattern Selection Matrix
 
-| Scenario | Recommended Pattern | Reason |
-|----------|-------------------|--------|
-| New feature development | Sequential | Clear workflow stages |
-| Codebase audit | Swarm | Independent analysis |
-| Architecture design | Nested | Hierarchical delegation |
-| Design review | Group Chat | Multi-perspective feedback |
-| Production release | Human-in-Loop | Critical validation |
-| Unclear request | Auto | Let orchestrator decide |
-| Long-running workflows | Replanning | Handle failures gracefully |
-| Resilient execution | Replanning | Automatic recovery |
+| Scenario                | Recommended Pattern | Reason                     |
+| ----------------------- | ------------------- | -------------------------- |
+| New feature development | Sequential          | Clear workflow stages      |
+| Codebase audit          | Swarm               | Independent analysis       |
+| Architecture design     | Nested              | Hierarchical delegation    |
+| Design review           | Group Chat          | Multi-perspective feedback |
+| Production release      | Human-in-Loop       | Critical validation        |
+| Unclear request         | Auto                | Let orchestrator decide    |
+| Long-running workflows  | Replanning          | Handle failures gracefully |
+| Resilient execution     | Replanning          | Automatic recovery         |
 
 ---
 
@@ -288,6 +303,7 @@ Execute Alternative
 ```
 
 **Use When**:
+
 - Tasks may fail or timeout
 - Alternative approaches exist
 - Resilience is critical
@@ -295,14 +311,15 @@ Execute Alternative
 
 **Components**:
 
-| Component | Purpose | CLI Command |
-|-----------|---------|-------------|
-| ReplanningEngine | Core replanning logic | `musubi-orchestrate replan <context-id>` |
-| GoalProgressTracker | Track goal completion | `musubi-orchestrate goal status` |
+| Component              | Purpose                  | CLI Command                                 |
+| ---------------------- | ------------------------ | ------------------------------------------- |
+| ReplanningEngine       | Core replanning logic    | `musubi-orchestrate replan <context-id>`    |
+| GoalProgressTracker    | Track goal completion    | `musubi-orchestrate goal status`            |
 | ProactivePathOptimizer | Optimize execution paths | `musubi-orchestrate optimize run <path-id>` |
-| AdaptiveGoalModifier | Adjust goals dynamically | `musubi-orchestrate goal update <goal-id>` |
+| AdaptiveGoalModifier   | Adjust goals dynamically | `musubi-orchestrate goal update <goal-id>`  |
 
 **Example**:
+
 ```
 User: "Deploy API to production"
 
@@ -324,6 +341,7 @@ Continue:
 ```
 
 **Trigger Types**:
+
 - `failure` - Task execution failed
 - `timeout` - Task exceeded time limit
 - `quality` - Output quality below threshold
@@ -331,6 +349,7 @@ Continue:
 - `dependency` - Dependency unavailable
 
 **Decision Types**:
+
 - `continue` - Proceed with next task
 - `retry` - Retry the failed task
 - `alternative` - Use alternative approach
@@ -338,6 +357,7 @@ Continue:
 - `human` - Escalate to human decision
 
 **CLI Usage**:
+
 ```bash
 # Execute replanning for a context
 musubi-orchestrate replan ctx-12345
@@ -352,4 +372,3 @@ musubi-orchestrate path analyze path-1
 musubi-orchestrate optimize suggest path-1
 musubi-orchestrate optimize run path-1
 ```
-

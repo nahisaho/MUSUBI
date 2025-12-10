@@ -1,6 +1,6 @@
 /**
  * Multi-Platform Support Module
- * 
+ *
  * Provides universal support for 13+ AI coding assistants:
  * - Claude Code (CLAUDE.md)
  * - GitHub Copilot (.github/copilot/)
@@ -29,7 +29,7 @@ const Platform = {
   CODEX: 'codex',
   AIDER: 'aider',
   CONTINUE: 'continue',
-  GENERIC: 'generic'
+  GENERIC: 'generic',
 };
 
 /**
@@ -42,7 +42,7 @@ const PlatformConfig = {
     directories: [],
     format: 'markdown',
     supportsSkills: true,
-    supportsMemory: true
+    supportsMemory: true,
   },
   [Platform.GITHUB_COPILOT]: {
     name: 'GitHub Copilot',
@@ -50,7 +50,7 @@ const PlatformConfig = {
     directories: ['.github/copilot/'],
     format: 'markdown',
     supportsSkills: true,
-    supportsMemory: true
+    supportsMemory: true,
   },
   [Platform.CURSOR]: {
     name: 'Cursor',
@@ -58,7 +58,7 @@ const PlatformConfig = {
     directories: ['.cursor/rules/'],
     format: 'markdown',
     supportsSkills: true,
-    supportsMemory: true
+    supportsMemory: true,
   },
   [Platform.WINDSURF]: {
     name: 'Windsurf',
@@ -66,7 +66,7 @@ const PlatformConfig = {
     directories: ['.windsurf/workflows/'],
     format: 'markdown',
     supportsSkills: true,
-    supportsMemory: false
+    supportsMemory: false,
   },
   [Platform.CLINE]: {
     name: 'Cline',
@@ -74,7 +74,7 @@ const PlatformConfig = {
     directories: ['.cline/'],
     format: 'markdown',
     supportsSkills: true,
-    supportsMemory: true
+    supportsMemory: true,
   },
   [Platform.OPENCODE]: {
     name: 'OpenCode',
@@ -82,7 +82,7 @@ const PlatformConfig = {
     directories: [],
     format: 'markdown',
     supportsSkills: true,
-    supportsMemory: false
+    supportsMemory: false,
   },
   [Platform.AMP]: {
     name: 'Amp',
@@ -90,7 +90,7 @@ const PlatformConfig = {
     directories: [],
     format: 'markdown',
     supportsSkills: true,
-    supportsMemory: false
+    supportsMemory: false,
   },
   [Platform.KILO_CODE]: {
     name: 'Kilo Code',
@@ -98,7 +98,7 @@ const PlatformConfig = {
     directories: [],
     format: 'markdown',
     supportsSkills: true,
-    supportsMemory: false
+    supportsMemory: false,
   },
   [Platform.ROO_CODE]: {
     name: 'Roo Code',
@@ -106,7 +106,7 @@ const PlatformConfig = {
     directories: ['.roo/'],
     format: 'markdown',
     supportsSkills: true,
-    supportsMemory: true
+    supportsMemory: true,
   },
   [Platform.CODEX]: {
     name: 'Codex CLI',
@@ -114,7 +114,7 @@ const PlatformConfig = {
     directories: [],
     format: 'markdown',
     supportsSkills: true,
-    supportsMemory: false
+    supportsMemory: false,
   },
   [Platform.AIDER]: {
     name: 'Aider',
@@ -122,7 +122,7 @@ const PlatformConfig = {
     directories: [],
     format: 'yaml',
     supportsSkills: false,
-    supportsMemory: false
+    supportsMemory: false,
   },
   [Platform.CONTINUE]: {
     name: 'Continue',
@@ -130,7 +130,7 @@ const PlatformConfig = {
     directories: ['.continue/'],
     format: 'json',
     supportsSkills: true,
-    supportsMemory: false
+    supportsMemory: false,
   },
   [Platform.GENERIC]: {
     name: 'Generic (AGENTS.md)',
@@ -138,8 +138,8 @@ const PlatformConfig = {
     directories: ['steering/'],
     format: 'markdown',
     supportsSkills: true,
-    supportsMemory: true
-  }
+    supportsMemory: true,
+  },
 };
 
 /**
@@ -273,7 +273,7 @@ class PlatformAdapter {
    */
   toMarkdown(content) {
     const lines = [];
-    
+
     if (content.title) {
       lines.push(`# ${content.title}`);
       lines.push('');
@@ -318,14 +318,14 @@ class PlatformAdapter {
    */
   toYaml(content) {
     const lines = [];
-    
+
     if (content.title) {
       lines.push(`# ${content.title}`);
     }
 
     for (const [key, value] of Object.entries(content)) {
       if (key === 'title') continue;
-      
+
       if (Array.isArray(value)) {
         lines.push(`${key}:`);
         for (const item of value) {
@@ -379,7 +379,7 @@ class PlatformAdapter {
       '- `#sdd-tasks <feature>` - Break down into tasks',
       '- `#sdd-implement <feature>` - Execute implementation',
       '- `#sdd-validate <feature>` - Validate constitutional compliance',
-      ''
+      '',
     ];
 
     return lines.join('\n');
@@ -400,29 +400,29 @@ class SkillConverter {
    */
   registerDefaultConverters() {
     // Claude to Copilot
-    this.register(Platform.CLAUDE_CODE, Platform.GITHUB_COPILOT, (skill) => {
+    this.register(Platform.CLAUDE_CODE, Platform.GITHUB_COPILOT, skill => {
       return {
         ...skill,
         format: 'copilot-instruction',
-        file: `.github/copilot/${skill.name}.md`
+        file: `.github/copilot/${skill.name}.md`,
       };
     });
 
     // Claude to Cursor
-    this.register(Platform.CLAUDE_CODE, Platform.CURSOR, (skill) => {
+    this.register(Platform.CLAUDE_CODE, Platform.CURSOR, skill => {
       return {
         ...skill,
         format: 'cursor-rule',
-        file: `.cursor/rules/${skill.name}.mdc`
+        file: `.cursor/rules/${skill.name}.mdc`,
       };
     });
 
     // Copilot to Claude
-    this.register(Platform.GITHUB_COPILOT, Platform.CLAUDE_CODE, (skill) => {
+    this.register(Platform.GITHUB_COPILOT, Platform.CLAUDE_CODE, skill => {
       return {
         ...skill,
         format: 'claude-skill',
-        file: `steering/skills/${skill.name}.md`
+        file: `steering/skills/${skill.name}.md`,
       };
     });
   }
@@ -448,14 +448,14 @@ class SkillConverter {
   convert(skill, from, to) {
     const key = `${from}:${to}`;
     const converter = this.converters.get(key);
-    
+
     if (!converter) {
       // Generic conversion
       return {
         ...skill,
         format: 'generic',
         originalPlatform: from,
-        targetPlatform: to
+        targetPlatform: to,
       };
     }
 
@@ -517,7 +517,7 @@ class MemorySynchronizer {
       const content = adapter.adaptContent(source);
       results.set(targetId, {
         file: adapter.primaryFile,
-        content
+        content,
       });
     }
 
@@ -538,7 +538,7 @@ class MemorySynchronizer {
         plan.push({
           from: sourceId,
           to: targetId,
-          targetFile: adapter.primaryFile
+          targetFile: adapter.primaryFile,
         });
       }
     }
@@ -577,7 +577,7 @@ class UniversalInitializer {
     for (const platformId of this.platforms) {
       const adapter = new PlatformAdapter(platformId);
       const platformFiles = this.generatePlatformFiles(adapter);
-      
+
       for (const [path, content] of platformFiles) {
         files.set(path, content);
       }
@@ -749,19 +749,19 @@ The constitution SHALL be reviewed and improved regularly.
       case Platform.CLAUDE_CODE:
         files.set('CLAUDE.md', adapter.generateAgentsReference());
         break;
-      
+
       case Platform.GITHUB_COPILOT:
         files.set('.github/copilot-instructions.md', adapter.generateAgentsReference());
         break;
-      
+
       case Platform.CURSOR:
         files.set('.cursorrules', adapter.generateAgentsReference());
         break;
-      
+
       case Platform.WINDSURF:
         files.set('.windsurfrules', adapter.generateAgentsReference());
         break;
-      
+
       case Platform.CLINE:
         files.set('.clinerules', adapter.generateAgentsReference());
         break;
@@ -790,7 +790,7 @@ class PlatformManager extends EventEmitter {
    */
   initialize(files) {
     const platforms = this.detector.detect(files);
-    
+
     for (const platformId of platforms) {
       const adapter = new PlatformAdapter(platformId);
       this.adapters.set(platformId, adapter);
@@ -831,14 +831,14 @@ class PlatformManager extends EventEmitter {
    */
   syncSteering(sourceId, memory) {
     this.synchronizer.registerSource(sourceId, memory);
-    
+
     for (const [platformId, adapter] of this.adapters) {
       this.synchronizer.registerTarget(platformId, adapter);
     }
 
     const results = this.synchronizer.sync(sourceId);
     this.emit('synced', { source: sourceId, targets: [...results.keys()] });
-    
+
     return results;
   }
 
@@ -850,9 +850,10 @@ class PlatformManager extends EventEmitter {
   generateInitFiles(options = {}) {
     const initializer = new UniversalInitializer({
       ...options,
-      platforms: this.detector.detectedPlatforms.length > 0 
-        ? this.detector.detectedPlatforms 
-        : [Platform.GENERIC]
+      platforms:
+        this.detector.detectedPlatforms.length > 0
+          ? this.detector.detectedPlatforms
+          : [Platform.GENERIC],
     });
 
     return initializer.generate();
@@ -865,7 +866,7 @@ class PlatformManager extends EventEmitter {
     const report = {
       detected: [],
       supported: [],
-      features: {}
+      features: {},
     };
 
     for (const [platformId, config] of Object.entries(PlatformConfig)) {
@@ -873,7 +874,7 @@ class PlatformManager extends EventEmitter {
         id: platformId,
         name: config.name,
         supportsSkills: config.supportsSkills,
-        supportsMemory: config.supportsMemory
+        supportsMemory: config.supportsMemory,
       });
     }
 
@@ -881,7 +882,7 @@ class PlatformManager extends EventEmitter {
       const config = PlatformConfig[platformId];
       report.detected.push({
         id: platformId,
-        name: config.name
+        name: config.name,
       });
     }
 
@@ -889,7 +890,7 @@ class PlatformManager extends EventEmitter {
       totalPlatforms: Object.keys(PlatformConfig).length,
       detectedCount: this.detector.detectedPlatforms.length,
       skillSupport: report.supported.filter(p => p.supportsSkills).length,
-      memorySupport: report.supported.filter(p => p.supportsMemory).length
+      memorySupport: report.supported.filter(p => p.supportsMemory).length,
     };
 
     return report;
@@ -902,7 +903,7 @@ class PlatformManager extends EventEmitter {
     return {
       detectedPlatforms: this.detector.detectedPlatforms,
       adapters: [...this.adapters.keys()],
-      projectRoot: this.projectRoot
+      projectRoot: this.projectRoot,
     };
   }
 }
@@ -925,5 +926,5 @@ module.exports = {
   MemorySynchronizer,
   UniversalInitializer,
   PlatformManager,
-  createPlatformManager
+  createPlatformManager,
 };

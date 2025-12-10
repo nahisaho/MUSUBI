@@ -1,14 +1,14 @@
 /**
  * Repository Map Generator
- * 
+ *
  * Generates a comprehensive map of the repository structure for LLM context.
  * Implements efficient file scanning, caching, and incremental updates.
- * 
+ *
  * Part of MUSUBI v5.0.0 - Codebase Intelligence
- * 
+ *
  * @module analyzers/repository-map
  * @version 1.0.0
- * 
+ *
  * @traceability
  * - Requirement: REQ-P4-001 (Repository Map Generation)
  * - Design: docs/design/tdd-musubi-v5.0.0.md#2.1
@@ -92,7 +92,7 @@ const LANGUAGE_MAP = {
   '.gql': 'graphql',
   '.dockerfile': 'dockerfile',
   '.vue': 'vue',
-  '.svelte': 'svelte'
+  '.svelte': 'svelte',
 };
 
 /**
@@ -111,7 +111,7 @@ const ENTRY_PATTERNS = [
   /^pyproject\.toml$/,
   /^Gemfile$/,
   /^pom\.xml$/,
-  /^build\.gradle(\.kts)?$/
+  /^build\.gradle(\.kts)?$/,
 ];
 
 /**
@@ -151,7 +151,7 @@ const DEFAULT_IGNORE_PATTERNS = [
   'pnpm-lock.yaml',
   'Cargo.lock',
   'Gemfile.lock',
-  'poetry.lock'
+  'poetry.lock',
 ];
 
 /**
@@ -172,41 +172,38 @@ class RepositoryMap extends EventEmitter {
   constructor(options = {}) {
     super();
     this.rootPath = options.rootPath || process.cwd();
-    this.ignorePatterns = [
-      ...DEFAULT_IGNORE_PATTERNS,
-      ...(options.ignorePatterns || [])
-    ];
+    this.ignorePatterns = [...DEFAULT_IGNORE_PATTERNS, ...(options.ignorePatterns || [])];
     this.maxDepth = options.maxDepth ?? 20;
     this.maxFiles = options.maxFiles ?? 10000;
     this.includeContent = options.includeContent ?? false;
     this.contentMaxSize = options.contentMaxSize ?? 10000;
-    
+
     // Cache
     this.cache = new Map();
     this.lastScanTime = null;
-    
+
     // Statistics
     this.stats = {
       totalFiles: 0,
       totalDirs: 0,
       totalSize: 0,
       byLanguage: {},
-      byExtension: {}
+      byExtension: {},
     };
-    
+
     // Results
     this.files = [];
     this.structure = {};
     this.entryPoints = [];
   }
-  
+
   /**
    * Generate repository map
    * @returns {Promise<RepositoryMap>}
    */
   async generate() {
     this.emit('scan:start', { rootPath: this.rootPath });
-    
+
     // Reset state
     this.files = [];
     this.structure = {};
@@ -216,31 +213,30 @@ class RepositoryMap extends EventEmitter {
       totalDirs: 0,
       totalSize: 0,
       byLanguage: {},
-      byExtension: {}
+      byExtension: {},
     };
-    
+
     try {
       await this.scanDirectory(this.rootPath, '', 0);
       this.lastScanTime = new Date();
-      
+
       const result = {
         root: this.rootPath,
         generatedAt: this.lastScanTime,
         files: this.files,
         stats: this.stats,
         structure: this.structure,
-        entryPoints: this.entryPoints
+        entryPoints: this.entryPoints,
       };
-      
+
       this.emit('scan:complete', result);
       return result;
-      
     } catch (error) {
       this.emit('scan:error', error);
       throw error;
     }
   }
-  
+
   /**
    * Scan a directory recursively
    * @param {string} dirPath - Absolute directory path
@@ -251,7 +247,7 @@ class RepositoryMap extends EventEmitter {
   async scanDirectory(dirPath, relativePath, depth) {
     if (depth > this.maxDepth) return;
     if (this.files.length >= this.maxFiles) return;
-    
+
     let entries;
     try {
       entries = await fs.promises.readdir(dirPath, { withFileTypes: true });
@@ -259,14 +255,14 @@ class RepositoryMap extends EventEmitter {
       this.emit('scan:dirError', { path: relativePath, error });
       return;
     }
-    
+
     for (const entry of entries) {
       if (this.files.length >= this.maxFiles) break;
       if (this.shouldIgnore(entry.name)) continue;
-      
+
       const entryRelPath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
       const entryAbsPath = path.join(dirPath, entry.name);
-      
+
       if (entry.isDirectory()) {
         this.stats.totalDirs++;
         this.setStructureNode(entryRelPath, { type: 'directory', children: {} });
@@ -276,7 +272,7 @@ class RepositoryMap extends EventEmitter {
       }
     }
   }
-  
+
   /**
    * Process a single file
    * @param {string} absPath - Absolute file path
@@ -289,13 +285,13 @@ class RepositoryMap extends EventEmitter {
       const ext = path.extname(relPath).toLowerCase();
       const basename = path.basename(relPath);
       const language = LANGUAGE_MAP[ext] || 'unknown';
-      
+
       // Detect entry points
       const isEntry = ENTRY_PATTERNS.some(pattern => pattern.test(basename));
       if (isEntry) {
         this.entryPoints.push(relPath);
       }
-      
+
       // File info
       const fileInfo = {
         path: relPath,
@@ -305,15 +301,15 @@ class RepositoryMap extends EventEmitter {
         mtime: stat.mtime.getTime(),
         language,
         isEntry,
-        exports: []
+        exports: [],
       };
-      
+
       // Extract exports for JS/TS files
       if (['javascript', 'typescript'].includes(language) && stat.size < 100000) {
         const exports = await this.extractExports(absPath);
         fileInfo.exports = exports;
       }
-      
+
       // Optionally include content
       if (this.includeContent && stat.size <= this.contentMaxSize) {
         try {
@@ -323,24 +319,23 @@ class RepositoryMap extends EventEmitter {
           // Binary or unreadable file
         }
       }
-      
+
       // Update statistics
       this.stats.totalFiles++;
       this.stats.totalSize += stat.size;
       this.stats.byLanguage[language] = (this.stats.byLanguage[language] || 0) + 1;
       this.stats.byExtension[ext] = (this.stats.byExtension[ext] || 0) + 1;
-      
+
       // Add to results
       this.files.push(fileInfo);
       this.setStructureNode(relPath, { type: 'file', language, size: stat.size });
-      
+
       this.emit('file:processed', fileInfo);
-      
     } catch (error) {
       this.emit('file:error', { path: relPath, error });
     }
   }
-  
+
   /**
    * Extract exported symbols from JS/TS file
    * @param {string} filePath - File path
@@ -351,39 +346,40 @@ class RepositoryMap extends EventEmitter {
     try {
       const content = await fs.promises.readFile(filePath, 'utf-8');
       const exports = [];
-      
+
       // CommonJS exports
       const cjsMatch = content.match(/module\.exports\s*=\s*\{([^}]+)\}/);
       if (cjsMatch) {
         const props = cjsMatch[1].match(/\b([a-zA-Z_$][a-zA-Z0-9_$]*)\b/g);
         if (props) exports.push(...props);
       }
-      
+
       // Named exports
-      const namedExports = content.matchAll(/export\s+(?:const|let|var|function|class|async function)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g);
+      const namedExports = content.matchAll(
+        /export\s+(?:const|let|var|function|class|async function)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g
+      );
       for (const match of namedExports) {
         exports.push(match[1]);
       }
-      
+
       // Export statements
       const exportStmts = content.matchAll(/export\s*\{\s*([^}]+)\s*\}/g);
       for (const match of exportStmts) {
         const names = match[1].match(/\b([a-zA-Z_$][a-zA-Z0-9_$]*)\b/g);
         if (names) exports.push(...names);
       }
-      
+
       // Default export
       if (/export\s+default/.test(content)) {
         exports.push('default');
       }
-      
+
       return [...new Set(exports)];
-      
     } catch {
       return [];
     }
   }
-  
+
   /**
    * Set a node in the structure tree
    * @param {string} relPath - Relative path
@@ -393,14 +389,14 @@ class RepositoryMap extends EventEmitter {
   setStructureNode(relPath, value) {
     const parts = relPath.split('/');
     let current = this.structure;
-    
+
     for (let i = 0; i < parts.length - 1; i++) {
       if (!current[parts[i]]) {
         current[parts[i]] = { type: 'directory', children: {} };
       }
       current = current[parts[i]].children || current[parts[i]];
     }
-    
+
     const lastName = parts[parts.length - 1];
     if (value.type === 'directory') {
       if (!current[lastName]) {
@@ -410,7 +406,7 @@ class RepositoryMap extends EventEmitter {
       current[lastName] = value;
     }
   }
-  
+
   /**
    * Check if a path should be ignored
    * @param {string} name - File/directory name
@@ -426,7 +422,7 @@ class RepositoryMap extends EventEmitter {
       return name === pattern;
     });
   }
-  
+
   /**
    * Get files by language
    * @param {string} language - Programming language
@@ -435,7 +431,7 @@ class RepositoryMap extends EventEmitter {
   getFilesByLanguage(language) {
     return this.files.filter(f => f.language === language);
   }
-  
+
   /**
    * Get files by extension
    * @param {string} extension - File extension (with dot)
@@ -444,7 +440,7 @@ class RepositoryMap extends EventEmitter {
   getFilesByExtension(extension) {
     return this.files.filter(f => f.extension === extension);
   }
-  
+
   /**
    * Get files in directory
    * @param {string} dirPath - Relative directory path
@@ -454,7 +450,7 @@ class RepositoryMap extends EventEmitter {
     const prefix = dirPath.endsWith('/') ? dirPath : `${dirPath}/`;
     return this.files.filter(f => f.path.startsWith(prefix));
   }
-  
+
   /**
    * Search files by pattern
    * @param {string|RegExp} pattern - Search pattern
@@ -464,7 +460,7 @@ class RepositoryMap extends EventEmitter {
     const regex = typeof pattern === 'string' ? new RegExp(pattern) : pattern;
     return this.files.filter(f => regex.test(f.path));
   }
-  
+
   /**
    * Generate tree view string
    * @param {Object} [node] - Starting node
@@ -474,18 +470,18 @@ class RepositoryMap extends EventEmitter {
    */
   toTreeString(node = this.structure, prefix = '', maxDepth = 5) {
     if (maxDepth <= 0) return prefix + '...\n';
-    
+
     let result = '';
     const entries = Object.entries(node);
-    
+
     for (let i = 0; i < entries.length; i++) {
       const [name, info] = entries[i];
       const isLast = i === entries.length - 1;
       const connector = isLast ? '└── ' : '├── ';
       const childPrefix = isLast ? '    ' : '│   ';
-      
+
       result += `${prefix}${connector}${name}`;
-      
+
       if (info.type === 'file') {
         result += ` (${info.language})\n`;
       } else {
@@ -495,10 +491,10 @@ class RepositoryMap extends EventEmitter {
         }
       }
     }
-    
+
     return result;
   }
-  
+
   /**
    * Generate LLM-optimized context
    * @param {Object} options - Context options
@@ -509,17 +505,17 @@ class RepositoryMap extends EventEmitter {
    */
   toLLMContext(options = {}) {
     const { maxTokens = 4000, focusPaths = [], languages = [] } = options;
-    
+
     let context = `# Repository Map\n\n`;
     context += `**Root**: ${this.rootPath}\n`;
     context += `**Generated**: ${this.lastScanTime?.toISOString() || 'N/A'}\n\n`;
-    
+
     // Statistics
     context += `## Statistics\n\n`;
     context += `- Total Files: ${this.stats.totalFiles}\n`;
     context += `- Total Directories: ${this.stats.totalDirs}\n`;
     context += `- Total Size: ${this.formatBytes(this.stats.totalSize)}\n\n`;
-    
+
     // Language breakdown
     context += `### Languages\n\n`;
     const langEntries = Object.entries(this.stats.byLanguage)
@@ -529,7 +525,7 @@ class RepositoryMap extends EventEmitter {
       context += `- ${lang}: ${count} files\n`;
     }
     context += '\n';
-    
+
     // Entry points
     if (this.entryPoints.length > 0) {
       context += `## Entry Points\n\n`;
@@ -538,36 +534,36 @@ class RepositoryMap extends EventEmitter {
       }
       context += '\n';
     }
-    
+
     // Structure (token-limited)
     context += `## Structure\n\n\`\`\`\n`;
     const treeStr = this.toTreeString(this.structure, '', 4);
     const truncatedTree = this.truncateToTokens(treeStr, Math.floor(maxTokens * 0.6));
     context += truncatedTree;
     context += `\`\`\`\n\n`;
-    
+
     // Key files
     let keyFiles = this.files;
-    
+
     // Filter by focus paths
     if (focusPaths.length > 0) {
-      keyFiles = keyFiles.filter(f => 
+      keyFiles = keyFiles.filter(f =>
         focusPaths.some(fp => f.path.startsWith(fp) || f.path.includes(fp))
       );
     }
-    
+
     // Filter by languages
     if (languages.length > 0) {
       keyFiles = keyFiles.filter(f => languages.includes(f.language));
     }
-    
+
     // Sort by importance (entry points first, then by size)
     keyFiles.sort((a, b) => {
       if (a.isEntry && !b.isEntry) return -1;
       if (!a.isEntry && b.isEntry) return 1;
       return b.exports.length - a.exports.length;
     });
-    
+
     // Add key files with exports
     context += `## Key Modules\n\n`;
     for (const file of keyFiles.slice(0, 20)) {
@@ -581,10 +577,10 @@ class RepositoryMap extends EventEmitter {
         context += '\n';
       }
     }
-    
+
     return context;
   }
-  
+
   /**
    * Format bytes to human readable
    * @param {number} bytes - Size in bytes
@@ -598,7 +594,7 @@ class RepositoryMap extends EventEmitter {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
-  
+
   /**
    * Truncate string to approximate token count
    * @param {string} str - Input string
@@ -612,7 +608,7 @@ class RepositoryMap extends EventEmitter {
     if (str.length <= maxChars) return str;
     return str.slice(0, maxChars) + '\n... (truncated)\n';
   }
-  
+
   /**
    * Export to JSON
    * @returns {Object}
@@ -624,10 +620,10 @@ class RepositoryMap extends EventEmitter {
       stats: this.stats,
       files: this.files,
       entryPoints: this.entryPoints,
-      structure: this.structure
+      structure: this.structure,
     };
   }
-  
+
   /**
    * Import from JSON
    * @param {Object} data - JSON data
@@ -640,7 +636,7 @@ class RepositoryMap extends EventEmitter {
     this.entryPoints = data.entryPoints;
     this.structure = data.structure;
   }
-  
+
   /**
    * Get cache key for incremental updates
    * @returns {string}
@@ -648,7 +644,7 @@ class RepositoryMap extends EventEmitter {
   getCacheKey() {
     return `repomap:${this.rootPath}`;
   }
-  
+
   /**
    * Check if file has changed since last scan
    * @param {string} filePath - Relative file path
@@ -688,5 +684,5 @@ module.exports = {
   generateRepositoryMap,
   LANGUAGE_MAP,
   ENTRY_PATTERNS,
-  DEFAULT_IGNORE_PATTERNS
+  DEFAULT_IGNORE_PATTERNS,
 };

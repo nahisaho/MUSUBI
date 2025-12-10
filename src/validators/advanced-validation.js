@@ -1,7 +1,7 @@
 /**
  * Advanced Validation Engine
  * クロスアーティファクト一貫性検証と仕様ギャップ検出
- * 
+ *
  * @module validators/advanced-validation
  */
 
@@ -15,7 +15,7 @@ const VALIDATION_TYPE = {
   GAP_DETECTION: 'gap-detection',
   TRACEABILITY: 'traceability',
   CONSISTENCY: 'consistency',
-  COMPLETENESS: 'completeness'
+  COMPLETENESS: 'completeness',
 };
 
 /**
@@ -27,7 +27,7 @@ const ARTIFACT_TYPE = {
   IMPLEMENTATION: 'implementation',
   TEST: 'test',
   STEERING: 'steering',
-  DOCUMENTATION: 'documentation'
+  DOCUMENTATION: 'documentation',
 };
 
 /**
@@ -37,7 +37,7 @@ const GAP_SEVERITY = {
   CRITICAL: 'critical',
   MAJOR: 'major',
   MINOR: 'minor',
-  INFO: 'info'
+  INFO: 'info',
 };
 
 /**
@@ -51,7 +51,7 @@ class AdvancedValidation extends EventEmitter {
    */
   constructor(options = {}) {
     super();
-    
+
     this.strict = options.strict ?? false;
     this.customRules = new Map();
     this.artifacts = new Map();
@@ -79,7 +79,7 @@ class AdvancedValidation extends EventEmitter {
     this.artifacts.set(id, {
       id,
       ...artifact,
-      registeredAt: new Date().toISOString()
+      registeredAt: new Date().toISOString(),
     });
 
     this.emit('artifact-registered', { id, artifact });
@@ -115,7 +115,7 @@ class AdvancedValidation extends EventEmitter {
     this.traceabilityMatrix.get(sourceId).push({
       target: targetId,
       type: linkType,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     });
   }
 
@@ -139,7 +139,7 @@ class AdvancedValidation extends EventEmitter {
           artifactId: id,
           artifactType: artifact.type,
           severity: GAP_SEVERITY.MAJOR,
-          message: `Artifact "${id}" has no traceability links`
+          message: `Artifact "${id}" has no traceability links`,
         });
       }
 
@@ -155,7 +155,7 @@ class AdvancedValidation extends EventEmitter {
             sourceId,
             targetId: link.target,
             severity: GAP_SEVERITY.CRITICAL,
-            message: `Broken link: ${sourceId} -> ${link.target}`
+            message: `Broken link: ${sourceId} -> ${link.target}`,
           });
         }
       }
@@ -175,7 +175,7 @@ class AdvancedValidation extends EventEmitter {
               targetId: link.target,
               linkType: link.type,
               severity: GAP_SEVERITY.MINOR,
-              message: `Unusual link: ${sourceArtifact.type} -[${link.type}]-> ${targetArtifact.type}`
+              message: `Unusual link: ${sourceArtifact.type} -[${link.type}]-> ${targetArtifact.type}`,
             });
           }
         }
@@ -187,7 +187,7 @@ class AdvancedValidation extends EventEmitter {
       valid: issues.filter(i => i.severity === GAP_SEVERITY.CRITICAL).length === 0,
       issues,
       validated,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     this.validationHistory.push(result);
@@ -216,7 +216,7 @@ class AdvancedValidation extends EventEmitter {
       'requirement-design': ['implements', 'addresses', 'derives'],
       'design-implementation': ['implements', 'realizes'],
       'implementation-test': ['tests', 'verifies'],
-      'requirement-test': ['verifies', 'validates']
+      'requirement-test': ['verifies', 'validates'],
     };
 
     const key = `${sourceType}-${targetType}`;
@@ -247,7 +247,7 @@ class AdvancedValidation extends EventEmitter {
           type: 'missing-design',
           artifactId: req.id,
           severity: GAP_SEVERITY.MAJOR,
-          message: `Requirement "${req.id}" has no associated design`
+          message: `Requirement "${req.id}" has no associated design`,
         });
       }
     }
@@ -260,7 +260,7 @@ class AdvancedValidation extends EventEmitter {
           type: 'missing-implementation',
           artifactId: design.id,
           severity: GAP_SEVERITY.MAJOR,
-          message: `Design "${design.id}" has no associated implementation`
+          message: `Design "${design.id}" has no associated implementation`,
         });
       }
     }
@@ -273,7 +273,7 @@ class AdvancedValidation extends EventEmitter {
           type: 'missing-test',
           artifactId: impl.id,
           severity: GAP_SEVERITY.MINOR,
-          message: `Implementation "${impl.id}" has no associated tests`
+          message: `Implementation "${impl.id}" has no associated tests`,
         });
       }
     }
@@ -284,7 +284,7 @@ class AdvancedValidation extends EventEmitter {
       designs: designs.length,
       implementations: implementations.length,
       tests: tests.length,
-      coverage: this.calculateCoverage()
+      coverage: this.calculateCoverage(),
     };
 
     const result = {
@@ -293,7 +293,7 @@ class AdvancedValidation extends EventEmitter {
       completeness,
       gapCount: gaps.length,
       criticalGaps: gaps.filter(g => g.severity === GAP_SEVERITY.CRITICAL).length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     this.validationHistory.push(result);
@@ -375,7 +375,7 @@ class AdvancedValidation extends EventEmitter {
             sourceId,
             targetId: link.target,
             severity: GAP_SEVERITY.INFO,
-            message: `Unidirectional link: ${sourceId} -> ${link.target}`
+            message: `Unidirectional link: ${sourceId} -> ${link.target}`,
           });
         }
       }
@@ -391,7 +391,7 @@ class AdvancedValidation extends EventEmitter {
       coverage,
       artifactCount: this.artifacts.size,
       linkCount: this.countLinks(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     this.validationHistory.push(result);
@@ -420,7 +420,7 @@ class AdvancedValidation extends EventEmitter {
     }
     this.customRules.set(name, {
       severity: GAP_SEVERITY.MINOR,
-      ...rule
+      ...rule,
     });
   }
 
@@ -440,32 +440,26 @@ class AdvancedValidation extends EventEmitter {
         const result = rule.validate(this.artifacts, this.traceabilityMatrix);
         customResults.push({
           name,
-          ...result
+          ...result,
         });
       } catch (error) {
         customResults.push({
           name,
-          error: error.message
+          error: error.message,
         });
       }
     }
 
-    const allIssues = [
-      ...crossArtifact.issues,
-      ...gaps.gaps,
-      ...traceability.issues
-    ];
+    const allIssues = [...crossArtifact.issues, ...gaps.gaps, ...traceability.issues];
 
-    const overallValid = allIssues.filter(i => 
-      i.severity === GAP_SEVERITY.CRITICAL
-    ).length === 0;
+    const overallValid = allIssues.filter(i => i.severity === GAP_SEVERITY.CRITICAL).length === 0;
 
     return {
       valid: overallValid,
       summary: {
         crossArtifact: crossArtifact.valid,
         gaps: gaps.gapCount === 0,
-        traceability: traceability.valid
+        traceability: traceability.valid,
       },
       crossArtifact,
       gaps,
@@ -473,7 +467,7 @@ class AdvancedValidation extends EventEmitter {
       customRules: customResults,
       totalIssues: allIssues.length,
       criticalIssues: allIssues.filter(i => i.severity === GAP_SEVERITY.CRITICAL).length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -549,7 +543,7 @@ class AdvancedValidation extends EventEmitter {
       linkCount: this.countLinks(),
       ruleCount: this.customRules.size,
       historyCount: this.validationHistory.length,
-      coverage: this.calculateCoverage()
+      coverage: this.calculateCoverage(),
     };
   }
 
@@ -576,5 +570,5 @@ module.exports = {
   createAdvancedValidation,
   VALIDATION_TYPE,
   ARTIFACT_TYPE,
-  GAP_SEVERITY
+  GAP_SEVERITY,
 };

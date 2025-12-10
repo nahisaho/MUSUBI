@@ -1,6 +1,6 @@
 /**
  * Template Constraints Module
- * 
+ *
  * LLM-constraining syntax for steering templates with:
  * - Uncertainty markers ({?...?}, {~...~})
  * - Required checklists ([x] items)
@@ -18,16 +18,16 @@ const ConstraintType = {
   CHOICE: 'choice',
   RANGE: 'range',
   PATTERN: 'pattern',
-  CUSTOM: 'custom'
+  CUSTOM: 'custom',
 };
 
 // Uncertainty Marker Types
 const UncertaintyMarker = {
-  UNKNOWN: '?',      // {?...?} - value unknown
-  ESTIMATE: '~',     // {~...~} - estimated value
-  PLACEHOLDER: '#',  // {#...#} - placeholder
-  TODO: '!',         // {!...!} - needs action
-  REVIEW: '@'        // {@...@} - needs review
+  UNKNOWN: '?', // {?...?} - value unknown
+  ESTIMATE: '~', // {~...~} - estimated value
+  PLACEHOLDER: '#', // {#...#} - placeholder
+  TODO: '!', // {!...!} - needs action
+  REVIEW: '@', // {@...@} - needs review
 };
 
 // Validation Severity
@@ -35,7 +35,7 @@ const Severity = {
   ERROR: 'error',
   WARNING: 'warning',
   INFO: 'info',
-  HINT: 'hint'
+  HINT: 'hint',
 };
 
 /**
@@ -59,8 +59,8 @@ class Constraint {
         constraint: this.name,
         type: this.type,
         severity: this.severity,
-        message: result === true ? null : (typeof result === 'string' ? result : this.message),
-        value
+        message: result === true ? null : typeof result === 'string' ? result : this.message,
+        value,
       };
     } catch (error) {
       return {
@@ -70,7 +70,7 @@ class Constraint {
         severity: this.severity,
         message: error.message,
         value,
-        error
+        error,
       };
     }
   }
@@ -114,16 +114,14 @@ class ChecklistItem {
       if (context.checklist && !context.checklist[dep]?.checked) {
         return {
           valid: false,
-          message: `Dependency "${dep}" must be completed first`
+          message: `Dependency "${dep}" must be completed first`,
         };
       }
     }
 
     return {
       valid: !this.required || this.checked,
-      message: this.required && !this.checked 
-        ? `Required item not checked: ${this.text}` 
-        : null
+      message: this.required && !this.checked ? `Required item not checked: ${this.text}` : null,
     };
   }
 }
@@ -144,7 +142,7 @@ class Checklist {
   addItem(id, text, options = {}) {
     const item = new ChecklistItem(text, {
       ...options,
-      order: this.items.size
+      order: this.items.size,
     });
     this.items.set(id, item);
     return item;
@@ -188,7 +186,7 @@ class Checklist {
       if (!result.valid && !result.skipped) {
         issues.push({
           item: id,
-          message: result.message
+          message: result.message,
         });
       }
     }
@@ -198,7 +196,7 @@ class Checklist {
       const checked = this.getCheckedCount();
       if (checked < this.minRequired) {
         issues.push({
-          message: `At least ${this.minRequired} items must be checked (current: ${checked})`
+          message: `At least ${this.minRequired} items must be checked (current: ${checked})`,
         });
       }
     }
@@ -208,7 +206,7 @@ class Checklist {
       const checked = this.getCheckedCount();
       if (checked > this.maxAllowed) {
         issues.push({
-          message: `At most ${this.maxAllowed} items can be checked (current: ${checked})`
+          message: `At most ${this.maxAllowed} items can be checked (current: ${checked})`,
         });
       }
     }
@@ -218,13 +216,13 @@ class Checklist {
       checklist: this.name,
       checked: this.getCheckedCount(),
       total: this.items.size,
-      issues
+      issues,
     };
   }
 
   toMarkdown() {
     const lines = [`## ${this.name}`, ''];
-    
+
     for (const [, item] of this.items) {
       const checkbox = item.checked ? '[x]' : '[ ]';
       const required = item.required ? '' : ' (optional)';
@@ -238,7 +236,7 @@ class Checklist {
     const lines = content.split('\n');
     let name = 'Checklist';
     const checklist = new Checklist(name);
-    
+
     for (const line of lines) {
       // Parse header
       const headerMatch = line.match(/^##\s+(.+)$/);
@@ -255,7 +253,7 @@ class Checklist {
         const text = itemMatch[2];
         const required = !itemMatch[3];
         const id = text.toLowerCase().replace(/\s+/g, '-').slice(0, 50);
-        
+
         checklist.addItem(id, text, { checked, required });
       }
     }
@@ -274,7 +272,7 @@ class UncertaintyParser {
       ['~', { name: 'estimate', pattern: /\{~(.+?)~\}/g }],
       ['#', { name: 'placeholder', pattern: /\{#(.+?)#\}/g }],
       ['!', { name: 'todo', pattern: /\{!(.+?)!\}/g }],
-      ['@', { name: 'review', pattern: /\{@(.+?)@\}/g }]
+      ['@', { name: 'review', pattern: /\{@(.+?)@\}/g }],
     ]);
   }
 
@@ -291,7 +289,7 @@ class UncertaintyParser {
           marker,
           value: match[1],
           original: match[0],
-          index: match.index
+          index: match.index,
         });
       }
     }
@@ -307,7 +305,10 @@ class UncertaintyParser {
       for (const [marker] of this.markers) {
         const patterns = [
           new RegExp(`\\{\\${marker}${this.escapeRegex(key)}\\${marker}\\}`, 'g'),
-          new RegExp(`\\{\\${marker}[^${marker}]*${this.escapeRegex(key)}[^${marker}]*\\${marker}\\}`, 'g')
+          new RegExp(
+            `\\{\\${marker}[^${marker}]*${this.escapeRegex(key)}[^${marker}]*\\${marker}\\}`,
+            'g'
+          ),
         ];
 
         for (const pattern of patterns) {
@@ -378,7 +379,7 @@ class TemplateSection {
       issues.push({
         constraint: 'required',
         severity: Severity.ERROR,
-        message: `Section "${this.name}" is required`
+        message: `Section "${this.name}" is required`,
       });
       return { valid: false, section: this.name, issues };
     }
@@ -389,7 +390,7 @@ class TemplateSection {
         issues.push({
           constraint: 'dependency',
           severity: Severity.ERROR,
-          message: `Section "${this.name}" requires "${dep}" to be defined`
+          message: `Section "${this.name}" requires "${dep}" to be defined`,
         });
       }
     }
@@ -400,7 +401,7 @@ class TemplateSection {
         issues.push({
           constraint: 'minLength',
           severity: Severity.WARNING,
-          message: `Section "${this.name}" should be at least ${this.minLength} characters`
+          message: `Section "${this.name}" should be at least ${this.minLength} characters`,
         });
       }
 
@@ -408,7 +409,7 @@ class TemplateSection {
         issues.push({
           constraint: 'maxLength',
           severity: Severity.WARNING,
-          message: `Section "${this.name}" should be at most ${this.maxLength} characters`
+          message: `Section "${this.name}" should be at most ${this.maxLength} characters`,
         });
       }
 
@@ -417,7 +418,7 @@ class TemplateSection {
         issues.push({
           constraint: 'pattern',
           severity: Severity.ERROR,
-          message: `Section "${this.name}" does not match required pattern`
+          message: `Section "${this.name}" does not match required pattern`,
         });
       }
     }
@@ -429,7 +430,7 @@ class TemplateSection {
         issues.push({
           constraint: constraint.name,
           severity: result.severity,
-          message: result.message
+          message: result.message,
         });
       }
     }
@@ -437,7 +438,7 @@ class TemplateSection {
     return {
       valid: !issues.some(i => i.severity === Severity.ERROR),
       section: this.name,
-      issues
+      issues,
     };
   }
 }
@@ -486,12 +487,12 @@ class TemplateDefinition {
       template: this.name,
       sections: [],
       checklists: [],
-      global: []
+      global: [],
     };
 
     const sectionContext = {
       ...context,
-      sections: document.sections || {}
+      sections: document.sections || {},
     };
 
     // Validate sections
@@ -499,7 +500,7 @@ class TemplateDefinition {
       const content = document.sections?.[name] || '';
       const result = section.validate(content, sectionContext);
       results.sections.push(result);
-      
+
       if (!result.valid) {
         results.valid = false;
       }
@@ -508,7 +509,7 @@ class TemplateDefinition {
     // Validate checklists
     for (const [name, checklist] of this.checklists) {
       const items = document.checklists?.[name] || {};
-      
+
       // Apply checked state from document
       for (const [id, checked] of Object.entries(items)) {
         if (checked) checklist.check(id);
@@ -565,7 +566,7 @@ class TemplateConstraintEngine extends EventEmitter {
     const doc = {
       sections: {},
       checklists: {},
-      uncertainties: []
+      uncertainties: [],
     };
 
     // Parse sections (## headers)
@@ -576,7 +577,7 @@ class TemplateConstraintEngine extends EventEmitter {
 
     for (const line of lines) {
       const sectionMatch = line.match(/^##\s+(.+)$/);
-      
+
       if (sectionMatch) {
         // Save previous section
         if (currentSection) {
@@ -626,13 +627,11 @@ class TemplateConstraintEngine extends EventEmitter {
     if (!template) {
       return {
         valid: false,
-        error: `Template "${templateName}" not found`
+        error: `Template "${templateName}" not found`,
       };
     }
 
-    const document = typeof content === 'string' 
-      ? this.parseDocument(content)
-      : content;
+    const document = typeof content === 'string' ? this.parseDocument(content) : content;
 
     const results = template.validate(document);
 
@@ -642,13 +641,13 @@ class TemplateConstraintEngine extends EventEmitter {
       results.uncertainties = document.uncertainties.map(u => ({
         type: u.type,
         value: u.value,
-        message: `Unresolved ${u.type}: ${u.value}`
+        message: `Unresolved ${u.type}: ${u.value}`,
       }));
     }
 
     this.emit('validated', {
       template: templateName,
-      results
+      results,
     });
 
     return results;
@@ -703,7 +702,7 @@ class TemplateConstraintEngine extends EventEmitter {
   createSteeringTemplates() {
     // Structure template
     const structure = new TemplateDefinition('Structure', {
-      description: 'Project structure and architecture'
+      description: 'Project structure and architecture',
     });
 
     structure.addSection('Overview', { required: true, minLength: 50 });
@@ -720,7 +719,7 @@ class TemplateConstraintEngine extends EventEmitter {
 
     // Tech template
     const tech = new TemplateDefinition('Tech', {
-      description: 'Technology stack and tools'
+      description: 'Technology stack and tools',
     });
 
     tech.addSection('Languages', { required: true });
@@ -736,7 +735,7 @@ class TemplateConstraintEngine extends EventEmitter {
 
     // Product template
     const product = new TemplateDefinition('Product', {
-      description: 'Product context and goals'
+      description: 'Product context and goals',
     });
 
     product.addSection('Vision', { required: true, minLength: 100 });
@@ -761,7 +760,7 @@ class TemplateConstraintEngine extends EventEmitter {
  */
 function createTemplateConstraintEngine(options = {}) {
   const engine = new TemplateConstraintEngine(options);
-  
+
   if (options.includeSteeringTemplates !== false) {
     engine.createSteeringTemplates();
   }
@@ -774,7 +773,7 @@ module.exports = {
   ConstraintType,
   UncertaintyMarker,
   Severity,
-  
+
   // Classes
   Constraint,
   ChecklistItem,
@@ -783,7 +782,7 @@ module.exports = {
   TemplateSection,
   TemplateDefinition,
   TemplateConstraintEngine,
-  
+
   // Factory
-  createTemplateConstraintEngine
+  createTemplateConstraintEngine,
 };

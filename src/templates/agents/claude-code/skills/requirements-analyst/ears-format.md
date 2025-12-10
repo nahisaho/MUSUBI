@@ -15,6 +15,7 @@ EARS is a structured syntax for writing unambiguous, testable requirements. All 
 **Use When**: Requirement applies at all times, unconditionally.
 
 **Examples**:
+
 ```markdown
 REQ-001: The system SHALL encrypt all passwords using bcrypt with minimum 12 rounds.
 REQ-002: The API SHALL return responses in JSON format.
@@ -30,6 +31,7 @@ REQ-003: The application SHALL log all authentication attempts.
 **Use When**: Requirement is triggered by a specific event or user action.
 
 **Examples**:
+
 ```markdown
 REQ-010: WHEN user submits login form, the system SHALL validate credentials within 2 seconds.
 REQ-011: WHEN payment is processed, the system SHALL send confirmation email.
@@ -46,6 +48,7 @@ REQ-013: WHEN session expires, the system SHALL redirect user to login page.
 **Use When**: Requirement applies during a specific system state or condition.
 
 **Examples**:
+
 ```markdown
 REQ-020: WHILE user is authenticated, the system SHALL display user dashboard.
 REQ-021: WHILE database connection is lost, the system SHALL queue write operations.
@@ -62,6 +65,7 @@ REQ-023: WHILE rate limit is exceeded, the system SHALL return 429 status.
 **Use When**: Requirement depends on optional feature being enabled.
 
 **Examples**:
+
 ```markdown
 REQ-030: WHERE two-factor authentication is enabled, the system SHALL require OTP after password.
 REQ-031: WHERE dark mode is selected, the system SHALL apply dark theme CSS.
@@ -78,6 +82,7 @@ REQ-033: WHERE email notifications are enabled, the system SHALL send daily dige
 **Use When**: Defining how system should handle errors, exceptions, or edge cases.
 
 **Examples**:
+
 ```markdown
 REQ-040: IF login fails 5 times, THEN the system SHALL lock account for 30 minutes.
 REQ-041: IF payment gateway timeout occurs, THEN the system SHALL retry 3 times.
@@ -92,15 +97,16 @@ REQ-043: IF disk space is below 10%, THEN the system SHALL alert administrators.
 **Template**: Combine patterns for complex scenarios.
 
 **Examples**:
+
 ```markdown
-REQ-050: WHILE user is authenticated, WHEN session is about to expire, 
-         the system SHALL display warning 5 minutes before expiration.
+REQ-050: WHILE user is authenticated, WHEN session is about to expire,
+the system SHALL display warning 5 minutes before expiration.
 
-REQ-051: WHERE premium subscription is active, WHEN user uploads file, 
-         the system SHALL allow files up to 100MB.
+REQ-051: WHERE premium subscription is active, WHEN user uploads file,
+the system SHALL allow files up to 100MB.
 
-REQ-052: IF payment fails, THEN WHILE retry count < 3, 
-         the system SHALL attempt payment again after 30 seconds.
+REQ-052: IF payment fails, THEN WHILE retry count < 3,
+the system SHALL attempt payment again after 30 seconds.
 ```
 
 ---
@@ -109,26 +115,27 @@ REQ-052: IF payment fails, THEN WHILE retry count < 3,
 
 ### Required Keywords (SHALL/MUST)
 
-| Keyword | Meaning | Use |
-|---------|---------|-----|
-| **SHALL** | Mandatory requirement | Primary choice |
-| **MUST** | Mandatory requirement | Alternative to SHALL |
+| Keyword   | Meaning               | Use                  |
+| --------- | --------------------- | -------------------- |
+| **SHALL** | Mandatory requirement | Primary choice       |
+| **MUST**  | Mandatory requirement | Alternative to SHALL |
 
 ### Forbidden Keywords (Ambiguous)
 
-| Keyword | Problem | Replace With |
-|---------|---------|--------------|
-| should | Ambiguous obligation | SHALL |
-| may | Unclear optionality | WHERE + SHALL |
-| could | Vague possibility | SHALL or remove |
-| might | Uncertain behavior | SHALL or remove |
-| would | Conditional ambiguity | SHALL |
+| Keyword | Problem               | Replace With    |
+| ------- | --------------------- | --------------- |
+| should  | Ambiguous obligation  | SHALL           |
+| may     | Unclear optionality   | WHERE + SHALL   |
+| could   | Vague possibility     | SHALL or remove |
+| might   | Uncertain behavior    | SHALL or remove |
+| would   | Conditional ambiguity | SHALL           |
 
 ---
 
 ## Requirement ID Format
 
 ### Standard Format
+
 ```
 REQ-[Category]-[Number]
 
@@ -141,43 +148,47 @@ REQ-NF-001    # Non-functional requirement
 
 ### Categories
 
-| Category | Description |
-|----------|-------------|
-| AUTH | Authentication & Authorization |
-| USER | User Management |
-| PAY | Payment & Billing |
-| UI | User Interface |
-| API | API & Integration |
-| DATA | Data Management |
-| SEC | Security |
-| PERF | Performance |
-| NF | Non-Functional |
+| Category | Description                    |
+| -------- | ------------------------------ |
+| AUTH     | Authentication & Authorization |
+| USER     | User Management                |
+| PAY      | Payment & Billing              |
+| UI       | User Interface                 |
+| API      | API & Integration              |
+| DATA     | Data Management                |
+| SEC      | Security                       |
+| PERF     | Performance                    |
+| NF       | Non-Functional                 |
 
 ---
 
 ## Validation Rules
 
 ### Rule 1: One Requirement Per Statement
+
 ```
 ❌ BAD: The system SHALL validate credentials AND send welcome email.
-✅ GOOD: 
+✅ GOOD:
   REQ-001: The system SHALL validate credentials.
   REQ-002: WHEN login succeeds, the system SHALL send welcome email.
 ```
 
 ### Rule 2: Measurable Actions
+
 ```
 ❌ BAD: The system SHALL be fast.
 ✅ GOOD: The system SHALL respond within 200ms for 95% of requests.
 ```
 
 ### Rule 3: No Implementation Details
+
 ```
 ❌ BAD: The system SHALL use Redis for caching.
 ✅ GOOD: The system SHALL cache frequently accessed data.
 ```
 
 ### Rule 4: Testable Conditions
+
 ```
 ❌ BAD: WHEN user is unhappy, the system SHALL improve experience.
 ✅ GOOD: WHEN user rating is below 3, the system SHALL prompt for feedback.
@@ -191,6 +202,7 @@ REQ-NF-001    # Non-functional requirement
 # Requirements Specification: [Feature Name]
 
 ## Document Information
+
 - **Version**: 1.0
 - **Date**: YYYY-MM-DD
 - **Author**: requirements-analyst
@@ -200,21 +212,21 @@ REQ-NF-001    # Non-functional requirement
 
 ### 1.1 Authentication
 
-REQ-AUTH-001: WHEN user submits login form with valid credentials, 
-              the system SHALL authenticate user and create session.
+REQ-AUTH-001: WHEN user submits login form with valid credentials,
+the system SHALL authenticate user and create session.
 
-REQ-AUTH-002: IF login credentials are invalid, 
-              THEN the system SHALL display error message.
+REQ-AUTH-002: IF login credentials are invalid,
+THEN the system SHALL display error message.
 
-REQ-AUTH-003: IF login fails 5 consecutive times, 
-              THEN the system SHALL lock account for 30 minutes.
+REQ-AUTH-003: IF login fails 5 consecutive times,
+THEN the system SHALL lock account for 30 minutes.
 
 ### 1.2 User Management
 
 REQ-USER-001: The system SHALL store user profiles with name, email, and avatar.
 
-REQ-USER-002: WHEN user updates profile, 
-              the system SHALL validate and save changes.
+REQ-USER-002: WHEN user updates profile,
+the system SHALL validate and save changes.
 
 ## 2. Non-Functional Requirements
 
@@ -236,11 +248,11 @@ REQ-NF-005: The system SHALL maintain 99.9% uptime.
 
 ## 3. Traceability
 
-| REQ ID | Design Component | Priority | Status |
-|--------|------------------|----------|--------|
-| REQ-AUTH-001 | Auth Service | P1 | Approved |
-| REQ-AUTH-002 | Auth Service | P1 | Approved |
-| REQ-USER-001 | User Service | P2 | Draft |
+| REQ ID       | Design Component | Priority | Status   |
+| ------------ | ---------------- | -------- | -------- |
+| REQ-AUTH-001 | Auth Service     | P1       | Approved |
+| REQ-AUTH-002 | Auth Service     | P1       | Approved |
+| REQ-USER-001 | User Service     | P2       | Draft    |
 ```
 
 ---

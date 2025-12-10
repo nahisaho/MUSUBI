@@ -24,7 +24,7 @@ class LLMProvider {
       maxTokens: 1024,
       temperature: 0.7,
       timeout: 30000,
-      ...config
+      ...config,
     };
     this.name = 'base';
     this.isInitialized = false;
@@ -69,7 +69,7 @@ Output only the JSON, no explanation.`;
 
     const result = await this.complete(jsonPrompt, {
       ...options,
-      temperature: 0.3 // Lower temperature for structured output
+      temperature: 0.3, // Lower temperature for structured output
     });
 
     try {
@@ -116,8 +116,8 @@ Output only the JSON, no explanation.`;
         completion: true,
         embedding: false,
         streaming: false,
-        functionCalling: false
-      }
+        functionCalling: false,
+      },
     };
   }
 
@@ -130,13 +130,13 @@ Output only the JSON, no explanation.`;
    */
   formatMessages(systemPrompt, userPrompt) {
     const messages = [];
-    
+
     if (systemPrompt) {
       messages.push({ role: 'system', content: systemPrompt });
     }
-    
+
     messages.push({ role: 'user', content: userPrompt });
-    
+
     return messages;
   }
 
@@ -150,16 +150,14 @@ Output only the JSON, no explanation.`;
     const minInterval = 60000 / requestsPerMinute;
     let lastCall = 0;
 
-    return async (fn) => {
+    return async fn => {
       const now = Date.now();
       const timeSinceLastCall = now - lastCall;
-      
+
       if (timeSinceLastCall < minInterval) {
-        await new Promise(resolve => 
-          setTimeout(resolve, minInterval - timeSinceLastCall)
-        );
+        await new Promise(resolve => setTimeout(resolve, minInterval - timeSinceLastCall));
       }
-      
+
       lastCall = Date.now();
       return fn();
     };
@@ -175,20 +173,20 @@ Output only the JSON, no explanation.`;
    */
   async retryWithBackoff(fn, maxRetries = 3, baseDelay = 1000) {
     let lastError;
-    
+
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         return await fn();
       } catch (error) {
         lastError = error;
-        
+
         if (attempt < maxRetries) {
           const delay = baseDelay * Math.pow(2, attempt);
           await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
     }
-    
+
     throw lastError;
   }
 }

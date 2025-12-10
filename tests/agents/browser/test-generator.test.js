@@ -46,15 +46,15 @@ describe('TestGenerator', () => {
         },
       ];
 
-      const code = await generator.generateTest(history, { 
+      const code = await generator.generateTest(history, {
         name: 'My Test',
         format: 'jest',
       });
 
       expect(code).toContain("const puppeteer = require('puppeteer')");
       expect(code).toContain("describe('My Test'");
-      expect(code).toContain("beforeAll");
-      expect(code).toContain("afterAll");
+      expect(code).toContain('beforeAll');
+      expect(code).toContain('afterAll');
     });
   });
 
@@ -107,9 +107,9 @@ describe('TestGenerator', () => {
         name: 'login-page',
         fullPage: true,
       });
-      expect(code).toContain("await page.screenshot");
-      expect(code).toContain("login-page.png");
-      expect(code).toContain("fullPage: true");
+      expect(code).toContain('await page.screenshot');
+      expect(code).toContain('login-page.png');
+      expect(code).toContain('fullPage: true');
     });
 
     test('should convert assert action with text', () => {
@@ -117,8 +117,8 @@ describe('TestGenerator', () => {
         type: 'assert',
         expectedText: 'Welcome',
       });
-      expect(code).toContain("await expect");
-      expect(code).toContain("toBeVisible");
+      expect(code).toContain('await expect');
+      expect(code).toContain('toBeVisible');
     });
 
     test('should handle unknown action', () => {
@@ -172,7 +172,7 @@ describe('TestGenerator', () => {
     });
 
     test('should escape newlines', () => {
-      expect(generator.escapeString("line1\nline2")).toBe("line1\\nline2");
+      expect(generator.escapeString('line1\nline2')).toBe('line1\\nline2');
     });
 
     test('should handle empty string', () => {

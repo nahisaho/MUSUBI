@@ -13,7 +13,7 @@ const {
   createDocGenerator,
   createDocSite,
   createDocPage,
-  createDocSection
+  createDocSection,
 } = require('../../src/integrations/documentation');
 
 describe('Documentation Generator', () => {
@@ -124,7 +124,7 @@ describe('Documentation Generator', () => {
     });
 
     it('should register custom helper', () => {
-      engine.registerHelper('double', (val) => val * 2);
+      engine.registerHelper('double', val => val * 2);
       const result = engine.render('{{double num}}', { num: 5 });
       expect(result).toBe('10');
     });
@@ -141,7 +141,7 @@ describe('Documentation Generator', () => {
       const section = new DocSection({
         id: 'intro',
         title: 'Introduction',
-        content: 'This is the intro.'
+        content: 'This is the intro.',
       });
       expect(section.id).toBe('intro');
       expect(section.title).toBe('Introduction');
@@ -157,7 +157,7 @@ describe('Documentation Generator', () => {
     it('should convert to markdown', () => {
       const section = new DocSection({
         title: 'Features',
-        content: '- Feature 1\n- Feature 2'
+        content: '- Feature 1\n- Feature 2',
       });
       const md = section.toMarkdown();
       expect(md).toContain('## Features');
@@ -191,7 +191,7 @@ describe('Documentation Generator', () => {
         id: 'getting-started',
         title: 'Getting Started',
         description: 'Learn how to get started.',
-        type: DocType.TUTORIAL
+        type: DocType.TUTORIAL,
       });
       expect(page.id).toBe('getting-started');
       expect(page.type).toBe(DocType.TUTORIAL);
@@ -213,7 +213,7 @@ describe('Documentation Generator', () => {
     it('should include front matter', () => {
       const page = new DocPage({
         title: 'Test',
-        frontMatter: { layout: 'default', tags: ['a', 'b'] }
+        frontMatter: { layout: 'default', tags: ['a', 'b'] },
       });
       const md = page.toMarkdown();
       expect(md).toContain('---');
@@ -240,10 +240,12 @@ describe('Documentation Generator', () => {
 
     it('should convert code blocks to HTML', () => {
       const page = new DocPage({ title: 'Code' });
-      page.addSection(new DocSection({
-        title: 'Example',
-        content: '```javascript\nconst x = 1;\n```'
-      }));
+      page.addSection(
+        new DocSection({
+          title: 'Example',
+          content: '```javascript\nconst x = 1;\n```',
+        })
+      );
       const html = page.toHTML();
       expect(html).toContain('<pre><code');
       expect(html).toContain('const x = 1;');
@@ -251,10 +253,12 @@ describe('Documentation Generator', () => {
 
     it('should convert links to HTML', () => {
       const page = new DocPage({ title: 'Links' });
-      page.addSection(new DocSection({
-        title: 'Resources',
-        content: '[MUSUBI](https://example.com)'
-      }));
+      page.addSection(
+        new DocSection({
+          title: 'Resources',
+          content: '[MUSUBI](https://example.com)',
+        })
+      );
       const html = page.toHTML();
       expect(html).toContain('<a href="https://example.com">MUSUBI</a>');
     });
@@ -274,7 +278,7 @@ describe('Documentation Generator', () => {
       site = new DocSite({
         title: 'MUSUBI Docs',
         description: 'Documentation for MUSUBI SDD',
-        version: '1.0.0'
+        version: '1.0.0',
       });
     });
 
@@ -303,7 +307,7 @@ describe('Documentation Generator', () => {
     it('should generate navigation from pages', () => {
       site.addPage(new DocPage({ id: 'guide1', title: 'Guide 1', type: DocType.GUIDE }));
       site.addPage(new DocPage({ id: 'api1', title: 'API 1', type: DocType.API }));
-      
+
       const nav = site.generateNavigation();
       expect(nav.length).toBe(2);
     });
@@ -311,7 +315,7 @@ describe('Documentation Generator', () => {
     it('should build markdown files', () => {
       site.addPage(new DocPage({ id: 'intro', title: 'Introduction', path: '/intro' }));
       site.generateNavigation();
-      
+
       const output = site.build();
       expect(output.has('/intro')).toBe(true);
       expect(output.has('_sidebar.md')).toBe(true);
@@ -321,16 +325,14 @@ describe('Documentation Generator', () => {
     it('should build HTML files', () => {
       site.addPage(new DocPage({ id: 'intro', title: 'Introduction', path: '/intro.md' }));
       site.generateNavigation();
-      
+
       const output = site.build(DocFormat.HTML);
       expect(output.has('/intro.html')).toBe(true);
     });
 
     it('should generate sidebar', () => {
-      site.setNavigation([
-        { title: 'Guides', items: [{ title: 'Intro', path: '/intro' }] }
-      ]);
-      
+      site.setNavigation([{ title: 'Guides', items: [{ title: 'Intro', path: '/intro' }] }]);
+
       const sidebar = site.generateSidebar();
       expect(sidebar).toContain('# MUSUBI Docs');
       expect(sidebar).toContain('## Guides');
@@ -338,10 +340,8 @@ describe('Documentation Generator', () => {
     });
 
     it('should generate index', () => {
-      site.setNavigation([
-        { title: 'Guides', items: [{ title: 'Intro', path: '/intro' }] }
-      ]);
-      
+      site.setNavigation([{ title: 'Guides', items: [{ title: 'Intro', path: '/intro' }] }]);
+
       const index = site.generateIndex();
       expect(index).toContain('# MUSUBI Docs');
       expect(index).toContain('Version: 1.0.0');
@@ -367,8 +367,8 @@ describe('Documentation Generator', () => {
       expect(site.title).toBe('Test Docs');
     });
 
-    it('should emit siteCreated event', (done) => {
-      generator.on('siteCreated', (data) => {
+    it('should emit siteCreated event', done => {
+      generator.on('siteCreated', data => {
         expect(data.site).toBeDefined();
         done();
       });
@@ -379,21 +379,21 @@ describe('Documentation Generator', () => {
       const steering = {
         product: {
           description: 'A test product',
-          features: ['Feature 1', 'Feature 2']
+          features: ['Feature 1', 'Feature 2'],
         },
         structure: {
           description: 'Architecture overview',
           components: {
-            Core: { description: 'Core module' }
-          }
+            Core: { description: 'Core module' },
+          },
         },
         tech: {
           languages: ['JavaScript'],
-          frameworks: ['Node.js']
+          frameworks: ['Node.js'],
         },
         rules: {
-          constitution: 'Project rules here'
-        }
+          constitution: 'Project rules here',
+        },
       };
 
       const pages = generator.generateFromSteering(steering);
@@ -402,8 +402,8 @@ describe('Documentation Generator', () => {
       expect(pages.find(p => p.id === 'architecture')).toBeDefined();
     });
 
-    it('should emit generatedFromSteering event', (done) => {
-      generator.on('generatedFromSteering', (data) => {
+    it('should emit generatedFromSteering event', done => {
+      generator.on('generatedFromSteering', data => {
         expect(data.pages).toBeDefined();
         done();
       });
@@ -411,17 +411,21 @@ describe('Documentation Generator', () => {
     });
 
     it('should generate API docs', () => {
-      const modules = [{
-        name: 'core',
-        description: 'Core module',
-        exports: [{
-          name: 'init',
-          description: 'Initialize the system',
-          signature: 'function init(options)',
-          params: [{ name: 'options', type: 'object', description: 'Configuration' }],
-          returns: { type: 'void', description: '' }
-        }]
-      }];
+      const modules = [
+        {
+          name: 'core',
+          description: 'Core module',
+          exports: [
+            {
+              name: 'init',
+              description: 'Initialize the system',
+              signature: 'function init(options)',
+              params: [{ name: 'options', type: 'object', description: 'Configuration' }],
+              returns: { type: 'void', description: '' },
+            },
+          ],
+        },
+      ];
 
       const pages = generator.generateAPI(modules);
       expect(pages.length).toBe(1);
@@ -432,7 +436,7 @@ describe('Documentation Generator', () => {
       const entry = {
         name: 'test',
         description: 'Test function',
-        example: 'test()'
+        example: 'test()',
       };
       const content = generator.formatAPIEntry(entry);
       expect(content).toContain('**Example:**');
@@ -448,9 +452,9 @@ describe('Documentation Generator', () => {
         prerequisites: ['Node.js installed'],
         steps: [
           { title: 'Install', content: 'Run npm install' },
-          { title: 'Configure', content: 'Create config file' }
+          { title: 'Configure', content: 'Create config file' },
         ],
-        nextSteps: [{ title: 'Advanced', path: '/advanced' }]
+        nextSteps: [{ title: 'Advanced', path: '/advanced' }],
       };
 
       const page = generator.generateTutorial(tutorial);
@@ -465,14 +469,14 @@ describe('Documentation Generator', () => {
           date: '2024-01-01',
           features: ['Initial release'],
           fixes: ['Bug fix'],
-          breaking: ['Removed old API']
-        }
+          breaking: ['Removed old API'],
+        },
       ];
 
       const page = generator.generateChangelog(releases);
       expect(page.type).toBe(DocType.CHANGELOG);
       expect(page.sections.length).toBe(1);
-      
+
       const md = page.toMarkdown();
       expect(md).toContain('[1.0.0]');
       expect(md).toContain('Features');
@@ -483,7 +487,7 @@ describe('Documentation Generator', () => {
     it('should generate FAQ', () => {
       const questions = [
         { question: 'What is MUSUBI?', answer: 'A framework for SDD.' },
-        { question: 'How do I install?', answer: 'Use npm install.' }
+        { question: 'How do I install?', answer: 'Use npm install.' },
       ];
 
       const page = generator.generateFAQ(questions);
@@ -500,8 +504,8 @@ describe('Documentation Generator', () => {
       expect(output.size).toBeGreaterThan(0);
     });
 
-    it('should emit built event', (done) => {
-      generator.on('built', (data) => {
+    it('should emit built event', done => {
+      generator.on('built', data => {
         expect(data.files).toBeDefined();
         done();
       });

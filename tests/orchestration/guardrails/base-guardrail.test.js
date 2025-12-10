@@ -1,6 +1,6 @@
 /**
  * @fileoverview Tests for BaseGuardrail, GuardrailChain, and Rules DSL
- * 
+ *
  * @version 3.9.0
  */
 
@@ -16,7 +16,7 @@ const {
   SecurityPatterns,
   rules,
   CommonRuleSets,
-  globalRuleRegistry
+  globalRuleRegistry,
 } = require('../../../src/orchestration/guardrails');
 
 describe('BaseGuardrail', () => {
@@ -30,14 +30,14 @@ describe('BaseGuardrail', () => {
         return this.createResult(input === 'valid', []);
       }
     }
-    
+
     const guardrail = new TestGuardrail({ name: 'TestGuardrail' });
     expect(guardrail.name).toBe('TestGuardrail');
   });
 
   describe('run()', () => {
     let TestGuardrail;
-    
+
     beforeEach(() => {
       TestGuardrail = class extends BaseGuardrail {
         async check(input) {
@@ -56,7 +56,7 @@ describe('BaseGuardrail', () => {
     test('should return passed result for valid input', async () => {
       const guardrail = new TestGuardrail({ name: 'Test' });
       const result = await guardrail.run('valid');
-      
+
       expect(result.passed).toBe(true);
       expect(result.guardrailName).toBe('Test');
       expect(result.executionTimeMs).toBeGreaterThanOrEqual(0);
@@ -65,7 +65,7 @@ describe('BaseGuardrail', () => {
     test('should return failed result for invalid input', async () => {
       const guardrail = new TestGuardrail({ name: 'Test' });
       const result = await guardrail.run('invalid');
-      
+
       expect(result.passed).toBe(false);
       expect(result.violations).toHaveLength(1);
     });
@@ -73,7 +73,7 @@ describe('BaseGuardrail', () => {
     test('should skip execution when disabled', async () => {
       const guardrail = new TestGuardrail({ name: 'Test', enabled: false });
       const result = await guardrail.run('invalid');
-      
+
       expect(result.passed).toBe(true);
       expect(result.message).toBe('Guardrail is disabled');
     });
@@ -84,10 +84,10 @@ describe('BaseGuardrail', () => {
           throw new Error('Check failed');
         }
       };
-      
+
       const guardrail = new ErrorGuardrail({ name: 'Error' });
       const result = await guardrail.run('input');
-      
+
       expect(result.passed).toBe(false);
       expect(result.violations[0].code).toBe('GUARDRAIL_ERROR');
     });
@@ -96,24 +96,28 @@ describe('BaseGuardrail', () => {
   describe('enable/disable', () => {
     test('should enable guardrail', () => {
       class TestGuardrail extends BaseGuardrail {
-        async check() { return this.createResult(true, []); }
+        async check() {
+          return this.createResult(true, []);
+        }
       }
-      
+
       const guardrail = new TestGuardrail({ name: 'Test', enabled: false });
       expect(guardrail.enabled).toBe(false);
-      
+
       guardrail.enable();
       expect(guardrail.enabled).toBe(true);
     });
 
     test('should disable guardrail', () => {
       class TestGuardrail extends BaseGuardrail {
-        async check() { return this.createResult(true, []); }
+        async check() {
+          return this.createResult(true, []);
+        }
       }
-      
+
       const guardrail = new TestGuardrail({ name: 'Test' });
       expect(guardrail.enabled).toBe(true);
-      
+
       guardrail.disable();
       expect(guardrail.enabled).toBe(false);
     });
@@ -122,9 +126,11 @@ describe('BaseGuardrail', () => {
   describe('tripwire', () => {
     test('should enable tripwire', () => {
       class TestGuardrail extends BaseGuardrail {
-        async check() { return this.createResult(true, []); }
+        async check() {
+          return this.createResult(true, []);
+        }
       }
-      
+
       const guardrail = new TestGuardrail({ name: 'Test' });
       guardrail.enableTripwire();
       expect(guardrail.tripwireEnabled).toBe(true);
@@ -132,9 +138,11 @@ describe('BaseGuardrail', () => {
 
     test('should disable tripwire', () => {
       class TestGuardrail extends BaseGuardrail {
-        async check() { return this.createResult(true, []); }
+        async check() {
+          return this.createResult(true, []);
+        }
       }
-      
+
       const guardrail = new TestGuardrail({ name: 'Test', tripwireEnabled: true });
       guardrail.disableTripwire();
       expect(guardrail.tripwireEnabled).toBe(false);
@@ -151,7 +159,7 @@ describe('GuardrailChain', () => {
         return this.createResult(true, [], 'Passed');
       }
     };
-    
+
     FailGuardrail = class extends BaseGuardrail {
       async check(_input) {
         return this.createResult(
@@ -166,7 +174,7 @@ describe('GuardrailChain', () => {
   describe('constructor', () => {
     test('should create with default options', () => {
       const chain = new GuardrailChain();
-      
+
       expect(chain.name).toBe('GuardrailChain');
       expect(chain.parallel).toBe(false);
       expect(chain.stopOnFirstFailure).toBe(false);
@@ -176,9 +184,9 @@ describe('GuardrailChain', () => {
       const chain = new GuardrailChain({
         name: 'CustomChain',
         parallel: true,
-        stopOnFirstFailure: true
+        stopOnFirstFailure: true,
       });
-      
+
       expect(chain.name).toBe('CustomChain');
       expect(chain.parallel).toBe(true);
       expect(chain.stopOnFirstFailure).toBe(true);
@@ -189,25 +197,23 @@ describe('GuardrailChain', () => {
     test('should add guardrail to chain', () => {
       const chain = new GuardrailChain();
       const guardrail = new PassGuardrail({ name: 'Pass' });
-      
+
       chain.add(guardrail);
-      
+
       expect(chain.guardrails).toHaveLength(1);
     });
 
     test('should support method chaining', () => {
       const chain = new GuardrailChain();
-      
-      chain
-        .add(new PassGuardrail({ name: 'Pass1' }))
-        .add(new PassGuardrail({ name: 'Pass2' }));
-      
+
+      chain.add(new PassGuardrail({ name: 'Pass1' })).add(new PassGuardrail({ name: 'Pass2' }));
+
       expect(chain.guardrails).toHaveLength(2);
     });
 
     test('should reject non-guardrail objects', () => {
       const chain = new GuardrailChain();
-      
+
       expect(() => chain.add({ name: 'NotAGuardrail' })).toThrow();
     });
   });
@@ -215,13 +221,13 @@ describe('GuardrailChain', () => {
   describe('addAll()', () => {
     test('should add multiple guardrails', () => {
       const chain = new GuardrailChain();
-      
+
       chain.addAll([
         new PassGuardrail({ name: 'Pass1' }),
         new PassGuardrail({ name: 'Pass2' }),
-        new PassGuardrail({ name: 'Pass3' })
+        new PassGuardrail({ name: 'Pass3' }),
       ]);
-      
+
       expect(chain.guardrails).toHaveLength(3);
     });
   });
@@ -229,13 +235,11 @@ describe('GuardrailChain', () => {
   describe('run() - sequential', () => {
     test('should run all guardrails and pass', async () => {
       const chain = new GuardrailChain();
-      
-      chain
-        .add(new PassGuardrail({ name: 'Pass1' }))
-        .add(new PassGuardrail({ name: 'Pass2' }));
-      
+
+      chain.add(new PassGuardrail({ name: 'Pass1' })).add(new PassGuardrail({ name: 'Pass2' }));
+
       const result = await chain.run('input');
-      
+
       expect(result.passed).toBe(true);
       expect(result.results).toHaveLength(2);
       expect(result.executedCount).toBe(2);
@@ -243,26 +247,22 @@ describe('GuardrailChain', () => {
 
     test('should collect violations from failing guardrails', async () => {
       const chain = new GuardrailChain();
-      
-      chain
-        .add(new PassGuardrail({ name: 'Pass' }))
-        .add(new FailGuardrail({ name: 'Fail' }));
-      
+
+      chain.add(new PassGuardrail({ name: 'Pass' })).add(new FailGuardrail({ name: 'Fail' }));
+
       const result = await chain.run('input');
-      
+
       expect(result.passed).toBe(false);
       expect(result.violations).toHaveLength(1);
     });
 
     test('should stop on first failure when configured', async () => {
       const chain = new GuardrailChain({ stopOnFirstFailure: true });
-      
-      chain
-        .add(new FailGuardrail({ name: 'Fail1' }))
-        .add(new FailGuardrail({ name: 'Fail2' }));
-      
+
+      chain.add(new FailGuardrail({ name: 'Fail1' })).add(new FailGuardrail({ name: 'Fail2' }));
+
       const result = await chain.run('input');
-      
+
       expect(result.passed).toBe(false);
       expect(result.executedCount).toBe(1);
     });
@@ -271,26 +271,22 @@ describe('GuardrailChain', () => {
   describe('run() - parallel', () => {
     test('should run guardrails in parallel', async () => {
       const chain = new GuardrailChain({ parallel: true });
-      
-      chain
-        .add(new PassGuardrail({ name: 'Pass1' }))
-        .add(new PassGuardrail({ name: 'Pass2' }));
-      
+
+      chain.add(new PassGuardrail({ name: 'Pass1' })).add(new PassGuardrail({ name: 'Pass2' }));
+
       const result = await chain.run('input');
-      
+
       expect(result.passed).toBe(true);
       expect(result.results).toHaveLength(2);
     });
 
     test('should collect all violations in parallel mode', async () => {
       const chain = new GuardrailChain({ parallel: true });
-      
-      chain
-        .add(new FailGuardrail({ name: 'Fail1' }))
-        .add(new FailGuardrail({ name: 'Fail2' }));
-      
+
+      chain.add(new FailGuardrail({ name: 'Fail1' })).add(new FailGuardrail({ name: 'Fail2' }));
+
       const result = await chain.run('input');
-      
+
       expect(result.passed).toBe(false);
       expect(result.violations).toHaveLength(2);
     });
@@ -299,13 +295,13 @@ describe('GuardrailChain', () => {
   describe('getGuardrails()', () => {
     test('should return guardrail info', () => {
       const chain = new GuardrailChain();
-      
+
       chain
         .add(new PassGuardrail({ name: 'Pass1', description: 'First' }))
         .add(new PassGuardrail({ name: 'Pass2', description: 'Second' }));
-      
+
       const guardrails = chain.getGuardrails();
-      
+
       expect(guardrails).toHaveLength(2);
       expect(guardrails[0].name).toBe('Pass1');
       expect(guardrails[1].name).toBe('Pass2');
@@ -315,13 +311,11 @@ describe('GuardrailChain', () => {
   describe('clear()', () => {
     test('should remove all guardrails', () => {
       const chain = new GuardrailChain();
-      
-      chain
-        .add(new PassGuardrail({ name: 'Pass1' }))
-        .add(new PassGuardrail({ name: 'Pass2' }));
-      
+
+      chain.add(new PassGuardrail({ name: 'Pass1' })).add(new PassGuardrail({ name: 'Pass2' }));
+
       chain.clear();
-      
+
       expect(chain.guardrails).toHaveLength(0);
     });
   });
@@ -376,24 +370,32 @@ describe('RuleBuilder', () => {
 
   describe('pattern()', () => {
     test('should pass when pattern matches', () => {
-      const rule = rules().pattern(/^[A-Z]+$/).build()[0];
+      const rule = rules()
+        .pattern(/^[A-Z]+$/)
+        .build()[0];
       expect(rule.check('HELLO')).toBe(true);
     });
 
     test('should fail when pattern does not match', () => {
-      const rule = rules().pattern(/^[A-Z]+$/).build()[0];
+      const rule = rules()
+        .pattern(/^[A-Z]+$/)
+        .build()[0];
       expect(rule.check('Hello')).toBe(false);
     });
   });
 
   describe('noPattern()', () => {
     test('should pass when pattern does not match', () => {
-      const rule = rules().noPattern(/badword/).build()[0];
+      const rule = rules()
+        .noPattern(/badword/)
+        .build()[0];
       expect(rule.check('good content')).toBe(true);
     });
 
     test('should fail when pattern matches', () => {
-      const rule = rules().noPattern(/badword/).build()[0];
+      const rule = rules()
+        .noPattern(/badword/)
+        .build()[0];
       expect(rule.check('contains badword')).toBe(false);
     });
   });
@@ -484,7 +486,9 @@ describe('RuleBuilder', () => {
 
   describe('custom()', () => {
     test('should run custom validation', () => {
-      const rule = rules().custom('even', (v) => v % 2 === 0, 'Must be even').build()[0];
+      const rule = rules()
+        .custom('even', v => v % 2 === 0, 'Must be even')
+        .build()[0];
       expect(rule.check(4)).toBe(true);
       expect(rule.check(3)).toBe(false);
     });
@@ -492,19 +496,15 @@ describe('RuleBuilder', () => {
 
   describe('chaining', () => {
     test('should build multiple rules', () => {
-      const builtRules = rules()
-        .required()
-        .maxLength(100)
-        .noPII()
-        .build();
-      
+      const builtRules = rules().required().maxLength(100).noPII().build();
+
       expect(builtRules).toHaveLength(3);
     });
 
     test('should clear rules', () => {
       const builder = rules().required().maxLength(100);
       builder.clear();
-      
+
       expect(builder.build()).toHaveLength(0);
     });
   });
@@ -514,9 +514,9 @@ describe('RuleRegistry', () => {
   test('should register and retrieve rule sets', () => {
     const registry = new RuleRegistry();
     const testRules = rules().required().build();
-    
+
     registry.register('test', testRules);
-    
+
     expect(registry.get('test')).toEqual(testRules);
     expect(registry.has('test')).toBe(true);
   });
@@ -525,9 +525,9 @@ describe('RuleRegistry', () => {
     const registry = new RuleRegistry();
     registry.register('set1', []);
     registry.register('set2', []);
-    
+
     const list = registry.list();
-    
+
     expect(list).toContain('set1');
     expect(list).toContain('set2');
   });
@@ -535,7 +535,7 @@ describe('RuleRegistry', () => {
   test('should remove rule sets', () => {
     const registry = new RuleRegistry();
     registry.register('test', []);
-    
+
     expect(registry.remove('test')).toBe(true);
     expect(registry.has('test')).toBe(false);
   });
@@ -544,9 +544,9 @@ describe('RuleRegistry', () => {
     const registry = new RuleRegistry();
     registry.register('set1', []);
     registry.register('set2', []);
-    
+
     registry.clear();
-    
+
     expect(registry.list()).toHaveLength(0);
   });
 });

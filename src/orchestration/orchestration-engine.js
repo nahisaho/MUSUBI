@@ -1,6 +1,6 @@
 /**
  * OrchestrationEngine - Core engine for multi-skill orchestration
- * 
+ *
  * Implements ag2-inspired patterns for skill coordination:
  * - Auto: Automatic skill selection based on task
  * - Sequential: Linear skill execution
@@ -25,7 +25,7 @@ const PatternType = {
   SWARM: 'swarm',
   HUMAN_IN_LOOP: 'human-in-loop',
   HANDOFF: 'handoff',
-  TRIAGE: 'triage'
+  TRIAGE: 'triage',
 };
 
 /**
@@ -37,7 +37,7 @@ const ExecutionStatus = {
   COMPLETED: 'completed',
   FAILED: 'failed',
   CANCELLED: 'cancelled',
-  WAITING_FOR_HUMAN: 'waiting-for-human'
+  WAITING_FOR_HUMAN: 'waiting-for-human',
 };
 
 /**
@@ -47,7 +47,7 @@ const Priority = {
   P0: 0, // Critical - must complete first
   P1: 1, // High - important
   P2: 2, // Medium - nice to have
-  P3: 3  // Low - future enhancement
+  P3: 3, // Low - future enhancement
 };
 
 /**
@@ -117,11 +117,11 @@ class ExecutionContext {
       input: this.input,
       output: this.output,
       error: this.error,
-      children: this.children.map(c => c.toJSON ? c.toJSON() : c),
+      children: this.children.map(c => (c.toJSON ? c.toJSON() : c)),
       metadata: this.metadata,
       startTime: this.startTime,
       endTime: this.endTime,
-      duration: this.getDuration()
+      duration: this.getDuration(),
     };
   }
 }
@@ -140,7 +140,7 @@ class OrchestrationEngine extends EventEmitter {
       timeout: options.timeout || 300000, // 5 minutes default
       retryCount: options.retryCount || 3,
       retryDelay: options.retryDelay || 1000,
-      ...options
+      ...options,
     };
     this.skillResolver = options.skillResolver || null;
     this.humanGate = options.humanGate || null;
@@ -227,8 +227,8 @@ class OrchestrationEngine extends EventEmitter {
       input: options.input || {},
       metadata: {
         pattern: patternName,
-        ...options.metadata
-      }
+        ...options.metadata,
+      },
     });
 
     this.activeContexts.set(context.id, context);
@@ -236,12 +236,12 @@ class OrchestrationEngine extends EventEmitter {
 
     try {
       context.start();
-      
+
       const result = await this._executeWithTimeout(
         () => pattern.execute(context, this),
         this.config.timeout
       );
-      
+
       context.complete(result);
       this.emit('executionCompleted', context);
     } catch (error) {
@@ -294,7 +294,7 @@ class OrchestrationEngine extends EventEmitter {
       skill: skillName,
       input,
       parentId: parentContext?.id,
-      metadata: { directExecution: true }
+      metadata: { directExecution: true },
     });
 
     if (parentContext) {
@@ -305,7 +305,7 @@ class OrchestrationEngine extends EventEmitter {
 
     try {
       context.start();
-      
+
       let result;
       if (typeof skill.execute === 'function') {
         result = await skill.execute(input, this);
@@ -314,7 +314,7 @@ class OrchestrationEngine extends EventEmitter {
       } else {
         throw new Error(`Skill '${skillName}' is not executable`);
       }
-      
+
       context.complete(result);
       this.emit('skillExecutionCompleted', { skillName, context });
       return result;
@@ -334,7 +334,7 @@ class OrchestrationEngine extends EventEmitter {
     if (this.skillResolver) {
       return this.skillResolver.resolve(task, this.listSkills());
     }
-    
+
     // Default: return first matching skill based on keywords
     const taskLower = task.toLowerCase();
     for (const [name, skill] of this.skills) {
@@ -343,7 +343,7 @@ class OrchestrationEngine extends EventEmitter {
         return name;
       }
     }
-    
+
     return null;
   }
 
@@ -356,11 +356,11 @@ class OrchestrationEngine extends EventEmitter {
   async requestHumanValidation(context, question) {
     context.waitForHuman();
     this.emit('humanValidationRequested', { context, question });
-    
+
     if (this.humanGate) {
       return this.humanGate.request(question, context);
     }
-    
+
     // Default: auto-approve
     return { approved: true, feedback: 'Auto-approved (no human gate configured)' };
   }
@@ -375,7 +375,7 @@ class OrchestrationEngine extends EventEmitter {
       activeExecutions: contexts.length,
       patterns: this.listPatterns(),
       skills: this.listSkills(),
-      contexts: contexts.map(c => c.toJSON())
+      contexts: contexts.map(c => c.toJSON()),
     };
   }
 
@@ -409,5 +409,5 @@ module.exports = {
   ExecutionContext,
   PatternType,
   ExecutionStatus,
-  Priority
+  Priority,
 };

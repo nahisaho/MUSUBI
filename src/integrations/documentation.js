@@ -16,14 +16,14 @@ const DocType = {
   REFERENCE: 'reference',
   FAQ: 'faq',
   CHANGELOG: 'changelog',
-  ARCHITECTURE: 'architecture'
+  ARCHITECTURE: 'architecture',
 };
 
 const DocFormat = {
   MARKDOWN: 'markdown',
   HTML: 'html',
   PDF: 'pdf',
-  DOCX: 'docx'
+  DOCX: 'docx',
 };
 
 // ============================================================================
@@ -41,12 +41,12 @@ class TemplateEngine {
     // Default helpers
     this.helpers.set('date', () => new Date().toISOString().split('T')[0]);
     this.helpers.set('year', () => new Date().getFullYear());
-    this.helpers.set('uppercase', (str) => str.toUpperCase());
-    this.helpers.set('lowercase', (str) => str.toLowerCase());
-    this.helpers.set('capitalize', (str) => str.charAt(0).toUpperCase() + str.slice(1));
-    this.helpers.set('kebabCase', (str) => str.toLowerCase().replace(/\s+/g, '-'));
-    this.helpers.set('list', (items) => items.map(i => `- ${i}`).join('\n'));
-    this.helpers.set('numberedList', (items) => items.map((i, idx) => `${idx + 1}. ${i}`).join('\n'));
+    this.helpers.set('uppercase', str => str.toUpperCase());
+    this.helpers.set('lowercase', str => str.toLowerCase());
+    this.helpers.set('capitalize', str => str.charAt(0).toUpperCase() + str.slice(1));
+    this.helpers.set('kebabCase', str => str.toLowerCase().replace(/\s+/g, '-'));
+    this.helpers.set('list', items => items.map(i => `- ${i}`).join('\n'));
+    this.helpers.set('numberedList', items => items.map((i, idx) => `${idx + 1}. ${i}`).join('\n'));
     this.helpers.set('codeBlock', (code, lang = '') => `\`\`\`${lang}\n${code}\n\`\`\``);
   }
 
@@ -62,24 +62,38 @@ class TemplateEngine {
     let result = template;
 
     // Loops FIRST: {{#each items}}...{{/each}}
-    result = result.replace(/\{\{#each\s+([^}]+)\}\}([\s\S]*?)\{\{\/each\}\}/g, (_, key, content) => {
-      const items = this.resolveValue(key.trim(), context);
-      if (!Array.isArray(items)) return '';
-      return items.map(item => {
-        let itemContent = content;
-        // Replace {{this}} with the item
-        itemContent = itemContent.replace(/\{\{this\}\}/g, typeof item === 'object' ? JSON.stringify(item) : item);
-        // Replace {{this.prop}} with item properties
-        itemContent = itemContent.replace(/\{\{this\.([^}]+)\}\}/g, (_, prop) => item[prop.trim()] || '');
-        return itemContent;
-      }).join('');
-    });
+    result = result.replace(
+      /\{\{#each\s+([^}]+)\}\}([\s\S]*?)\{\{\/each\}\}/g,
+      (_, key, content) => {
+        const items = this.resolveValue(key.trim(), context);
+        if (!Array.isArray(items)) return '';
+        return items
+          .map(item => {
+            let itemContent = content;
+            // Replace {{this}} with the item
+            itemContent = itemContent.replace(
+              /\{\{this\}\}/g,
+              typeof item === 'object' ? JSON.stringify(item) : item
+            );
+            // Replace {{this.prop}} with item properties
+            itemContent = itemContent.replace(
+              /\{\{this\.([^}]+)\}\}/g,
+              (_, prop) => item[prop.trim()] || ''
+            );
+            return itemContent;
+          })
+          .join('');
+      }
+    );
 
     // Conditionals: {{#if condition}}...{{/if}}
-    result = result.replace(/\{\{#if\s+([^}]+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (_, condition, content) => {
-      const value = this.resolveValue(condition.trim(), context);
-      return value ? content : '';
-    });
+    result = result.replace(
+      /\{\{#if\s+([^}]+)\}\}([\s\S]*?)\{\{\/if\}\}/g,
+      (_, condition, content) => {
+        const value = this.resolveValue(condition.trim(), context);
+        return value ? content : '';
+      }
+    );
 
     // Apply helpers: {{helper arg}}
     for (const [name, fn] of this.helpers) {
@@ -144,7 +158,7 @@ class DocSection {
   toMarkdown(level = 2) {
     const heading = '#'.repeat(level);
     let md = `${heading} ${this.title}\n\n`;
-    
+
     if (this.content) {
       md += `${this.content}\n\n`;
     }
@@ -163,7 +177,7 @@ class DocSection {
       content: this.content,
       subsections: this.subsections.map(s => s.toJSON()),
       type: this.type,
-      metadata: this.metadata
+      metadata: this.metadata,
     };
   }
 }
@@ -233,7 +247,10 @@ class DocPage {
     html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
 
     // Code blocks
-    html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
+    html = html.replace(
+      /```(\w+)?\n([\s\S]*?)```/g,
+      '<pre><code class="language-$1">$2</code></pre>'
+    );
 
     // Inline code
     html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
@@ -264,7 +281,7 @@ class DocPage {
       description: this.description,
       sections: this.sections.map(s => s.toJSON()),
       path: this.path,
-      type: this.type
+      type: this.type,
     };
   }
 }
@@ -313,10 +330,12 @@ class DocSite {
     for (const [type, pages] of pagesByType) {
       nav.push({
         title: type.charAt(0).toUpperCase() + type.slice(1),
-        items: pages.sort((a, b) => a.order - b.order).map(p => ({
-          title: p.title,
-          path: p.path || `/${p.id}`
-        }))
+        items: pages
+          .sort((a, b) => a.order - b.order)
+          .map(p => ({
+            title: p.title,
+            path: p.path || `/${p.id}`,
+          })),
       });
     }
 
@@ -329,7 +348,7 @@ class DocSite {
 
     for (const [id, page] of this.pages) {
       const path = page.path || `${id}.md`;
-      
+
       switch (format) {
         case DocFormat.HTML:
           output.set(path.replace('.md', '.html'), page.toHTML());
@@ -363,7 +382,7 @@ class DocSite {
 
   generateIndex() {
     let index = `# ${this.title}\n\n`;
-    
+
     if (this.description) {
       index += `${this.description}\n\n`;
     }
@@ -390,7 +409,7 @@ class DocSite {
       baseUrl: this.baseUrl,
       pages: Array.from(this.pages.values()).map(p => p.toJSON()),
       navigation: this.navigation,
-      theme: this.theme
+      theme: this.theme,
     };
   }
 }
@@ -423,15 +442,17 @@ class DocGenerator extends EventEmitter {
         title: 'Product Overview',
         description: steering.product.description || '',
         type: DocType.GUIDE,
-        path: '/product'
+        path: '/product',
       });
 
       if (steering.product.features) {
-        productPage.addSection(new DocSection({
-          id: 'features',
-          title: 'Features',
-          content: steering.product.features.map(f => `- ${f}`).join('\n')
-        }));
+        productPage.addSection(
+          new DocSection({
+            id: 'features',
+            title: 'Features',
+            content: steering.product.features.map(f => `- ${f}`).join('\n'),
+          })
+        );
       }
 
       pages.push(productPage);
@@ -444,16 +465,18 @@ class DocGenerator extends EventEmitter {
         title: 'Architecture',
         description: steering.structure.description || '',
         type: DocType.ARCHITECTURE,
-        path: '/architecture'
+        path: '/architecture',
       });
 
       if (steering.structure.components) {
         for (const [name, component] of Object.entries(steering.structure.components)) {
-          archPage.addSection(new DocSection({
-            id: name,
-            title: name,
-            content: component.description || ''
-          }));
+          archPage.addSection(
+            new DocSection({
+              id: name,
+              title: name,
+              content: component.description || '',
+            })
+          );
         }
       }
 
@@ -466,23 +489,27 @@ class DocGenerator extends EventEmitter {
         id: 'technology',
         title: 'Technology Stack',
         type: DocType.REFERENCE,
-        path: '/technology'
+        path: '/technology',
       });
 
       if (steering.tech.languages) {
-        techPage.addSection(new DocSection({
-          id: 'languages',
-          title: 'Languages',
-          content: steering.tech.languages.map(l => `- ${l}`).join('\n')
-        }));
+        techPage.addSection(
+          new DocSection({
+            id: 'languages',
+            title: 'Languages',
+            content: steering.tech.languages.map(l => `- ${l}`).join('\n'),
+          })
+        );
       }
 
       if (steering.tech.frameworks) {
-        techPage.addSection(new DocSection({
-          id: 'frameworks',
-          title: 'Frameworks',
-          content: steering.tech.frameworks.map(f => `- ${f}`).join('\n')
-        }));
+        techPage.addSection(
+          new DocSection({
+            id: 'frameworks',
+            title: 'Frameworks',
+            content: steering.tech.frameworks.map(f => `- ${f}`).join('\n'),
+          })
+        );
       }
 
       pages.push(techPage);
@@ -494,15 +521,17 @@ class DocGenerator extends EventEmitter {
         id: 'rules',
         title: 'Project Rules',
         type: DocType.REFERENCE,
-        path: '/rules'
+        path: '/rules',
       });
 
       if (steering.rules.constitution) {
-        rulesPage.addSection(new DocSection({
-          id: 'constitution',
-          title: 'Constitution',
-          content: steering.rules.constitution
-        }));
+        rulesPage.addSection(
+          new DocSection({
+            id: 'constitution',
+            title: 'Constitution',
+            content: steering.rules.constitution,
+          })
+        );
       }
 
       pages.push(rulesPage);
@@ -521,7 +550,7 @@ class DocGenerator extends EventEmitter {
         title: mod.name,
         description: mod.description || '',
         type: DocType.API,
-        path: `/api/${mod.name}`
+        path: `/api/${mod.name}`,
       });
 
       if (mod.exports) {
@@ -529,7 +558,7 @@ class DocGenerator extends EventEmitter {
           const section = new DocSection({
             id: exp.name,
             title: exp.name,
-            content: this.formatAPIEntry(exp)
+            content: this.formatAPIEntry(exp),
           });
           page.addSection(section);
         }
@@ -583,35 +612,41 @@ class DocGenerator extends EventEmitter {
       frontMatter: {
         difficulty: tutorial.difficulty || 'beginner',
         duration: tutorial.duration || '10 minutes',
-        tags: tutorial.tags || []
-      }
+        tags: tutorial.tags || [],
+      },
     });
 
     if (tutorial.prerequisites) {
-      page.addSection(new DocSection({
-        id: 'prerequisites',
-        title: 'Prerequisites',
-        content: tutorial.prerequisites.map(p => `- ${p}`).join('\n')
-      }));
+      page.addSection(
+        new DocSection({
+          id: 'prerequisites',
+          title: 'Prerequisites',
+          content: tutorial.prerequisites.map(p => `- ${p}`).join('\n'),
+        })
+      );
     }
 
     if (tutorial.steps) {
       for (let i = 0; i < tutorial.steps.length; i++) {
         const step = tutorial.steps[i];
-        page.addSection(new DocSection({
-          id: `step-${i + 1}`,
-          title: `Step ${i + 1}: ${step.title}`,
-          content: step.content
-        }));
+        page.addSection(
+          new DocSection({
+            id: `step-${i + 1}`,
+            title: `Step ${i + 1}: ${step.title}`,
+            content: step.content,
+          })
+        );
       }
     }
 
     if (tutorial.nextSteps) {
-      page.addSection(new DocSection({
-        id: 'next-steps',
-        title: 'Next Steps',
-        content: tutorial.nextSteps.map(n => `- [${n.title}](${n.path})`).join('\n')
-      }));
+      page.addSection(
+        new DocSection({
+          id: 'next-steps',
+          title: 'Next Steps',
+          content: tutorial.nextSteps.map(n => `- [${n.title}](${n.path})`).join('\n'),
+        })
+      );
     }
 
     this.emit('generatedTutorial', { page });
@@ -624,7 +659,7 @@ class DocGenerator extends EventEmitter {
       title: 'Changelog',
       description: 'All notable changes to this project.',
       type: DocType.CHANGELOG,
-      path: '/changelog'
+      path: '/changelog',
     });
 
     for (const release of releases) {
@@ -645,11 +680,13 @@ class DocGenerator extends EventEmitter {
         content.push(release.breaking.map(b => `- ⚠️ ${b}`).join('\n'));
       }
 
-      page.addSection(new DocSection({
-        id: `v${release.version}`,
-        title: `[${release.version}] - ${release.date}`,
-        content: content.join('\n')
-      }));
+      page.addSection(
+        new DocSection({
+          id: `v${release.version}`,
+          title: `[${release.version}] - ${release.date}`,
+          content: content.join('\n'),
+        })
+      );
     }
 
     return page;
@@ -661,15 +698,17 @@ class DocGenerator extends EventEmitter {
       title: 'Frequently Asked Questions',
       description: 'Common questions and answers about this project.',
       type: DocType.FAQ,
-      path: '/faq'
+      path: '/faq',
     });
 
     for (const q of questions) {
-      page.addSection(new DocSection({
-        id: q.id || q.question.substring(0, 20).toLowerCase().replace(/\s+/g, '-'),
-        title: q.question,
-        content: q.answer
-      }));
+      page.addSection(
+        new DocSection({
+          id: q.id || q.question.substring(0, 20).toLowerCase().replace(/\s+/g, '-'),
+          title: q.question,
+          content: q.answer,
+        })
+      );
     }
 
     return page;
@@ -678,11 +717,11 @@ class DocGenerator extends EventEmitter {
   build(site, options = {}) {
     const format = options.format || DocFormat.MARKDOWN;
     const output = site.build(format);
-    
-    this.emit('built', { 
-      format, 
+
+    this.emit('built', {
+      format,
       files: Array.from(output.keys()),
-      site
+      site,
     });
 
     return output;
@@ -691,7 +730,7 @@ class DocGenerator extends EventEmitter {
   toJSON() {
     return {
       projectRoot: this.projectRoot,
-      site: this.site ? this.site.toJSON() : null
+      site: this.site ? this.site.toJSON() : null,
     };
   }
 }
@@ -724,17 +763,17 @@ module.exports = {
   // Constants
   DocType,
   DocFormat,
-  
+
   // Classes
   TemplateEngine,
   DocSection,
   DocPage,
   DocSite,
   DocGenerator,
-  
+
   // Factories
   createDocGenerator,
   createDocSite,
   createDocPage,
-  createDocSection
+  createDocSection,
 };

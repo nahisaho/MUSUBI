@@ -17,7 +17,7 @@ const ProjectType = {
   MICROSERVICE: 'microservice',
   FULLSTACK: 'fullstack',
   MOBILE: 'mobile',
-  DESKTOP: 'desktop'
+  DESKTOP: 'desktop',
 };
 
 const FrameworkPreset = {
@@ -29,7 +29,7 @@ const FrameworkPreset = {
   FASTIFY: 'fastify',
   NESTJS: 'nestjs',
   ELECTRON: 'electron',
-  REACT_NATIVE: 'react-native'
+  REACT_NATIVE: 'react-native',
 };
 
 // ============================================================================
@@ -80,17 +80,17 @@ class ProjectTemplate {
         test: 'jest',
         lint: 'eslint src',
         validate: 'npx musubi validate',
-        ...this.scripts
+        ...this.scripts,
       },
       dependencies: {
         'musubi-sdd': '^3.0.0',
-        ...this.dependencies
+        ...this.dependencies,
       },
       devDependencies: {
         jest: '^29.0.0',
         eslint: '^8.0.0',
-        ...this.devDependencies
-      }
+        ...this.devDependencies,
+      },
     };
   }
 
@@ -266,7 +266,7 @@ Regular retrospectives and refinement.
       framework: this.framework,
       files: Array.from(this.files.keys()),
       dependencies: this.dependencies,
-      devDependencies: this.devDependencies
+      devDependencies: this.devDependencies,
     };
   }
 }
@@ -283,53 +283,67 @@ class ProjectCatalog {
 
   registerDefaults() {
     // Basic API Example
-    this.register(new ProjectTemplate({
-      id: 'musubi-api-example',
-      name: 'MUSUBI API Example',
-      description: 'A REST API example using MUSUBI SDD',
-      type: ProjectType.API_SERVER,
-      framework: FrameworkPreset.EXPRESS
-    }).addDependency('express', '^4.18.0')
-      .addScript('dev', 'nodemon src/index.js'));
+    this.register(
+      new ProjectTemplate({
+        id: 'musubi-api-example',
+        name: 'MUSUBI API Example',
+        description: 'A REST API example using MUSUBI SDD',
+        type: ProjectType.API_SERVER,
+        framework: FrameworkPreset.EXPRESS,
+      })
+        .addDependency('express', '^4.18.0')
+        .addScript('dev', 'nodemon src/index.js')
+    );
 
     // CLI Tool Example
-    this.register(new ProjectTemplate({
-      id: 'musubi-cli-example',
-      name: 'MUSUBI CLI Example',
-      description: 'A CLI tool example using MUSUBI SDD',
-      type: ProjectType.CLI_TOOL
-    }).addDependency('commander', '^11.0.0')
-      .addDependency('chalk', '^5.0.0'));
+    this.register(
+      new ProjectTemplate({
+        id: 'musubi-cli-example',
+        name: 'MUSUBI CLI Example',
+        description: 'A CLI tool example using MUSUBI SDD',
+        type: ProjectType.CLI_TOOL,
+      })
+        .addDependency('commander', '^11.0.0')
+        .addDependency('chalk', '^5.0.0')
+    );
 
     // Library Example
-    this.register(new ProjectTemplate({
-      id: 'musubi-lib-example',
-      name: 'MUSUBI Library Example',
-      description: 'A reusable library example using MUSUBI SDD',
-      type: ProjectType.LIBRARY
-    }).addScript('build', 'npm run lint && npm test'));
+    this.register(
+      new ProjectTemplate({
+        id: 'musubi-lib-example',
+        name: 'MUSUBI Library Example',
+        description: 'A reusable library example using MUSUBI SDD',
+        type: ProjectType.LIBRARY,
+      }).addScript('build', 'npm run lint && npm test')
+    );
 
     // Full-Stack Example
-    this.register(new ProjectTemplate({
-      id: 'musubi-fullstack-example',
-      name: 'MUSUBI Full-Stack Example',
-      description: 'A full-stack application using MUSUBI SDD',
-      type: ProjectType.FULLSTACK,
-      framework: FrameworkPreset.NEXTJS
-    }).addDependency('next', '^14.0.0')
-      .addDependency('react', '^18.0.0')
-      .addScript('dev', 'next dev')
-      .addScript('build', 'next build'));
+    this.register(
+      new ProjectTemplate({
+        id: 'musubi-fullstack-example',
+        name: 'MUSUBI Full-Stack Example',
+        description: 'A full-stack application using MUSUBI SDD',
+        type: ProjectType.FULLSTACK,
+        framework: FrameworkPreset.NEXTJS,
+      })
+        .addDependency('next', '^14.0.0')
+        .addDependency('react', '^18.0.0')
+        .addScript('dev', 'next dev')
+        .addScript('build', 'next build')
+    );
 
     // Microservice Example
-    this.register(new ProjectTemplate({
-      id: 'musubi-microservice-example',
-      name: 'MUSUBI Microservice Example',
-      description: 'A microservice example using MUSUBI SDD',
-      type: ProjectType.MICROSERVICE,
-      framework: FrameworkPreset.FASTIFY
-    }).addDependency('fastify', '^4.0.0')
-      .addScript('dev', 'nodemon src/index.js'));
+    this.register(
+      new ProjectTemplate({
+        id: 'musubi-microservice-example',
+        name: 'MUSUBI Microservice Example',
+        description: 'A microservice example using MUSUBI SDD',
+        type: ProjectType.MICROSERVICE,
+        framework: FrameworkPreset.FASTIFY,
+      })
+        .addDependency('fastify', '^4.0.0')
+        .addScript('dev', 'nodemon src/index.js')
+    );
   }
 
   register(template) {
@@ -347,18 +361,16 @@ class ProjectCatalog {
       name: t.name,
       description: t.description,
       type: t.type,
-      framework: t.framework
+      framework: t.framework,
     }));
   }
 
   byType(type) {
-    return Array.from(this.templates.values())
-      .filter(t => t.type === type);
+    return Array.from(this.templates.values()).filter(t => t.type === type);
   }
 
   byFramework(framework) {
-    return Array.from(this.templates.values())
-      .filter(t => t.framework === framework);
+    return Array.from(this.templates.values()).filter(t => t.framework === framework);
   }
 }
 
@@ -374,7 +386,7 @@ const LaunchCategory = {
   SECURITY: 'security',
   PERFORMANCE: 'performance',
   ACCESSIBILITY: 'accessibility',
-  COMPLIANCE: 'compliance'
+  COMPLIANCE: 'compliance',
 };
 
 class LaunchChecklist {
@@ -391,14 +403,14 @@ class LaunchChecklist {
       category: LaunchCategory.CODE_QUALITY,
       title: 'ESLint passes with no errors',
       command: 'npm run lint',
-      required: true
+      required: true,
     });
 
     this.addItem({
       id: 'no-console',
       category: LaunchCategory.CODE_QUALITY,
       title: 'No console.log statements in production code',
-      required: false
+      required: false,
     });
 
     // Documentation
@@ -406,21 +418,21 @@ class LaunchChecklist {
       id: 'readme-complete',
       category: LaunchCategory.DOCUMENTATION,
       title: 'README.md is complete and up-to-date',
-      required: true
+      required: true,
     });
 
     this.addItem({
       id: 'agents-md',
       category: LaunchCategory.DOCUMENTATION,
       title: 'AGENTS.md exists and is configured',
-      required: true
+      required: true,
     });
 
     this.addItem({
       id: 'api-docs',
       category: LaunchCategory.DOCUMENTATION,
       title: 'API documentation is generated',
-      required: false
+      required: false,
     });
 
     // Testing
@@ -429,14 +441,14 @@ class LaunchChecklist {
       category: LaunchCategory.TESTING,
       title: 'All tests pass',
       command: 'npm test',
-      required: true
+      required: true,
     });
 
     this.addItem({
       id: 'coverage-threshold',
       category: LaunchCategory.TESTING,
       title: 'Test coverage meets threshold (80%+)',
-      required: true
+      required: true,
     });
 
     // CI/CD
@@ -444,14 +456,14 @@ class LaunchChecklist {
       id: 'ci-configured',
       category: LaunchCategory.CI_CD,
       title: 'CI pipeline is configured',
-      required: true
+      required: true,
     });
 
     this.addItem({
       id: 'auto-deploy',
       category: LaunchCategory.CI_CD,
       title: 'Automatic deployment is set up',
-      required: false
+      required: false,
     });
 
     // Security
@@ -459,7 +471,7 @@ class LaunchChecklist {
       id: 'no-secrets',
       category: LaunchCategory.SECURITY,
       title: 'No secrets in source code',
-      required: true
+      required: true,
     });
 
     this.addItem({
@@ -467,7 +479,7 @@ class LaunchChecklist {
       category: LaunchCategory.SECURITY,
       title: 'npm audit shows no critical vulnerabilities',
       command: 'npm audit',
-      required: true
+      required: true,
     });
 
     // Compliance
@@ -476,21 +488,21 @@ class LaunchChecklist {
       category: LaunchCategory.COMPLIANCE,
       title: 'MUSUBI validation passes',
       command: 'npx musubi validate',
-      required: true
+      required: true,
     });
 
     this.addItem({
       id: 'constitution-compliance',
       category: LaunchCategory.COMPLIANCE,
       title: 'Constitution compliance score is A or B',
-      required: true
+      required: true,
     });
   }
 
   addItem(item) {
     this.items.push({
       ...item,
-      checked: false
+      checked: false,
     });
     return this;
   }
@@ -523,7 +535,7 @@ class LaunchChecklist {
       percentage: Math.round((checked / total) * 100),
       required: required.length,
       requiredChecked,
-      readyToLaunch: requiredChecked === required.length
+      readyToLaunch: requiredChecked === required.length,
     };
   }
 
@@ -541,17 +553,20 @@ class LaunchChecklist {
 
   toMarkdown() {
     let md = `# Launch Checklist: ${this.projectName}\n\n`;
-    
+
     const status = this.getStatus();
     md += `**Progress:** ${status.checked}/${status.total} (${status.percentage}%)\n`;
     md += `**Required:** ${status.requiredChecked}/${status.required}\n`;
     md += `**Ready to Launch:** ${status.readyToLaunch ? '✅ Yes' : '❌ No'}\n\n`;
 
     const categories = [...new Set(this.items.map(i => i.category))];
-    
+
     for (const category of categories) {
-      md += `## ${category.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}\n\n`;
-      
+      md += `## ${category
+        .split('-')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ')}\n\n`;
+
       for (const item of this.getByCategory(category)) {
         const checkbox = item.checked ? '[x]' : '[ ]';
         const required = item.required ? ' **(required)**' : '';
@@ -570,7 +585,7 @@ class LaunchChecklist {
     return {
       projectName: this.projectName,
       status: this.getStatus(),
-      items: this.items
+      items: this.items,
     };
   }
 }
@@ -590,7 +605,7 @@ class ReleaseManager extends EventEmitter {
 
   bumpVersion(type = 'patch') {
     const [major, minor, patch] = this.version.split('.').map(Number);
-    
+
     switch (type) {
       case 'major':
         this.version = `${major + 1}.0.0`;
@@ -729,9 +744,9 @@ class ReleaseManager extends EventEmitter {
       valid: status.readyToLaunch,
       progress: status.percentage,
       blockers: uncheckedRequired.map(i => i.title),
-      message: status.readyToLaunch 
-        ? 'Ready for release!' 
-        : `${uncheckedRequired.length} required items remaining`
+      message: status.readyToLaunch
+        ? 'Ready for release!'
+        : `${uncheckedRequired.length} required items remaining`,
     };
   }
 
@@ -740,7 +755,7 @@ class ReleaseManager extends EventEmitter {
       version: this.version,
       projectRoot: this.projectRoot,
       checklist: this.checklist.toJSON(),
-      templates: this.catalog.list()
+      templates: this.catalog.list(),
     };
   }
 }
@@ -774,16 +789,16 @@ module.exports = {
   ProjectType,
   FrameworkPreset,
   LaunchCategory,
-  
+
   // Classes
   ProjectTemplate,
   ProjectCatalog,
   LaunchChecklist,
   ReleaseManager,
-  
+
   // Factories
   createProjectTemplate,
   createProjectCatalog,
   createLaunchChecklist,
-  createReleaseManager
+  createReleaseManager,
 };

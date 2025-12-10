@@ -1,9 +1,9 @@
 /**
  * MUSUBI MCP Context Provider
- * 
+ *
  * Provides context information from MCP resources to the Agent Loop.
  * Manages resources, prompts, and context from MCP servers.
- * 
+ *
  * @module integrations/mcp/mcp-context-provider
  */
 
@@ -48,24 +48,24 @@ class MCPContextProvider extends EventEmitter {
    */
   constructor(options = {}) {
     super();
-    
+
     this.connector = options.connector || null;
     this.cacheTTL = options.cacheTTL ?? 300000;
     this.maxCacheSize = options.maxCacheSize ?? 100;
-    
+
     /** @type {Map<string, MCPResource[]>} */
     this.resources = new Map();
-    
+
     /** @type {Map<string, MCPPrompt[]>} */
     this.prompts = new Map();
-    
+
     /** @type {Map<string, { data: *, timestamp: number }>} */
     this.cache = new Map();
-    
+
     /** @type {Map<string, Function>} */
     this.subscriptions = new Map();
   }
-  
+
   /**
    * Set the MCP connector
    * @param {Object} connector
@@ -73,7 +73,7 @@ class MCPContextProvider extends EventEmitter {
   setConnector(connector) {
     this.connector = connector;
   }
-  
+
   /**
    * Discover resources from an MCP server
    * @param {string} serverName
@@ -83,29 +83,28 @@ class MCPContextProvider extends EventEmitter {
     if (!this.connector) {
       throw new Error('MCP connector not set');
     }
-    
+
     try {
       const response = await this.connector.listResources(serverName);
       const resources = (response.resources || []).map(r => ({
         ...r,
-        serverName
+        serverName,
       }));
-      
+
       this.resources.set(serverName, resources);
-      
+
       this.emit('resources:discovered', {
         serverName,
-        count: resources.length
+        count: resources.length,
       });
-      
+
       return resources;
-      
     } catch (error) {
       this.emit('resources:error', { serverName, error });
       throw error;
     }
   }
-  
+
   /**
    * Discover prompts from an MCP server
    * @param {string} serverName
@@ -115,29 +114,28 @@ class MCPContextProvider extends EventEmitter {
     if (!this.connector) {
       throw new Error('MCP connector not set');
     }
-    
+
     try {
       const response = await this.connector.listPrompts(serverName);
       const prompts = (response.prompts || []).map(p => ({
         ...p,
-        serverName
+        serverName,
       }));
-      
+
       this.prompts.set(serverName, prompts);
-      
+
       this.emit('prompts:discovered', {
         serverName,
-        count: prompts.length
+        count: prompts.length,
       });
-      
+
       return prompts;
-      
     } catch (error) {
       this.emit('prompts:error', { serverName, error });
       throw error;
     }
   }
-  
+
   /**
    * Read a resource
    * @param {string} serverName
@@ -149,7 +147,7 @@ class MCPContextProvider extends EventEmitter {
   async readResource(serverName, uri, options = {}) {
     const cacheKey = `resource:${serverName}:${uri}`;
     const useCache = options.useCache ?? true;
-    
+
     // Check cache
     if (useCache) {
       const cached = this.getFromCache(cacheKey);
@@ -157,13 +155,13 @@ class MCPContextProvider extends EventEmitter {
         return cached;
       }
     }
-    
+
     if (!this.connector) {
       throw new Error('MCP connector not set');
     }
-    
+
     const response = await this.connector.readResource(serverName, uri);
-    
+
     const contextData = {
       type: 'resource',
       source: `${serverName}:${uri}`,
@@ -171,16 +169,16 @@ class MCPContextProvider extends EventEmitter {
       metadata: {
         uri,
         serverName,
-        mimeType: response.mimeType
-      }
+        mimeType: response.mimeType,
+      },
     };
-    
+
     this.addToCache(cacheKey, contextData);
     this.emit('resource:read', { serverName, uri });
-    
+
     return contextData;
   }
-  
+
   /**
    * Get a prompt with arguments
    * @param {string} serverName
@@ -192,9 +190,9 @@ class MCPContextProvider extends EventEmitter {
     if (!this.connector) {
       throw new Error('MCP connector not set');
     }
-    
+
     const response = await this.connector.getPrompt(serverName, promptName, args);
-    
+
     const contextData = {
       type: 'prompt',
       source: `${serverName}:${promptName}`,
@@ -203,15 +201,15 @@ class MCPContextProvider extends EventEmitter {
         promptName,
         serverName,
         arguments: args,
-        description: response.description
-      }
+        description: response.description,
+      },
     };
-    
+
     this.emit('prompt:retrieved', { serverName, promptName });
-    
+
     return contextData;
   }
-  
+
   /**
    * Subscribe to resource updates
    * @param {string} serverName
@@ -221,27 +219,27 @@ class MCPContextProvider extends EventEmitter {
    */
   subscribeToResource(serverName, uri, callback) {
     const key = `${serverName}:${uri}`;
-    
+
     // Store callback
     this.subscriptions.set(key, callback);
-    
+
     // Setup MCP subscription if connector supports it
     if (this.connector && this.connector.subscribe) {
-      this.connector.subscribe(serverName, uri, (update) => {
+      this.connector.subscribe(serverName, uri, update => {
         // Invalidate cache
         this.cache.delete(`resource:${serverName}:${uri}`);
-        
+
         // Call callback
         callback({
           type: 'resource:updated',
           source: key,
-          content: update
+          content: update,
         });
       });
     }
-    
+
     this.emit('subscription:created', { serverName, uri });
-    
+
     // Return unsubscribe function
     return () => {
       this.subscriptions.delete(key);
@@ -251,7 +249,7 @@ class MCPContextProvider extends EventEmitter {
       this.emit('subscription:removed', { serverName, uri });
     };
   }
-  
+
   /**
    * Get all resources
    * @returns {MCPResource[]}
@@ -263,7 +261,7 @@ class MCPContextProvider extends EventEmitter {
     }
     return all;
   }
-  
+
   /**
    * Get resources by server
    * @param {string} serverName
@@ -272,7 +270,7 @@ class MCPContextProvider extends EventEmitter {
   getResourcesByServer(serverName) {
     return this.resources.get(serverName) || [];
   }
-  
+
   /**
    * Get all prompts
    * @returns {MCPPrompt[]}
@@ -284,7 +282,7 @@ class MCPContextProvider extends EventEmitter {
     }
     return all;
   }
-  
+
   /**
    * Get prompts by server
    * @param {string} serverName
@@ -293,7 +291,7 @@ class MCPContextProvider extends EventEmitter {
   getPromptsByServer(serverName) {
     return this.prompts.get(serverName) || [];
   }
-  
+
   /**
    * Build context for Agent Loop
    * @param {Object} options
@@ -308,10 +306,10 @@ class MCPContextProvider extends EventEmitter {
       prompts: [],
       metadata: {
         builtAt: new Date().toISOString(),
-        sources: []
-      }
+        sources: [],
+      },
     };
-    
+
     // Gather resources
     if (options.resources) {
       for (const resourceSpec of options.resources) {
@@ -325,7 +323,7 @@ class MCPContextProvider extends EventEmitter {
         }
       }
     }
-    
+
     // Gather prompts
     if (options.prompts) {
       for (const promptSpec of options.prompts) {
@@ -340,15 +338,15 @@ class MCPContextProvider extends EventEmitter {
         }
       }
     }
-    
+
     this.emit('context:built', {
       resourceCount: context.resources.length,
-      promptCount: context.prompts.length
+      promptCount: context.prompts.length,
     });
-    
+
     return context;
   }
-  
+
   /**
    * Parse resource specification (serverName:uri or serverName/name)
    * @param {string} spec
@@ -364,7 +362,7 @@ class MCPContextProvider extends EventEmitter {
     }
     return [spec, ''];
   }
-  
+
   /**
    * Add item to cache
    * @param {string} key
@@ -378,13 +376,13 @@ class MCPContextProvider extends EventEmitter {
         this.cache.delete(oldest);
       }
     }
-    
+
     this.cache.set(key, {
       data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
-  
+
   /**
    * Get item from cache
    * @param {string} key
@@ -393,16 +391,16 @@ class MCPContextProvider extends EventEmitter {
   getFromCache(key) {
     const entry = this.cache.get(key);
     if (!entry) return null;
-    
+
     // Check TTL
     if (Date.now() - entry.timestamp > this.cacheTTL) {
       this.cache.delete(key);
       return null;
     }
-    
+
     return entry.data;
   }
-  
+
   /**
    * Find oldest cache entry
    * @returns {string|null}
@@ -410,17 +408,17 @@ class MCPContextProvider extends EventEmitter {
   findOldestCacheEntry() {
     let oldest = null;
     let oldestTime = Infinity;
-    
+
     for (const [key, entry] of this.cache) {
       if (entry.timestamp < oldestTime) {
         oldestTime = entry.timestamp;
         oldest = key;
       }
     }
-    
+
     return oldest;
   }
-  
+
   /**
    * Clear cache
    */
@@ -428,7 +426,7 @@ class MCPContextProvider extends EventEmitter {
     this.cache.clear();
     this.emit('cache:cleared');
   }
-  
+
   /**
    * Get provider statistics
    * @returns {Object}
@@ -439,22 +437,22 @@ class MCPContextProvider extends EventEmitter {
         total: this.getAllResources().length,
         byServer: Object.fromEntries(
           Array.from(this.resources.entries()).map(([s, r]) => [s, r.length])
-        )
+        ),
       },
       prompts: {
         total: this.getAllPrompts().length,
         byServer: Object.fromEntries(
           Array.from(this.prompts.entries()).map(([s, p]) => [s, p.length])
-        )
+        ),
       },
       cache: {
         size: this.cache.size,
-        maxSize: this.maxCacheSize
+        maxSize: this.maxCacheSize,
       },
-      subscriptions: this.subscriptions.size
+      subscriptions: this.subscriptions.size,
     };
   }
-  
+
   /**
    * Clear all data
    */
@@ -468,5 +466,5 @@ class MCPContextProvider extends EventEmitter {
 }
 
 module.exports = {
-  MCPContextProvider
+  MCPContextProvider,
 };

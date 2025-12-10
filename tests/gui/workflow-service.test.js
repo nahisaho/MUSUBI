@@ -139,13 +139,13 @@ describe('WorkflowService', () => {
     });
 
     it('should throw for unknown stage', async () => {
-      await expect(service.transitionTo('feature-1', 'unknown'))
-        .rejects.toThrow('Unknown stage');
+      await expect(service.transitionTo('feature-1', 'unknown')).rejects.toThrow('Unknown stage');
     });
 
     it('should throw for stage skip', async () => {
-      await expect(service.transitionTo('feature-1', 'tasks'))
-        .rejects.toThrow('Cannot skip stages');
+      await expect(service.transitionTo('feature-1', 'tasks')).rejects.toThrow(
+        'Cannot skip stages'
+      );
     });
   });
 

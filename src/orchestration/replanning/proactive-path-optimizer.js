@@ -15,33 +15,33 @@ const EventEmitter = require('events');
 const DEFAULT_CONFIG = {
   // Enable proactive optimization
   enabled: true,
-  
+
   // Evaluation frequency (every N successful tasks)
   evaluateEvery: 3,
-  
+
   // Minimum improvement threshold to trigger re-routing (percentage)
   minImprovementThreshold: 0.15,
-  
+
   // Maximum time to spend on optimization (ms)
   optimizationTimeout: 5000,
-  
+
   // Consider parallel execution opportunities
   considerParallelization: true,
-  
+
   // Consider task merging opportunities
   considerMerging: true,
-  
+
   // Consider task reordering for better dependency resolution
   considerReordering: true,
-  
+
   // Consider skipping optional tasks when ahead of schedule
   considerSkipping: false,
-  
+
   // Learning from past executions
   learningEnabled: true,
-  
+
   // Maximum optimization history to keep
-  maxHistorySize: 100
+  maxHistorySize: 100,
 };
 
 /**
@@ -79,7 +79,7 @@ class PathMetrics {
   compareWith(other) {
     const thisScore = this.getScore();
     const otherScore = other.getScore();
-    
+
     if (otherScore === 0) return 0;
     return (otherScore - thisScore) / otherScore;
   }
@@ -120,16 +120,16 @@ class ProactivePathOptimizer extends EventEmitter {
    */
   constructor(llmProvider, options = {}) {
     super();
-    
+
     this.llm = llmProvider;
     this.config = { ...DEFAULT_CONFIG, ...options.config };
-    
+
     // State
     this.successCount = 0;
     this.optimizationHistory = [];
     this.learningData = new Map(); // Task patterns -> performance data
     this.currentMetrics = null;
-    
+
     // Analyzers
     this.parallelizationAnalyzer = new ParallelizationAnalyzer();
     this.mergingAnalyzer = new MergingAnalyzer();
@@ -145,19 +145,19 @@ class ProactivePathOptimizer extends EventEmitter {
    */
   async onTaskSuccess(task, context, result) {
     if (!this.config.enabled) return null;
-    
+
     this.successCount++;
-    
+
     // Record performance data for learning
     if (this.config.learningEnabled) {
       this.recordPerformance(task, result);
     }
-    
+
     // Check if we should evaluate
     if (this.successCount % this.config.evaluateEvery !== 0) {
       return null;
     }
-    
+
     // Perform proactive optimization
     return this.optimize(context);
   }
@@ -169,65 +169,65 @@ class ProactivePathOptimizer extends EventEmitter {
    */
   async optimize(context) {
     const startTime = Date.now();
-    
+
     // Calculate current path metrics
     this.currentMetrics = this.calculatePathMetrics(context);
-    
+
     // Find optimization opportunities
     const opportunities = await this.findOpportunities(context);
-    
+
     if (opportunities.length === 0) {
       return {
         optimized: false,
         reason: 'No optimization opportunities found',
-        currentMetrics: this.currentMetrics
+        currentMetrics: this.currentMetrics,
       };
     }
-    
+
     // Rank opportunities
     const ranked = this.rankOpportunities(opportunities);
     const best = ranked[0];
-    
+
     // Check if improvement meets threshold
     if (best.estimatedImprovement < this.config.minImprovementThreshold) {
       return {
         optimized: false,
         reason: `Best improvement (${(best.estimatedImprovement * 100).toFixed(1)}%) below threshold`,
         opportunities: ranked.slice(0, 3),
-        currentMetrics: this.currentMetrics
+        currentMetrics: this.currentMetrics,
       };
     }
-    
+
     // Validate the optimization
     const validation = await this.validateOptimization(best, context);
-    
+
     if (!validation.valid) {
       return {
         optimized: false,
         reason: validation.reason,
         opportunities: ranked.slice(0, 3),
-        currentMetrics: this.currentMetrics
+        currentMetrics: this.currentMetrics,
       };
     }
-    
+
     // Record optimization
     this.recordOptimization(best, context);
-    
+
     // Emit optimization event
     this.emit('optimization', {
       type: best.type,
       improvement: best.estimatedImprovement,
       affectedTasks: best.affectedTasks,
-      newPath: best.newPath
+      newPath: best.newPath,
     });
-    
+
     return {
       optimized: true,
       optimization: best,
       newPath: best.newPath,
       estimatedImprovement: best.estimatedImprovement,
       newMetrics: this.calculatePathMetrics({ ...context, pending: best.newPath }),
-      duration: Date.now() - startTime
+      duration: Date.now() - startTime,
     };
   }
 
@@ -238,31 +238,29 @@ class ProactivePathOptimizer extends EventEmitter {
    */
   calculatePathMetrics(context) {
     const pending = context.pending || [];
-    
+
     // Estimate total time
     let estimatedTime = 0;
     pending.forEach(task => {
       const historical = this.getHistoricalDuration(task);
       estimatedTime += historical || task.estimatedDuration || 30000;
     });
-    
+
     // Calculate parallelization factor
     const parallelizable = this.countParallelizable(pending);
-    const parallelizationFactor = pending.length > 0 
-      ? parallelizable / pending.length 
-      : 1.0;
-    
+    const parallelizationFactor = pending.length > 0 ? parallelizable / pending.length : 1.0;
+
     // Calculate risk score
     const riskScore = this.calculateRiskScore(pending, context);
-    
+
     // Calculate dependency complexity
     const dependencyComplexity = this.calculateDependencyComplexity(pending);
-    
+
     return new PathMetrics({
       estimatedTime,
       parallelizationFactor,
       riskScore,
-      dependencyComplexity
+      dependencyComplexity,
     });
   }
 
@@ -274,33 +272,33 @@ class ProactivePathOptimizer extends EventEmitter {
   async findOpportunities(context) {
     const opportunities = [];
     const pending = context.pending || [];
-    
+
     if (pending.length < 2) return opportunities;
-    
+
     // Check parallelization opportunities
     if (this.config.considerParallelization) {
       const parallelOps = this.parallelizationAnalyzer.analyze(pending, context);
       opportunities.push(...parallelOps);
     }
-    
+
     // Check merging opportunities
     if (this.config.considerMerging) {
       const mergeOps = this.mergingAnalyzer.analyze(pending, context);
       opportunities.push(...mergeOps);
     }
-    
+
     // Check reordering opportunities
     if (this.config.considerReordering) {
       const reorderOps = this.reorderingAnalyzer.analyze(pending, context);
       opportunities.push(...reorderOps);
     }
-    
+
     // Use LLM for additional insights if available
     if (this.llm && pending.length >= 3) {
       const llmOps = await this.getLLMOptimizations(pending, context);
       opportunities.push(...llmOps);
     }
-    
+
     return opportunities;
   }
 
@@ -313,14 +311,14 @@ class ProactivePathOptimizer extends EventEmitter {
   async getLLMOptimizations(pending, context) {
     try {
       const prompt = this.buildOptimizationPrompt(pending, context);
-      
+
       const response = await Promise.race([
         this.llm.completeJSON(prompt, this.getOptimizationSchema()),
-        new Promise((_, reject) => 
+        new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Timeout')), this.config.optimizationTimeout)
-        )
+        ),
       ]);
-      
+
       return this.processLLMResponse(response, pending);
     } catch (error) {
       // LLM optimization is optional, don't fail on error
@@ -337,16 +335,16 @@ class ProactivePathOptimizer extends EventEmitter {
   buildOptimizationPrompt(pending, context) {
     const completedSummary = (context.completed || []).map(t => ({
       name: t.name || t.skill,
-      duration: t.duration
+      duration: t.duration,
     }));
-    
+
     const pendingSummary = pending.map(t => ({
       id: t.id,
       name: t.name || t.skill,
       dependencies: t.dependencies || [],
-      estimatedDuration: t.estimatedDuration
+      estimatedDuration: t.estimatedDuration,
     }));
-    
+
     return `Analyze this execution plan and suggest optimizations:
 
 COMPLETED TASKS:
@@ -377,16 +375,19 @@ Return optimization suggestions with estimated improvement percentages.`;
           items: {
             type: 'object',
             properties: {
-              type: { type: 'string', enum: ['parallelize', 'merge', 'reorder', 'skip', 'substitute'] },
+              type: {
+                type: 'string',
+                enum: ['parallelize', 'merge', 'reorder', 'skip', 'substitute'],
+              },
               description: { type: 'string' },
               affectedTaskIds: { type: 'array', items: { type: 'string' } },
               estimatedImprovement: { type: 'number' },
               newOrder: { type: 'array', items: { type: 'string' } },
-              reasoning: { type: 'string' }
-            }
-          }
-        }
-      }
+              reasoning: { type: 'string' },
+            },
+          },
+        },
+      },
     };
   }
 
@@ -398,18 +399,16 @@ Return optimization suggestions with estimated improvement percentages.`;
    */
   processLLMResponse(response, pending) {
     if (!response || !response.optimizations) return [];
-    
+
     return response.optimizations.map(opt => {
       const affectedTasks = (opt.affectedTaskIds || [])
         .map(id => pending.find(t => t.id === id))
         .filter(Boolean);
-      
+
       let newPath = null;
       if (opt.newOrder) {
-        newPath = opt.newOrder
-          .map(id => pending.find(t => t.id === id))
-          .filter(Boolean);
-        
+        newPath = opt.newOrder.map(id => pending.find(t => t.id === id)).filter(Boolean);
+
         // Add any tasks not in newOrder at the end
         const inOrder = new Set(opt.newOrder);
         pending.forEach(t => {
@@ -418,7 +417,7 @@ Return optimization suggestions with estimated improvement percentages.`;
           }
         });
       }
-      
+
       return new OptimizationOpportunity({
         type: opt.type,
         description: opt.description,
@@ -426,7 +425,7 @@ Return optimization suggestions with estimated improvement percentages.`;
         estimatedImprovement: opt.estimatedImprovement || 0.1,
         confidence: 0.6, // LLM suggestions get moderate confidence
         newPath,
-        reasoning: opt.reasoning
+        reasoning: opt.reasoning,
       });
     });
   }
@@ -437,9 +436,7 @@ Return optimization suggestions with estimated improvement percentages.`;
    * @returns {OptimizationOpportunity[]} Ranked opportunities
    */
   rankOpportunities(opportunities) {
-    return [...opportunities].sort((a, b) => 
-      b.getWeightedScore() - a.getWeightedScore()
-    );
+    return [...opportunities].sort((a, b) => b.getWeightedScore() - a.getWeightedScore());
   }
 
   /**
@@ -456,17 +453,15 @@ Return optimization suggestions with estimated improvement percentages.`;
         return { valid: false, reason: 'New path violates dependency constraints' };
       }
     }
-    
+
     // Check resource constraints
     if (optimization.type === 'parallelize') {
-      const canParallelize = this.checkResourceCapacity(
-        optimization.affectedTasks.length
-      );
+      const canParallelize = this.checkResourceCapacity(optimization.affectedTasks.length);
       if (!canParallelize) {
         return { valid: false, reason: 'Insufficient resources for parallelization' };
       }
     }
-    
+
     return { valid: true };
   }
 
@@ -477,7 +472,7 @@ Return optimization suggestions with estimated improvement percentages.`;
    */
   validateDependencies(path) {
     const completed = new Set();
-    
+
     for (const task of path) {
       const deps = task.dependencies || [];
       for (const dep of deps) {
@@ -492,7 +487,7 @@ Return optimization suggestions with estimated improvement percentages.`;
       }
       completed.add(task.id);
     }
-    
+
     return true;
   }
 
@@ -513,20 +508,20 @@ Return optimization suggestions with estimated improvement percentages.`;
    */
   recordPerformance(task, result) {
     const key = task.skill || task.name;
-    
+
     if (!this.learningData.has(key)) {
       this.learningData.set(key, {
         durations: [],
         successRate: 0,
-        totalCount: 0
+        totalCount: 0,
       });
     }
-    
+
     const data = this.learningData.get(key);
     data.durations.push(result.duration || 0);
     data.totalCount++;
     data.successRate = (data.successRate * (data.totalCount - 1) + 1) / data.totalCount;
-    
+
     // Keep only last 50 durations
     if (data.durations.length > 50) {
       data.durations.shift();
@@ -541,9 +536,9 @@ Return optimization suggestions with estimated improvement percentages.`;
   getHistoricalDuration(task) {
     const key = task.skill || task.name;
     const data = this.learningData.get(key);
-    
+
     if (!data || data.durations.length === 0) return null;
-    
+
     return data.durations.reduce((a, b) => a + b, 0) / data.durations.length;
   }
 
@@ -555,7 +550,7 @@ Return optimization suggestions with estimated improvement percentages.`;
   countParallelizable(tasks) {
     let count = 0;
     const completed = new Set();
-    
+
     for (const task of tasks) {
       const deps = task.dependencies || [];
       if (deps.length === 0 || deps.every(d => completed.has(d))) {
@@ -563,7 +558,7 @@ Return optimization suggestions with estimated improvement percentages.`;
       }
       completed.add(task.id);
     }
-    
+
     return count;
   }
 
@@ -575,22 +570,22 @@ Return optimization suggestions with estimated improvement percentages.`;
    */
   calculateRiskScore(pending, _context) {
     if (pending.length === 0) return 0;
-    
+
     let riskSum = 0;
-    
+
     for (const task of pending) {
       const key = task.skill || task.name;
       const data = this.learningData.get(key);
-      
+
       if (data) {
         // Use failure rate as risk indicator
-        riskSum += (1 - data.successRate);
+        riskSum += 1 - data.successRate;
       } else {
         // Unknown tasks get moderate risk
         riskSum += 0.3;
       }
     }
-    
+
     return riskSum / pending.length;
   }
 
@@ -601,20 +596,20 @@ Return optimization suggestions with estimated improvement percentages.`;
    */
   calculateDependencyComplexity(tasks) {
     if (tasks.length === 0) return 0;
-    
+
     let totalDeps = 0;
     let maxDeps = 0;
-    
+
     for (const task of tasks) {
       const deps = (task.dependencies || []).length;
       totalDeps += deps;
       maxDeps = Math.max(maxDeps, deps);
     }
-    
+
     // Normalize: average deps / max possible deps
     const avgDeps = totalDeps / tasks.length;
     const normalized = Math.min(avgDeps / 5, 1); // Assume 5+ deps is max complexity
-    
+
     return normalized;
   }
 
@@ -631,10 +626,10 @@ Return optimization suggestions with estimated improvement percentages.`;
       tasksAffected: optimization.affectedTasks.length,
       contextSnapshot: {
         completedCount: context.completed?.length || 0,
-        pendingCount: context.pending?.length || 0
-      }
+        pendingCount: context.pending?.length || 0,
+      },
     });
-    
+
     // Limit history size
     while (this.optimizationHistory.length > this.config.maxHistorySize) {
       this.optimizationHistory.shift();
@@ -647,28 +642,28 @@ Return optimization suggestions with estimated improvement percentages.`;
    */
   getStatistics() {
     const history = this.optimizationHistory;
-    
+
     if (history.length === 0) {
       return {
         totalOptimizations: 0,
         averageImprovement: 0,
-        byType: {}
+        byType: {},
       };
     }
-    
+
     const byType = {};
     let totalImprovement = 0;
-    
+
     for (const opt of history) {
       byType[opt.type] = (byType[opt.type] || 0) + 1;
       totalImprovement += opt.improvement;
     }
-    
+
     return {
       totalOptimizations: history.length,
       averageImprovement: totalImprovement / history.length,
       byType,
-      learningDataSize: this.learningData.size
+      learningDataSize: this.learningData.size,
     };
   }
 
@@ -703,30 +698,28 @@ class ParallelizationAnalyzer {
   analyze(tasks, _context) {
     const opportunities = [];
     const groups = this.findParallelGroups(tasks);
-    
+
     for (const group of groups) {
       if (group.length >= 2) {
-        const sequentialTime = group.reduce((sum, t) => 
-          sum + (t.estimatedDuration || 30000), 0
-        );
-        const parallelTime = Math.max(...group.map(t => 
-          t.estimatedDuration || 30000
-        ));
+        const sequentialTime = group.reduce((sum, t) => sum + (t.estimatedDuration || 30000), 0);
+        const parallelTime = Math.max(...group.map(t => t.estimatedDuration || 30000));
         const improvement = (sequentialTime - parallelTime) / sequentialTime;
-        
+
         if (improvement > 0.1) {
-          opportunities.push(new OptimizationOpportunity({
-            type: 'parallelize',
-            description: `Run ${group.length} tasks in parallel`,
-            affectedTasks: group,
-            estimatedImprovement: improvement,
-            confidence: 0.8,
-            reasoning: 'Tasks have no interdependencies'
-          }));
+          opportunities.push(
+            new OptimizationOpportunity({
+              type: 'parallelize',
+              description: `Run ${group.length} tasks in parallel`,
+              affectedTasks: group,
+              estimatedImprovement: improvement,
+              confidence: 0.8,
+              reasoning: 'Tasks have no interdependencies',
+            })
+          );
         }
       }
     }
-    
+
     return opportunities;
   }
 
@@ -739,40 +732,42 @@ class ParallelizationAnalyzer {
     const groups = [];
     const used = new Set();
     const completed = new Set();
-    
+
     for (let i = 0; i < tasks.length; i++) {
       if (used.has(i)) continue;
-      
+
       const task = tasks[i];
       const deps = task.dependencies || [];
-      
+
       // Check if dependencies are satisfied
       if (!deps.every(d => completed.has(d))) continue;
-      
+
       // Find other tasks that can run in parallel
       const group = [task];
       used.add(i);
-      
+
       for (let j = i + 1; j < tasks.length; j++) {
         if (used.has(j)) continue;
-        
+
         const other = tasks[j];
         const otherDeps = other.dependencies || [];
-        
+
         // Can run in parallel if:
         // 1. Its dependencies are satisfied
         // 2. It doesn't depend on any task in the current group
-        if (otherDeps.every(d => completed.has(d)) &&
-            !otherDeps.some(d => group.some(g => g.id === d))) {
+        if (
+          otherDeps.every(d => completed.has(d)) &&
+          !otherDeps.some(d => group.some(g => g.id === d))
+        ) {
           group.push(other);
           used.add(j);
         }
       }
-      
+
       groups.push(group);
       group.forEach(t => completed.add(t.id));
     }
-    
+
     return groups;
   }
 }
@@ -791,29 +786,29 @@ class MergingAnalyzer {
   analyze(tasks, _context) {
     const opportunities = [];
     const groups = this.findMergeableGroups(tasks);
-    
+
     for (const group of groups) {
       if (group.length >= 2) {
         const overhead = 5000; // Assumed overhead per task
         const savingsTime = overhead * (group.length - 1);
-        const totalTime = group.reduce((sum, t) => 
-          sum + (t.estimatedDuration || 30000), 0
-        );
+        const totalTime = group.reduce((sum, t) => sum + (t.estimatedDuration || 30000), 0);
         const improvement = savingsTime / totalTime;
-        
+
         if (improvement > 0.05) {
-          opportunities.push(new OptimizationOpportunity({
-            type: 'merge',
-            description: `Merge ${group.length} similar ${group[0].skill || group[0].name} tasks`,
-            affectedTasks: group,
-            estimatedImprovement: improvement,
-            confidence: 0.7,
-            reasoning: 'Tasks operate on similar targets'
-          }));
+          opportunities.push(
+            new OptimizationOpportunity({
+              type: 'merge',
+              description: `Merge ${group.length} similar ${group[0].skill || group[0].name} tasks`,
+              affectedTasks: group,
+              estimatedImprovement: improvement,
+              confidence: 0.7,
+              reasoning: 'Tasks operate on similar targets',
+            })
+          );
         }
       }
     }
-    
+
     return opportunities;
   }
 
@@ -824,7 +819,7 @@ class MergingAnalyzer {
    */
   findMergeableGroups(tasks) {
     const bySkill = new Map();
-    
+
     for (const task of tasks) {
       const skill = task.skill || task.name;
       if (!bySkill.has(skill)) {
@@ -832,7 +827,7 @@ class MergingAnalyzer {
       }
       bySkill.get(skill).push(task);
     }
-    
+
     // Return groups with 2+ tasks of the same skill
     return Array.from(bySkill.values()).filter(g => g.length >= 2);
   }
@@ -851,26 +846,28 @@ class ReorderingAnalyzer {
    */
   analyze(tasks, _context) {
     const opportunities = [];
-    
+
     // Check for dependency-based improvements
     const optimalOrder = this.topologicalSort(tasks);
-    
+
     if (!this.arraysEqual(tasks, optimalOrder)) {
       const improvement = this.estimateReorderImprovement(tasks, optimalOrder);
-      
+
       if (improvement > 0.05) {
-        opportunities.push(new OptimizationOpportunity({
-          type: 'reorder',
-          description: 'Optimize task order for better dependency resolution',
-          affectedTasks: tasks,
-          estimatedImprovement: improvement,
-          confidence: 0.9,
-          newPath: optimalOrder,
-          reasoning: 'Current order causes unnecessary waiting'
-        }));
+        opportunities.push(
+          new OptimizationOpportunity({
+            type: 'reorder',
+            description: 'Optimize task order for better dependency resolution',
+            affectedTasks: tasks,
+            estimatedImprovement: improvement,
+            confidence: 0.9,
+            newPath: optimalOrder,
+            reasoning: 'Current order causes unnecessary waiting',
+          })
+        );
       }
     }
-    
+
     return opportunities;
   }
 
@@ -883,28 +880,28 @@ class ReorderingAnalyzer {
     const taskMap = new Map(tasks.map(t => [t.id, t]));
     const inDegree = new Map();
     const result = [];
-    
+
     // Initialize in-degrees
     for (const task of tasks) {
       inDegree.set(task.id, 0);
     }
-    
+
     // Calculate in-degrees
     for (const task of tasks) {
-      for (const dep of (task.dependencies || [])) {
+      for (const dep of task.dependencies || []) {
         if (taskMap.has(dep)) {
           inDegree.set(task.id, inDegree.get(task.id) + 1);
         }
       }
     }
-    
+
     // Queue tasks with no dependencies
     const queue = tasks.filter(t => inDegree.get(t.id) === 0);
-    
+
     while (queue.length > 0) {
       const task = queue.shift();
       result.push(task);
-      
+
       // Reduce in-degree for dependent tasks
       for (const other of tasks) {
         if ((other.dependencies || []).includes(task.id)) {
@@ -916,14 +913,14 @@ class ReorderingAnalyzer {
         }
       }
     }
-    
+
     // Add remaining tasks (circular dependencies)
     for (const task of tasks) {
       if (!result.includes(task)) {
         result.push(task);
       }
     }
-    
+
     return result;
   }
 
@@ -955,7 +952,7 @@ class ReorderingAnalyzer {
         outOfPlace++;
       }
     }
-    
+
     // More out of place = more potential improvement
     return (outOfPlace / current.length) * 0.3;
   }
@@ -968,5 +965,5 @@ module.exports = {
   ParallelizationAnalyzer,
   MergingAnalyzer,
   ReorderingAnalyzer,
-  DEFAULT_CONFIG
+  DEFAULT_CONFIG,
 };

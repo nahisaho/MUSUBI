@@ -1,6 +1,6 @@
 /**
  * Monitoring Module - SRE, Observability, and Release Management
- * 
+ *
  * Provides monitoring capabilities for MUSUBI-powered applications:
  * - SLI/SLO definition and tracking
  * - Alerting rules generation
@@ -18,7 +18,7 @@ const SLOType = {
   LATENCY: 'latency',
   THROUGHPUT: 'throughput',
   ERROR_RATE: 'error-rate',
-  CORRECTNESS: 'correctness'
+  CORRECTNESS: 'correctness',
 };
 
 /**
@@ -27,7 +27,7 @@ const SLOType = {
 const AlertSeverity = {
   CRITICAL: 'critical',
   WARNING: 'warning',
-  INFO: 'info'
+  INFO: 'info',
 };
 
 /**
@@ -37,7 +37,7 @@ const MetricType = {
   COUNTER: 'counter',
   GAUGE: 'gauge',
   HISTOGRAM: 'histogram',
-  SUMMARY: 'summary'
+  SUMMARY: 'summary',
 };
 
 /**
@@ -62,16 +62,16 @@ class SLI {
     switch (this.type) {
       case SLOType.AVAILABILITY:
         return `sum(rate(${this.metric}_success_total[5m])) / sum(rate(${this.metric}_total[5m]))`;
-      
+
       case SLOType.LATENCY:
         return `histogram_quantile(0.95, sum(rate(${this.metric}_bucket[5m])) by (le))`;
-      
+
       case SLOType.ERROR_RATE:
         return `sum(rate(${this.metric}_errors_total[5m])) / sum(rate(${this.metric}_total[5m]))`;
-      
+
       case SLOType.THROUGHPUT:
         return `sum(rate(${this.metric}_total[5m]))`;
-      
+
       default:
         return this.goodEventsQuery || this.metric;
     }
@@ -84,7 +84,7 @@ class SLI {
       type: this.type,
       metric: this.metric,
       unit: this.unit,
-      prometheusQuery: this.toPrometheusQuery()
+      prometheusQuery: this.toPrometheusQuery(),
     };
   }
 }
@@ -101,7 +101,7 @@ class SLO {
     this.window = options.window || '30d'; // Measurement window
     this.burnRateThresholds = options.burnRateThresholds || {
       critical: 14.4, // 1 hour to exhaust error budget
-      warning: 6      // 6 hours to exhaust error budget
+      warning: 6, // 6 hours to exhaust error budget
     };
   }
 
@@ -112,7 +112,7 @@ class SLO {
     return {
       total: 1 - this.target,
       remaining: null, // Calculated at runtime
-      consumptionRate: null
+      consumptionRate: null,
     };
   }
 
@@ -122,21 +122,21 @@ class SLO {
   toBurnRateAlert() {
     const shortWindow = '5m';
     const _longWindow = '1h';
-    
+
     return {
       name: `${this.name}_high_burn_rate`,
       expr: `(
         ${this.sli.toPrometheusQuery()}
-      ) < ${this.target - ((1 - this.target) * this.burnRateThresholds.critical)}`,
+      ) < ${this.target - (1 - this.target) * this.burnRateThresholds.critical}`,
       for: shortWindow,
       labels: {
         severity: AlertSeverity.CRITICAL,
-        slo: this.name
+        slo: this.name,
       },
       annotations: {
         summary: `High burn rate on SLO: ${this.name}`,
-        description: `Error budget will be exhausted within 1 hour at current rate`
-      }
+        description: `Error budget will be exhausted within 1 hour at current rate`,
+      },
     };
   }
 
@@ -149,7 +149,7 @@ class SLO {
       targetPercentage: `${(this.target * 100).toFixed(2)}%`,
       window: this.window,
       errorBudget: this.calculateErrorBudget(),
-      burnRateAlert: this.toBurnRateAlert()
+      burnRateAlert: this.toBurnRateAlert(),
     };
   }
 }
@@ -176,7 +176,9 @@ class AlertRule {
   for: ${this.for}
   labels:
     severity: ${this.severity}
-${Object.entries(this.labels).map(([k, v]) => `    ${k}: ${v}`).join('\n')}
+${Object.entries(this.labels)
+  .map(([k, v]) => `    ${k}: ${v}`)
+  .join('\n')}
   annotations:
     summary: "${this.annotations.summary || this.name}"
     description: "${this.annotations.description || ''}"`;
@@ -189,7 +191,7 @@ ${Object.entries(this.labels).map(([k, v]) => `    ${k}: ${v}`).join('\n')}
       for: this.for,
       severity: this.severity,
       labels: this.labels,
-      annotations: this.annotations
+      annotations: this.annotations,
     };
   }
 }
@@ -214,7 +216,7 @@ class HealthCheck {
       name: check.name,
       type: check.type || 'dependency',
       critical: check.critical !== false,
-      check: check.check
+      check: check.check,
     });
     return this;
   }
@@ -231,22 +233,20 @@ class HealthCheck {
         const startTime = Date.now();
         const checkResult = await Promise.race([
           check.check(),
-          new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Timeout')), this.timeout)
-          )
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), this.timeout)),
         ]);
-        
+
         results.push({
           name: check.name,
           status: 'healthy',
           latency: Date.now() - startTime,
-          details: checkResult
+          details: checkResult,
         });
       } catch (error) {
         results.push({
           name: check.name,
           status: 'unhealthy',
-          error: error.message
+          error: error.message,
         });
         if (check.critical) healthy = false;
       }
@@ -255,7 +255,7 @@ class HealthCheck {
     return {
       status: healthy ? 'healthy' : 'unhealthy',
       timestamp: new Date().toISOString(),
-      checks: results
+      checks: results,
     };
   }
 
@@ -289,8 +289,8 @@ app.get('${this.endpoint}/ready', async (req, res) => {
       checks: this.checks.map(c => ({
         name: c.name,
         type: c.type,
-        critical: c.critical
-      }))
+        critical: c.critical,
+      })),
     };
   }
 }
@@ -361,9 +361,8 @@ class MonitoringConfig extends EventEmitter {
    * Define a health check
    */
   defineHealthCheck(healthCheck) {
-    const hcInstance = healthCheck instanceof HealthCheck 
-      ? healthCheck 
-      : new HealthCheck(healthCheck);
+    const hcInstance =
+      healthCheck instanceof HealthCheck ? healthCheck : new HealthCheck(healthCheck);
     this.healthChecks.set(hcInstance.name, hcInstance);
     this.emit('healthCheckAdded', hcInstance);
     return this;
@@ -384,7 +383,7 @@ class MonitoringConfig extends EventEmitter {
       name: metric.name,
       type: metric.type || MetricType.COUNTER,
       help: metric.help || '',
-      labels: metric.labels || []
+      labels: metric.labels || [],
     });
     return this;
   }
@@ -394,22 +393,24 @@ class MonitoringConfig extends EventEmitter {
    */
   toPrometheusConfig() {
     const rules = [];
-    
+
     // Generate SLO-based alerts
     for (const slo of this.slos.values()) {
       rules.push(slo.toBurnRateAlert());
     }
-    
+
     // Add custom alerts
     for (const alert of this.alerts.values()) {
       rules.push(alert.toJSON());
     }
 
     return {
-      groups: [{
-        name: `${this.serviceName}-alerts`,
-        rules
-      }]
+      groups: [
+        {
+          name: `${this.serviceName}-alerts`,
+          rules,
+        },
+      ],
     };
   }
 
@@ -427,10 +428,12 @@ class MonitoringConfig extends EventEmitter {
         type: 'gauge',
         title: slo.name,
         gridPos: { x: 0, y, w: 8, h: 6 },
-        targets: [{
-          expr: slo.sli.toPrometheusQuery(),
-          legendFormat: slo.name
-        }],
+        targets: [
+          {
+            expr: slo.sli.toPrometheusQuery(),
+            legendFormat: slo.name,
+          },
+        ],
         fieldConfig: {
           defaults: {
             thresholds: {
@@ -438,14 +441,14 @@ class MonitoringConfig extends EventEmitter {
               steps: [
                 { color: 'red', value: null },
                 { color: 'yellow', value: slo.target - 0.01 },
-                { color: 'green', value: slo.target }
-              ]
+                { color: 'green', value: slo.target },
+              ],
             },
             min: 0,
             max: 1,
-            unit: 'percentunit'
-          }
-        }
+            unit: 'percentunit',
+          },
+        },
       });
       y += 6;
     }
@@ -457,7 +460,7 @@ class MonitoringConfig extends EventEmitter {
       timezone: 'browser',
       panels,
       refresh: '30s',
-      time: { from: 'now-24h', to: 'now' }
+      time: { from: 'now-24h', to: 'now' },
     };
   }
 
@@ -473,7 +476,7 @@ class MonitoringConfig extends EventEmitter {
       healthChecks: [...this.healthChecks.values()].map(h => h.toJSON()),
       metrics: [...this.metrics.values()],
       prometheus: this.toPrometheusConfig(),
-      grafana: this.toGrafanaDashboard()
+      grafana: this.toGrafanaDashboard(),
     };
   }
 }
@@ -485,48 +488,51 @@ const SLOTemplates = {
   /**
    * API Availability SLO
    */
-  API_AVAILABILITY: (target = 0.999) => new SLO({
-    name: 'api-availability',
-    description: 'API endpoint availability',
-    sli: {
-      name: 'api-success-rate',
-      type: SLOType.AVAILABILITY,
-      metric: 'http_requests'
-    },
-    target,
-    window: '30d'
-  }),
+  API_AVAILABILITY: (target = 0.999) =>
+    new SLO({
+      name: 'api-availability',
+      description: 'API endpoint availability',
+      sli: {
+        name: 'api-success-rate',
+        type: SLOType.AVAILABILITY,
+        metric: 'http_requests',
+      },
+      target,
+      window: '30d',
+    }),
 
   /**
    * API Latency SLO
    */
-  API_LATENCY: (target = 0.95, thresholdMs = 200) => new SLO({
-    name: 'api-latency',
-    description: `95th percentile latency under ${thresholdMs}ms`,
-    sli: {
-      name: 'api-response-time',
-      type: SLOType.LATENCY,
-      metric: 'http_request_duration_seconds',
-      threshold: thresholdMs / 1000
-    },
-    target,
-    window: '30d'
-  }),
+  API_LATENCY: (target = 0.95, thresholdMs = 200) =>
+    new SLO({
+      name: 'api-latency',
+      description: `95th percentile latency under ${thresholdMs}ms`,
+      sli: {
+        name: 'api-response-time',
+        type: SLOType.LATENCY,
+        metric: 'http_request_duration_seconds',
+        threshold: thresholdMs / 1000,
+      },
+      target,
+      window: '30d',
+    }),
 
   /**
    * Error Rate SLO
    */
-  ERROR_RATE: (target = 0.99) => new SLO({
-    name: 'error-rate',
-    description: 'Low error rate objective',
-    sli: {
-      name: 'error-rate-indicator',
-      type: SLOType.ERROR_RATE,
-      metric: 'http_requests'
-    },
-    target,
-    window: '7d'
-  })
+  ERROR_RATE: (target = 0.99) =>
+    new SLO({
+      name: 'error-rate',
+      description: 'Low error rate objective',
+      sli: {
+        name: 'error-rate-indicator',
+        type: SLOType.ERROR_RATE,
+        metric: 'http_requests',
+      },
+      target,
+      window: '7d',
+    }),
 };
 
 /**
@@ -536,58 +542,62 @@ const AlertTemplates = {
   /**
    * High Error Rate Alert
    */
-  HIGH_ERROR_RATE: (threshold = 0.05) => new AlertRule({
-    name: 'HighErrorRate',
-    expr: `sum(rate(http_requests_errors_total[5m])) / sum(rate(http_requests_total[5m])) > ${threshold}`,
-    for: '5m',
-    severity: AlertSeverity.CRITICAL,
-    annotations: {
-      summary: 'High error rate detected',
-      description: `Error rate is above ${threshold * 100}%`
-    }
-  }),
+  HIGH_ERROR_RATE: (threshold = 0.05) =>
+    new AlertRule({
+      name: 'HighErrorRate',
+      expr: `sum(rate(http_requests_errors_total[5m])) / sum(rate(http_requests_total[5m])) > ${threshold}`,
+      for: '5m',
+      severity: AlertSeverity.CRITICAL,
+      annotations: {
+        summary: 'High error rate detected',
+        description: `Error rate is above ${threshold * 100}%`,
+      },
+    }),
 
   /**
    * High Latency Alert
    */
-  HIGH_LATENCY: (thresholdMs = 500) => new AlertRule({
-    name: 'HighLatency',
-    expr: `histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > ${thresholdMs / 1000}`,
-    for: '5m',
-    severity: AlertSeverity.WARNING,
-    annotations: {
-      summary: 'High latency detected',
-      description: `P95 latency is above ${thresholdMs}ms`
-    }
-  }),
+  HIGH_LATENCY: (thresholdMs = 500) =>
+    new AlertRule({
+      name: 'HighLatency',
+      expr: `histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > ${thresholdMs / 1000}`,
+      for: '5m',
+      severity: AlertSeverity.WARNING,
+      annotations: {
+        summary: 'High latency detected',
+        description: `P95 latency is above ${thresholdMs}ms`,
+      },
+    }),
 
   /**
    * Service Down Alert
    */
-  SERVICE_DOWN: () => new AlertRule({
-    name: 'ServiceDown',
-    expr: 'up == 0',
-    for: '1m',
-    severity: AlertSeverity.CRITICAL,
-    annotations: {
-      summary: 'Service is down',
-      description: 'Service instance is not responding'
-    }
-  }),
+  SERVICE_DOWN: () =>
+    new AlertRule({
+      name: 'ServiceDown',
+      expr: 'up == 0',
+      for: '1m',
+      severity: AlertSeverity.CRITICAL,
+      annotations: {
+        summary: 'Service is down',
+        description: 'Service instance is not responding',
+      },
+    }),
 
   /**
    * High Memory Usage Alert
    */
-  HIGH_MEMORY: (threshold = 0.9) => new AlertRule({
-    name: 'HighMemoryUsage',
-    expr: `process_resident_memory_bytes / node_memory_MemTotal_bytes > ${threshold}`,
-    for: '5m',
-    severity: AlertSeverity.WARNING,
-    annotations: {
-      summary: 'High memory usage',
-      description: `Memory usage is above ${threshold * 100}%`
-    }
-  })
+  HIGH_MEMORY: (threshold = 0.9) =>
+    new AlertRule({
+      name: 'HighMemoryUsage',
+      expr: `process_resident_memory_bytes / node_memory_MemTotal_bytes > ${threshold}`,
+      for: '5m',
+      severity: AlertSeverity.WARNING,
+      annotations: {
+        summary: 'High memory usage',
+        description: `Memory usage is above ${threshold * 100}%`,
+      },
+    }),
 };
 
 /**
@@ -610,28 +620,28 @@ module.exports = {
   AlertRule,
   HealthCheck,
   MonitoringConfig,
-  
+
   // Constants
   SLOType,
   AlertSeverity,
   MetricType,
-  
+
   // Templates
   SLOTemplates,
   AlertTemplates,
-  
+
   // Factory
   createMonitoringConfig,
-  
+
   // Release Manager
   ...releaseManagerModule,
-  
+
   // Incident Manager
   ...incidentManagerModule,
-  
+
   // Observability
   ...observabilityModule,
-  
+
   // Cost Tracker
-  ...costTrackerModule
+  ...costTrackerModule,
 };

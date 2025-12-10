@@ -74,18 +74,25 @@ describe('RepoSkillManager', () => {
     });
 
     it('should detect Node.js project from package.json', async () => {
-      fs.writeFileSync(path.join(tempDir, 'package.json'), JSON.stringify({
-        name: 'test-project',
-        description: 'A test project',
-        scripts: {
-          test: 'jest',
-          build: 'tsc',
-        },
-        devDependencies: {
-          jest: '^29.0.0',
-          typescript: '^5.0.0',
-        },
-      }, null, 2));
+      fs.writeFileSync(
+        path.join(tempDir, 'package.json'),
+        JSON.stringify(
+          {
+            name: 'test-project',
+            description: 'A test project',
+            scripts: {
+              test: 'jest',
+              build: 'tsc',
+            },
+            devDependencies: {
+              jest: '^29.0.0',
+              typescript: '^5.0.0',
+            },
+          },
+          null,
+          2
+        )
+      );
 
       const content = await manager.generateRepoMd();
       expect(content).toContain('# test-project');
@@ -213,11 +220,14 @@ describe('RepoSkillManager', () => {
   describe('updateRepoMd', () => {
     it('should update repo.md', async () => {
       await manager.initialize();
-      
+
       // Add package.json
-      fs.writeFileSync(path.join(tempDir, 'package.json'), JSON.stringify({
-        name: 'updated-project',
-      }));
+      fs.writeFileSync(
+        path.join(tempDir, 'package.json'),
+        JSON.stringify({
+          name: 'updated-project',
+        })
+      );
 
       await manager.updateRepoMd();
       const content = fs.readFileSync(path.join(manager.skillsDir, 'repo.md'), 'utf-8');

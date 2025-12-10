@@ -219,7 +219,7 @@ class TestGenerator {
    */
   requirementToTest(requirement) {
     const testName = `${requirement.id}: ${requirement.title || requirement.action || 'Requirement'}`;
-    
+
     const lines = [
       `test('${this.escapeString(testName)}', async ({ page }) => {`,
       `  // Pattern: ${requirement.pattern}`,

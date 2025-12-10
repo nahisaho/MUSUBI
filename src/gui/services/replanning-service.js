@@ -35,7 +35,7 @@ class ReplanningService extends EventEmitter {
     super();
     this.projectPath = projectPath;
     this.storagePath = path.join(projectPath, 'storage', 'replanning');
-    
+
     // In-memory state (will be populated from storage or engine)
     this.state = {
       status: 'idle',
@@ -49,8 +49,8 @@ class ReplanningService extends EventEmitter {
         successfulReplans: 0,
         averageConfidence: 0,
         goalCompletionRate: 0,
-        optimizationsApplied: 0
-      }
+        optimizationsApplied: 0,
+      },
     };
   }
 
@@ -106,10 +106,13 @@ class ReplanningService extends EventEmitter {
     try {
       const historyDir = path.join(this.storagePath, 'history');
       await fs.mkdir(historyDir, { recursive: true });
-      
+
       const files = await fs.readdir(historyDir);
-      const jsonFiles = files.filter(f => f.endsWith('.json')).sort().reverse();
-      
+      const jsonFiles = files
+        .filter(f => f.endsWith('.json'))
+        .sort()
+        .reverse();
+
       this.state.history = [];
       for (const file of jsonFiles.slice(0, 50)) {
         try {
@@ -148,7 +151,7 @@ class ReplanningService extends EventEmitter {
         overallProgress: 0,
         activeGoals: 0,
         completedGoals: 0,
-        milestones: []
+        milestones: [],
       };
     }
   }
@@ -168,7 +171,7 @@ class ReplanningService extends EventEmitter {
         currentPath: null,
         optimizedPath: null,
         potentialSavings: 0,
-        suggestions: []
+        suggestions: [],
       };
     }
   }
@@ -214,26 +217,26 @@ class ReplanningService extends EventEmitter {
   async recordReplan(event) {
     const historyDir = path.join(this.storagePath, 'history');
     await fs.mkdir(historyDir, { recursive: true });
-    
+
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `replan-${timestamp}.json`;
-    
+
     const entry = {
       id: `replan-${Date.now()}`,
       timestamp: new Date().toISOString(),
-      ...event
+      ...event,
     };
-    
+
     await fs.writeFile(path.join(historyDir, filename), JSON.stringify(entry, null, 2));
-    
+
     this.state.history.unshift(entry);
     this.state.lastReplan = entry;
     this.state.metrics.totalReplans++;
-    
+
     if (event.success) {
       this.state.metrics.successfulReplans++;
     }
-    
+
     await this.saveState();
     this.emit('replan:recorded', entry);
   }
@@ -247,7 +250,7 @@ class ReplanningService extends EventEmitter {
       this.getState(),
       this.getGoalProgress(),
       this.getPathOptimization(),
-      this.getMetrics()
+      this.getMetrics(),
     ]);
 
     return {
@@ -255,20 +258,21 @@ class ReplanningService extends EventEmitter {
       goalProgress: {
         overall: goalProgress.overallProgress || 0,
         active: goalProgress.activeGoals || 0,
-        completed: goalProgress.completedGoals || 0
+        completed: goalProgress.completedGoals || 0,
       },
       optimization: {
         status: pathOptimization.status,
-        suggestions: pathOptimization.suggestions?.length || 0
+        suggestions: pathOptimization.suggestions?.length || 0,
       },
       metrics: {
         totalReplans: metrics.totalReplans || 0,
-        successRate: metrics.totalReplans > 0 
-          ? Math.round((metrics.successfulReplans / metrics.totalReplans) * 100) 
-          : 100,
-        optimizationsApplied: metrics.optimizationsApplied || 0
+        successRate:
+          metrics.totalReplans > 0
+            ? Math.round((metrics.successfulReplans / metrics.totalReplans) * 100)
+            : 100,
+        optimizationsApplied: metrics.optimizationsApplied || 0,
       },
-      recentHistory: state.history.slice(0, 5)
+      recentHistory: state.history.slice(0, 5),
     };
   }
 }

@@ -11,7 +11,7 @@ const {
   MemorySynchronizer,
   UniversalInitializer,
   PlatformManager,
-  createPlatformManager
+  createPlatformManager,
 } = require('../../src/integrations/platforms');
 
 describe('Multi-Platform Support', () => {
@@ -122,11 +122,9 @@ describe('Multi-Platform Support', () => {
       const content = {
         title: 'Test Project',
         description: 'A test project',
-        sections: [
-          { title: 'Features', items: ['Feature 1', 'Feature 2'] }
-        ]
+        sections: [{ title: 'Features', items: ['Feature 1', 'Feature 2'] }],
       };
-      
+
       const markdown = adapter.adaptContent(content);
       expect(markdown).toContain('# Test Project');
       expect(markdown).toContain('A test project');
@@ -138,9 +136,9 @@ describe('Multi-Platform Support', () => {
       const adapter = new PlatformAdapter(Platform.AIDER);
       const content = {
         title: 'Test',
-        options: ['opt1', 'opt2']
+        options: ['opt1', 'opt2'],
       };
-      
+
       const yaml = adapter.adaptContent(content);
       expect(yaml).toContain('# Test');
       expect(yaml).toContain('options:');
@@ -151,9 +149,9 @@ describe('Multi-Platform Support', () => {
       const adapter = new PlatformAdapter(Platform.CONTINUE);
       const content = {
         name: 'test',
-        settings: { enabled: true }
+        settings: { enabled: true },
       };
-      
+
       const json = adapter.adaptContent(content);
       const parsed = JSON.parse(json);
       expect(parsed.name).toBe('test');
@@ -171,11 +169,9 @@ describe('Multi-Platform Support', () => {
     it('should handle sections with content', () => {
       const adapter = new PlatformAdapter(Platform.GENERIC);
       const content = {
-        sections: [
-          { title: 'Overview', content: 'This is the overview text.' }
-        ]
+        sections: [{ title: 'Overview', content: 'This is the overview text.' }],
       };
-      
+
       const markdown = adapter.adaptContent(content);
       expect(markdown).toContain('## Overview');
       expect(markdown).toContain('This is the overview text.');
@@ -184,9 +180,9 @@ describe('Multi-Platform Support', () => {
     it('should handle rules', () => {
       const adapter = new PlatformAdapter(Platform.GENERIC);
       const content = {
-        rules: ['Rule 1', 'Rule 2']
+        rules: ['Rule 1', 'Rule 2'],
       };
-      
+
       const markdown = adapter.adaptContent(content);
       expect(markdown).toContain('## Rules');
       expect(markdown).toContain('- Rule 1');
@@ -203,7 +199,7 @@ describe('Multi-Platform Support', () => {
     it('should convert Claude skill to Copilot', () => {
       const skill = { name: 'test-skill', content: 'Test content' };
       const converted = converter.convert(skill, Platform.CLAUDE_CODE, Platform.GITHUB_COPILOT);
-      
+
       expect(converted.format).toBe('copilot-instruction');
       expect(converted.file).toBe('.github/copilot/test-skill.md');
     });
@@ -211,7 +207,7 @@ describe('Multi-Platform Support', () => {
     it('should convert Claude skill to Cursor', () => {
       const skill = { name: 'my-skill', content: 'Content' };
       const converted = converter.convert(skill, Platform.CLAUDE_CODE, Platform.CURSOR);
-      
+
       expect(converted.format).toBe('cursor-rule');
       expect(converted.file).toBe('.cursor/rules/my-skill.mdc');
     });
@@ -219,7 +215,7 @@ describe('Multi-Platform Support', () => {
     it('should convert Copilot skill to Claude', () => {
       const skill = { name: 'copilot-skill', content: 'Content' };
       const converted = converter.convert(skill, Platform.GITHUB_COPILOT, Platform.CLAUDE_CODE);
-      
+
       expect(converted.format).toBe('claude-skill');
       expect(converted.file).toBe('steering/skills/copilot-skill.md');
     });
@@ -227,7 +223,7 @@ describe('Multi-Platform Support', () => {
     it('should provide generic conversion for unsupported pairs', () => {
       const skill = { name: 'skill', content: 'Content' };
       const converted = converter.convert(skill, Platform.AIDER, Platform.WINDSURF);
-      
+
       expect(converted.format).toBe('generic');
       expect(converted.originalPlatform).toBe(Platform.AIDER);
       expect(converted.targetPlatform).toBe(Platform.WINDSURF);
@@ -239,11 +235,11 @@ describe('Multi-Platform Support', () => {
     });
 
     it('should register custom converter', () => {
-      converter.register(Platform.WINDSURF, Platform.CLINE, (skill) => ({
+      converter.register(Platform.WINDSURF, Platform.CLINE, skill => ({
         ...skill,
-        format: 'cline-rule'
+        format: 'cline-rule',
       }));
-      
+
       const skill = { name: 'test' };
       const converted = converter.convert(skill, Platform.WINDSURF, Platform.CLINE);
       expect(converted.format).toBe('cline-rule');
@@ -260,10 +256,10 @@ describe('Multi-Platform Support', () => {
     it('should register source and target', () => {
       const memory = { title: 'Project', description: 'Test' };
       synchronizer.registerSource(Platform.CLAUDE_CODE, memory);
-      
+
       const adapter = new PlatformAdapter(Platform.CURSOR);
       synchronizer.registerTarget(Platform.CURSOR, adapter);
-      
+
       expect(synchronizer.sources.size).toBe(1);
       expect(synchronizer.targets.size).toBe(1);
     });
@@ -271,10 +267,10 @@ describe('Multi-Platform Support', () => {
     it('should sync memory to targets', () => {
       const memory = { title: 'Project', description: 'Description' };
       synchronizer.registerSource(Platform.CLAUDE_CODE, memory);
-      
+
       const cursorAdapter = new PlatformAdapter(Platform.CURSOR);
       synchronizer.registerTarget(Platform.CURSOR, cursorAdapter);
-      
+
       const results = synchronizer.sync(Platform.CLAUDE_CODE);
       expect(results.has(Platform.CURSOR)).toBe(true);
       expect(results.get(Platform.CURSOR).content).toContain('# Project');
@@ -283,10 +279,10 @@ describe('Multi-Platform Support', () => {
     it('should skip source platform in sync', () => {
       const memory = { title: 'Test' };
       synchronizer.registerSource(Platform.CLAUDE_CODE, memory);
-      
+
       const claudeAdapter = new PlatformAdapter(Platform.CLAUDE_CODE);
       synchronizer.registerTarget(Platform.CLAUDE_CODE, claudeAdapter);
-      
+
       const results = synchronizer.sync(Platform.CLAUDE_CODE);
       expect(results.has(Platform.CLAUDE_CODE)).toBe(false);
     });
@@ -294,11 +290,11 @@ describe('Multi-Platform Support', () => {
     it('should skip platforms without memory support', () => {
       const memory = { title: 'Test' };
       synchronizer.registerSource(Platform.CLAUDE_CODE, memory);
-      
+
       // Windsurf doesn't support memory
       const windsurfAdapter = new PlatformAdapter(Platform.WINDSURF);
       synchronizer.registerTarget(Platform.WINDSURF, windsurfAdapter);
-      
+
       const results = synchronizer.sync(Platform.CLAUDE_CODE);
       expect(results.has(Platform.WINDSURF)).toBe(false);
     });
@@ -310,8 +306,11 @@ describe('Multi-Platform Support', () => {
     it('should get sync plan', () => {
       synchronizer.registerSource(Platform.CLAUDE_CODE, {});
       synchronizer.registerTarget(Platform.CURSOR, new PlatformAdapter(Platform.CURSOR));
-      synchronizer.registerTarget(Platform.GITHUB_COPILOT, new PlatformAdapter(Platform.GITHUB_COPILOT));
-      
+      synchronizer.registerTarget(
+        Platform.GITHUB_COPILOT,
+        new PlatformAdapter(Platform.GITHUB_COPILOT)
+      );
+
       const plan = synchronizer.getSyncPlan();
       expect(plan.length).toBe(2);
       expect(plan[0].from).toBe(Platform.CLAUDE_CODE);
@@ -325,7 +324,7 @@ describe('Multi-Platform Support', () => {
       initializer = new UniversalInitializer({
         projectName: 'test-project',
         description: 'A test project',
-        platforms: [Platform.GENERIC]
+        platforms: [Platform.GENERIC],
       });
     });
 
@@ -359,9 +358,9 @@ describe('Multi-Platform Support', () => {
     it('should generate Claude-specific files', () => {
       const claudeInit = new UniversalInitializer({
         projectName: 'claude-project',
-        platforms: [Platform.CLAUDE_CODE]
+        platforms: [Platform.CLAUDE_CODE],
       });
-      
+
       const files = claudeInit.generate();
       expect(files.has('CLAUDE.md')).toBe(true);
     });
@@ -369,9 +368,9 @@ describe('Multi-Platform Support', () => {
     it('should generate Copilot-specific files', () => {
       const copilotInit = new UniversalInitializer({
         projectName: 'copilot-project',
-        platforms: [Platform.GITHUB_COPILOT]
+        platforms: [Platform.GITHUB_COPILOT],
       });
-      
+
       const files = copilotInit.generate();
       expect(files.has('.github/copilot-instructions.md')).toBe(true);
     });
@@ -379,9 +378,9 @@ describe('Multi-Platform Support', () => {
     it('should generate Cursor-specific files', () => {
       const cursorInit = new UniversalInitializer({
         projectName: 'cursor-project',
-        platforms: [Platform.CURSOR]
+        platforms: [Platform.CURSOR],
       });
-      
+
       const files = cursorInit.generate();
       expect(files.has('.cursorrules')).toBe(true);
     });
@@ -389,9 +388,9 @@ describe('Multi-Platform Support', () => {
     it('should generate for multiple platforms', () => {
       const multiInit = new UniversalInitializer({
         projectName: 'multi-project',
-        platforms: [Platform.CLAUDE_CODE, Platform.CURSOR, Platform.WINDSURF]
+        platforms: [Platform.CLAUDE_CODE, Platform.CURSOR, Platform.WINDSURF],
       });
-      
+
       const files = multiInit.generate();
       expect(files.has('CLAUDE.md')).toBe(true);
       expect(files.has('.cursorrules')).toBe(true);
@@ -409,17 +408,17 @@ describe('Multi-Platform Support', () => {
     it('should initialize with files', () => {
       const files = ['CLAUDE.md', '.cursorrules', 'package.json'];
       const platforms = manager.initialize(files);
-      
+
       expect(platforms).toContain(Platform.CLAUDE_CODE);
       expect(platforms).toContain(Platform.CURSOR);
     });
 
-    it('should emit initialized event', (done) => {
-      manager.on('initialized', (data) => {
+    it('should emit initialized event', done => {
+      manager.on('initialized', data => {
         expect(data.platforms).toBeDefined();
         done();
       });
-      
+
       manager.initialize(['CLAUDE.md']);
     });
 
@@ -448,46 +447,46 @@ describe('Multi-Platform Support', () => {
 
     it('should sync steering across platforms', () => {
       manager.initialize(['CLAUDE.md', '.cursorrules']);
-      
+
       const memory = { title: 'Project', description: 'Test' };
       const results = manager.syncSteering(Platform.CLAUDE_CODE, memory);
-      
+
       expect(results.size).toBeGreaterThan(0);
     });
 
-    it('should emit synced event', (done) => {
+    it('should emit synced event', done => {
       manager.initialize(['CLAUDE.md', '.cursorrules']);
-      
-      manager.on('synced', (data) => {
+
+      manager.on('synced', data => {
         expect(data.source).toBe(Platform.CLAUDE_CODE);
         done();
       });
-      
+
       manager.syncSteering(Platform.CLAUDE_CODE, { title: 'Test' });
     });
 
     it('should generate init files', () => {
       manager.initialize(['CLAUDE.md']);
-      
+
       const files = manager.generateInitFiles({
         projectName: 'test',
-        description: 'Test project'
+        description: 'Test project',
       });
-      
+
       expect(files.has('AGENTS.md')).toBe(true);
       expect(files.has('CLAUDE.md')).toBe(true);
     });
 
     it('should use generic platform when none detected', () => {
       manager.initialize([]);
-      
+
       const files = manager.generateInitFiles({ projectName: 'empty' });
       expect(files.has('AGENTS.md')).toBe(true);
     });
 
     it('should get compatibility report', () => {
       manager.initialize(['CLAUDE.md']);
-      
+
       const report = manager.getCompatibilityReport();
       expect(report.supported.length).toBe(13);
       expect(report.detected.length).toBe(1);
@@ -496,7 +495,7 @@ describe('Multi-Platform Support', () => {
 
     it('should convert to JSON', () => {
       manager.initialize(['CLAUDE.md']);
-      
+
       const json = manager.toJSON();
       expect(json.detectedPlatforms).toContain(Platform.CLAUDE_CODE);
       expect(json.projectRoot).toBe('/test/project');

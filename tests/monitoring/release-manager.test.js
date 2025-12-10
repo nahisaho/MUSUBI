@@ -11,7 +11,7 @@ const {
   ReleaseState,
   ReleaseType,
   FeatureFlagStatus,
-  createReleaseManager
+  createReleaseManager,
 } = require('../../src/monitoring/release-manager');
 
 describe('Release Manager', () => {
@@ -23,7 +23,7 @@ describe('Release Manager', () => {
         version: '1.0.0',
         type: ReleaseType.MAJOR,
         name: 'Initial Release',
-        description: 'First major release'
+        description: 'First major release',
       });
     });
 
@@ -65,7 +65,7 @@ describe('Release Manager', () => {
       release.addFeature({
         title: 'New Feature',
         description: 'Feature description',
-        jiraId: 'PROJ-123'
+        jiraId: 'PROJ-123',
       });
 
       expect(release.features).toHaveLength(1);
@@ -77,7 +77,7 @@ describe('Release Manager', () => {
       release.addBugFix({
         title: 'Fix issue',
         jiraId: 'BUG-456',
-        severity: 'high'
+        severity: 'high',
       });
 
       expect(release.bugFixes).toHaveLength(1);
@@ -97,15 +97,15 @@ describe('Release Manager', () => {
       release.addFeature({
         title: 'New Dashboard',
         description: 'Redesigned dashboard UI',
-        jiraId: 'PROJ-100'
+        jiraId: 'PROJ-100',
       });
       release.addBugFix({
         title: 'Fixed login issue',
-        jiraId: 'BUG-200'
+        jiraId: 'BUG-200',
       });
       release.breakingChanges.push({
         title: 'API v1 deprecated',
-        description: 'Use API v2 instead'
+        description: 'Use API v2 instead',
       });
 
       const notes = release.generateReleaseNotes('markdown');
@@ -165,7 +165,7 @@ describe('Release Manager', () => {
       flag = new FeatureFlag({
         key: 'new-feature',
         name: 'New Feature',
-        description: 'A new experimental feature'
+        description: 'A new experimental feature',
       });
     });
 
@@ -255,7 +255,7 @@ describe('Release Manager', () => {
     test('should create and get release', () => {
       const release = manager.createRelease({
         version: '1.0.0',
-        type: ReleaseType.MAJOR
+        type: ReleaseType.MAJOR,
       });
 
       expect(release.version).toBe('1.0.0');
@@ -284,13 +284,13 @@ describe('Release Manager', () => {
 
     test('should transition release', () => {
       const release = manager.createRelease({ version: '1.0.0' });
-      
+
       manager.transitionRelease(release.id, ReleaseState.DEVELOPMENT);
       expect(release.state).toBe(ReleaseState.DEVELOPMENT);
     });
 
-    test('should emit events on release creation', (done) => {
-      manager.on('releaseCreated', (release) => {
+    test('should emit events on release creation', done => {
+      manager.on('releaseCreated', release => {
         expect(release.version).toBe('1.0.0');
         done();
       });
@@ -298,7 +298,7 @@ describe('Release Manager', () => {
       manager.createRelease({ version: '1.0.0' });
     });
 
-    test('should emit events on release transition', (done) => {
+    test('should emit events on release transition', done => {
       const release = manager.createRelease({ version: '1.0.0' });
 
       manager.on('releaseTransitioned', ({ release: r, newState }) => {
@@ -313,7 +313,7 @@ describe('Release Manager', () => {
     test('should create and get feature flag', () => {
       const flag = manager.createFeatureFlag({
         key: 'test-flag',
-        name: 'Test Flag'
+        name: 'Test Flag',
       });
 
       expect(flag.key).toBe('test-flag');
@@ -372,7 +372,7 @@ describe('Release Manager', () => {
       expect(flag.percentage).toBe(50);
     });
 
-    test('should emit events for feature flags', (done) => {
+    test('should emit events for feature flags', done => {
       let eventCount = 0;
 
       manager.on('featureFlagCreated', () => eventCount++);

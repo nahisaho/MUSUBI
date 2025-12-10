@@ -1,20 +1,20 @@
 /**
  * AutoPattern Tests
- * 
+ *
  * Tests for automatic skill selection pattern
  */
 
 const {
   AutoPattern,
   ConfidenceLevel,
-  createAutoPattern
+  createAutoPattern,
 } = require('../../src/orchestration/patterns/auto');
 
 const {
   OrchestrationEngine,
   ExecutionContext,
   _ExecutionStatus,
-  PatternType
+  PatternType,
 } = require('../../src/orchestration/orchestration-engine');
 
 describe('AutoPattern', () => {
@@ -30,44 +30,44 @@ describe('AutoPattern', () => {
       keywords: ['requirement', 'ears', 'specification', 'need'],
       categories: ['requirements'],
       description: 'Analyzes and creates requirements',
-      execute: async (input) => ({
+      execute: async input => ({
         skill: 'requirements-analyst',
         analyzed: true,
-        input
-      })
+        input,
+      }),
     });
 
     engine.registerSkill('test-engineer', {
       keywords: ['test', 'testing', 'qa', 'quality'],
       categories: ['testing'],
       description: 'Creates and runs tests',
-      execute: async (input) => ({
+      execute: async input => ({
         skill: 'test-engineer',
         tested: true,
-        input
-      })
+        input,
+      }),
     });
 
     engine.registerSkill('code-generator', {
       keywords: ['code', 'implement', 'generate', 'develop'],
       categories: ['implementation'],
       description: 'Generates code from specifications',
-      execute: async (input) => ({
+      execute: async input => ({
         skill: 'code-generator',
         generated: true,
-        input
-      })
+        input,
+      }),
     });
 
     engine.registerSkill('documentation-writer', {
       keywords: ['document', 'readme', 'guide', 'docs'],
       categories: ['documentation'],
       description: 'Writes documentation',
-      execute: async (input) => ({
+      execute: async input => ({
         skill: 'documentation-writer',
         documented: true,
-        input
-      })
+        input,
+      }),
     });
 
     engine.registerPattern(PatternType.AUTO, pattern);
@@ -85,7 +85,7 @@ describe('AutoPattern', () => {
       const custom = new AutoPattern({
         minConfidence: 0.5,
         fallbackSkill: 'default-skill',
-        multiMatch: true
+        multiMatch: true,
       });
 
       expect(custom.options.minConfidence).toBe(0.5);
@@ -129,7 +129,7 @@ describe('AutoPattern', () => {
 
     it('should accept task from input', () => {
       const context = new ExecutionContext({
-        input: { task: 'input task' }
+        input: { task: 'input task' },
       });
       const result = pattern.validate(context, engine);
 
@@ -140,7 +140,7 @@ describe('AutoPattern', () => {
   describe('execute', () => {
     it('should select requirements-analyst for requirement task', async () => {
       const context = new ExecutionContext({
-        task: 'Write requirements for the login feature'
+        task: 'Write requirements for the login feature',
       });
 
       const result = await pattern.execute(context, engine);
@@ -151,7 +151,7 @@ describe('AutoPattern', () => {
 
     it('should select test-engineer for testing task', async () => {
       const context = new ExecutionContext({
-        task: 'Create unit tests for the user module'
+        task: 'Create unit tests for the user module',
       });
 
       const result = await pattern.execute(context, engine);
@@ -161,7 +161,7 @@ describe('AutoPattern', () => {
 
     it('should select code-generator for implementation task', async () => {
       const context = new ExecutionContext({
-        task: 'Implement the authentication service'
+        task: 'Implement the authentication service',
       });
 
       const result = await pattern.execute(context, engine);
@@ -171,7 +171,7 @@ describe('AutoPattern', () => {
 
     it('should select documentation-writer for docs task', async () => {
       const context = new ExecutionContext({
-        task: 'Write documentation for the API'
+        task: 'Write documentation for the API',
       });
 
       const result = await pattern.execute(context, engine);
@@ -181,7 +181,7 @@ describe('AutoPattern', () => {
 
     it('should throw when no skill matches', async () => {
       const context = new ExecutionContext({
-        task: 'xyz123 completely unrelated gibberish'
+        task: 'xyz123 completely unrelated gibberish',
       });
 
       // Use high confidence threshold to ensure no match
@@ -194,16 +194,16 @@ describe('AutoPattern', () => {
 
     it('should use fallback skill when no match', async () => {
       engine.registerSkill('fallback', {
-        execute: async () => ({ fallback: true })
+        execute: async () => ({ fallback: true }),
       });
 
       const fallbackPattern = new AutoPattern({
         minConfidence: 0.99,
-        fallbackSkill: 'fallback'
+        fallbackSkill: 'fallback',
       });
 
       const context = new ExecutionContext({
-        task: 'xyz123 gibberish'
+        task: 'xyz123 gibberish',
       });
 
       const result = await fallbackPattern.execute(context, engine);
@@ -213,22 +213,20 @@ describe('AutoPattern', () => {
 
     it('should include confidence level', async () => {
       const context = new ExecutionContext({
-        task: 'Write requirements'
+        task: 'Write requirements',
       });
 
       const result = await pattern.execute(context, engine);
 
       expect(result.confidenceLevel).toBeDefined();
-      expect([
-        ConfidenceLevel.HIGH,
-        ConfidenceLevel.MEDIUM,
-        ConfidenceLevel.LOW
-      ]).toContain(result.confidenceLevel);
+      expect([ConfidenceLevel.HIGH, ConfidenceLevel.MEDIUM, ConfidenceLevel.LOW]).toContain(
+        result.confidenceLevel
+      );
     });
 
     it('should add child context', async () => {
       const context = new ExecutionContext({
-        task: 'Write tests'
+        task: 'Write tests',
       });
 
       await pattern.execute(context, engine);
@@ -248,7 +246,7 @@ describe('AutoPattern', () => {
       engine.on('autoPatternCompleted', completeListener);
 
       const context = new ExecutionContext({
-        task: 'Write tests'
+        task: 'Write tests',
       });
 
       await pattern.execute(context, engine);
@@ -262,8 +260,8 @@ describe('AutoPattern', () => {
       const context = new ExecutionContext({
         task: 'Write requirements',
         input: {
-          skillInput: { feature: 'login' }
-        }
+          skillInput: { feature: 'login' },
+        },
       });
 
       const result = await pattern.execute(context, engine);
@@ -275,17 +273,17 @@ describe('AutoPattern', () => {
   describe('multi-match mode', () => {
     it('should execute multiple matching skills', async () => {
       const multiPattern = new AutoPattern({
-        multiMatch: true
+        multiMatch: true,
       });
 
       // Register a skill that will also match
       engine.registerSkill('spec-writer', {
         keywords: ['requirement', 'spec', 'write'],
-        execute: async () => ({ skill: 'spec-writer' })
+        execute: async () => ({ skill: 'spec-writer' }),
       });
 
       const context = new ExecutionContext({
-        task: 'Write requirement specifications'
+        task: 'Write requirement specifications',
       });
 
       const result = await multiPattern.execute(context, engine);
@@ -298,11 +296,11 @@ describe('AutoPattern', () => {
     it('should include all results in multi-match', async () => {
       const multiPattern = new AutoPattern({
         multiMatch: true,
-        minConfidence: 0.1 // Low threshold to get multiple matches
+        minConfidence: 0.1, // Low threshold to get multiple matches
       });
 
       const context = new ExecutionContext({
-        task: 'Test requirements documentation'
+        task: 'Test requirements documentation',
       });
 
       const result = await multiPattern.execute(context, engine);
@@ -318,7 +316,7 @@ describe('AutoPattern', () => {
   describe('confidence scoring', () => {
     it('should give higher score for exact skill name match', async () => {
       const context = new ExecutionContext({
-        task: 'Use requirements-analyst skill'
+        task: 'Use requirements-analyst skill',
       });
 
       const result = await pattern.execute(context, engine);
@@ -329,7 +327,7 @@ describe('AutoPattern', () => {
 
     it('should match by keywords', async () => {
       const context = new ExecutionContext({
-        task: 'We need to write EARS format specifications'
+        task: 'We need to write EARS format specifications',
       });
 
       const result = await pattern.execute(context, engine);
@@ -339,17 +337,17 @@ describe('AutoPattern', () => {
 
     it('should respect minConfidence threshold', async () => {
       const highConfPattern = new AutoPattern({
-        minConfidence: 0.9
+        minConfidence: 0.9,
       });
 
       engine.registerSkill('fallback-high', {
-        execute: async () => ({ used: true })
+        execute: async () => ({ used: true }),
       });
 
       highConfPattern.options.fallbackSkill = 'fallback-high';
 
       const context = new ExecutionContext({
-        task: 'vague task'
+        task: 'vague task',
       });
 
       const result = await highConfPattern.execute(context, engine);
@@ -379,7 +377,7 @@ describe('createAutoPattern', () => {
   it('should create pattern with custom options', () => {
     const pattern = createAutoPattern({
       minConfidence: 0.8,
-      multiMatch: true
+      multiMatch: true,
     });
     expect(pattern.options.minConfidence).toBe(0.8);
     expect(pattern.options.multiMatch).toBe(true);

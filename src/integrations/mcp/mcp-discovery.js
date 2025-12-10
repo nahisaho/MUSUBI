@@ -1,12 +1,12 @@
 /**
  * MUSUBI MCP Server Discovery
- * 
+ *
  * Discovers and manages MCP servers from various configuration sources:
  * - claude_desktop_config.json
  * - .mcp/config.json (project-level)
  * - Environment variables
  * - Dynamic discovery via well-known paths
- * 
+ *
  * @module integrations/mcp/mcp-discovery
  */
 
@@ -42,18 +42,20 @@ const EventEmitter = require('events');
 const CONFIG_LOCATIONS = {
   // Claude Desktop config
   claudeDesktop: {
-    darwin: path.join(os.homedir(), 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json'),
+    darwin: path.join(
+      os.homedir(),
+      'Library',
+      'Application Support',
+      'Claude',
+      'claude_desktop_config.json'
+    ),
     win32: path.join(os.homedir(), 'AppData', 'Roaming', 'Claude', 'claude_desktop_config.json'),
-    linux: path.join(os.homedir(), '.config', 'claude', 'claude_desktop_config.json')
+    linux: path.join(os.homedir(), '.config', 'claude', 'claude_desktop_config.json'),
   },
   // Project-level config
-  project: [
-    '.mcp/config.json',
-    '.mcp.json',
-    'mcp.config.json'
-  ],
+  project: ['.mcp/config.json', '.mcp.json', 'mcp.config.json'],
   // VS Code settings
-  vscode: '.vscode/mcp.json'
+  vscode: '.vscode/mcp.json',
 };
 
 /**
@@ -69,22 +71,22 @@ class MCPDiscovery extends EventEmitter {
    */
   constructor(options = {}) {
     super();
-    
+
     this.projectRoot = options.projectRoot || process.cwd();
     this.includeGlobal = options.includeGlobal ?? true;
     this.includeProject = options.includeProject ?? true;
     this.includeEnv = options.includeEnv ?? true;
-    
+
     /** @type {Map<string, MCPServerConfig>} */
     this.servers = new Map();
-    
+
     /** @type {string[]} */
     this.discoveredSources = [];
-    
+
     /** @type {Object<string, Error>} */
     this.errors = {};
   }
-  
+
   /**
    * Discover all available MCP servers
    * @returns {Promise<DiscoveryResult>}
@@ -93,38 +95,38 @@ class MCPDiscovery extends EventEmitter {
     this.servers.clear();
     this.discoveredSources = [];
     this.errors = {};
-    
+
     const promises = [];
-    
+
     // Global configs (Claude Desktop, etc.)
     if (this.includeGlobal) {
       promises.push(this.discoverGlobalConfigs());
     }
-    
+
     // Project-level configs
     if (this.includeProject) {
       promises.push(this.discoverProjectConfigs());
     }
-    
+
     // Environment variable configs
     if (this.includeEnv) {
       promises.push(this.discoverEnvConfigs());
     }
-    
+
     await Promise.all(promises);
-    
+
     this.emit('discovery:complete', {
       serverCount: this.servers.size,
-      sources: this.discoveredSources
+      sources: this.discoveredSources,
     });
-    
+
     return {
       servers: Array.from(this.servers.values()),
       sources: this.discoveredSources,
-      errors: this.errors
+      errors: this.errors,
     };
   }
-  
+
   /**
    * Discover global configuration files
    */
@@ -132,12 +134,12 @@ class MCPDiscovery extends EventEmitter {
     // Claude Desktop config
     const platform = process.platform;
     const claudeConfigPath = CONFIG_LOCATIONS.claudeDesktop[platform];
-    
+
     if (claudeConfigPath) {
       await this.loadConfigFile(claudeConfigPath, 'claude-desktop');
     }
   }
-  
+
   /**
    * Discover project-level configuration files
    */
@@ -146,12 +148,12 @@ class MCPDiscovery extends EventEmitter {
       const fullPath = path.join(this.projectRoot, configPath);
       await this.loadConfigFile(fullPath, `project:${configPath}`);
     }
-    
+
     // VS Code config
     const vscodePath = path.join(this.projectRoot, CONFIG_LOCATIONS.vscode);
     await this.loadConfigFile(vscodePath, 'vscode');
   }
-  
+
   /**
    * Discover servers from environment variables
    */
@@ -170,7 +172,7 @@ class MCPDiscovery extends EventEmitter {
         this.errors['env:MCP_SERVERS'] = error;
       }
     }
-    
+
     // Individual MCP_SERVER_* environment variables
     for (const [key, value] of Object.entries(process.env)) {
       if (key.startsWith('MCP_SERVER_') && key !== 'MCP_SERVERS') {
@@ -184,7 +186,7 @@ class MCPDiscovery extends EventEmitter {
       }
     }
   }
-  
+
   /**
    * Load configuration from a file
    * @param {string} filePath - Path to config file
@@ -195,10 +197,10 @@ class MCPDiscovery extends EventEmitter {
       if (!fs.existsSync(filePath)) {
         return;
       }
-      
+
       const content = fs.readFileSync(filePath, 'utf-8');
       const config = JSON.parse(content);
-      
+
       // Handle different config formats
       if (config.mcpServers) {
         // Claude Desktop format
@@ -216,16 +218,15 @@ class MCPDiscovery extends EventEmitter {
           this.addServer(server, source);
         }
       }
-      
+
       this.discoveredSources.push(source);
       this.emit('config:loaded', { source, path: filePath });
-      
     } catch (error) {
       this.errors[source] = error;
       this.emit('config:error', { source, error });
     }
   }
-  
+
   /**
    * Add a server to the registry
    * @param {MCPServerConfig} serverConfig
@@ -235,7 +236,7 @@ class MCPDiscovery extends EventEmitter {
     if (!serverConfig.name) {
       return;
     }
-    
+
     const existing = this.servers.get(serverConfig.name);
     if (existing) {
       // Merge configurations, later sources override
@@ -245,22 +246,22 @@ class MCPDiscovery extends EventEmitter {
         metadata: {
           ...existing.metadata,
           ...serverConfig.metadata,
-          sources: [...(existing.metadata?.sources || []), source]
-        }
+          sources: [...(existing.metadata?.sources || []), source],
+        },
       });
     } else {
       this.servers.set(serverConfig.name, {
         ...serverConfig,
         metadata: {
           ...serverConfig.metadata,
-          sources: [source]
-        }
+          sources: [source],
+        },
       });
     }
-    
+
     this.emit('server:discovered', { name: serverConfig.name, source });
   }
-  
+
   /**
    * Get a server by name
    * @param {string} name
@@ -269,7 +270,7 @@ class MCPDiscovery extends EventEmitter {
   getServer(name) {
     return this.servers.get(name);
   }
-  
+
   /**
    * Get all servers
    * @returns {MCPServerConfig[]}
@@ -277,18 +278,16 @@ class MCPDiscovery extends EventEmitter {
   getAllServers() {
     return Array.from(this.servers.values());
   }
-  
+
   /**
    * Get servers by transport type
    * @param {string} transport
    * @returns {MCPServerConfig[]}
    */
   getServersByTransport(transport) {
-    return this.getAllServers().filter(s => 
-      (s.transport || 'stdio') === transport
-    );
+    return this.getAllServers().filter(s => (s.transport || 'stdio') === transport);
   }
-  
+
   /**
    * Filter servers by criteria
    * @param {Function} predicate
@@ -297,7 +296,7 @@ class MCPDiscovery extends EventEmitter {
   filterServers(predicate) {
     return this.getAllServers().filter(predicate);
   }
-  
+
   /**
    * Check if a server exists
    * @param {string} name
@@ -306,7 +305,7 @@ class MCPDiscovery extends EventEmitter {
   hasServer(name) {
     return this.servers.has(name);
   }
-  
+
   /**
    * Get server count
    * @returns {number}
@@ -314,7 +313,7 @@ class MCPDiscovery extends EventEmitter {
   get serverCount() {
     return this.servers.size;
   }
-  
+
   /**
    * Create a project configuration file
    * @param {MCPServerConfig[]} servers - Servers to include
@@ -326,24 +325,27 @@ class MCPDiscovery extends EventEmitter {
   async createProjectConfig(servers, options = {}) {
     const format = options.format || 'mcp';
     const configPath = options.path || path.join(this.projectRoot, '.mcp', 'config.json');
-    
+
     // Ensure directory exists
     const dir = path.dirname(configPath);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    
+
     let config;
     if (format === 'claude') {
       // Claude Desktop format
       config = {
         mcpServers: Object.fromEntries(
-          servers.map(s => [s.name, {
-            command: s.command,
-            args: s.args,
-            env: s.env
-          }])
-        )
+          servers.map(s => [
+            s.name,
+            {
+              command: s.command,
+              args: s.args,
+              env: s.env,
+            },
+          ])
+        ),
       };
     } else {
       // MUSUBI MCP format
@@ -355,17 +357,17 @@ class MCPDiscovery extends EventEmitter {
           args: s.args,
           env: s.env,
           transport: s.transport || 'stdio',
-          metadata: s.metadata
-        }))
+          metadata: s.metadata,
+        })),
       };
     }
-    
+
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
     this.emit('config:created', { path: configPath });
-    
+
     return configPath;
   }
-  
+
   /**
    * Watch for configuration changes
    * @param {Function} callback
@@ -373,12 +375,12 @@ class MCPDiscovery extends EventEmitter {
    */
   watch(callback) {
     const watchers = [];
-    
+
     // Watch project configs
     for (const configPath of CONFIG_LOCATIONS.project) {
       const fullPath = path.join(this.projectRoot, configPath);
       const dir = path.dirname(fullPath);
-      
+
       if (fs.existsSync(dir)) {
         try {
           const watcher = fs.watch(dir, (eventType, filename) => {
@@ -392,7 +394,7 @@ class MCPDiscovery extends EventEmitter {
         }
       }
     }
-    
+
     // Return unwatch function
     return () => {
       for (const watcher of watchers) {
@@ -400,7 +402,7 @@ class MCPDiscovery extends EventEmitter {
       }
     };
   }
-  
+
   /**
    * Get discovery summary
    * @returns {Object}
@@ -413,8 +415,8 @@ class MCPDiscovery extends EventEmitter {
       servers: this.getAllServers().map(s => ({
         name: s.name,
         transport: s.transport || 'stdio',
-        sources: s.metadata?.sources || []
-      }))
+        sources: s.metadata?.sources || [],
+      })),
     };
   }
 }
@@ -432,5 +434,5 @@ async function discoverMCPServers(options = {}) {
 module.exports = {
   MCPDiscovery,
   discoverMCPServers,
-  CONFIG_LOCATIONS
+  CONFIG_LOCATIONS,
 };

@@ -8,7 +8,7 @@ const {
   SkillMetadata,
   SkillHealth,
   SkillCategory,
-  SkillPriority
+  SkillPriority,
 } = require('../../src/orchestration/skill-registry');
 
 describe('SkillMetadata', () => {
@@ -20,7 +20,7 @@ describe('SkillMetadata', () => {
       category: SkillCategory.ANALYSIS,
       version: '1.0.0',
       inputs: [{ name: 'input', type: 'string' }],
-      outputs: [{ name: 'output', type: 'string' }]
+      outputs: [{ name: 'output', type: 'string' }],
     });
 
     const validation = metadata.validate();
@@ -29,7 +29,7 @@ describe('SkillMetadata', () => {
 
   test('should detect missing id', () => {
     const metadata = new SkillMetadata({
-      name: 'Test Skill'
+      name: 'Test Skill',
     });
 
     const validation = metadata.validate();
@@ -39,7 +39,7 @@ describe('SkillMetadata', () => {
 
   test('should detect missing name', () => {
     const metadata = new SkillMetadata({
-      id: 'test-skill'
+      id: 'test-skill',
     });
 
     const validation = metadata.validate();
@@ -50,19 +50,23 @@ describe('SkillMetadata', () => {
   test('should detect invalid id format', () => {
     const metadata = new SkillMetadata({
       id: 'Test Skill Invalid',
-      name: 'Test Skill'
+      name: 'Test Skill',
     });
 
     const validation = metadata.validate();
     expect(validation.valid).toBe(false);
-    expect(validation.errors.some(e => e.toLowerCase().includes('lowercase') || e.toLowerCase().includes('alphanumeric'))).toBe(true);
+    expect(
+      validation.errors.some(
+        e => e.toLowerCase().includes('lowercase') || e.toLowerCase().includes('alphanumeric')
+      )
+    ).toBe(true);
   });
 
   test('should detect invalid priority', () => {
     const metadata = new SkillMetadata({
       id: 'test-skill',
       name: 'Test Skill',
-      priority: 'INVALID'
+      priority: 'INVALID',
     });
 
     const validation = metadata.validate();
@@ -74,7 +78,7 @@ describe('SkillMetadata', () => {
     const metadata = new SkillMetadata({
       id: 'test-skill',
       name: 'Test Skill',
-      inputs: [{ type: 'string' }]
+      inputs: [{ type: 'string' }],
     });
 
     const validation = metadata.validate();
@@ -88,7 +92,7 @@ describe('SkillMetadata', () => {
       name: 'Test Skill',
       description: 'A test skill',
       version: '1.0.0',
-      category: SkillCategory.ANALYSIS
+      category: SkillCategory.ANALYSIS,
     });
 
     const json = metadata.toJSON();
@@ -120,7 +124,7 @@ describe('SkillRegistry', () => {
         category: SkillCategory.ANALYSIS,
         version: '1.0.0',
         inputs: [{ name: 'input', type: 'string' }],
-        outputs: [{ name: 'output', type: 'string' }]
+        outputs: [{ name: 'output', type: 'string' }],
       };
 
       const result = registry.registerSkill(skill);
@@ -136,20 +140,20 @@ describe('SkillRegistry', () => {
         description: 'Skill with handler',
         version: '1.0.0',
         inputs: [],
-        outputs: []
+        outputs: [],
       };
       const handler = jest.fn();
 
       const result = registry.registerSkill(skill, handler);
       expect(result).toBeDefined();
-      
+
       const entry = registry.getSkillEntry('handler-skill');
       expect(entry.handler).toBe(handler);
     });
 
     test('should throw for skill with missing required fields', () => {
       const skill = {
-        name: 'Test Skill'
+        name: 'Test Skill',
         // Missing id
       };
 
@@ -165,7 +169,7 @@ describe('SkillRegistry', () => {
         description: 'Test',
         version: '1.0.0',
         inputs: [],
-        outputs: []
+        outputs: [],
       };
 
       registry.registerSkill(skill);
@@ -175,33 +179,33 @@ describe('SkillRegistry', () => {
     });
 
     test('should throw when max skills limit reached', () => {
-      const limitedRegistry = new SkillRegistry({ 
+      const limitedRegistry = new SkillRegistry({
         maxSkills: 2,
-        enableHealthMonitoring: false 
+        enableHealthMonitoring: false,
       });
 
       limitedRegistry.registerSkill({
         id: 'skill-1',
         name: 'Skill 1',
         inputs: [],
-        outputs: []
+        outputs: [],
       });
       limitedRegistry.registerSkill({
         id: 'skill-2',
         name: 'Skill 2',
         inputs: [],
-        outputs: []
+        outputs: [],
       });
-      
+
       expect(() => {
         limitedRegistry.registerSkill({
           id: 'skill-3',
           name: 'Skill 3',
           inputs: [],
-          outputs: []
+          outputs: [],
         });
       }).toThrow(/[Mm]aximum/);
-      
+
       limitedRegistry.destroy();
     });
 
@@ -215,13 +219,15 @@ describe('SkillRegistry', () => {
         description: 'Test',
         version: '1.0.0',
         inputs: [],
-        outputs: []
+        outputs: [],
       };
 
       registry.registerSkill(skill);
-      expect(listener).toHaveBeenCalledWith(expect.objectContaining({
-        skillId: 'event-skill'
-      }));
+      expect(listener).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skillId: 'event-skill',
+        })
+      );
     });
   });
 
@@ -235,7 +241,7 @@ describe('SkillRegistry', () => {
         version: '1.0.0',
         tags: ['tag1', 'common'],
         inputs: [],
-        outputs: []
+        outputs: [],
       });
 
       registry.registerSkill({
@@ -246,7 +252,7 @@ describe('SkillRegistry', () => {
         version: '2.0.0',
         tags: ['tag2', 'common'],
         inputs: [],
-        outputs: []
+        outputs: [],
       });
     });
 
@@ -309,7 +315,7 @@ describe('SkillRegistry', () => {
         description: 'Can be removed',
         version: '1.0.0',
         inputs: [],
-        outputs: []
+        outputs: [],
       });
     });
 
@@ -329,9 +335,11 @@ describe('SkillRegistry', () => {
       registry.on('skill-unregistered', listener);
 
       registry.unregisterSkill('removable');
-      expect(listener).toHaveBeenCalledWith(expect.objectContaining({
-        skillId: 'removable'
-      }));
+      expect(listener).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skillId: 'removable',
+        })
+      );
     });
   });
 
@@ -344,7 +352,7 @@ describe('SkillRegistry', () => {
         version: '1.0.0',
         dependencies: [],
         inputs: [],
-        outputs: []
+        outputs: [],
       });
 
       registry.registerSkill({
@@ -354,7 +362,7 @@ describe('SkillRegistry', () => {
         version: '1.0.0',
         dependencies: ['base-skill'],
         inputs: [],
-        outputs: []
+        outputs: [],
       });
 
       registry.registerSkill({
@@ -364,7 +372,7 @@ describe('SkillRegistry', () => {
         version: '1.0.0',
         dependencies: ['dependent-skill'],
         inputs: [],
-        outputs: []
+        outputs: [],
       });
     });
 
@@ -390,7 +398,7 @@ describe('SkillRegistry', () => {
           version: '1.0.0',
           dependencies: ['non-existent'],
           inputs: [],
-          outputs: []
+          outputs: [],
         });
       }).toThrow();
     });
@@ -403,7 +411,7 @@ describe('SkillRegistry', () => {
         version: '1.0.0',
         dependencies: [],
         inputs: [],
-        outputs: []
+        outputs: [],
       });
 
       registry.registerSkill({
@@ -412,7 +420,7 @@ describe('SkillRegistry', () => {
         version: '1.0.0',
         dependencies: ['circular-a'],
         inputs: [],
-        outputs: []
+        outputs: [],
       });
 
       // Manually update to create circular dependency (if possible)
@@ -433,13 +441,13 @@ describe('SkillRegistry', () => {
         name: 'Health Skill',
         version: '1.0.0',
         inputs: [],
-        outputs: []
+        outputs: [],
       });
     });
 
     test('should update skill health', () => {
       registry.updateHealth('health-skill', SkillHealth.DEGRADED, 'Test reason');
-      
+
       const health = registry.getHealth('health-skill');
       // getHealth returns status string directly
       expect(health).toBe(SkillHealth.DEGRADED);
@@ -459,7 +467,7 @@ describe('SkillRegistry', () => {
         name: 'Unhealthy Skill',
         version: '1.0.0',
         inputs: [],
-        outputs: []
+        outputs: [],
       });
 
       registry.updateHealth('unhealthy-skill', SkillHealth.UNHEALTHY);
@@ -477,13 +485,13 @@ describe('SkillRegistry', () => {
         name: 'Stats Skill',
         version: '1.0.0',
         inputs: [],
-        outputs: []
+        outputs: [],
       });
     });
 
     test('should record successful execution', () => {
       registry.recordExecution('stats-skill', true, 100);
-      
+
       const stats = registry.getStats('stats-skill');
       expect(stats.totalExecutions).toBe(1);
       expect(stats.successCount).toBe(1);
@@ -492,7 +500,7 @@ describe('SkillRegistry', () => {
 
     test('should record failed execution', () => {
       registry.recordExecution('stats-skill', false, 50);
-      
+
       const stats = registry.getStats('stats-skill');
       expect(stats.totalExecutions).toBe(1);
       expect(stats.successCount).toBe(0);
@@ -503,14 +511,14 @@ describe('SkillRegistry', () => {
       registry.recordExecution('stats-skill', true, 100);
       registry.recordExecution('stats-skill', true, 200);
       registry.recordExecution('stats-skill', true, 150);
-      
+
       const stats = registry.getStats('stats-skill');
       expect(stats.averageExecutionTime).toBe(150);
     });
 
     test('should get all stats', () => {
       registry.recordExecution('stats-skill', true, 100);
-      
+
       const allStats = registry.getAllStats();
       // getAllStats returns an object from Object.fromEntries
       expect(typeof allStats).toBe('object');
@@ -520,7 +528,7 @@ describe('SkillRegistry', () => {
 
   describe('Validators and Hooks', () => {
     test('should apply custom validator', () => {
-      registry.addValidator((metadata) => {
+      registry.addValidator(metadata => {
         if (metadata.name.length < 5) {
           return { valid: false, error: 'Name too short' };
         }
@@ -532,7 +540,7 @@ describe('SkillRegistry', () => {
           id: 'abc',
           name: 'ABC',
           inputs: [],
-          outputs: []
+          outputs: [],
         });
       }).toThrow(/[Ss]hort/);
     });
@@ -545,7 +553,7 @@ describe('SkillRegistry', () => {
         id: 'hook-skill',
         name: 'Hook Skill',
         inputs: [],
-        outputs: []
+        outputs: [],
       });
 
       expect(hook).toHaveBeenCalled();
@@ -559,7 +567,7 @@ describe('SkillRegistry', () => {
         id: 'hook-skill',
         name: 'Hook Skill',
         inputs: [],
-        outputs: []
+        outputs: [],
       });
 
       expect(hook).toHaveBeenCalled();
@@ -574,7 +582,7 @@ describe('SkillRegistry', () => {
         category: SkillCategory.ANALYSIS,
         version: '1.0.0',
         inputs: [],
-        outputs: []
+        outputs: [],
       });
 
       registry.registerSkill({
@@ -583,7 +591,7 @@ describe('SkillRegistry', () => {
         category: SkillCategory.ANALYSIS,
         version: '1.0.0',
         inputs: [],
-        outputs: []
+        outputs: [],
       });
 
       const summary = registry.getSummary();
@@ -599,7 +607,7 @@ describe('SkillRegistry', () => {
         name: 'Export Skill',
         version: '1.0.0',
         inputs: [],
-        outputs: []
+        outputs: [],
       });
 
       const json = registry.exportToJSON();
@@ -615,9 +623,9 @@ describe('SkillRegistry', () => {
             name: 'Import Skill',
             version: '1.0.0',
             inputs: [],
-            outputs: []
-          }
-        ]
+            outputs: [],
+          },
+        ],
       };
 
       const result = registry.importFromJSON(data);
@@ -633,7 +641,7 @@ describe('SkillRegistry', () => {
         id: 'clear-skill',
         name: 'Clear Skill',
         inputs: [],
-        outputs: []
+        outputs: [],
       });
 
       registry.clear();

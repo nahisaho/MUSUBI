@@ -1,6 +1,6 @@
 /**
  * NestedPattern - Hierarchical skill delegation pattern
- * 
+ *
  * Executes tasks by delegating to sub-skills in a hierarchical manner.
  * Each skill can spawn child tasks creating a tree-like execution structure.
  */
@@ -13,7 +13,7 @@ const { PatternType, ExecutionContext, ExecutionStatus } = require('../orchestra
  */
 const NestedMode = {
   DEPTH_FIRST: 'depth-first',
-  BREADTH_FIRST: 'breadth-first'
+  BREADTH_FIRST: 'breadth-first',
 };
 
 /**
@@ -27,14 +27,10 @@ class NestedPattern extends BasePattern {
       description: 'Execute tasks hierarchically, delegating to sub-skills',
       version: '1.0.0',
       tags: ['hierarchical', 'delegation', 'decomposition'],
-      useCases: [
-        'Complex task breakdown',
-        'Hierarchical processing',
-        'Multi-level delegation'
-      ],
+      useCases: ['Complex task breakdown', 'Hierarchical processing', 'Multi-level delegation'],
       complexity: 'high',
       supportsParallel: false,
-      requiresHuman: false
+      requiresHuman: false,
     });
 
     this.options = {
@@ -42,7 +38,7 @@ class NestedPattern extends BasePattern {
       mode: options.mode || NestedMode.DEPTH_FIRST,
       allowSelfDelegation: options.allowSelfDelegation || false,
       aggregateResults: options.aggregateResults || true,
-      ...options
+      ...options,
     };
   }
 
@@ -82,7 +78,7 @@ class NestedPattern extends BasePattern {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -99,11 +95,11 @@ class NestedPattern extends BasePattern {
     }
 
     const { rootSkill, task, delegationMap = {}, initialInput = {} } = context.input;
-    
+
     engine.emit('nestedStarted', {
       context,
       rootSkill,
-      delegationMap
+      delegationMap,
     });
 
     // Determine root skill from task if not provided
@@ -120,18 +116,11 @@ class NestedPattern extends BasePattern {
       children: [],
       output: null,
       status: ExecutionStatus.PENDING,
-      depth: 0
+      depth: 0,
     };
 
     try {
-      await this._executeNode(
-        executionTree,
-        initialInput,
-        delegationMap,
-        context,
-        engine,
-        0
-      );
+      await this._executeNode(executionTree, initialInput, delegationMap, context, engine, 0);
 
       const aggregatedResult = this.options.aggregateResults
         ? this._aggregateResults(executionTree)
@@ -140,20 +129,19 @@ class NestedPattern extends BasePattern {
       engine.emit('nestedCompleted', {
         context,
         tree: executionTree,
-        aggregatedResult
+        aggregatedResult,
       });
 
       return {
         tree: executionTree,
         aggregatedResult,
-        summary: this._createSummary(executionTree)
+        summary: this._createSummary(executionTree),
       };
-
     } catch (error) {
       engine.emit('nestedFailed', {
         context,
         tree: executionTree,
-        error
+        error,
       });
       throw error;
     }
@@ -178,8 +166,8 @@ class NestedPattern extends BasePattern {
       metadata: {
         pattern: PatternType.NESTED,
         depth,
-        hasChildren: delegationMap[node.skill]?.length > 0
-      }
+        hasChildren: delegationMap[node.skill]?.length > 0,
+      },
     });
 
     parentContext.children.push(stepContext);
@@ -187,7 +175,7 @@ class NestedPattern extends BasePattern {
     engine.emit('nestedNodeStarted', {
       node,
       depth,
-      stepContext
+      stepContext,
     });
 
     try {
@@ -201,7 +189,7 @@ class NestedPattern extends BasePattern {
 
       // Check for child skills to delegate to
       const childSkills = delegationMap[node.skill] || [];
-      
+
       if (childSkills.length > 0) {
         for (const childSkill of childSkills) {
           // Skip self-delegation unless allowed
@@ -214,7 +202,7 @@ class NestedPattern extends BasePattern {
             children: [],
             output: null,
             status: ExecutionStatus.PENDING,
-            depth: depth + 1
+            depth: depth + 1,
           };
           node.children.push(childNode);
 
@@ -235,9 +223,8 @@ class NestedPattern extends BasePattern {
       engine.emit('nestedNodeCompleted', {
         node,
         depth,
-        output
+        output,
       });
-
     } catch (error) {
       node.status = ExecutionStatus.FAILED;
       node.error = error.message;
@@ -246,7 +233,7 @@ class NestedPattern extends BasePattern {
       engine.emit('nestedNodeFailed', {
         node,
         depth,
-        error
+        error,
       });
 
       throw error;
@@ -261,7 +248,7 @@ class NestedPattern extends BasePattern {
     const result = {
       skill: node.skill,
       output: node.output,
-      childOutputs: []
+      childOutputs: [],
     };
 
     for (const child of node.children) {
@@ -281,12 +268,12 @@ class NestedPattern extends BasePattern {
     let failed = 0;
     let maxDepth = 0;
 
-    const traverse = (node) => {
+    const traverse = node => {
       totalNodes++;
       if (node.status === ExecutionStatus.COMPLETED) completed++;
       if (node.status === ExecutionStatus.FAILED) failed++;
       if (node.depth > maxDepth) maxDepth = node.depth;
-      
+
       for (const child of node.children) {
         traverse(child);
       }
@@ -299,9 +286,7 @@ class NestedPattern extends BasePattern {
       completed,
       failed,
       maxDepth,
-      successRate: totalNodes > 0 
-        ? (completed / totalNodes * 100).toFixed(1) + '%' 
-        : '0%'
+      successRate: totalNodes > 0 ? ((completed / totalNodes) * 100).toFixed(1) + '%' : '0%',
     };
   }
 }
@@ -318,5 +303,5 @@ function createNestedPattern(options = {}) {
 module.exports = {
   NestedPattern,
   NestedMode,
-  createNestedPattern
+  createNestedPattern,
 };

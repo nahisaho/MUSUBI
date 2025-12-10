@@ -1,33 +1,38 @@
 /**
  * SwarmPattern - Parallel skill execution pattern
- * 
+ *
  * Enables concurrent execution of multiple skills with
  * P-label task decomposition and dependency tracking.
- * 
+ *
  * v1.1.0: Added replanning support for dynamic task recovery
  */
 
 const { BasePattern } = require('../pattern-registry');
-const { PatternType, ExecutionContext, ExecutionStatus: _ExecutionStatus, Priority } = require('../orchestration-engine');
+const {
+  PatternType,
+  ExecutionContext,
+  ExecutionStatus: _ExecutionStatus,
+  Priority,
+} = require('../orchestration-engine');
 
 /**
  * P-label priority levels for parallel execution
  */
 const PLabel = {
-  P0: 'P0',  // Critical - must complete first (blocking)
-  P1: 'P1',  // High priority - primary path
-  P2: 'P2',  // Medium priority - secondary path  
-  P3: 'P3'   // Low priority - can be deferred
+  P0: 'P0', // Critical - must complete first (blocking)
+  P1: 'P1', // High priority - primary path
+  P2: 'P2', // Medium priority - secondary path
+  P3: 'P3', // Low priority - can be deferred
 };
 
 /**
  * Execution strategy for swarm
  */
 const SwarmStrategy = {
-  ALL: 'all',           // Wait for all to complete
-  FIRST: 'first',       // Return after first success
+  ALL: 'all', // Wait for all to complete
+  FIRST: 'first', // Return after first success
   MAJORITY: 'majority', // Return after majority complete
-  QUORUM: 'quorum'      // Return after quorum achieved
+  QUORUM: 'quorum', // Return after quorum achieved
 };
 
 /**
@@ -46,12 +51,12 @@ class SwarmPattern extends BasePattern {
         'Independent subtask processing',
         'Load distribution',
         'Multi-perspective analysis',
-        'Dynamic task recovery with replanning'
+        'Dynamic task recovery with replanning',
       ],
       complexity: 'high',
       supportsParallel: true,
       supportsReplanning: true,
-      requiresHuman: false
+      requiresHuman: false,
     });
 
     this.options = {
@@ -66,7 +71,7 @@ class SwarmPattern extends BasePattern {
       enableReplanning: options.enableReplanning || false,
       replanningEngine: options.replanningEngine || null,
       fallbackSkill: options.fallbackSkill || null,
-      ...options
+      ...options,
     };
   }
 
@@ -114,7 +119,7 @@ class SwarmPattern extends BasePattern {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -139,7 +144,7 @@ class SwarmPattern extends BasePattern {
     engine.emit('swarmStarted', {
       context,
       totalTasks: tasks.length,
-      strategy: this.options.strategy
+      strategy: this.options.strategy,
     });
 
     const startTime = Date.now();
@@ -154,7 +159,7 @@ class SwarmPattern extends BasePattern {
         const readyTasks = sortedTasks.filter(task => {
           const taskId = task.id || task.skill;
           if (!pending.has(taskId)) return false;
-          
+
           const deps = dependencies[taskId] || [];
           return deps.every(dep => completed.has(dep));
         });
@@ -170,7 +175,7 @@ class SwarmPattern extends BasePattern {
         engine.emit('swarmBatchStarted', {
           context,
           batch: batch.map(t => t.id || t.skill),
-          pending: pending.size
+          pending: pending.size,
         });
 
         const batchResults = await Promise.allSettled(
@@ -192,7 +197,7 @@ class SwarmPattern extends BasePattern {
             engine.emit('swarmTaskCompleted', {
               context,
               taskId,
-              result: result.value
+              result: result.value,
             });
           } else {
             failed.add(taskId);
@@ -201,7 +206,7 @@ class SwarmPattern extends BasePattern {
             engine.emit('swarmTaskFailed', {
               context,
               taskId,
-              error: result.reason
+              error: result.reason,
             });
 
             // Try replanning if enabled
@@ -214,17 +219,17 @@ class SwarmPattern extends BasePattern {
                 sharedContext,
                 results
               );
-              
+
               if (alternative) {
                 // Add alternative task to pending
                 pending.add(alternative.id || alternative.skill);
                 sortedTasks.push(alternative);
                 failed.delete(taskId);
-                
+
                 engine.emit('swarmTaskReplanned', {
                   context,
                   originalTaskId: taskId,
-                  alternativeTask: alternative
+                  alternativeTask: alternative,
                 });
                 continue;
               }
@@ -241,7 +246,7 @@ class SwarmPattern extends BasePattern {
                 ...task,
                 skill: this.options.fallbackSkill,
                 id: `${taskId}-fallback`,
-                originalTaskId: taskId
+                originalTaskId: taskId,
               };
               pending.add(fallbackTask.id);
               sortedTasks.push(fallbackTask);
@@ -262,21 +267,20 @@ class SwarmPattern extends BasePattern {
       engine.emit('swarmCompleted', {
         context,
         results: Object.fromEntries(results),
-        summary
+        summary,
       });
 
       return {
         results: Object.fromEntries(results),
         completed: [...completed],
         failed: [...failed],
-        summary
+        summary,
       };
-
     } catch (error) {
       engine.emit('swarmFailed', {
         context,
         results: Object.fromEntries(results),
-        error
+        error,
       });
       throw error;
     }
@@ -288,7 +292,7 @@ class SwarmPattern extends BasePattern {
    */
   _sortByPriority(tasks) {
     const priorityOrder = this.options.priorityOrder;
-    
+
     return [...tasks].sort((a, b) => {
       const aPriority = a.priority || PLabel.P2;
       const bPriority = b.priority || PLabel.P2;
@@ -302,22 +306,22 @@ class SwarmPattern extends BasePattern {
    */
   async _executeTask(task, engine, parentContext, sharedContext, previousResults) {
     const taskId = task.id || task.skill;
-    
+
     const stepContext = new ExecutionContext({
       task: `Swarm task: ${taskId}`,
       skill: task.skill,
       input: {
         ...sharedContext,
         ...task.input,
-        previousResults: Object.fromEntries(previousResults)
+        previousResults: Object.fromEntries(previousResults),
       },
       parentId: parentContext.id,
       priority: this._mapPriority(task.priority),
       metadata: {
         pattern: PatternType.SWARM,
         taskId,
-        priority: task.priority || PLabel.P2
-      }
+        priority: task.priority || PLabel.P2,
+      },
     });
 
     parentContext.children.push(stepContext);
@@ -327,12 +331,11 @@ class SwarmPattern extends BasePattern {
     try {
       const result = await Promise.race([
         engine.executeSkill(task.skill, stepContext.input, parentContext),
-        this._timeout(this.options.timeout, taskId)
+        this._timeout(this.options.timeout, taskId),
       ]);
 
       stepContext.complete(result);
       return result;
-
     } catch (error) {
       stepContext.fail(error);
       throw error;
@@ -348,7 +351,7 @@ class SwarmPattern extends BasePattern {
       [PLabel.P0]: Priority.CRITICAL,
       [PLabel.P1]: Priority.HIGH,
       [PLabel.P2]: Priority.MEDIUM,
-      [PLabel.P3]: Priority.LOW
+      [PLabel.P3]: Priority.LOW,
     };
     return mapping[pLabel] || Priority.MEDIUM;
   }
@@ -376,21 +379,25 @@ class SwarmPattern extends BasePattern {
    */
   async _tryReplanning(task, error, engine, context, sharedContext, previousResults) {
     const replanningEngine = this.options.replanningEngine;
-    
+
     try {
       // Create context for replanning
       const replanContext = {
-        completed: [...previousResults.entries()].filter(([, v]) => !v.error).map(([id, result]) => ({
-          id,
-          result
-        })),
+        completed: [...previousResults.entries()]
+          .filter(([, v]) => !v.error)
+          .map(([id, result]) => ({
+            id,
+            result,
+          })),
         pending: [],
-        failed: [{
-          id: task.id || task.skill,
-          ...task,
-          error
-        }],
-        sharedContext
+        failed: [
+          {
+            id: task.id || task.skill,
+            ...task,
+            error,
+          },
+        ],
+        sharedContext,
       };
 
       // Generate alternatives
@@ -401,7 +408,7 @@ class SwarmPattern extends BasePattern {
 
       if (alternatives.length > 0) {
         const best = alternatives[0];
-        
+
         // Only use alternatives with sufficient confidence
         if (best.confidence >= (replanningEngine.config.alternatives?.minConfidence || 0.5)) {
           return {
@@ -410,7 +417,7 @@ class SwarmPattern extends BasePattern {
             priority: task.priority,
             originalTaskId: task.id || task.skill,
             replanSource: 'llm',
-            replanConfidence: best.confidence
+            replanConfidence: best.confidence,
           };
         }
       }
@@ -418,7 +425,7 @@ class SwarmPattern extends BasePattern {
       engine.emit('swarmReplanFailed', {
         context,
         taskId: task.id || task.skill,
-        error: replanError
+        error: replanError,
       });
     }
 
@@ -433,13 +440,13 @@ class SwarmPattern extends BasePattern {
     switch (this.options.strategy) {
       case SwarmStrategy.FIRST:
         return completed.size >= 1;
-      
+
       case SwarmStrategy.MAJORITY:
         return completed.size > total / 2;
-      
+
       case SwarmStrategy.QUORUM:
         return completed.size >= total * this.options.quorumThreshold;
-      
+
       case SwarmStrategy.ALL:
       default:
         return false; // Continue until all complete
@@ -461,7 +468,7 @@ class SwarmPattern extends BasePattern {
       [PLabel.P0]: { total: 0, completed: 0, failed: 0 },
       [PLabel.P1]: { total: 0, completed: 0, failed: 0 },
       [PLabel.P2]: { total: 0, completed: 0, failed: 0 },
-      [PLabel.P3]: { total: 0, completed: 0, failed: 0 }
+      [PLabel.P3]: { total: 0, completed: 0, failed: 0 },
     };
 
     for (const task of tasks) {
@@ -478,9 +485,9 @@ class SwarmPattern extends BasePattern {
       failed: failCount,
       pending: pendingCount,
       duration,
-      successRate: total > 0 ? (successCount / total * 100).toFixed(1) + '%' : '0%',
+      successRate: total > 0 ? ((successCount / total) * 100).toFixed(1) + '%' : '0%',
       strategy: this.options.strategy,
-      byPriority
+      byPriority,
     };
   }
 }
@@ -498,5 +505,5 @@ module.exports = {
   SwarmPattern,
   PLabel,
   SwarmStrategy,
-  createSwarmPattern
+  createSwarmPattern,
 };

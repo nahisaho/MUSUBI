@@ -15,33 +15,33 @@ const EventEmitter = require('events');
 const DEFAULT_CONFIG = {
   // Enable goal tracking
   enabled: true,
-  
+
   // Minimum progress rate (percentage per time unit)
   minProgressRate: 0.05,
-  
+
   // Time window for progress rate calculation (ms)
   progressWindow: 60000,
-  
+
   // Threshold for goal completion (0-1)
   completionThreshold: 1.0,
-  
+
   // Enable sub-goal decomposition
   subGoalTracking: true,
-  
+
   // Trigger replan if progress stalls
   triggerOnStall: true,
-  
+
   // Stall detection threshold (no progress for N consecutive checks)
   stallThreshold: 3,
-  
+
   // Progress check interval (ms)
   checkInterval: 10000,
-  
+
   // Enable predictive analysis
   predictiveAnalysis: true,
-  
+
   // Confidence threshold for goal predictions
-  predictionConfidence: 0.7
+  predictionConfidence: 0.7,
 };
 
 /**
@@ -126,10 +126,10 @@ class Goal {
    */
   isAtRisk(currentRate) {
     if (!this.deadline) return false;
-    
+
     const eta = this.getETA(currentRate);
     if (eta === null) return true;
-    
+
     const timeRemaining = this.deadline - Date.now();
     return eta > timeRemaining;
   }
@@ -154,7 +154,7 @@ class Goal {
       progress: this.progress,
       startedAt: this.startedAt,
       completedAt: this.completedAt,
-      metadata: this.metadata
+      metadata: this.metadata,
     };
   }
 }
@@ -181,24 +181,24 @@ class GoalProgressTracker extends EventEmitter {
    */
   constructor(options = {}) {
     super();
-    
+
     this.config = { ...DEFAULT_CONFIG, ...options.config };
-    
+
     // Goals registry
     this.goals = new Map();
-    
+
     // Progress history for trend analysis
     this.progressHistory = new Map(); // goalId -> ProgressSnapshot[]
-    
+
     // Stall counters
     this.stallCounters = new Map(); // goalId -> count
-    
+
     // Task to goal mapping
     this.taskGoalMapping = new Map(); // taskId -> goalId[]
-    
+
     // Check interval timer
     this.checkTimer = null;
-    
+
     // State
     this.isTracking = false;
   }
@@ -210,18 +210,18 @@ class GoalProgressTracker extends EventEmitter {
    */
   registerGoal(goalData) {
     const goal = goalData instanceof Goal ? goalData : new Goal(goalData);
-    
+
     this.goals.set(goal.id, goal);
     this.progressHistory.set(goal.id, []);
     this.stallCounters.set(goal.id, 0);
-    
+
     // Register sub-goals
     if (goal.hasSubGoals()) {
       for (const subGoal of goal.subGoals) {
         this.registerGoal(subGoal);
       }
     }
-    
+
     this.emit('goal:registered', { goal });
     return goal;
   }
@@ -233,7 +233,7 @@ class GoalProgressTracker extends EventEmitter {
    */
   registerGoalsFromPlan(plan) {
     const goals = [];
-    
+
     // Create main goal from plan
     const mainGoal = new Goal({
       id: `plan-${plan.id}`,
@@ -246,22 +246,22 @@ class GoalProgressTracker extends EventEmitter {
         description: task.description || `Execute ${task.skill || task.name}`,
         type: 'completion',
         priority: task.priority || 1,
-        metadata: { taskId: task.id }
-      }))
+        metadata: { taskId: task.id },
+      })),
     });
-    
+
     this.registerGoal(mainGoal);
     goals.push(mainGoal);
-    
+
     // Build task-goal mapping
-    for (const task of (plan.tasks || [])) {
+    for (const task of plan.tasks || []) {
       const goalId = `task-${task.id}`;
       if (!this.taskGoalMapping.has(task.id)) {
         this.taskGoalMapping.set(task.id, []);
       }
       this.taskGoalMapping.get(task.id).push(goalId);
     }
-    
+
     return goals;
   }
 
@@ -279,15 +279,15 @@ class GoalProgressTracker extends EventEmitter {
    */
   startTracking() {
     if (this.isTracking) return;
-    
+
     this.isTracking = true;
-    
+
     if (this.config.checkInterval > 0) {
       this.checkTimer = setInterval(() => {
         this.performCheck();
       }, this.config.checkInterval);
     }
-    
+
     this.emit('tracking:started');
   }
 
@@ -296,14 +296,14 @@ class GoalProgressTracker extends EventEmitter {
    */
   stopTracking() {
     if (!this.isTracking) return;
-    
+
     this.isTracking = false;
-    
+
     if (this.checkTimer) {
       clearInterval(this.checkTimer);
       this.checkTimer = null;
     }
-    
+
     this.emit('tracking:stopped');
   }
 
@@ -316,10 +316,10 @@ class GoalProgressTracker extends EventEmitter {
   updateProgress(goalId, progress, metadata = {}) {
     const goal = this.goals.get(goalId);
     if (!goal) return;
-    
+
     const previousProgress = goal.progress;
     goal.progress = Math.max(0, Math.min(1, progress));
-    
+
     // Update status
     if (goal.progress >= this.config.completionThreshold) {
       goal.status = 'completed';
@@ -328,10 +328,10 @@ class GoalProgressTracker extends EventEmitter {
       goal.status = 'in-progress';
       goal.startedAt = goal.startedAt || Date.now();
     }
-    
+
     // Record snapshot
     this.recordSnapshot(goalId, goal.progress);
-    
+
     // Check for stall
     if (progress === previousProgress) {
       const count = this.stallCounters.get(goalId) + 1;
@@ -339,21 +339,21 @@ class GoalProgressTracker extends EventEmitter {
     } else {
       this.stallCounters.set(goalId, 0);
     }
-    
+
     // Emit progress event
     this.emit('progress:updated', {
       goalId,
       previousProgress,
       newProgress: goal.progress,
       delta: goal.progress - previousProgress,
-      metadata
+      metadata,
     });
-    
+
     // Check for completion
     if (goal.status === 'completed') {
       this.emit('goal:completed', { goal });
     }
-    
+
     // Update parent goals
     this.updateParentGoals(goalId);
   }
@@ -380,7 +380,7 @@ class GoalProgressTracker extends EventEmitter {
    */
   onTaskComplete(taskId, result = {}) {
     const goalIds = this.taskGoalMapping.get(taskId) || [];
-    
+
     for (const goalId of goalIds) {
       this.updateProgress(goalId, 1.0, { taskResult: result });
     }
@@ -393,7 +393,7 @@ class GoalProgressTracker extends EventEmitter {
    */
   onTaskFailed(taskId, error) {
     const goalIds = this.taskGoalMapping.get(taskId) || [];
-    
+
     for (const goalId of goalIds) {
       const goal = this.goals.get(goalId);
       if (goal) {
@@ -412,9 +412,9 @@ class GoalProgressTracker extends EventEmitter {
   recordSnapshot(goalId, progress) {
     const snapshots = this.progressHistory.get(goalId);
     if (!snapshots) return;
-    
+
     snapshots.push(new ProgressSnapshot(goalId, progress));
-    
+
     // Keep only snapshots within the progress window
     const cutoff = Date.now() - this.config.progressWindow * 2;
     while (snapshots.length > 0 && snapshots[0].timestamp < cutoff) {
@@ -430,17 +430,17 @@ class GoalProgressTracker extends EventEmitter {
   calculateProgressRate(goalId) {
     const snapshots = this.progressHistory.get(goalId);
     if (!snapshots || snapshots.length < 2) return 0;
-    
+
     const cutoff = Date.now() - this.config.progressWindow;
     const recent = snapshots.filter(s => s.timestamp >= cutoff);
-    
+
     if (recent.length < 2) return 0;
-    
+
     const first = recent[0];
     const last = recent[recent.length - 1];
     const progressDelta = last.progress - first.progress;
     const timeDelta = last.timestamp - first.timestamp;
-    
+
     return timeDelta > 0 ? progressDelta / timeDelta : 0;
   }
 
@@ -450,36 +450,36 @@ class GoalProgressTracker extends EventEmitter {
   performCheck() {
     for (const [goalId, goal] of this.goals) {
       if (goal.status === 'completed' || goal.status === 'failed') continue;
-      
+
       const rate = this.calculateProgressRate(goalId);
       const stallCount = this.stallCounters.get(goalId);
-      
+
       // Check for stall
       if (this.config.triggerOnStall && stallCount >= this.config.stallThreshold) {
         this.emit('goal:stalled', {
           goal,
           stallCount,
           currentProgress: goal.progress,
-          progressRate: rate
+          progressRate: rate,
         });
       }
-      
+
       // Check progress rate
       if (rate < this.config.minProgressRate && goal.progress > 0 && goal.progress < 0.9) {
         this.emit('goal:slow-progress', {
           goal,
           currentRate: rate,
-          minRate: this.config.minProgressRate
+          minRate: this.config.minProgressRate,
         });
       }
-      
+
       // Check deadline risk
       if (goal.isAtRisk(rate)) {
         this.emit('goal:at-risk', {
           goal,
           eta: goal.getETA(rate),
           deadline: goal.deadline,
-          currentProgress: goal.progress
+          currentProgress: goal.progress,
         });
       }
     }
@@ -497,30 +497,28 @@ class GoalProgressTracker extends EventEmitter {
         'in-progress': 0,
         completed: 0,
         failed: 0,
-        blocked: 0
+        blocked: 0,
       },
       overallProgress: 0,
       atRiskCount: 0,
-      stalledCount: 0
+      stalledCount: 0,
     };
-    
+
     let totalProgress = 0;
-    
+
     for (const [goalId, goal] of this.goals) {
       summary.byStatus[goal.status] = (summary.byStatus[goal.status] || 0) + 1;
       totalProgress += goal.calculateProgress();
-      
+
       const rate = this.calculateProgressRate(goalId);
       if (goal.isAtRisk(rate)) summary.atRiskCount++;
-      
+
       const stallCount = this.stallCounters.get(goalId);
       if (stallCount >= this.config.stallThreshold) summary.stalledCount++;
     }
-    
-    summary.overallProgress = this.goals.size > 0 
-      ? totalProgress / this.goals.size 
-      : 0;
-    
+
+    summary.overallProgress = this.goals.size > 0 ? totalProgress / this.goals.size : 0;
+
     return summary;
   }
 
@@ -532,11 +530,11 @@ class GoalProgressTracker extends EventEmitter {
   getGoalReport(goalId) {
     const goal = this.goals.get(goalId);
     if (!goal) return null;
-    
+
     const rate = this.calculateProgressRate(goalId);
     const stallCount = this.stallCounters.get(goalId);
     const snapshots = this.progressHistory.get(goalId) || [];
-    
+
     return {
       goal: goal.toJSON(),
       metrics: {
@@ -545,18 +543,18 @@ class GoalProgressTracker extends EventEmitter {
         stallCount,
         eta: goal.getETA(rate),
         isAtRisk: goal.isAtRisk(rate),
-        isStalled: stallCount >= this.config.stallThreshold
+        isStalled: stallCount >= this.config.stallThreshold,
       },
       history: snapshots.slice(-20).map(s => ({
         progress: s.progress,
-        timestamp: s.timestamp
+        timestamp: s.timestamp,
       })),
       subGoalProgress: goal.subGoals.map(sg => ({
         id: sg.id,
         name: sg.name,
         progress: sg.calculateProgress(),
-        status: sg.status
-      }))
+        status: sg.status,
+      })),
     };
   }
 
@@ -568,22 +566,22 @@ class GoalProgressTracker extends EventEmitter {
   predictCompletion(goalId) {
     const goal = this.goals.get(goalId);
     if (!goal) return null;
-    
+
     const rate = this.calculateProgressRate(goalId);
     const currentProgress = goal.calculateProgress();
-    
+
     if (rate <= 0) {
       return {
         willComplete: false,
         confidence: 0.5,
-        reason: 'No positive progress rate detected'
+        reason: 'No positive progress rate detected',
       };
     }
-    
+
     const remaining = 1.0 - currentProgress;
     const eta = remaining / rate;
     const predictedCompletion = Date.now() + eta;
-    
+
     // Check deadline
     if (goal.deadline && predictedCompletion > goal.deadline) {
       return {
@@ -591,16 +589,16 @@ class GoalProgressTracker extends EventEmitter {
         predictedCompletion,
         deadline: goal.deadline,
         confidence: this.config.predictionConfidence,
-        reason: 'Current pace will miss deadline'
+        reason: 'Current pace will miss deadline',
       };
     }
-    
+
     return {
       willComplete: true,
       predictedCompletion,
       eta,
       confidence: this.calculatePredictionConfidence(goalId, rate),
-      reason: 'On track for completion'
+      reason: 'On track for completion',
     };
   }
 
@@ -612,27 +610,27 @@ class GoalProgressTracker extends EventEmitter {
    */
   calculatePredictionConfidence(goalId, _currentRate) {
     const snapshots = this.progressHistory.get(goalId) || [];
-    
+
     if (snapshots.length < 5) return 0.5; // Low confidence with little data
-    
+
     // Calculate variance in progress rate
     const rates = [];
     for (let i = 1; i < snapshots.length; i++) {
-      const dt = snapshots[i].timestamp - snapshots[i-1].timestamp;
-      const dp = snapshots[i].progress - snapshots[i-1].progress;
+      const dt = snapshots[i].timestamp - snapshots[i - 1].timestamp;
+      const dp = snapshots[i].progress - snapshots[i - 1].progress;
       if (dt > 0) rates.push(dp / dt);
     }
-    
+
     if (rates.length < 2) return 0.5;
-    
+
     const mean = rates.reduce((a, b) => a + b, 0) / rates.length;
     const variance = rates.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / rates.length;
     const stdDev = Math.sqrt(variance);
-    
+
     // Lower variance = higher confidence
     const coefficientOfVariation = mean !== 0 ? stdDev / Math.abs(mean) : 1;
     const confidence = Math.max(0.3, Math.min(0.95, 1 - coefficientOfVariation));
-    
+
     return confidence;
   }
 
@@ -674,12 +672,12 @@ class GoalProgressTracker extends EventEmitter {
       progressHistory: Object.fromEntries(
         Array.from(this.progressHistory.entries()).map(([k, v]) => [
           k,
-          v.map(s => ({ progress: s.progress, timestamp: s.timestamp }))
+          v.map(s => ({ progress: s.progress, timestamp: s.timestamp })),
         ])
       ),
       stallCounters: Object.fromEntries(this.stallCounters),
       taskGoalMapping: Object.fromEntries(this.taskGoalMapping),
-      summary: this.getStatusSummary()
+      summary: this.getStatusSummary(),
     };
   }
 
@@ -689,13 +687,13 @@ class GoalProgressTracker extends EventEmitter {
    */
   importState(state) {
     this.reset();
-    
+
     if (state.goals) {
       for (const goalData of state.goals) {
         this.registerGoal(goalData);
       }
     }
-    
+
     if (state.progressHistory) {
       for (const [goalId, snapshots] of Object.entries(state.progressHistory)) {
         this.progressHistory.set(
@@ -704,13 +702,13 @@ class GoalProgressTracker extends EventEmitter {
         );
       }
     }
-    
+
     if (state.stallCounters) {
       for (const [goalId, count] of Object.entries(state.stallCounters)) {
         this.stallCounters.set(goalId, count);
       }
     }
-    
+
     if (state.taskGoalMapping) {
       for (const [taskId, goalIds] of Object.entries(state.taskGoalMapping)) {
         this.taskGoalMapping.set(taskId, goalIds);
@@ -723,5 +721,5 @@ module.exports = {
   GoalProgressTracker,
   Goal,
   ProgressSnapshot,
-  DEFAULT_CONFIG
+  DEFAULT_CONFIG,
 };

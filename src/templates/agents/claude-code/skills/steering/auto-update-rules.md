@@ -11,6 +11,7 @@ This document defines the rules for automatically detecting when steering files 
 ### 1. New Dependencies Added
 
 **Detection**:
+
 ```bash
 # package.json changes (Node.js)
 git diff --name-only | grep -E "(package\.json|package-lock\.json)"
@@ -25,8 +26,10 @@ git diff --name-only | grep -E "go\.(mod|sum)"
 **Action**: Update `steering/tech.md` with new dependencies
 
 **Example**:
+
 ```markdown
 # Add to tech.md Dependencies section
+
 - **New**: express@4.18.0 (Web framework)
 - **New**: jest@29.0.0 (Testing framework)
 ```
@@ -36,6 +39,7 @@ git diff --name-only | grep -E "go\.(mod|sum)"
 ### 2. New Directory Structure Created
 
 **Detection**:
+
 ```bash
 # New directories created
 git diff --name-only --diff-filter=A | grep "/" | cut -d'/' -f1 | sort -u
@@ -44,6 +48,7 @@ git diff --name-only --diff-filter=A | grep "/" | cut -d'/' -f1 | sort -u
 **Action**: Update `steering/structure.md` with new directories
 
 **Patterns to Watch**:
+
 - `src/` - Source code organization
 - `lib/` - Library modules (Constitutional Article I)
 - `tests/` - Test organization
@@ -55,6 +60,7 @@ git diff --name-only --diff-filter=A | grep "/" | cut -d'/' -f1 | sort -u
 ### 3. Architecture Pattern Changes
 
 **Detection**:
+
 ```bash
 # Major architectural changes
 git diff --name-only | grep -E "(src/.*index\.(ts|js|py)|main\.(ts|js|py))"
@@ -66,9 +72,12 @@ find src -type d -maxdepth 2 -newer .git/COMMIT_EDITMSG
 **Action**: Update `steering/structure.md` with pattern changes
 
 **Example**:
+
 ```markdown
 # Update Architecture Patterns section
+
 ## Detected Pattern: Microservices
+
 - services/auth/
 - services/user/
 - services/order/
@@ -79,6 +88,7 @@ find src -type d -maxdepth 2 -newer .git/COMMIT_EDITMSG
 ### 4. Technology Stack Updates
 
 **Detection**:
+
 ```bash
 # Framework version updates
 git diff package.json | grep -E '"(react|vue|angular|express|fastapi)"'
@@ -94,6 +104,7 @@ git diff --name-only | grep -E "(webpack|vite|rollup|esbuild)\.config\."
 ### 5. New Feature Implementation
 
 **Detection**:
+
 ```bash
 # New feature directories
 git diff --name-only --diff-filter=A | grep "storage/features/"
@@ -146,9 +157,12 @@ git diff --name-only --diff-filter=A | grep "requirements\.md"
 **Trigger**: New ADR created in `storage/features/*/design.md`
 
 **Action**:
+
 ```markdown
 # Append to architecture_decisions.md
+
 ## ADR-XXX: [Decision Title]
+
 - **Date**: YYYY-MM-DD
 - **Status**: Accepted
 - **Context**: [Extracted from ADR]
@@ -160,9 +174,12 @@ git diff --name-only --diff-filter=A | grep "requirements\.md"
 **Trigger**: New CI/CD config or build scripts added
 
 **Action**:
+
 ```markdown
 # Update development_workflow.md
+
 ## Build Process
+
 - npm run build (detected from package.json)
 - npm test (detected from package.json)
 ```
@@ -172,9 +189,12 @@ git diff --name-only --diff-filter=A | grep "requirements\.md"
 **Trigger**: New business logic files or domain models
 
 **Action**:
+
 ```markdown
 # Update domain_knowledge.md
+
 ## Core Concepts
+
 - User: Represents system users (src/models/user.ts)
 - Order: Purchase transaction (src/models/order.ts)
 ```
@@ -184,9 +204,12 @@ git diff --name-only --diff-filter=A | grep "requirements\.md"
 **Trigger**: New CLI commands or scripts added
 
 **Action**:
+
 ```markdown
 # Update suggested_commands.md
+
 ## Development Commands
+
 - `npm run dev` - Start development server
 - `npm run test:watch` - Run tests in watch mode
 ```
@@ -196,9 +219,12 @@ git diff --name-only --diff-filter=A | grep "requirements\.md"
 **Trigger**: Post-mortem or retrospective files created
 
 **Action**:
+
 ```markdown
 # Append to lessons_learned.md
+
 ## [Date]: [Lesson Title]
+
 - **Context**: [What happened]
 - **Insight**: [What we learned]
 - **Action**: [What we changed]
@@ -231,17 +257,21 @@ diff <(grep "Feature" steering/product.md) <(ls storage/features/)
 ## Detected Issues
 
 ### tech.md
+
 - ⚠️ Missing: express@4.18.0 (added in package.json)
 - ⚠️ Outdated: react@17.0.0 → react@18.2.0
 
 ### structure.md
+
 - ⚠️ Missing directory: src/services/payment/
 - ⚠️ Removed directory: src/legacy/ (no longer exists)
 
 ### product.md
+
 - ⚠️ Missing feature: payment-integration (in storage/features/)
 
 ## Recommendations
+
 1. Run steering skill to update all files
 2. Review changes before committing
 ```
@@ -253,6 +283,7 @@ diff <(grep "Feature" steering/product.md) <(ls storage/features/)
 ### Git Hooks Integration
 
 **pre-commit hook**:
+
 ```bash
 #!/bin/bash
 # Check if steering files need update

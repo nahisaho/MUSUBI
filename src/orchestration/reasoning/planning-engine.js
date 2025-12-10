@@ -19,7 +19,7 @@ const PLAN_STATUS = {
   PAUSED: 'paused',
   COMPLETED: 'completed',
   FAILED: 'failed',
-  CANCELLED: 'cancelled'
+  CANCELLED: 'cancelled',
 };
 
 /**
@@ -33,7 +33,7 @@ const TASK_STATUS = {
   BLOCKED: 'blocked',
   COMPLETED: 'completed',
   FAILED: 'failed',
-  SKIPPED: 'skipped'
+  SKIPPED: 'skipped',
 };
 
 /**
@@ -45,7 +45,7 @@ const PRIORITY = {
   HIGH: 1,
   MEDIUM: 2,
   LOW: 3,
-  OPTIONAL: 4
+  OPTIONAL: 4,
 };
 
 /**
@@ -96,19 +96,19 @@ class PlanningEngine extends EventEmitter {
    */
   constructor(options = {}) {
     super();
-    
+
     this.maxTasks = options.maxTasks ?? 50;
     this.parallelExecution = options.parallelExecution ?? true;
     this.maxParallel = options.maxParallel ?? 4;
     this.adaptivePlanning = options.adaptivePlanning ?? true;
     this.replanThreshold = options.replanThreshold ?? 0.3;
-    
+
     // State
     this.plans = new Map();
     this.activePlan = null;
     this.taskCounter = 0;
   }
-  
+
   /**
    * Create a plan from a goal
    * @param {string} goal - High-level goal description
@@ -117,7 +117,7 @@ class PlanningEngine extends EventEmitter {
    */
   async createPlan(goal, context = {}) {
     const planId = this.generateId('plan');
-    
+
     const plan = {
       id: planId,
       goal,
@@ -133,43 +133,43 @@ class PlanningEngine extends EventEmitter {
         failedTasks: 0,
         skippedTasks: 0,
         totalEstimatedTime: 0,
-        actualTime: 0
-      }
+        actualTime: 0,
+      },
     };
-    
+
     this.emit('plan:creating', { planId, goal });
-    
+
     // Decompose goal into tasks
     const tasks = await this.decomposeGoal(goal, context);
     plan.tasks = tasks;
     plan.metrics.totalTasks = tasks.length;
     plan.metrics.totalEstimatedTime = tasks.reduce((sum, t) => sum + t.estimatedTime, 0);
-    
+
     // Optimize task order
     this.optimizeTaskOrder(plan);
-    
+
     // Update status
     plan.status = PLAN_STATUS.READY;
-    
+
     this.plans.set(planId, plan);
     this.emit('plan:created', { plan });
-    
+
     return plan;
   }
-  
+
   /**
    * Decompose goal into tasks
    * @private
    */
   async decomposeGoal(goal, _context) {
     const tasks = [];
-    
+
     // Analyze goal for key components
     const components = this.analyzeGoal(goal);
-    
+
     for (let i = 0; i < components.length; i++) {
       const component = components[i];
-      
+
       const task = {
         id: this.generateId('task'),
         name: component.name,
@@ -183,21 +183,21 @@ class PlanningEngine extends EventEmitter {
         result: null,
         metadata: {
           component: component.type,
-          index: i
-        }
+          index: i,
+        },
       };
-      
+
       // Add dependencies from previous tasks if sequential
       if (i > 0 && component.dependsOnPrevious !== false) {
         task.dependencies.push(tasks[i - 1].id);
       }
-      
+
       tasks.push(task);
     }
-    
+
     return tasks;
   }
-  
+
   /**
    * Analyze goal to extract components
    * @private
@@ -205,7 +205,7 @@ class PlanningEngine extends EventEmitter {
   analyzeGoal(goal) {
     const components = [];
     const goalLower = goal.toLowerCase();
-    
+
     // Pattern matching for common goal structures
     const patterns = [
       { keyword: 'create', type: 'creation', priority: PRIORITY.HIGH },
@@ -217,9 +217,9 @@ class PlanningEngine extends EventEmitter {
       { keyword: 'refactor', type: 'refactoring', priority: PRIORITY.MEDIUM },
       { keyword: 'document', type: 'documentation', priority: PRIORITY.LOW },
       { keyword: 'analyze', type: 'analysis', priority: PRIORITY.MEDIUM },
-      { keyword: 'review', type: 'review', priority: PRIORITY.MEDIUM }
+      { keyword: 'review', type: 'review', priority: PRIORITY.MEDIUM },
     ];
-    
+
     // Match patterns
     for (const pattern of patterns) {
       if (goalLower.includes(pattern.keyword)) {
@@ -228,11 +228,11 @@ class PlanningEngine extends EventEmitter {
           description: `${pattern.type} task for: ${goal.substring(0, 50)}`,
           type: pattern.type,
           priority: pattern.priority,
-          estimatedTime: this.estimateTime(pattern.type)
+          estimatedTime: this.estimateTime(pattern.type),
         });
       }
     }
-    
+
     // If no patterns matched, create generic decomposition
     if (components.length === 0) {
       components.push(
@@ -241,35 +241,35 @@ class PlanningEngine extends EventEmitter {
           description: 'Analyze requirements and context',
           type: 'analysis',
           priority: PRIORITY.HIGH,
-          estimatedTime: 3000
+          estimatedTime: 3000,
         },
         {
           name: 'Planning',
           description: 'Create detailed implementation plan',
           type: 'planning',
           priority: PRIORITY.HIGH,
-          estimatedTime: 2000
+          estimatedTime: 2000,
         },
         {
           name: 'Execution',
           description: 'Execute the main task',
           type: 'execution',
           priority: PRIORITY.HIGH,
-          estimatedTime: 10000
+          estimatedTime: 10000,
         },
         {
           name: 'Validation',
           description: 'Validate results and quality',
           type: 'validation',
           priority: PRIORITY.MEDIUM,
-          estimatedTime: 3000
+          estimatedTime: 3000,
         }
       );
     }
-    
+
     return components;
   }
-  
+
   /**
    * Estimate time for task type
    * @private
@@ -285,12 +285,12 @@ class PlanningEngine extends EventEmitter {
       refactoring: 15000,
       documentation: 5000,
       analysis: 5000,
-      review: 6000
+      review: 6000,
     };
-    
+
     return estimates[type] || 10000;
   }
-  
+
   /**
    * Optimize task order based on dependencies and priorities
    * @private
@@ -300,15 +300,15 @@ class PlanningEngine extends EventEmitter {
     const sorted = [];
     const visited = new Set();
     const visiting = new Set();
-    
-    const visit = (taskId) => {
+
+    const visit = taskId => {
       if (visited.has(taskId)) return;
       if (visiting.has(taskId)) {
         throw new Error(`Circular dependency detected for task ${taskId}`);
       }
-      
+
       visiting.add(taskId);
-      
+
       const task = plan.tasks.find(t => t.id === taskId);
       if (task) {
         for (const depId of task.dependencies) {
@@ -317,18 +317,18 @@ class PlanningEngine extends EventEmitter {
         visited.add(taskId);
         sorted.push(task);
       }
-      
+
       visiting.delete(taskId);
     };
-    
+
     // Sort by priority first, then visit
     const byPriority = [...plan.tasks].sort((a, b) => a.priority - b.priority);
     for (const task of byPriority) {
       visit(task.id);
     }
-    
+
     plan.tasks = sorted;
-    
+
     // Update ready status for tasks with no dependencies
     for (const task of plan.tasks) {
       if (task.dependencies.length === 0) {
@@ -336,7 +336,7 @@ class PlanningEngine extends EventEmitter {
       }
     }
   }
-  
+
   /**
    * Execute a plan
    * @param {string} planId - Plan identifier
@@ -349,38 +349,37 @@ class PlanningEngine extends EventEmitter {
     if (plan.status === PLAN_STATUS.EXECUTING) {
       throw new Error('Plan is already executing');
     }
-    
+
     plan.status = PLAN_STATUS.EXECUTING;
     plan.startedAt = Date.now();
     this.activePlan = plan;
-    
+
     this.emit('plan:executing', { planId });
-    
+
     try {
       if (this.parallelExecution) {
         await this.executeParallel(plan, executor);
       } else {
         await this.executeSequential(plan, executor);
       }
-      
+
       // Determine final status
       const hasFailures = plan.tasks.some(t => t.status === TASK_STATUS.FAILED);
       plan.status = hasFailures ? PLAN_STATUS.FAILED : PLAN_STATUS.COMPLETED;
-      
     } catch (error) {
       plan.status = PLAN_STATUS.FAILED;
       this.emit('plan:error', { planId, error: error.message });
     }
-    
+
     plan.completedAt = Date.now();
     plan.metrics.actualTime = plan.completedAt - plan.startedAt;
     this.activePlan = null;
-    
+
     this.emit('plan:completed', { plan });
-    
+
     return plan;
   }
-  
+
   /**
    * Execute tasks sequentially
    * @private
@@ -388,30 +387,30 @@ class PlanningEngine extends EventEmitter {
   async executeSequential(plan, executor) {
     for (const task of plan.tasks) {
       if (task.status === TASK_STATUS.SKIPPED) continue;
-      
+
       // Check dependencies
       const blocked = task.dependencies.some(depId => {
         const dep = plan.tasks.find(t => t.id === depId);
         return dep && dep.status === TASK_STATUS.FAILED;
       });
-      
+
       if (blocked) {
         task.status = TASK_STATUS.SKIPPED;
         plan.metrics.skippedTasks++;
         continue;
       }
-      
+
       await this.executeTask(task, executor, plan);
     }
   }
-  
+
   /**
    * Execute tasks in parallel where possible
    * @private
    */
   async executeParallel(plan, executor) {
     const completed = new Set();
-    
+
     for (;;) {
       // Find tasks that are ready to execute
       const ready = plan.tasks.filter(task => {
@@ -421,16 +420,17 @@ class PlanningEngine extends EventEmitter {
         // Check all dependencies are completed
         return task.dependencies.every(depId => completed.has(depId));
       });
-      
+
       if (ready.length === 0) {
         // No more tasks ready - check if we're done
-        const remaining = plan.tasks.filter(t => 
-          t.status === TASK_STATUS.PENDING || 
-          t.status === TASK_STATUS.READY ||
-          t.status === TASK_STATUS.IN_PROGRESS
+        const remaining = plan.tasks.filter(
+          t =>
+            t.status === TASK_STATUS.PENDING ||
+            t.status === TASK_STATUS.READY ||
+            t.status === TASK_STATUS.IN_PROGRESS
         );
         if (remaining.length === 0) break;
-        
+
         // Check for blocked tasks (dependencies failed)
         for (const task of remaining) {
           const hasFailed = task.dependencies.some(depId => {
@@ -444,14 +444,16 @@ class PlanningEngine extends EventEmitter {
         }
         break;
       }
-      
+
       // Execute batch of ready tasks
       const batch = ready.slice(0, this.maxParallel);
-      await Promise.all(batch.map(async (task) => {
-        await this.executeTask(task, executor, plan);
-        completed.add(task.id);
-      }));
-      
+      await Promise.all(
+        batch.map(async task => {
+          await this.executeTask(task, executor, plan);
+          completed.add(task.id);
+        })
+      );
+
       // Mark newly ready tasks
       for (const task of plan.tasks) {
         if (task.status === TASK_STATUS.PENDING) {
@@ -463,7 +465,7 @@ class PlanningEngine extends EventEmitter {
       }
     }
   }
-  
+
   /**
    * Execute a single task
    * @private
@@ -471,33 +473,32 @@ class PlanningEngine extends EventEmitter {
   async executeTask(task, executor, plan) {
     task.status = TASK_STATUS.IN_PROGRESS;
     const startTime = Date.now();
-    
+
     this.emit('task:start', { taskId: task.id, planId: plan.id, task });
-    
+
     try {
       const result = await executor(task);
       task.result = result;
       task.status = TASK_STATUS.COMPLETED;
       plan.metrics.completedTasks++;
-      
+
       this.emit('task:complete', { taskId: task.id, planId: plan.id, result });
-      
+
       // Check for replanning
       if (this.adaptivePlanning) {
         await this.checkReplan(plan, task);
       }
-      
     } catch (error) {
       task.result = { error: error.message };
       task.status = TASK_STATUS.FAILED;
       plan.metrics.failedTasks++;
-      
+
       this.emit('task:error', { taskId: task.id, planId: plan.id, error: error.message });
     }
-    
+
     task.actualTime = Date.now() - startTime;
   }
-  
+
   /**
    * Check if replanning is needed
    * @private
@@ -505,21 +506,23 @@ class PlanningEngine extends EventEmitter {
   async checkReplan(plan, completedTask) {
     // Calculate deviation from estimates
     if (!completedTask.actualTime || !completedTask.estimatedTime) return;
-    
-    const deviation = Math.abs(completedTask.actualTime - completedTask.estimatedTime) / completedTask.estimatedTime;
-    
+
+    const deviation =
+      Math.abs(completedTask.actualTime - completedTask.estimatedTime) /
+      completedTask.estimatedTime;
+
     if (deviation > this.replanThreshold) {
-      this.emit('plan:replan-trigger', { 
-        planId: plan.id, 
-        taskId: completedTask.id, 
-        deviation 
+      this.emit('plan:replan-trigger', {
+        planId: plan.id,
+        taskId: completedTask.id,
+        deviation,
       });
-      
+
       // Adjust estimates for remaining tasks
-      const remaining = plan.tasks.filter(t => 
-        t.status === TASK_STATUS.PENDING || t.status === TASK_STATUS.READY
+      const remaining = plan.tasks.filter(
+        t => t.status === TASK_STATUS.PENDING || t.status === TASK_STATUS.READY
       );
-      
+
       for (const task of remaining) {
         if (task.metadata.component === completedTask.metadata.component) {
           // Adjust based on actual vs estimated ratio
@@ -529,7 +532,7 @@ class PlanningEngine extends EventEmitter {
       }
     }
   }
-  
+
   /**
    * Pause plan execution
    * @param {string} planId - Plan identifier
@@ -537,13 +540,13 @@ class PlanningEngine extends EventEmitter {
   pausePlan(planId) {
     const plan = this.plans.get(planId);
     if (!plan) throw new Error(`Plan ${planId} not found`);
-    
+
     if (plan.status === PLAN_STATUS.EXECUTING) {
       plan.status = PLAN_STATUS.PAUSED;
       this.emit('plan:paused', { planId });
     }
   }
-  
+
   /**
    * Resume plan execution
    * @param {string} planId - Plan identifier
@@ -553,15 +556,15 @@ class PlanningEngine extends EventEmitter {
   async resumePlan(planId, executor) {
     const plan = this.plans.get(planId);
     if (!plan) throw new Error(`Plan ${planId} not found`);
-    
+
     if (plan.status !== PLAN_STATUS.PAUSED) {
       throw new Error('Plan is not paused');
     }
-    
+
     this.emit('plan:resuming', { planId });
     return this.executePlan(planId, executor);
   }
-  
+
   /**
    * Cancel plan execution
    * @param {string} planId - Plan identifier
@@ -569,10 +572,10 @@ class PlanningEngine extends EventEmitter {
   cancelPlan(planId) {
     const plan = this.plans.get(planId);
     if (!plan) throw new Error(`Plan ${planId} not found`);
-    
+
     plan.status = PLAN_STATUS.CANCELLED;
     plan.completedAt = Date.now();
-    
+
     // Mark pending tasks as skipped
     for (const task of plan.tasks) {
       if (task.status === TASK_STATUS.PENDING || task.status === TASK_STATUS.READY) {
@@ -580,10 +583,10 @@ class PlanningEngine extends EventEmitter {
         plan.metrics.skippedTasks++;
       }
     }
-    
+
     this.emit('plan:cancelled', { planId });
   }
-  
+
   /**
    * Add task to existing plan
    * @param {string} planId - Plan identifier
@@ -593,7 +596,7 @@ class PlanningEngine extends EventEmitter {
   addTask(planId, taskDef) {
     const plan = this.plans.get(planId);
     if (!plan) throw new Error(`Plan ${planId} not found`);
-    
+
     const task = {
       id: this.generateId('task'),
       name: taskDef.name,
@@ -605,9 +608,9 @@ class PlanningEngine extends EventEmitter {
       estimatedTime: taskDef.estimatedTime || 5000,
       actualTime: null,
       result: null,
-      metadata: taskDef.metadata || {}
+      metadata: taskDef.metadata || {},
     };
-    
+
     // Insert at appropriate position based on dependencies
     if (taskDef.after) {
       const afterIndex = plan.tasks.findIndex(t => t.id === taskDef.after);
@@ -620,15 +623,15 @@ class PlanningEngine extends EventEmitter {
     } else {
       plan.tasks.push(task);
     }
-    
+
     plan.metrics.totalTasks++;
     plan.metrics.totalEstimatedTime += task.estimatedTime;
-    
+
     this.emit('task:added', { planId, task });
-    
+
     return task;
   }
-  
+
   /**
    * Remove task from plan
    * @param {string} planId - Plan identifier
@@ -637,24 +640,24 @@ class PlanningEngine extends EventEmitter {
   removeTask(planId, taskId) {
     const plan = this.plans.get(planId);
     if (!plan) throw new Error(`Plan ${planId} not found`);
-    
+
     const index = plan.tasks.findIndex(t => t.id === taskId);
     if (index < 0) throw new Error(`Task ${taskId} not found`);
-    
+
     const task = plan.tasks[index];
-    
+
     // Remove from other tasks' dependencies
     for (const t of plan.tasks) {
       t.dependencies = t.dependencies.filter(d => d !== taskId);
     }
-    
+
     plan.tasks.splice(index, 1);
     plan.metrics.totalTasks--;
     plan.metrics.totalEstimatedTime -= task.estimatedTime;
-    
+
     this.emit('task:removed', { planId, taskId });
   }
-  
+
   /**
    * Get plan by ID
    * @param {string} planId - Plan identifier
@@ -663,7 +666,7 @@ class PlanningEngine extends EventEmitter {
   getPlan(planId) {
     return this.plans.get(planId) || null;
   }
-  
+
   /**
    * Get all plans
    * @returns {Plan[]}
@@ -671,7 +674,7 @@ class PlanningEngine extends EventEmitter {
   getAllPlans() {
     return Array.from(this.plans.values());
   }
-  
+
   /**
    * Get plan progress
    * @param {string} planId - Plan identifier
@@ -680,14 +683,14 @@ class PlanningEngine extends EventEmitter {
   getProgress(planId) {
     const plan = this.plans.get(planId);
     if (!plan) return null;
-    
+
     const total = plan.metrics.totalTasks;
     const completed = plan.metrics.completedTasks;
     const failed = plan.metrics.failedTasks;
     const skipped = plan.metrics.skippedTasks;
     const inProgress = plan.tasks.filter(t => t.status === TASK_STATUS.IN_PROGRESS).length;
     const pending = total - completed - failed - skipped - inProgress;
-    
+
     return {
       total,
       completed,
@@ -698,10 +701,10 @@ class PlanningEngine extends EventEmitter {
       percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
       estimatedRemaining: plan.tasks
         .filter(t => t.status === TASK_STATUS.PENDING || t.status === TASK_STATUS.READY)
-        .reduce((sum, t) => sum + t.estimatedTime, 0)
+        .reduce((sum, t) => sum + t.estimatedTime, 0),
     };
   }
-  
+
   /**
    * Get dependency graph
    * @param {string} planId - Plan identifier
@@ -710,24 +713,24 @@ class PlanningEngine extends EventEmitter {
   getDependencyGraph(planId) {
     const plan = this.plans.get(planId);
     if (!plan) return null;
-    
+
     const nodes = plan.tasks.map(t => ({
       id: t.id,
       name: t.name,
       status: t.status,
-      priority: t.priority
+      priority: t.priority,
     }));
-    
+
     const edges = [];
     for (const task of plan.tasks) {
       for (const dep of task.dependencies) {
         edges.push({ from: dep, to: task.id });
       }
     }
-    
+
     return { nodes, edges };
   }
-  
+
   /**
    * Generate unique ID
    * @private
@@ -735,7 +738,7 @@ class PlanningEngine extends EventEmitter {
   generateId(prefix) {
     return `${prefix}-${++this.taskCounter}-${Date.now().toString(36)}`;
   }
-  
+
   /**
    * Clear all plans
    */
@@ -744,7 +747,7 @@ class PlanningEngine extends EventEmitter {
     this.activePlan = null;
     this.taskCounter = 0;
   }
-  
+
   /**
    * Export plan to readable format
    * @param {string} planId - Plan identifier
@@ -753,14 +756,14 @@ class PlanningEngine extends EventEmitter {
   exportPlan(planId) {
     const plan = this.plans.get(planId);
     if (!plan) return '';
-    
+
     let output = `# Plan: ${plan.goal}\n\n`;
     output += `**ID:** ${plan.id}\n`;
     output += `**Status:** ${plan.status}\n`;
     output += `**Created:** ${new Date(plan.createdAt).toISOString()}\n\n`;
-    
+
     output += `## Tasks (${plan.metrics.totalTasks})\n\n`;
-    
+
     for (let i = 0; i < plan.tasks.length; i++) {
       const task = plan.tasks[i];
       const statusIcon = this.getStatusIcon(task.status);
@@ -771,7 +774,7 @@ class PlanningEngine extends EventEmitter {
       }
       output += `\n`;
     }
-    
+
     output += `## Metrics\n\n`;
     output += `- Completed: ${plan.metrics.completedTasks}\n`;
     output += `- Failed: ${plan.metrics.failedTasks}\n`;
@@ -779,10 +782,10 @@ class PlanningEngine extends EventEmitter {
     if (plan.metrics.actualTime) {
       output += `- Total Time: ${plan.metrics.actualTime}ms\n`;
     }
-    
+
     return output;
   }
-  
+
   /**
    * Get status icon
    * @private
@@ -795,7 +798,7 @@ class PlanningEngine extends EventEmitter {
       [TASK_STATUS.BLOCKED]: '🚫',
       [TASK_STATUS.COMPLETED]: '✅',
       [TASK_STATUS.FAILED]: '❌',
-      [TASK_STATUS.SKIPPED]: '⏭️'
+      [TASK_STATUS.SKIPPED]: '⏭️',
     };
     return icons[status] || '•';
   }
@@ -827,5 +830,5 @@ module.exports = {
   createPlan,
   PLAN_STATUS,
   TASK_STATUS,
-  PRIORITY
+  PRIORITY,
 };

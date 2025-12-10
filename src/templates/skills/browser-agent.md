@@ -55,55 +55,61 @@ npx musubi browser generate-test --history actions.json --output tests/e2e/login
 ## サポートするコマンド
 
 ### ナビゲーション
+
 - `https://example.com を開く`
 - `go to https://example.com`
 - `ログインページにアクセス`
 
 ### クリック
+
 - `ログインボタンをクリック`
 - `click login button`
 - `送信ボタンを押す`
 
 ### 入力
+
 - `メール欄に「test@example.com」と入力`
 - `type "hello" in email field`
 - `パスワードに "secret" を入力`
 
 ### 待機
+
 - `3秒待つ`
 - `wait 5 seconds`
 - `ローディングが消えるまで待つ`
 
 ### スクリーンショット
+
 - `スクリーンショットを取る`
 - `画面を「login-page」として保存`
 - `take screenshot`
 
 ### 検証
+
 - `「ログイン成功」が表示される`
 - `verify "Welcome" is visible`
 - `ダッシュボードが表示されること`
 
 ## セッションコマンド（インタラクティブモード）
 
-| コマンド | 説明 |
-|---------|------|
-| `history` | アクション履歴を表示 |
-| `clear` | 履歴をクリア |
-| `save-test <file>` | 履歴から Playwright テストを保存 |
-| `exit` / `quit` / `q` | ブラウザを閉じて終了 |
-| `help` / `?` | ヘルプを表示 |
+| コマンド              | 説明                             |
+| --------------------- | -------------------------------- |
+| `history`             | アクション履歴を表示             |
+| `clear`               | 履歴をクリア                     |
+| `save-test <file>`    | 履歴から Playwright テストを保存 |
+| `exit` / `quit` / `q` | ブラウザを閉じて終了             |
+| `help` / `?`          | ヘルプを表示                     |
 
 ## オプション
 
-| オプション | 説明 | デフォルト |
-|-----------|------|-----------|
-| `--headless` | ヘッドレスモードで実行 | `true` |
-| `--no-headless` | ブラウザを表示 | - |
-| `-b, --browser` | ブラウザ種類 | `chromium` |
-| `-o, --output` | スクリーンショット保存先 | `./screenshots` |
-| `-t, --timeout` | タイムアウト（ms） | `30000` |
-| `--threshold` | 類似度閾値 | `0.95` |
+| オプション      | 説明                     | デフォルト      |
+| --------------- | ------------------------ | --------------- |
+| `--headless`    | ヘッドレスモードで実行   | `true`          |
+| `--no-headless` | ブラウザを表示           | -               |
+| `-b, --browser` | ブラウザ種類             | `chromium`      |
+| `-o, --output`  | スクリーンショット保存先 | `./screenshots` |
+| `-t, --timeout` | タイムアウト（ms）       | `30000`         |
+| `--threshold`   | 類似度閾値               | `0.95`          |
 
 ## MUSUBI 仕様連携
 
@@ -125,7 +131,6 @@ test('REQ-001: User Login', async ({ page }) => {
   // Pattern: event-driven
   // Trigger: the user clicks the login button with valid credentials
   // Action: display the dashboard page
-  
   // TODO: Implement test based on requirement
 });
 ```

@@ -9,12 +9,15 @@ Patterns for implementing effective observability in distributed systems.
 ## Three Pillars of Observability
 
 ### 1. Metrics (What)
+
 Numeric measurements aggregated over time.
 
 ### 2. Logs (Why)
+
 Discrete events with context.
 
 ### 3. Traces (Where)
+
 Request paths through distributed systems.
 
 ---
@@ -23,10 +26,10 @@ Request paths through distributed systems.
 
 ### RED Method (Request-focused)
 
-| Metric | Description |
-|--------|-------------|
-| **R**ate | Requests per second |
-| **E**rrors | Failed requests per second |
+| Metric       | Description                |
+| ------------ | -------------------------- |
+| **R**ate     | Requests per second        |
+| **E**rrors   | Failed requests per second |
 | **D**uration | Response time distribution |
 
 ```typescript
@@ -36,61 +39,64 @@ import { Counter, Histogram } from 'prom-client';
 const requestCounter = new Counter({
   name: 'http_requests_total',
   help: 'Total HTTP requests',
-  labelNames: ['method', 'path', 'status']
+  labelNames: ['method', 'path', 'status'],
 });
 
 const requestDuration = new Histogram({
   name: 'http_request_duration_seconds',
   help: 'HTTP request duration',
   labelNames: ['method', 'path'],
-  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5]
+  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],
 });
 
 app.use((req, res, next) => {
   const start = Date.now();
-  
+
   res.on('finish', () => {
     const duration = (Date.now() - start) / 1000;
-    
+
     requestCounter.inc({
       method: req.method,
       path: req.route?.path || req.path,
-      status: res.statusCode
+      status: res.statusCode,
     });
-    
-    requestDuration.observe({
-      method: req.method,
-      path: req.route?.path || req.path
-    }, duration);
+
+    requestDuration.observe(
+      {
+        method: req.method,
+        path: req.route?.path || req.path,
+      },
+      duration
+    );
   });
-  
+
   next();
 });
 ```
 
 ### USE Method (Resource-focused)
 
-| Metric | Description |
-|--------|-------------|
-| **U**tilization | % time resource is busy |
-| **S**aturation | Queue depth, waiting work |
-| **E**rrors | Error events |
+| Metric          | Description               |
+| --------------- | ------------------------- |
+| **U**tilization | % time resource is busy   |
+| **S**aturation  | Queue depth, waiting work |
+| **E**rrors      | Error events              |
 
 ```typescript
 // System metrics
 const cpuUtilization = new Gauge({
   name: 'system_cpu_utilization',
-  help: 'CPU utilization percentage'
+  help: 'CPU utilization percentage',
 });
 
 const memoryUtilization = new Gauge({
   name: 'system_memory_utilization',
-  help: 'Memory utilization percentage'
+  help: 'Memory utilization percentage',
 });
 
 const queueDepth = new Gauge({
   name: 'job_queue_depth',
-  help: 'Number of jobs in queue'
+  help: 'Number of jobs in queue',
 });
 ```
 
@@ -145,7 +151,7 @@ const storage = new AsyncLocalStorage<{ correlationId: string }>();
 app.use((req, res, next) => {
   const correlationId = req.headers['x-correlation-id'] || uuid();
   res.setHeader('x-correlation-id', correlationId);
-  
+
   storage.run({ correlationId }, () => {
     next();
   });
@@ -154,22 +160,25 @@ app.use((req, res, next) => {
 // Logger wrapper
 function log(level: string, message: string, data: object = {}) {
   const store = storage.getStore();
-  logger[level]({
-    correlationId: store?.correlationId,
-    ...data
-  }, message);
+  logger[level](
+    {
+      correlationId: store?.correlationId,
+      ...data,
+    },
+    message
+  );
 }
 ```
 
 ### Log Levels
 
-| Level | When to Use |
-|-------|-------------|
-| ERROR | Operation failed, needs attention |
-| WARN | Unexpected but handled condition |
-| INFO | Significant events (startup, requests) |
-| DEBUG | Detailed debugging information |
-| TRACE | Very detailed tracing |
+| Level | When to Use                            |
+| ----- | -------------------------------------- |
+| ERROR | Operation failed, needs attention      |
+| WARN  | Unexpected but handled condition       |
+| INFO  | Significant events (startup, requests) |
+| DEBUG | Detailed debugging information         |
+| TRACE | Very detailed tracing                  |
 
 ---
 
@@ -190,7 +199,7 @@ const provider = new NodeTracerProvider();
 provider.addSpanProcessor(
   new SimpleSpanProcessor(
     new JaegerExporter({
-      endpoint: 'http://jaeger:14268/api/traces'
+      endpoint: 'http://jaeger:14268/api/traces',
     })
   )
 );
@@ -198,10 +207,7 @@ provider.addSpanProcessor(
 provider.register();
 
 registerInstrumentations({
-  instrumentations: [
-    new HttpInstrumentation(),
-    new ExpressInstrumentation()
-  ]
+  instrumentations: [new HttpInstrumentation(), new ExpressInstrumentation()],
 });
 ```
 
@@ -213,23 +219,23 @@ import { trace } from '@opentelemetry/api';
 const tracer = trace.getTracer('my-service');
 
 async function processOrder(order: Order) {
-  return tracer.startActiveSpan('processOrder', async (span) => {
+  return tracer.startActiveSpan('processOrder', async span => {
     try {
       span.setAttribute('order.id', order.id);
       span.setAttribute('order.amount', order.amount);
-      
+
       // Child span for payment
-      await tracer.startActiveSpan('processPayment', async (paymentSpan) => {
+      await tracer.startActiveSpan('processPayment', async paymentSpan => {
         await paymentService.charge(order);
         paymentSpan.end();
       });
-      
+
       // Child span for inventory
-      await tracer.startActiveSpan('updateInventory', async (inventorySpan) => {
+      await tracer.startActiveSpan('updateInventory', async inventorySpan => {
         await inventoryService.reserve(order.items);
         inventorySpan.end();
       });
-      
+
       span.setStatus({ code: SpanStatusCode.OK });
     } catch (error) {
       span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
@@ -262,8 +268,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "High error budget burn rate"
-          
+          summary: 'High error budget burn rate'
+
       # Slow burn: 5% budget in 6 hours
       - alert: SlowErrorBudgetBurn
         expr: |
@@ -283,9 +289,9 @@ rules:
   # Good: User-facing symptom
   - alert: HighLatency
     expr: http_request_duration_seconds:p99 > 0.5
-    
+
   # Avoid: Cause-based
-  - alert: HighCPU  # May not affect users
+  - alert: HighCPU # May not affect users
     expr: cpu_utilization > 80
 ```
 
@@ -298,36 +304,36 @@ rules:
 ```yaml
 # Grafana dashboard structure
 dashboard:
-  title: "Service Overview"
+  title: 'Service Overview'
   rows:
-    - title: "Traffic"
+    - title: 'Traffic'
       panels:
         - type: graph
-          title: "Requests per Second"
-          query: "rate(http_requests_total[5m])"
-          
-    - title: "Errors"
+          title: 'Requests per Second'
+          query: 'rate(http_requests_total[5m])'
+
+    - title: 'Errors'
       panels:
         - type: graph
-          title: "Error Rate"
+          title: 'Error Rate'
           query: "rate(http_requests_total{status=~'5..'}[5m])"
-          
-    - title: "Latency"
+
+    - title: 'Latency'
       panels:
         - type: graph
-          title: "Latency Percentiles"
+          title: 'Latency Percentiles'
           queries:
-            - "histogram_quantile(0.50, ...)"
-            - "histogram_quantile(0.95, ...)"
-            - "histogram_quantile(0.99, ...)"
-            
-    - title: "Saturation"
+            - 'histogram_quantile(0.50, ...)'
+            - 'histogram_quantile(0.95, ...)'
+            - 'histogram_quantile(0.99, ...)'
+
+    - title: 'Saturation'
       panels:
         - type: graph
-          title: "Resource Usage"
+          title: 'Resource Usage'
           queries:
-            - "cpu_utilization"
-            - "memory_utilization"
+            - 'cpu_utilization'
+            - 'memory_utilization'
 ```
 
 ---
@@ -335,24 +341,28 @@ dashboard:
 ## Observability Checklist
 
 ### Metrics
+
 - [ ] RED metrics for all services
 - [ ] USE metrics for resources
 - [ ] Business metrics tracked
 - [ ] SLI metrics defined
 
 ### Logging
+
 - [ ] Structured JSON logs
 - [ ] Correlation IDs propagated
 - [ ] Appropriate log levels
 - [ ] Sensitive data masked
 
 ### Tracing
+
 - [ ] Distributed tracing enabled
 - [ ] Span context propagated
 - [ ] Key operations instrumented
 - [ ] Sampling configured
 
 ### Alerting
+
 - [ ] SLO-based alerts
 - [ ] Multi-window burn rates
 - [ ] Clear runbooks linked

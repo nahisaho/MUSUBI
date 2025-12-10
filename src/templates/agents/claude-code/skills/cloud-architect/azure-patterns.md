@@ -72,16 +72,16 @@ spec:
         app: my-api
     spec:
       containers:
-      - name: api
-        image: myregistry.azurecr.io/my-api:latest
-        ports:
-        - containerPort: 3000
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: db-secret
-              key: connection-string
+        - name: api
+          image: myregistry.azurecr.io/my-api:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: connection-string
 ```
 
 ---
@@ -216,30 +216,35 @@ resource keyVaultAccessPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2021-04-
 ## Azure Well-Architected
 
 ### Reliability
+
 - [ ] Availability zones used
 - [ ] Traffic Manager/Front Door configured
 - [ ] Geo-replication enabled
 - [ ] Backup and restore tested
 
 ### Security
+
 - [ ] Azure AD authentication
 - [ ] Managed identities used
 - [ ] Key Vault for secrets
 - [ ] Private endpoints configured
 
 ### Cost Optimization
+
 - [ ] Reserved instances evaluated
 - [ ] Right-sized resources
 - [ ] Auto-scaling configured
 - [ ] Cost alerts set up
 
 ### Operational Excellence
+
 - [ ] ARM/Bicep templates
 - [ ] Azure DevOps pipelines
 - [ ] Application Insights
 - [ ] Log Analytics workspace
 
 ### Performance
+
 - [ ] CDN for static content
 - [ ] Redis Cache configured
 - [ ] Appropriate service tiers
@@ -285,16 +290,16 @@ module compute './modules/compute.bicep' = {
 
 ## Service Selection Guide
 
-| Need | Service |
-|------|---------|
-| Simple web app | App Service |
-| Containers | AKS or Container Apps |
-| Serverless | Functions |
-| SQL database | Azure SQL |
-| NoSQL database | Cosmos DB |
-| Messaging | Service Bus |
-| Events | Event Grid |
-| Storage | Blob Storage |
-| CDN | Azure CDN / Front Door |
-| Secrets | Key Vault |
-| Monitoring | Application Insights |
+| Need           | Service                |
+| -------------- | ---------------------- |
+| Simple web app | App Service            |
+| Containers     | AKS or Container Apps  |
+| Serverless     | Functions              |
+| SQL database   | Azure SQL              |
+| NoSQL database | Cosmos DB              |
+| Messaging      | Service Bus            |
+| Events         | Event Grid             |
+| Storage        | Blob Storage           |
+| CDN            | Azure CDN / Front Door |
+| Secrets        | Key Vault              |
+| Monitoring     | Application Insights   |

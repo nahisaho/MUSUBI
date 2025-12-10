@@ -11,7 +11,7 @@ const fs = require('fs').promises;
 const os = require('os');
 
 // Import replanning components
-const { 
+const {
   ReplanningEngine,
   _PlanMonitor,
   PlanEvaluator,
@@ -22,7 +22,7 @@ const {
   AdaptiveGoalModifier,
   ModificationHistoryManager,
   ReplanTrigger,
-  defaultReplanningConfig
+  defaultReplanningConfig,
 } = require('../../../src/orchestration/replanning');
 
 // Import GUI service for integration
@@ -35,7 +35,7 @@ describe('E2E Replanning Engine Tests', () => {
 
   beforeAll(async () => {
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'musubi-e2e-replanning-'));
-    
+
     // Create necessary directories
     await fs.mkdir(path.join(tempDir, 'storage', 'replanning', 'history'), { recursive: true });
     await fs.mkdir(path.join(tempDir, 'steering'), { recursive: true });
@@ -52,7 +52,7 @@ describe('E2E Replanning Engine Tests', () => {
 
   beforeEach(() => {
     engine = new ReplanningEngine(null, {
-      config: defaultReplanningConfig
+      config: defaultReplanningConfig,
     });
     guiService = new ReplanningService(tempDir);
   });
@@ -66,11 +66,9 @@ describe('E2E Replanning Engine Tests', () => {
         tasks: [
           { id: 'T1', name: 'Setup environment', status: 'completed', duration: 120 },
           { id: 'T2', name: 'Run tests', status: 'pending', estimatedDuration: 300 },
-          { id: 'T3', name: 'Deploy', status: 'pending', estimatedDuration: 180 }
+          { id: 'T3', name: 'Deploy', status: 'pending', estimatedDuration: 180 },
         ],
-        goals: [
-          { id: 'G1', name: 'Complete deployment', progress: 0.33 }
-        ]
+        goals: [{ id: 'G1', name: 'Complete deployment', progress: 0.33 }],
       };
 
       // Initialize engine with plan
@@ -79,18 +77,20 @@ describe('E2E Replanning Engine Tests', () => {
 
       // Create evaluator
       const evaluator = new PlanEvaluator({ config: defaultReplanningConfig.evaluation });
-      
+
       // Simulate task failure - create current state with failed task
       const currentState = {
         completed: [plan.tasks[0]],
         pending: [plan.tasks[2]],
-        failed: [{
-          ...plan.tasks[1],
-          status: 'failed',
-          error: 'Test execution failed: 3 tests failed',
-          failureTime: Date.now()
-        }],
-        startTime: Date.now() - 60000 // Started 1 minute ago
+        failed: [
+          {
+            ...plan.tasks[1],
+            status: 'failed',
+            error: 'Test execution failed: 3 tests failed',
+            failureTime: Date.now(),
+          },
+        ],
+        startTime: Date.now() - 60000, // Started 1 minute ago
       };
 
       // Evaluate current state (PlanEvaluator.evaluate takes plan and currentState)
@@ -108,8 +108,8 @@ describe('E2E Replanning Engine Tests', () => {
         reason: currentState.failed[0].error,
         success: true,
         evaluation: {
-          health: evaluation.health
-        }
+          health: evaluation.health,
+        },
       });
 
       // Verify history was recorded
@@ -123,14 +123,14 @@ describe('E2E Replanning Engine Tests', () => {
       await guiService.recordReplan({
         trigger: 'manual',
         reason: 'User requested replan',
-        success: true
+        success: true,
       });
 
       await guiService.recordReplan({
         trigger: 'optimization',
         reason: 'Better path found',
         success: true,
-        confidence: 0.85
+        confidence: 0.85,
       });
 
       // Create new service instance (simulating new session)
@@ -147,7 +147,7 @@ describe('E2E Replanning Engine Tests', () => {
     beforeEach(() => {
       tracker = new GoalProgressTracker({
         checkInterval: 100,
-        deviationThreshold: 0.15
+        deviationThreshold: 0.15,
       });
     });
 
@@ -160,7 +160,7 @@ describe('E2E Replanning Engine Tests', () => {
       tracker.registerGoal({
         id: 'deploy-feature',
         name: 'Deploy Feature X',
-        type: 'completion'
+        type: 'completion',
       });
 
       // Simulate progress updates (0-1 scale)
@@ -168,9 +168,9 @@ describe('E2E Replanning Engine Tests', () => {
       let goal = tracker.getGoal('deploy-feature');
       expect(goal.progress).toBe(0.25);
 
-      tracker.updateProgress('deploy-feature', 0.50);
+      tracker.updateProgress('deploy-feature', 0.5);
       goal = tracker.getGoal('deploy-feature');
-      expect(goal.progress).toBe(0.50);
+      expect(goal.progress).toBe(0.5);
 
       tracker.updateProgress('deploy-feature', 1.0);
       goal = tracker.getGoal('deploy-feature');
@@ -180,16 +180,16 @@ describe('E2E Replanning Engine Tests', () => {
 
     test('should detect deviation from expected progress', async () => {
       const deviationEvents = [];
-      tracker.on('deviation', (event) => deviationEvents.push(event));
+      tracker.on('deviation', event => deviationEvents.push(event));
 
       tracker.registerGoal({
         id: 'time-sensitive',
         name: 'Time Sensitive Task',
-        type: 'completion'
+        type: 'completion',
       });
 
       // Set initial progress
-      tracker.updateProgress('time-sensitive', 0.10);
+      tracker.updateProgress('time-sensitive', 0.1);
 
       // Wait and update with lower than expected progress
       await new Promise(resolve => setTimeout(resolve, 150));
@@ -206,7 +206,7 @@ describe('E2E Replanning Engine Tests', () => {
       tracker.registerGoal({ id: 'G3', name: 'Goal 3', type: 'completion' });
 
       tracker.updateProgress('G1', 1.0);
-      tracker.updateProgress('G2', 0.50);
+      tracker.updateProgress('G2', 0.5);
       tracker.updateProgress('G3', 0.25);
 
       const summary = tracker.getStatusSummary();
@@ -224,15 +224,15 @@ describe('E2E Replanning Engine Tests', () => {
       const mockLLM = {
         complete: async () => 'No suggestions',
         completeJSON: async () => ({ suggestions: [] }),
-        isAvailable: async () => false
+        isAvailable: async () => false,
       };
-      
+
       optimizer = new ProactivePathOptimizer(mockLLM, {
         config: {
           enabled: true,
           evaluateEvery: 1,
-          minImprovementThreshold: 0.05
-        }
+          minImprovementThreshold: 0.05,
+        },
       });
     });
 
@@ -241,8 +241,8 @@ describe('E2E Replanning Engine Tests', () => {
         pending: [
           { id: 'S1', name: 'Step 1', estimatedDuration: 100 },
           { id: 'S2', name: 'Step 2', estimatedDuration: 150 },
-          { id: 'S3', name: 'Step 3', estimatedDuration: 200 }
-        ]
+          { id: 'S3', name: 'Step 3', estimatedDuration: 200 },
+        ],
       };
 
       const metrics = optimizer.calculatePathMetrics(context);
@@ -257,27 +257,27 @@ describe('E2E Replanning Engine Tests', () => {
       const context = {
         pending: [
           { id: 'T2', estimatedDuration: 200 },
-          { id: 'T3', estimatedDuration: 150 }
-        ]
+          { id: 'T3', estimatedDuration: 150 },
+        ],
       };
       const result = { duration: 95, success: true };
 
       const optimization = await optimizer.onTaskSuccess(task, context, result);
-      
+
       // May or may not optimize depending on opportunities
       expect(optimization === null || typeof optimization === 'object').toBe(true);
     });
 
     test('should emit optimization events', async () => {
       const events = [];
-      optimizer.on('optimization', (event) => events.push(event));
+      optimizer.on('optimization', event => events.push(event));
 
       // Perform optimization with context
       const context = {
         pending: [
           { id: 'S1', estimatedDuration: 100 },
-          { id: 'S2', estimatedDuration: 200, dependencies: [] }
-        ]
+          { id: 'S2', estimatedDuration: 200, dependencies: [] },
+        ],
       };
 
       await optimizer.optimize(context);
@@ -294,7 +294,7 @@ describe('E2E Replanning Engine Tests', () => {
     beforeEach(() => {
       modifier = new AdaptiveGoalModifier({
         requireApproval: false,
-        autoModifyThreshold: 0.5
+        autoModifyThreshold: 0.5,
       });
       historyManager = new ModificationHistoryManager();
     });
@@ -303,7 +303,7 @@ describe('E2E Replanning Engine Tests', () => {
       const goal = modifier.registerGoal({
         id: 'performance-target',
         name: 'Achieve 100ms response time',
-        priority: 'high'
+        priority: 'high',
       });
 
       expect(goal).toBeDefined();
@@ -313,20 +313,28 @@ describe('E2E Replanning Engine Tests', () => {
 
     test('should track modification history via ModificationHistoryManager', () => {
       const goalId = 'test-goal';
-      
-      historyManager.recordModification(goalId, {
-        type: 'target_adjustment',
-        oldValue: 100,
-        newValue: 120,
-        reason: 'Resource constraints'
-      }, { score: 0.5 });
 
-      historyManager.recordModification(goalId, {
-        type: 'priority_change',
-        oldValue: 'high',
-        newValue: 'medium',
-        reason: 'Deadline extension'
-      }, { score: 0.3 });
+      historyManager.recordModification(
+        goalId,
+        {
+          type: 'target_adjustment',
+          oldValue: 100,
+          newValue: 120,
+          reason: 'Resource constraints',
+        },
+        { score: 0.5 }
+      );
+
+      historyManager.recordModification(
+        goalId,
+        {
+          type: 'priority_change',
+          oldValue: 'high',
+          newValue: 'medium',
+          reason: 'Deadline extension',
+        },
+        { score: 0.3 }
+      );
 
       const history = historyManager.getHistory(goalId);
       expect(history.length).toBe(2);
@@ -337,14 +345,14 @@ describe('E2E Replanning Engine Tests', () => {
         id: 'delivery-goal',
         name: 'Deliver feature by deadline',
         priority: 'high',
-        targetDate: new Date(Date.now() + 86400000).toISOString()
+        targetDate: new Date(Date.now() + 86400000).toISOString(),
       });
 
       const result = await modifier.triggerModification('delivery-goal', {
         type: 'resource_constraint',
-        severity: 0.5
+        severity: 0.5,
       });
-      
+
       expect(result).toBeDefined();
       expect(result.status).toBeDefined();
     });
@@ -360,7 +368,7 @@ describe('E2E Replanning Engine Tests', () => {
       tracker.registerGoal({
         id: 'feature-complete',
         name: 'Complete Feature Implementation',
-        type: 'completion'
+        type: 'completion',
       });
 
       // 3. Simulate progress (0-1 scale)
@@ -381,7 +389,7 @@ describe('E2E Replanning Engine Tests', () => {
         trigger: 'resource_constraint',
         reason: 'Code task delayed',
         evaluation: { riskScore: evaluation.riskScore },
-        success: true
+        success: true,
       });
 
       // 6. Update state back to monitoring
@@ -424,7 +432,7 @@ describe('E2E Replanning Engine Tests', () => {
       await guiService.recordReplan({
         trigger: 'cli_manual',
         command: 'npx musubi-orchestrate replan context-123',
-        success: true
+        success: true,
       });
       await guiService.updateState({ status: 'idle' });
 
@@ -448,7 +456,7 @@ describe('E2E Replanning Engine Tests', () => {
   describe('Scenario 7: Error Handling and Recovery', () => {
     test('should handle goal registration with missing id', () => {
       const tracker = new GoalProgressTracker();
-      
+
       // Should auto-generate id for goal without id
       const goal = tracker.registerGoal({ name: 'No ID Goal', type: 'completion' });
       expect(goal).toBeDefined();
@@ -462,7 +470,7 @@ describe('E2E Replanning Engine Tests', () => {
 
     test('should handle missing files gracefully', async () => {
       const emptyService = new ReplanningService('/nonexistent/path');
-      
+
       // Should return defaults, not throw
       const state = await emptyService.getState();
       expect(state.status).toBe('idle');
@@ -499,7 +507,7 @@ describe('E2E Replanning Engine Tests', () => {
         await guiService.recordReplan({
           trigger: `sequential-${i}`,
           success: true,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
 

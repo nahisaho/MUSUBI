@@ -13,7 +13,7 @@ const {
   IncidentSeverity,
   IncidentStatus,
   StepStatus,
-  createIncidentManager
+  createIncidentManager,
 } = require('../../src/monitoring/incident-manager');
 
 describe('Incident Manager', () => {
@@ -25,7 +25,7 @@ describe('Incident Manager', () => {
         title: 'API latency spike',
         description: 'P99 latency increased to 5s',
         severity: IncidentSeverity.SEV2,
-        affectedServices: ['api-gateway', 'user-service']
+        affectedServices: ['api-gateway', 'user-service'],
       });
     });
 
@@ -147,10 +147,14 @@ describe('Incident Manager', () => {
         steps: [
           { title: 'Notify team', description: 'Send alert to database team' },
           { title: 'Check replica status', command: 'mysql -e "SHOW SLAVE STATUS"' },
-          { title: 'Promote replica', command: 'mysql -e "STOP SLAVE; RESET SLAVE ALL"', requiresConfirmation: true },
+          {
+            title: 'Promote replica',
+            command: 'mysql -e "STOP SLAVE; RESET SLAVE ALL"',
+            requiresConfirmation: true,
+          },
           { title: 'Update DNS', command: 'aws route53 change-resource-record-sets ...' },
-          { title: 'Verify connections', command: 'curl -f http://app/health' }
-        ]
+          { title: 'Verify connections', command: 'curl -f http://app/health' },
+        ],
       });
     });
 
@@ -178,11 +182,7 @@ describe('Incident Manager', () => {
     beforeEach(() => {
       runbook = new Runbook({
         name: 'Simple Runbook',
-        steps: [
-          { title: 'Step 1' },
-          { title: 'Step 2' },
-          { title: 'Step 3' }
-        ]
+        steps: [{ title: 'Step 1' }, { title: 'Step 2' }, { title: 'Step 3' }],
       });
       execution = new RunbookExecution(runbook);
     });
@@ -268,7 +268,7 @@ describe('Incident Manager', () => {
         title: 'Database Outage',
         severity: IncidentSeverity.SEV1,
         affectedServices: ['database', 'api'],
-        customerImpact: { affected: 1000, percentage: 50 }
+        customerImpact: { affected: 1000, percentage: 50 },
       });
       incident.acknowledge('alice');
       incident.setRootCause('Disk full');
@@ -290,7 +290,7 @@ describe('Incident Manager', () => {
         title: 'Add disk monitoring',
         owner: 'charlie',
         priority: 'high',
-        dueDate: '2024-01-15'
+        dueDate: '2024-01-15',
       });
 
       expect(postMortem.actionItems).toHaveLength(1);
@@ -316,7 +316,7 @@ describe('Incident Manager', () => {
       postMortem.addActionItem({
         title: 'Add monitoring',
         owner: 'alice',
-        priority: 'high'
+        priority: 'high',
       });
       postMortem.addLessonLearned('Better monitoring needed');
 
@@ -344,7 +344,7 @@ describe('Incident Manager', () => {
 
     beforeEach(() => {
       manager = createIncidentManager({
-        primaryOncall: 'alice'
+        primaryOncall: 'alice',
       });
     });
 
@@ -356,7 +356,7 @@ describe('Incident Manager', () => {
     test('should create and get incident', () => {
       const incident = manager.createIncident({
         title: 'Test incident',
-        severity: IncidentSeverity.SEV3
+        severity: IncidentSeverity.SEV3,
       });
 
       expect(incident.title).toBe('Test incident');
@@ -398,8 +398,13 @@ describe('Incident Manager', () => {
     test('should update incident status', () => {
       const incident = manager.createIncident({ title: 'Test' });
       incident.acknowledge('alice');
-      
-      manager.updateIncidentStatus(incident.id, IncidentStatus.INVESTIGATING, 'Looking into it', 'alice');
+
+      manager.updateIncidentStatus(
+        incident.id,
+        IncidentStatus.INVESTIGATING,
+        'Looking into it',
+        'alice'
+      );
 
       expect(incident.status).toBe(IncidentStatus.INVESTIGATING);
     });
@@ -412,8 +417,8 @@ describe('Incident Manager', () => {
       expect(incident.resolution).toBe('Fixed the issue');
     });
 
-    test('should emit events', (done) => {
-      manager.on('incidentCreated', (incident) => {
+    test('should emit events', done => {
+      manager.on('incidentCreated', incident => {
         expect(incident.title).toBe('Event test');
         done();
       });
@@ -421,7 +426,7 @@ describe('Incident Manager', () => {
       manager.createIncident({ title: 'Event test' });
     });
 
-    test('should notify on-call on incident creation', (done) => {
+    test('should notify on-call on incident creation', done => {
       manager.on('notify', ({ type, recipient }) => {
         expect(type).toBe('incident');
         expect(recipient).toBe('alice');
@@ -434,7 +439,7 @@ describe('Incident Manager', () => {
     test('should register and get runbook', () => {
       const runbook = manager.registerRunbook({
         name: 'Test Runbook',
-        steps: [{ title: 'Step 1' }]
+        steps: [{ title: 'Step 1' }],
       });
 
       expect(manager.getRunbook(runbook.id)).toBe(runbook);
@@ -454,7 +459,7 @@ describe('Incident Manager', () => {
     test('should execute runbook', () => {
       const runbook = manager.registerRunbook({
         name: 'Test Runbook',
-        steps: [{ title: 'Step 1' }]
+        steps: [{ title: 'Step 1' }],
       });
 
       const execution = manager.executeRunbook(runbook.id);
@@ -467,7 +472,7 @@ describe('Incident Manager', () => {
     test('should execute runbook for incident', () => {
       const runbook = manager.registerRunbook({
         name: 'Test Runbook',
-        steps: [{ title: 'Step 1' }]
+        steps: [{ title: 'Step 1' }],
       });
       const incident = manager.createIncident({ title: 'Test' });
 

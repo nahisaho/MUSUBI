@@ -1,6 +1,6 @@
 /**
  * Tests for TriagePattern
- * 
+ *
  * @module tests/orchestration/patterns/triage.test
  */
 
@@ -10,12 +10,12 @@ const {
   TriageStrategy,
   AgentCapability,
   TriageResult,
-  DEFAULT_KEYWORD_MAPPINGS
+  DEFAULT_KEYWORD_MAPPINGS,
 } = require('../../../src/orchestration/patterns/triage');
 
 const {
   HandoffPatternType,
-  _EscalationData
+  _EscalationData,
 } = require('../../../src/orchestration/patterns/handoff');
 
 const { ExecutionContext } = require('../../../src/orchestration/orchestration-engine');
@@ -24,23 +24,26 @@ const { BasePattern } = require('../../../src/orchestration/pattern-registry');
 // Mock engine
 const createMockEngine = (skills = {}) => ({
   skills: new Map(Object.entries(skills)),
-  getSkill: jest.fn((name) => skills[name]),
+  getSkill: jest.fn(name => skills[name]),
   executeSkill: jest.fn(async (name, context) => ({
     skill: name,
     result: `Result from ${name}`,
-    context: context.input
+    context: context.input,
   })),
-  emit: jest.fn()
+  emit: jest.fn(),
 });
 
 // Mock agents
 const createMockAgent = (name, executeResult = null) => ({
   name,
-  execute: jest.fn(async (context) => executeResult || {
-    agent: name,
-    result: `Executed by ${name}`,
-    input: context.input
-  })
+  execute: jest.fn(
+    async context =>
+      executeResult || {
+        agent: name,
+        result: `Executed by ${name}`,
+        input: context.input,
+      }
+  ),
 });
 
 describe('TriagePattern', () => {
@@ -69,7 +72,7 @@ describe('TriagePattern', () => {
       const customPattern = new TriagePattern({
         strategy: TriageStrategy.KEYWORD,
         defaultCategory: TriageCategory.SUPPORT,
-        confidenceThreshold: 0.5
+        confidenceThreshold: 0.5,
       });
 
       expect(customPattern.options.strategy).toBe(TriageStrategy.KEYWORD);
@@ -85,10 +88,10 @@ describe('TriagePattern', () => {
   describe('registerAgent', () => {
     test('should register agent with capabilities', () => {
       const agent = createMockAgent('billing-agent');
-      
+
       pattern.registerAgent(agent, {
         categories: [TriageCategory.BILLING],
-        keywords: ['invoice', 'payment']
+        keywords: ['invoice', 'payment'],
       });
 
       expect(pattern.getRegisteredAgents().size).toBe(1);
@@ -109,7 +112,7 @@ describe('TriagePattern', () => {
     test('should unregister agent', () => {
       const agent = createMockAgent('test-agent');
       pattern.registerAgent(agent, { categories: [TriageCategory.GENERAL] });
-      
+
       expect(pattern.unregisterAgent(agent)).toBe(true);
       expect(pattern.getRegisteredAgents().size).toBe(0);
     });
@@ -122,8 +125,8 @@ describe('TriagePattern', () => {
 
       const context = new ExecutionContext({
         input: {
-          message: 'I need help'
-        }
+          message: 'I need help',
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -135,8 +138,8 @@ describe('TriagePattern', () => {
       const context = new ExecutionContext({
         input: {
           message: 'I need help',
-          agents: [createMockAgent('test-agent')]
-        }
+          agents: [createMockAgent('test-agent')],
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -148,19 +151,21 @@ describe('TriagePattern', () => {
       pattern.registerAgent(agent, { categories: [TriageCategory.GENERAL] });
 
       const context = new ExecutionContext({
-        input: {}
+        input: {},
       });
 
       const result = pattern.validate(context, engine);
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Triage pattern requires input.message, input.text, or input.query');
+      expect(result.errors).toContain(
+        'Triage pattern requires input.message, input.text, or input.query'
+      );
     });
 
     test('should reject missing agents', () => {
       const context = new ExecutionContext({
         input: {
-          message: 'I need help'
-        }
+          message: 'I need help',
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -184,7 +189,7 @@ describe('TriagePattern', () => {
     describe('KEYWORD strategy', () => {
       test('should classify billing keywords', async () => {
         const keywordPattern = new TriagePattern({ strategy: TriageStrategy.KEYWORD });
-        
+
         const result = await keywordPattern.classifyRequest(
           'I have a question about my invoice',
           new ExecutionContext({ input: {} })
@@ -197,7 +202,7 @@ describe('TriagePattern', () => {
 
       test('should classify refund keywords', async () => {
         const keywordPattern = new TriagePattern({ strategy: TriageStrategy.KEYWORD });
-        
+
         const result = await keywordPattern.classifyRequest(
           'I want a refund for my order',
           new ExecutionContext({ input: {} })
@@ -208,7 +213,7 @@ describe('TriagePattern', () => {
 
       test('should classify support keywords', async () => {
         const keywordPattern = new TriagePattern({ strategy: TriageStrategy.KEYWORD });
-        
+
         const result = await keywordPattern.classifyRequest(
           'I have a problem with my account not working',
           new ExecutionContext({ input: {} })
@@ -218,11 +223,11 @@ describe('TriagePattern', () => {
       });
 
       test('should return default category when no matches', async () => {
-        const keywordPattern = new TriagePattern({ 
+        const keywordPattern = new TriagePattern({
           strategy: TriageStrategy.KEYWORD,
-          defaultCategory: TriageCategory.GENERAL
+          defaultCategory: TriageCategory.GENERAL,
         });
-        
+
         const result = await keywordPattern.classifyRequest(
           'Hello there',
           new ExecutionContext({ input: {} })
@@ -236,7 +241,7 @@ describe('TriagePattern', () => {
     describe('INTENT strategy', () => {
       test('should detect refund intent', async () => {
         const intentPattern = new TriagePattern({ strategy: TriageStrategy.INTENT });
-        
+
         const result = await intentPattern.classifyRequest(
           'I want to get a refund',
           new ExecutionContext({ input: {} })
@@ -248,7 +253,7 @@ describe('TriagePattern', () => {
 
       test('should detect issue reporting intent', async () => {
         const intentPattern = new TriagePattern({ strategy: TriageStrategy.INTENT });
-        
+
         const result = await intentPattern.classifyRequest(
           'The app is broken and not working',
           new ExecutionContext({ input: {} })
@@ -259,7 +264,7 @@ describe('TriagePattern', () => {
 
       test('should detect purchase intent', async () => {
         const intentPattern = new TriagePattern({ strategy: TriageStrategy.INTENT });
-        
+
         const result = await intentPattern.classifyRequest(
           'I want to buy a subscription',
           new ExecutionContext({ input: {} })
@@ -274,10 +279,10 @@ describe('TriagePattern', () => {
       test('should match agent capabilities', async () => {
         const capPattern = new TriagePattern({ strategy: TriageStrategy.CAPABILITY });
         const billingAgent = createMockAgent('billing-agent');
-        
+
         capPattern.registerAgent(billingAgent, {
           categories: [TriageCategory.BILLING],
-          keywords: ['invoice', 'payment', 'subscription']
+          keywords: ['invoice', 'payment', 'subscription'],
         });
 
         const result = await capPattern.classifyRequest(
@@ -294,10 +299,10 @@ describe('TriagePattern', () => {
       test('should combine multiple classification methods', async () => {
         const hybridPattern = new TriagePattern({ strategy: TriageStrategy.HYBRID });
         const refundAgent = createMockAgent('refund-agent');
-        
+
         hybridPattern.registerAgent(refundAgent, {
           categories: [TriageCategory.REFUND],
-          keywords: ['refund', 'money back']
+          keywords: ['refund', 'money back'],
         });
 
         const result = await hybridPattern.classifyRequest(
@@ -318,20 +323,25 @@ describe('TriagePattern', () => {
 
       pattern.registerAgent(billingAgent, {
         categories: [TriageCategory.BILLING],
-        keywords: ['invoice']
+        keywords: ['invoice'],
       });
       pattern.registerAgent(supportAgent, {
         categories: [TriageCategory.SUPPORT],
-        keywords: ['help']
+        keywords: ['help'],
       });
 
       const classification = new TriageResult({
         category: TriageCategory.BILLING,
-        confidence: 0.8
+        confidence: 0.8,
       });
 
       const context = new ExecutionContext({ input: { message: 'invoice question' } });
-      const selected = await pattern.selectAgent(classification, 'invoice question', context, engine);
+      const selected = await pattern.selectAgent(
+        classification,
+        'invoice question',
+        context,
+        engine
+      );
 
       expect(selected.name).toBe('billing-agent');
     });
@@ -343,21 +353,26 @@ describe('TriagePattern', () => {
       pattern.registerAgent(agent1, {
         categories: [TriageCategory.BILLING],
         keywords: ['invoice'],
-        priority: 5
+        priority: 5,
       });
       pattern.registerAgent(agent2, {
         categories: [TriageCategory.BILLING],
         keywords: ['invoice', 'payment', 'charge'],
-        priority: 10
+        priority: 10,
       });
 
       const classification = new TriageResult({
         category: TriageCategory.BILLING,
-        confidence: 0.8
+        confidence: 0.8,
       });
 
       const context = new ExecutionContext({ input: { message: 'invoice payment' } });
-      const selected = await pattern.selectAgent(classification, 'invoice payment', context, engine);
+      const selected = await pattern.selectAgent(
+        classification,
+        'invoice payment',
+        context,
+        engine
+      );
 
       expect(selected.name).toBe('agent2');
     });
@@ -366,12 +381,12 @@ describe('TriagePattern', () => {
       const supportAgent = createMockAgent('support-agent');
       pattern.registerAgent(supportAgent, {
         categories: [TriageCategory.SUPPORT],
-        keywords: ['help']
+        keywords: ['help'],
       });
 
       const classification = new TriageResult({
         category: TriageCategory.BILLING,
-        confidence: 0.8
+        confidence: 0.8,
       });
 
       const context = new ExecutionContext({ input: { message: 'billing' } });
@@ -382,11 +397,11 @@ describe('TriagePattern', () => {
 
     test('should use pre-selected agent from classification', async () => {
       const preselected = createMockAgent('preselected-agent');
-      
+
       const classification = new TriageResult({
         category: TriageCategory.BILLING,
         confidence: 0.8,
-        selectedAgent: preselected
+        selectedAgent: preselected,
       });
 
       const context = new ExecutionContext({ input: { message: 'test' } });
@@ -399,16 +414,16 @@ describe('TriagePattern', () => {
   describe('execute', () => {
     test('should classify and route to agent', async () => {
       const billingAgent = createMockAgent('billing-agent');
-      
+
       pattern.registerAgent(billingAgent, {
         categories: [TriageCategory.BILLING],
-        keywords: ['invoice', 'payment']
+        keywords: ['invoice', 'payment'],
       });
 
       const context = new ExecutionContext({
         input: {
-          message: 'I have a question about my invoice'
-        }
+          message: 'I have a question about my invoice',
+        },
       });
 
       const result = await pattern.execute(context, engine);
@@ -422,11 +437,11 @@ describe('TriagePattern', () => {
       const agent = createMockAgent('test-agent');
       pattern.registerAgent(agent, {
         categories: [TriageCategory.GENERAL],
-        keywords: ['help']
+        keywords: ['help'],
       });
 
       const context = new ExecutionContext({
-        input: { message: 'I need help' }
+        input: { message: 'I need help' },
       });
 
       await pattern.execute(context, engine);
@@ -441,16 +456,16 @@ describe('TriagePattern', () => {
     test('should use fallback agent when no match found', async () => {
       const fallbackAgent = createMockAgent('fallback-agent');
       const customPattern = new TriagePattern({
-        fallbackAgent
+        fallbackAgent,
       });
 
       customPattern.registerAgent(createMockAgent('billing-agent'), {
         categories: [TriageCategory.BILLING],
-        keywords: ['invoice']
+        keywords: ['invoice'],
       });
 
       const context = new ExecutionContext({
-        input: { message: 'random unrelated message xyz' }
+        input: { message: 'random unrelated message xyz' },
       });
 
       const result = await customPattern.execute(context, engine);
@@ -463,11 +478,11 @@ describe('TriagePattern', () => {
       const agent = createMockAgent('test-agent');
       pattern.registerAgent(agent, {
         categories: [TriageCategory.SUPPORT],
-        keywords: ['help']
+        keywords: ['help'],
       });
 
       const context = new ExecutionContext({
-        input: { message: 'I need help' }
+        input: { message: 'I need help' },
       });
 
       await pattern.execute(context, engine);
@@ -479,14 +494,14 @@ describe('TriagePattern', () => {
     test('should skip handoff when disabled', async () => {
       const noHandoffPattern = new TriagePattern({ enableHandoff: false });
       const agent = createMockAgent('test-agent');
-      
+
       noHandoffPattern.registerAgent(agent, {
         categories: [TriageCategory.GENERAL],
-        keywords: ['test']
+        keywords: ['test'],
       });
 
       const context = new ExecutionContext({
-        input: { message: 'test message' }
+        input: { message: 'test message' },
       });
 
       const result = await noHandoffPattern.execute(context, engine);
@@ -502,7 +517,7 @@ describe('TriagePattern', () => {
       const agent = createMockAgent('test-agent');
       pattern.registerAgent(agent, {
         categories: [TriageCategory.BILLING, TriageCategory.SUPPORT],
-        keywords: ['invoice', 'help']
+        keywords: ['invoice', 'help'],
       });
 
       // Run some classifications
@@ -510,10 +525,7 @@ describe('TriagePattern', () => {
         new ExecutionContext({ input: { message: 'invoice question' } }),
         engine
       );
-      await pattern.execute(
-        new ExecutionContext({ input: { message: 'help me please' } }),
-        engine
-      );
+      await pattern.execute(new ExecutionContext({ input: { message: 'help me please' } }), engine);
 
       const stats = pattern.getStats();
 
@@ -523,7 +535,11 @@ describe('TriagePattern', () => {
     });
 
     test('should clear history', () => {
-      pattern.classificationHistory.push({ timestamp: new Date(), input: 'test', classification: {} });
+      pattern.classificationHistory.push({
+        timestamp: new Date(),
+        input: 'test',
+        classification: {},
+      });
       expect(pattern.getStats().totalClassifications).toBe(1);
 
       pattern.clearHistory();
@@ -545,7 +561,7 @@ describe('AgentCapability', () => {
   test('should check category handling', () => {
     const cap = new AgentCapability({
       agent: 'billing-agent',
-      categories: [TriageCategory.BILLING, TriageCategory.REFUND]
+      categories: [TriageCategory.BILLING, TriageCategory.REFUND],
     });
 
     expect(cap.canHandle(TriageCategory.BILLING)).toBe(true);
@@ -556,7 +572,7 @@ describe('AgentCapability', () => {
   test('should check GENERAL category as catch-all', () => {
     const cap = new AgentCapability({
       agent: 'general-agent',
-      categories: [TriageCategory.GENERAL]
+      categories: [TriageCategory.GENERAL],
     });
 
     expect(cap.canHandle(TriageCategory.BILLING)).toBe(true);
@@ -566,7 +582,7 @@ describe('AgentCapability', () => {
   test('should match keywords case-insensitively', () => {
     const cap = new AgentCapability({
       agent: 'test-agent',
-      keywords: ['Invoice', 'Payment']
+      keywords: ['Invoice', 'Payment'],
     });
 
     expect(cap.matchesKeywords('I have an INVOICE question')).toBe(true);
@@ -579,7 +595,7 @@ describe('AgentCapability', () => {
       agent: 'test-agent',
       categories: [TriageCategory.BILLING],
       keywords: ['invoice', 'payment', 'charge'],
-      priority: 5
+      priority: 5,
     });
 
     const score1 = cap.calculateScore('invoice payment', TriageCategory.BILLING);
@@ -592,11 +608,11 @@ describe('AgentCapability', () => {
     const cap = new AgentCapability({
       agent: 'test-agent',
       categories: [TriageCategory.BILLING],
-      maxConcurrent: 5
+      maxConcurrent: 5,
     });
 
     const scoreUnloaded = cap.calculateScore('test', TriageCategory.BILLING);
-    
+
     cap.currentLoad = 5; // At max capacity
     const scoreLoaded = cap.calculateScore('test', TriageCategory.BILLING);
 
@@ -608,7 +624,7 @@ describe('AgentCapability', () => {
       agent: createMockAgent('test-agent'),
       categories: [TriageCategory.BILLING],
       keywords: ['invoice'],
-      priority: 5
+      priority: 5,
     });
 
     const json = cap.toJSON();
@@ -636,7 +652,7 @@ describe('TriageResult', () => {
       confidence: 0.9,
       keywords: [{ category: 'billing', keyword: 'invoice' }],
       selectedAgent: agent,
-      reasoning: 'Keyword match'
+      reasoning: 'Keyword match',
     });
 
     expect(result.category).toBe(TriageCategory.BILLING);
@@ -648,7 +664,7 @@ describe('TriageResult', () => {
     const result = new TriageResult({
       category: TriageCategory.SUPPORT,
       confidence: 0.75,
-      reasoning: 'Test'
+      reasoning: 'Test',
     });
 
     const json = result.toJSON();

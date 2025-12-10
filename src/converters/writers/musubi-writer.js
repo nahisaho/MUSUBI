@@ -1,6 +1,6 @@
 /**
  * MUSUBI Writer
- * 
+ *
  * Writes Intermediate Representation (IR) to MUSUBI project structure
  */
 
@@ -21,7 +21,7 @@ async function writeMusubiProject(ir, outputPath, options = {}) {
   const { dryRun = false, force = false, preserveRaw = false, verbose = false } = options;
   const warnings = [];
   let filesWritten = 0;
-  
+
   // Create base directories
   const dirs = [
     path.join(outputPath, 'steering'),
@@ -30,13 +30,13 @@ async function writeMusubiProject(ir, outputPath, options = {}) {
     path.join(outputPath, 'steering', 'memories'),
     path.join(outputPath, 'storage', 'specs'),
   ];
-  
+
   if (!dryRun) {
     for (const dir of dirs) {
       await fs.ensureDir(dir);
     }
   }
-  
+
   // Write project.yml
   const projectYmlPath = path.join(outputPath, 'steering', 'project.yml');
   const projectYml = generateProjectYml(ir);
@@ -45,7 +45,7 @@ async function writeMusubiProject(ir, outputPath, options = {}) {
     filesWritten++;
   }
   if (verbose) console.log(`  Writing: ${projectYmlPath}`);
-  
+
   // Write constitution
   const constitutionPath = path.join(outputPath, 'steering', 'rules', 'constitution.md');
   const constitution = generateConstitution(ir.constitution, preserveRaw);
@@ -54,7 +54,7 @@ async function writeMusubiProject(ir, outputPath, options = {}) {
     filesWritten++;
   }
   if (verbose) console.log(`  Writing: ${constitutionPath}`);
-  
+
   // Write product.md
   const productPath = path.join(outputPath, 'steering', 'product.md');
   const product = generateProduct(ir);
@@ -63,7 +63,7 @@ async function writeMusubiProject(ir, outputPath, options = {}) {
     filesWritten++;
   }
   if (verbose) console.log(`  Writing: ${productPath}`);
-  
+
   // Write structure.md
   const structurePath = path.join(outputPath, 'steering', 'structure.md');
   const structure = generateStructure(ir);
@@ -72,7 +72,7 @@ async function writeMusubiProject(ir, outputPath, options = {}) {
     filesWritten++;
   }
   if (verbose) console.log(`  Writing: ${structurePath}`);
-  
+
   // Write tech.md
   const techPath = path.join(outputPath, 'steering', 'tech.md');
   const tech = generateTech(ir);
@@ -81,15 +81,20 @@ async function writeMusubiProject(ir, outputPath, options = {}) {
     filesWritten++;
   }
   if (verbose) console.log(`  Writing: ${techPath}`);
-  
+
   // Write features
   for (const feature of ir.features) {
     const featurePath = path.join(outputPath, 'storage', 'specs', feature.id);
-    const result = await writeFeature(feature, featurePath, { dryRun, force, preserveRaw, verbose });
+    const result = await writeFeature(feature, featurePath, {
+      dryRun,
+      force,
+      preserveRaw,
+      verbose,
+    });
     filesWritten += result.filesWritten;
     warnings.push(...result.warnings);
   }
-  
+
   // Write templates
   for (const template of ir.templates) {
     const templatePath = path.join(outputPath, 'steering', 'templates', `${template.name}.md`);
@@ -99,7 +104,7 @@ async function writeMusubiProject(ir, outputPath, options = {}) {
     }
     if (verbose) console.log(`  Writing: ${templatePath}`);
   }
-  
+
   // Write memories
   for (const memory of ir.memories) {
     const memoryPath = path.join(outputPath, 'steering', 'memories', `${memory.category}.md`);
@@ -110,18 +115,18 @@ async function writeMusubiProject(ir, outputPath, options = {}) {
     }
     if (verbose) console.log(`  Writing: ${memoryPath}`);
   }
-  
+
   return { filesWritten, warnings };
 }
 
 /**
  * Write file with optional force overwrite
- * @param {string} filePath 
- * @param {string} content 
- * @param {boolean} force 
+ * @param {string} filePath
+ * @param {string} content
+ * @param {boolean} force
  */
 async function writeFile(filePath, content, force = false) {
-  if (await fs.pathExists(filePath) && !force) {
+  if ((await fs.pathExists(filePath)) && !force) {
     throw new Error(`File exists: ${filePath} (use --force to overwrite)`);
   }
   await fs.writeFile(filePath, content, 'utf-8');
@@ -129,7 +134,7 @@ async function writeFile(filePath, content, force = false) {
 
 /**
  * Generate project.yml content
- * @param {import('../ir/types').ProjectIR} ir 
+ * @param {import('../ir/types').ProjectIR} ir
  * @returns {string}
  */
 function generateProjectYml(ir) {
@@ -150,34 +155,34 @@ function generateProjectYml(ir) {
       status: f.status,
     })),
   };
-  
+
   return yaml.dump(projectData, { lineWidth: 100 });
 }
 
 /**
  * Generate constitution.md content
- * @param {import('../ir/types').ConstitutionIR} constitution 
- * @param {boolean} preserveRaw 
+ * @param {import('../ir/types').ConstitutionIR} constitution
+ * @param {boolean} preserveRaw
  * @returns {string}
  */
 function generateConstitution(constitution, preserveRaw = false) {
   const lines = [];
-  
+
   lines.push('# MUSUBI Constitution');
   lines.push('');
   lines.push('The fundamental principles governing this project.');
   lines.push('');
-  
+
   // Write articles
   for (const article of constitution.articles) {
     lines.push(`## Article ${article.number}: ${article.name}`);
     lines.push('');
-    
+
     if (article.description) {
       lines.push(article.description);
       lines.push('');
     }
-    
+
     if (article.rules && article.rules.length > 0) {
       lines.push('### Rules');
       lines.push('');
@@ -186,20 +191,20 @@ function generateConstitution(constitution, preserveRaw = false) {
       }
       lines.push('');
     }
-    
+
     if (article.mappedFrom) {
       lines.push(`> Mapped from: ${article.mappedFrom}`);
       lines.push('');
     }
   }
-  
+
   // Write governance
   if (constitution.governance) {
     lines.push('## Governance');
     lines.push('');
     lines.push(`Version: ${constitution.governance.version}`);
     lines.push('');
-    
+
     if (constitution.governance.rules && constitution.governance.rules.length > 0) {
       for (const rule of constitution.governance.rules) {
         lines.push(`- ${rule}`);
@@ -207,7 +212,7 @@ function generateConstitution(constitution, preserveRaw = false) {
       lines.push('');
     }
   }
-  
+
   // Preserve raw content if requested
   if (preserveRaw && constitution.rawContent) {
     lines.push('---');
@@ -218,18 +223,18 @@ function generateConstitution(constitution, preserveRaw = false) {
     lines.push(constitution.rawContent);
     lines.push('```');
   }
-  
+
   return lines.join('\n');
 }
 
 /**
  * Generate product.md content
- * @param {import('../ir/types').ProjectIR} ir 
+ * @param {import('../ir/types').ProjectIR} ir
  * @returns {string}
  */
 function generateProduct(ir) {
   const lines = [];
-  
+
   lines.push(`# ${ir.metadata.name}`);
   lines.push('');
   lines.push('## Overview');
@@ -238,27 +243,27 @@ function generateProduct(ir) {
   lines.push('');
   lines.push('## Features');
   lines.push('');
-  
+
   for (const feature of ir.features) {
     lines.push(`- **${feature.name}** (${feature.id}) - ${feature.status}`);
   }
   lines.push('');
-  
+
   lines.push('## Version History');
   lines.push('');
   lines.push(`- ${ir.metadata.version} - Initial conversion from ${ir.metadata.sourceFormat}`);
-  
+
   return lines.join('\n');
 }
 
 /**
  * Generate structure.md content
- * @param {import('../ir/types').ProjectIR} ir 
+ * @param {import('../ir/types').ProjectIR} ir
  * @returns {string}
  */
 function generateStructure(ir) {
   const lines = [];
-  
+
   lines.push('# Project Structure');
   lines.push('');
   lines.push('## Directory Layout');
@@ -276,39 +281,39 @@ function generateStructure(ir) {
   lines.push('');
   lines.push('storage/');
   lines.push('└── specs/');
-  
+
   for (const feature of ir.features) {
     lines.push(`    └── ${feature.id}/`);
     lines.push('        ├── spec.md');
     lines.push('        ├── plan.md');
     lines.push('        └── tasks.md');
   }
-  
+
   lines.push('```');
-  
+
   return lines.join('\n');
 }
 
 /**
  * Generate tech.md content
- * @param {import('../ir/types').ProjectIR} ir 
+ * @param {import('../ir/types').ProjectIR} ir
  * @returns {string}
  */
 function generateTech(ir) {
   const lines = [];
-  
+
   lines.push('# Technology Stack');
   lines.push('');
-  
+
   // Extract technical context from first feature with a plan
   const featureWithPlan = ir.features.find(f => f.plan);
-  
+
   if (featureWithPlan && featureWithPlan.plan) {
     const tech = featureWithPlan.plan.technicalContext;
-    
+
     lines.push('## Core Technologies');
     lines.push('');
-    
+
     if (tech.language) {
       lines.push(`- **Language**: ${tech.language}${tech.version ? ` ${tech.version}` : ''}`);
     }
@@ -321,7 +326,7 @@ function generateTech(ir) {
     if (tech.targetPlatform) {
       lines.push(`- **Platform**: ${tech.targetPlatform}`);
     }
-    
+
     if (tech.dependencies && tech.dependencies.length > 0) {
       lines.push('');
       lines.push('## Dependencies');
@@ -335,26 +340,26 @@ function generateTech(ir) {
     lines.push('');
     lines.push('> Technology stack to be defined based on project requirements.');
   }
-  
+
   return lines.join('\n');
 }
 
 /**
  * Write a feature to MUSUBI format
- * @param {import('../ir/types').FeatureIR} feature 
- * @param {string} featurePath 
- * @param {Object} options 
+ * @param {import('../ir/types').FeatureIR} feature
+ * @param {string} featurePath
+ * @param {Object} options
  * @returns {Promise<{filesWritten: number, warnings: string[]}>}
  */
 async function writeFeature(feature, featurePath, options = {}) {
   const { dryRun = false, force = false, preserveRaw = false, verbose = false } = options;
   const warnings = [];
   let filesWritten = 0;
-  
+
   if (!dryRun) {
     await fs.ensureDir(featurePath);
   }
-  
+
   // Write spec.md
   const specPath = path.join(featurePath, 'spec.md');
   const specContent = generateSpec(feature, preserveRaw);
@@ -363,7 +368,7 @@ async function writeFeature(feature, featurePath, options = {}) {
     filesWritten++;
   }
   if (verbose) console.log(`  Writing: ${specPath}`);
-  
+
   // Write plan.md
   if (feature.plan) {
     const planPath = path.join(featurePath, 'plan.md');
@@ -374,7 +379,7 @@ async function writeFeature(feature, featurePath, options = {}) {
     }
     if (verbose) console.log(`  Writing: ${planPath}`);
   }
-  
+
   // Write tasks.md
   if (feature.tasks && feature.tasks.length > 0) {
     const tasksPath = path.join(featurePath, 'tasks.md');
@@ -385,7 +390,7 @@ async function writeFeature(feature, featurePath, options = {}) {
     }
     if (verbose) console.log(`  Writing: ${tasksPath}`);
   }
-  
+
   // Write research.md
   if (feature.research) {
     const researchPath = path.join(featurePath, 'research.md');
@@ -396,7 +401,7 @@ async function writeFeature(feature, featurePath, options = {}) {
     }
     if (verbose) console.log(`  Writing: ${researchPath}`);
   }
-  
+
   // Write data-model.md
   if (feature.dataModel) {
     const dataModelPath = path.join(featurePath, 'data-model.md');
@@ -407,14 +412,14 @@ async function writeFeature(feature, featurePath, options = {}) {
     }
     if (verbose) console.log(`  Writing: ${dataModelPath}`);
   }
-  
+
   // Write contracts
   if (feature.contracts && feature.contracts.length > 0) {
     const contractsPath = path.join(featurePath, 'contracts');
     if (!dryRun) {
       await fs.ensureDir(contractsPath);
     }
-    
+
     for (const contract of feature.contracts) {
       const contractFile = path.join(contractsPath, `${contract.name}.md`);
       const contractContent = contract.rawContent || generateContract(contract);
@@ -425,33 +430,33 @@ async function writeFeature(feature, featurePath, options = {}) {
       if (verbose) console.log(`  Writing: ${contractFile}`);
     }
   }
-  
+
   return { filesWritten, warnings };
 }
 
 /**
  * Generate spec.md content (MUSUBI format with EARS)
- * @param {import('../ir/types').FeatureIR} feature 
- * @param {boolean} preserveRaw 
+ * @param {import('../ir/types').FeatureIR} feature
+ * @param {boolean} preserveRaw
  * @returns {string}
  */
 function generateSpec(feature, preserveRaw = false) {
   const lines = [];
   const spec = feature.specification;
-  
+
   lines.push(`# ${spec.title || feature.name}`);
   lines.push('');
-  
+
   if (spec.description) {
     lines.push(spec.description);
     lines.push('');
   }
-  
+
   // Write requirements (EARS format)
   if (spec.requirements && spec.requirements.length > 0) {
     lines.push('## Requirements');
     lines.push('');
-    
+
     for (const req of spec.requirements) {
       lines.push(`### ${req.id}: ${req.title || 'Requirement'}`);
       lines.push('');
@@ -460,7 +465,7 @@ function generateSpec(feature, preserveRaw = false) {
       lines.push('');
       lines.push(`**Statement**: ${req.statement}`);
       lines.push('');
-      
+
       if (req.acceptanceCriteria && req.acceptanceCriteria.length > 0) {
         lines.push('**Acceptance Criteria**:');
         for (const ac of req.acceptanceCriteria) {
@@ -468,14 +473,14 @@ function generateSpec(feature, preserveRaw = false) {
         }
         lines.push('');
       }
-      
+
       if (req.mappedFromUserStory) {
         lines.push(`> Converted from User Story: ${req.mappedFromUserStory}`);
         lines.push('');
       }
     }
   }
-  
+
   // Write success criteria
   if (spec.successCriteria && spec.successCriteria.length > 0) {
     lines.push('## Success Criteria');
@@ -485,7 +490,7 @@ function generateSpec(feature, preserveRaw = false) {
     }
     lines.push('');
   }
-  
+
   // Preserve raw content if requested
   if (preserveRaw && spec.rawContent) {
     lines.push('---');
@@ -496,33 +501,33 @@ function generateSpec(feature, preserveRaw = false) {
     lines.push(spec.rawContent);
     lines.push('```');
   }
-  
+
   return lines.join('\n');
 }
 
 /**
  * Generate plan.md content
- * @param {import('../ir/types').PlanIR} plan 
- * @param {boolean} preserveRaw 
+ * @param {import('../ir/types').PlanIR} plan
+ * @param {boolean} preserveRaw
  * @returns {string}
  */
 function generatePlan(plan, preserveRaw = false) {
   const lines = [];
-  
+
   lines.push('# Implementation Plan');
   lines.push('');
-  
+
   if (plan.summary) {
     lines.push(plan.summary);
     lines.push('');
   }
-  
+
   // Technical Context
   const tech = plan.technicalContext;
   if (tech && (tech.language || tech.framework)) {
     lines.push('## Technical Context');
     lines.push('');
-    
+
     if (tech.language) {
       lines.push(`- **Language**: ${tech.language}${tech.version ? ` ${tech.version}` : ''}`);
     }
@@ -537,21 +542,21 @@ function generatePlan(plan, preserveRaw = false) {
     }
     lines.push('');
   }
-  
+
   // Phases
   if (plan.phases && plan.phases.length > 0) {
     lines.push('## Phases');
     lines.push('');
-    
+
     for (const phase of plan.phases) {
       lines.push(`### Phase ${phase.number}: ${phase.name}`);
       lines.push('');
-      
+
       if (phase.purpose) {
         lines.push(phase.purpose);
         lines.push('');
       }
-      
+
       if (phase.outputs && phase.outputs.length > 0) {
         lines.push('**Outputs**:');
         for (const output of phase.outputs) {
@@ -561,7 +566,7 @@ function generatePlan(plan, preserveRaw = false) {
       }
     }
   }
-  
+
   // Preserve raw content if requested
   if (preserveRaw && plan.rawContent) {
     lines.push('---');
@@ -572,21 +577,21 @@ function generatePlan(plan, preserveRaw = false) {
     lines.push(plan.rawContent);
     lines.push('```');
   }
-  
+
   return lines.join('\n');
 }
 
 /**
  * Generate tasks.md content (MUSUBI format)
- * @param {import('../ir/types').TaskIR[]} tasks 
+ * @param {import('../ir/types').TaskIR[]} tasks
  * @returns {string}
  */
 function generateTasks(tasks) {
   const lines = [];
-  
+
   lines.push('# Tasks');
   lines.push('');
-  
+
   // Group by phase
   const phases = {};
   for (const task of tasks) {
@@ -596,17 +601,17 @@ function generateTasks(tasks) {
     }
     phases[phase].push(task);
   }
-  
+
   for (const [phaseNum, phaseTasks] of Object.entries(phases)) {
     lines.push(`## Phase ${phaseNum}`);
     lines.push('');
-    
+
     for (const task of phaseTasks) {
       const checkbox = task.completed ? '[x]' : '[ ]';
       let taskLine = `- ${checkbox} ${task.id}: ${task.description}`;
-      
+
       lines.push(taskLine);
-      
+
       // Add metadata as sub-items
       if (task.filePath) {
         lines.push(`  - Path: ${task.filePath}`);
@@ -620,27 +625,27 @@ function generateTasks(tasks) {
     }
     lines.push('');
   }
-  
+
   return lines.join('\n');
 }
 
 /**
  * Generate research.md content
- * @param {import('../ir/types').ResearchIR} research 
- * @param {boolean} preserveRaw 
+ * @param {import('../ir/types').ResearchIR} research
+ * @param {boolean} preserveRaw
  * @returns {string}
  */
 function generateResearch(research, preserveRaw = false) {
   const lines = [];
-  
+
   lines.push('# Research');
   lines.push('');
-  
+
   // Decisions
   if (research.decisions && research.decisions.length > 0) {
     lines.push('## Decisions');
     lines.push('');
-    
+
     for (const decision of research.decisions) {
       lines.push(`### ${decision.topic}`);
       lines.push('');
@@ -651,16 +656,16 @@ function generateResearch(research, preserveRaw = false) {
       lines.push('');
     }
   }
-  
+
   // Alternatives
   if (research.alternatives && research.alternatives.length > 0) {
     lines.push('## Alternatives Considered');
     lines.push('');
-    
+
     for (const alt of research.alternatives) {
       lines.push(`### ${alt.name}`);
       lines.push('');
-      
+
       if (alt.pros && alt.pros.length > 0) {
         lines.push('**Pros**:');
         for (const pro of alt.pros) {
@@ -668,7 +673,7 @@ function generateResearch(research, preserveRaw = false) {
         }
         lines.push('');
       }
-      
+
       if (alt.cons && alt.cons.length > 0) {
         lines.push('**Cons**:');
         for (const con of alt.cons) {
@@ -676,7 +681,7 @@ function generateResearch(research, preserveRaw = false) {
         }
         lines.push('');
       }
-      
+
       if (alt.rejected) {
         lines.push(`**Status**: Rejected`);
         if (alt.reason) {
@@ -686,7 +691,7 @@ function generateResearch(research, preserveRaw = false) {
       }
     }
   }
-  
+
   // Preserve raw content if requested
   if (preserveRaw && research.rawContent) {
     lines.push('---');
@@ -697,36 +702,36 @@ function generateResearch(research, preserveRaw = false) {
     lines.push(research.rawContent);
     lines.push('```');
   }
-  
+
   return lines.join('\n');
 }
 
 /**
  * Generate data-model.md content
- * @param {import('../ir/types').DataModelIR} dataModel 
- * @param {boolean} preserveRaw 
+ * @param {import('../ir/types').DataModelIR} dataModel
+ * @param {boolean} preserveRaw
  * @returns {string}
  */
 function generateDataModel(dataModel, preserveRaw = false) {
   const lines = [];
-  
+
   lines.push('# Data Model');
   lines.push('');
-  
+
   // Entities
   if (dataModel.entities && dataModel.entities.length > 0) {
     lines.push('## Entities');
     lines.push('');
-    
+
     for (const entity of dataModel.entities) {
       lines.push(`### ${entity.name}`);
       lines.push('');
-      
+
       if (entity.description) {
         lines.push(entity.description);
         lines.push('');
       }
-      
+
       if (entity.fields && entity.fields.length > 0) {
         lines.push('**Fields**:');
         for (const field of entity.fields) {
@@ -743,18 +748,18 @@ function generateDataModel(dataModel, preserveRaw = false) {
       }
     }
   }
-  
+
   // Relationships
   if (dataModel.relationships && dataModel.relationships.length > 0) {
     lines.push('## Relationships');
     lines.push('');
-    
+
     for (const rel of dataModel.relationships) {
       lines.push(`- ${rel.from} → ${rel.to} (${rel.type})`);
     }
     lines.push('');
   }
-  
+
   // Preserve raw content if requested
   if (preserveRaw && dataModel.rawContent) {
     lines.push('---');
@@ -765,29 +770,29 @@ function generateDataModel(dataModel, preserveRaw = false) {
     lines.push(dataModel.rawContent);
     lines.push('```');
   }
-  
+
   return lines.join('\n');
 }
 
 /**
  * Generate contract content
- * @param {import('../ir/types').ContractIR} contract 
+ * @param {import('../ir/types').ContractIR} contract
  * @returns {string}
  */
 function generateContract(contract) {
   const lines = [];
-  
+
   lines.push(`# ${contract.name}`);
   lines.push('');
   lines.push(`**Type**: ${contract.type}`);
   lines.push('');
-  
+
   if (contract.rawContent) {
     lines.push(contract.rawContent);
   } else {
     lines.push('> Contract details to be defined.');
   }
-  
+
   return lines.join('\n');
 }
 

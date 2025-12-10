@@ -60,17 +60,17 @@ class GUIServer {
    */
   setupReplanningEvents() {
     // Forward replanning events to WebSocket clients
-    this.replanningService.on('state:updated', (state) => {
-      this.broadcast({ 
-        type: 'replanning:state', 
-        data: state 
+    this.replanningService.on('state:updated', state => {
+      this.broadcast({
+        type: 'replanning:state',
+        data: state,
       });
     });
 
-    this.replanningService.on('replan:recorded', (event) => {
-      this.broadcast({ 
-        type: 'replanning:event', 
-        data: event 
+    this.replanningService.on('replan:recorded', event => {
+      this.broadcast({
+        type: 'replanning:event',
+        data: event,
       });
     });
   }
@@ -288,7 +288,7 @@ class GUIServer {
         const { spawn } = require('child_process');
         const _child = spawn('npx', ['musubi-requirements', 'create'], {
           cwd: this.projectPath,
-          shell: true
+          shell: true,
         });
         res.json({ success: true, message: 'Requirements wizard started' });
       } catch (error) {
@@ -303,20 +303,20 @@ class GUIServer {
       }
       try {
         const { id, title, type, priority, description, feature } = req.body;
-        
+
         if (!id || !title || !description || !feature) {
           return res.status(400).json({ error: 'Missing required fields' });
         }
 
         const fs = require('fs').promises;
         const specsDir = path.join(this.projectPath, 'storage', 'specs');
-        
+
         // Ensure directory exists
         await fs.mkdir(specsDir, { recursive: true });
-        
+
         const filename = `${feature}-requirements.md`;
         const filepath = path.join(specsDir, filename);
-        
+
         // Check if file exists
         let content = '';
         try {
@@ -346,9 +346,9 @@ ${description}
 
 `;
         content += reqContent;
-        
+
         await fs.writeFile(filepath, content, 'utf-8');
-        
+
         res.json({ success: true, file: filepath });
       } catch (error) {
         res.status(500).json({ error: error.message });
@@ -359,26 +359,26 @@ ${description}
       try {
         const { spawn } = require('child_process');
         const result = { stdout: '', stderr: '' };
-        
+
         const child = spawn('node', [path.join(__dirname, '../../bin/musubi-validate.js'), 'all'], {
           cwd: this.projectPath,
           shell: false,
-          env: { ...process.env, FORCE_COLOR: '0' }
+          env: { ...process.env, FORCE_COLOR: '0' },
         });
-        
-        child.stdout.on('data', (data) => result.stdout += data.toString());
-        child.stderr.on('data', (data) => result.stderr += data.toString());
-        
-        child.on('error', (error) => {
+
+        child.stdout.on('data', data => (result.stdout += data.toString()));
+        child.stderr.on('data', data => (result.stderr += data.toString()));
+
+        child.on('error', error => {
           res.status(500).json({ success: false, error: error.message });
         });
-        
-        child.on('close', (code) => {
-          res.json({ 
-            success: code === 0, 
-            output: result.stdout || 'Validation completed', 
+
+        child.on('close', code => {
+          res.json({
+            success: code === 0,
+            output: result.stdout || 'Validation completed',
             errors: result.stderr,
-            exitCode: code
+            exitCode: code,
           });
         });
       } catch (error) {
@@ -412,20 +412,20 @@ ${description}
   setupWebSocket() {
     this.wss = new WebSocketServer({ server: this.httpServer });
 
-    this.wss.on('connection', (ws) => {
+    this.wss.on('connection', ws => {
       this.clients.add(ws);
 
       ws.on('close', () => {
         this.clients.delete(ws);
       });
 
-      ws.on('error', (error) => {
+      ws.on('error', error => {
         console.error('WebSocket error:', error);
         this.clients.delete(ws);
       });
 
       // Send initial project state
-      this.projectScanner.scan().then((project) => {
+      this.projectScanner.scan().then(project => {
         ws.send(JSON.stringify({ type: 'project:init', data: project }));
       });
     });
@@ -438,7 +438,8 @@ ${description}
   broadcast(message) {
     const data = JSON.stringify(message);
     for (const client of this.clients) {
-      if (client.readyState === 1) { // WebSocket.OPEN
+      if (client.readyState === 1) {
+        // WebSocket.OPEN
         client.send(data);
       }
     }
@@ -452,7 +453,7 @@ ${description}
       ignored: /(^|[/\\])\.|node_modules/,
     });
 
-    this.fileWatcher.on('change', async (filePath) => {
+    this.fileWatcher.on('change', async filePath => {
       try {
         const project = await this.projectScanner.scan();
         this.broadcast({ type: 'file:changed', data: { path: filePath, project } });
@@ -461,7 +462,7 @@ ${description}
       }
     });
 
-    this.fileWatcher.on('add', async (filePath) => {
+    this.fileWatcher.on('add', async filePath => {
       try {
         const project = await this.projectScanner.scan();
         this.broadcast({ type: 'file:added', data: { path: filePath, project } });
@@ -470,7 +471,7 @@ ${description}
       }
     });
 
-    this.fileWatcher.on('unlink', async (filePath) => {
+    this.fileWatcher.on('unlink', async filePath => {
       try {
         const project = await this.projectScanner.scan();
         this.broadcast({ type: 'file:removed', data: { path: filePath, project } });
@@ -487,11 +488,11 @@ ${description}
   async start() {
     return new Promise((resolve, reject) => {
       this.httpServer = http.createServer(this.app);
-      
+
       this.setupWebSocket();
       this.setupFileWatcher();
 
-      this.httpServer.listen(this.port, (err) => {
+      this.httpServer.listen(this.port, err => {
         if (err) {
           reject(err);
           return;
@@ -537,7 +538,7 @@ ${description}
     }
 
     if (this.httpServer) {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         this.httpServer.close(resolve);
       });
     }

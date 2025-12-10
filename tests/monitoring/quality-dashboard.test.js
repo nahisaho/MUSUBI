@@ -9,7 +9,7 @@ const {
   createQualityDashboard,
   METRIC_CATEGORY,
   HEALTH_STATUS,
-  CONSTITUTIONAL_ARTICLES
+  CONSTITUTIONAL_ARTICLES,
 } = require('../../src/monitoring/quality-dashboard');
 
 describe('QualityDashboard', () => {
@@ -24,8 +24,8 @@ describe('QualityDashboard', () => {
     test('should accept custom thresholds', () => {
       const dashboard = new QualityDashboard({
         thresholds: {
-          coverage: { healthy: 90, warning: 60, critical: 30 }
-        }
+          coverage: { healthy: 90, warning: 60, critical: 30 },
+        },
       });
       expect(dashboard.thresholds.coverage.healthy).toBe(90);
     });
@@ -45,8 +45,9 @@ describe('QualityDashboard', () => {
 
     test('should throw on non-function collector', () => {
       const dashboard = new QualityDashboard();
-      expect(() => dashboard.registerCollector('bad', 'not a function'))
-        .toThrow('Collector must be a function');
+      expect(() => dashboard.registerCollector('bad', 'not a function')).toThrow(
+        'Collector must be a function'
+      );
     });
   });
 
@@ -64,7 +65,7 @@ describe('QualityDashboard', () => {
       const dashboard = new QualityDashboard();
       const context = {
         coverage: { lines: 85, branches: 70, functions: 90, statements: 80 },
-        quality: { complexity: 75, maintainability: 80, documentation: 60, testQuality: 85 }
+        quality: { complexity: 75, maintainability: 80, documentation: 60, testQuality: 85 },
       };
 
       const results = await dashboard.collect(context);
@@ -102,7 +103,7 @@ describe('QualityDashboard', () => {
     test('should return collected metric', async () => {
       const dashboard = new QualityDashboard();
       await dashboard.collect({
-        coverage: { lines: 85, branches: 70, functions: 90, statements: 80 }
+        coverage: { lines: 85, branches: 70, functions: 90, statements: 80 },
       });
 
       const metric = dashboard.getMetric('coverage');
@@ -155,7 +156,13 @@ describe('QualityDashboard', () => {
       const dashboard = new QualityDashboard();
       await dashboard.collect({
         coverage: { lines: 85, branches: 70, functions: 90, statements: 80, overall: 81 },
-        quality: { complexity: 75, maintainability: 80, documentation: 60, testQuality: 85, overall: 75 }
+        quality: {
+          complexity: 75,
+          maintainability: 80,
+          documentation: 60,
+          testQuality: 85,
+          overall: 75,
+        },
       });
 
       const summary = dashboard.getHealthSummary();
@@ -242,7 +249,13 @@ describe('QualityDashboard', () => {
       const dashboard = new QualityDashboard();
       await dashboard.collect({
         coverage: { lines: 85, branches: 70, functions: 90, statements: 80, overall: 81 },
-        quality: { complexity: 75, maintainability: 80, documentation: 60, testQuality: 85, overall: 75 }
+        quality: {
+          complexity: 75,
+          maintainability: 80,
+          documentation: 60,
+          testQuality: 85,
+          overall: 75,
+        },
       });
 
       const report = dashboard.exportReport();
@@ -255,7 +268,7 @@ describe('QualityDashboard', () => {
     test('should include coverage details', async () => {
       const dashboard = new QualityDashboard();
       await dashboard.collect({
-        coverage: { lines: 85, branches: 70, functions: 90, statements: 80 }
+        coverage: { lines: 85, branches: 70, functions: 90, statements: 80 },
       });
 
       const report = dashboard.exportReport();
@@ -345,7 +358,7 @@ describe('createQualityDashboard()', () => {
 
   test('should accept options', () => {
     const dashboard = createQualityDashboard({
-      thresholds: { coverage: { healthy: 90 } }
+      thresholds: { coverage: { healthy: 90 } },
     });
     expect(dashboard.thresholds.coverage.healthy).toBe(90);
   });

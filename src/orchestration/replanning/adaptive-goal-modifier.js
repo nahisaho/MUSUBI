@@ -1,9 +1,9 @@
 /**
  * AdaptiveGoalModifier - 状況に応じた目標の動的調整
- * 
+ *
  * Goal-Driven Replanning の完全実装 (Phase 2/3)
  * 目標の優先度・スコープ・タイムライン・成功基準を動的に調整
- * 
+ *
  * @module orchestration/replanning/adaptive-goal-modifier
  */
 
@@ -13,32 +13,32 @@
  * 目標調整の理由を分類
  */
 const ModificationReason = {
-  RESOURCE_CONSTRAINT: 'resource_constraint',      // リソース制約
-  TIME_CONSTRAINT: 'time_constraint',              // 時間制約
-  DEPENDENCY_FAILURE: 'dependency_failure',        // 依存関係の失敗
-  PRIORITY_SHIFT: 'priority_shift',                // 優先度の変更
-  SCOPE_CREEP: 'scope_creep',                      // スコープの拡大
-  EXTERNAL_CHANGE: 'external_change',              // 外部要因の変化
-  PERFORMANCE_ISSUE: 'performance_issue',          // パフォーマンス問題
-  USER_REQUEST: 'user_request',                    // ユーザーリクエスト
-  STRATEGIC_PIVOT: 'strategic_pivot'               // 戦略的転換
+  RESOURCE_CONSTRAINT: 'resource_constraint', // リソース制約
+  TIME_CONSTRAINT: 'time_constraint', // 時間制約
+  DEPENDENCY_FAILURE: 'dependency_failure', // 依存関係の失敗
+  PRIORITY_SHIFT: 'priority_shift', // 優先度の変更
+  SCOPE_CREEP: 'scope_creep', // スコープの拡大
+  EXTERNAL_CHANGE: 'external_change', // 外部要因の変化
+  PERFORMANCE_ISSUE: 'performance_issue', // パフォーマンス問題
+  USER_REQUEST: 'user_request', // ユーザーリクエスト
+  STRATEGIC_PIVOT: 'strategic_pivot', // 戦略的転換
 };
 
 /**
  * 調整タイプ
  */
 const ModificationType = {
-  PRIORITY_ADJUSTMENT: 'priority_adjustment',      // 優先度調整
-  SCOPE_REDUCTION: 'scope_reduction',              // スコープ縮小
-  SCOPE_EXPANSION: 'scope_expansion',              // スコープ拡大
-  TIMELINE_EXTENSION: 'timeline_extension',        // タイムライン延長
-  TIMELINE_COMPRESSION: 'timeline_compression',    // タイムライン圧縮
+  PRIORITY_ADJUSTMENT: 'priority_adjustment', // 優先度調整
+  SCOPE_REDUCTION: 'scope_reduction', // スコープ縮小
+  SCOPE_EXPANSION: 'scope_expansion', // スコープ拡大
+  TIMELINE_EXTENSION: 'timeline_extension', // タイムライン延長
+  TIMELINE_COMPRESSION: 'timeline_compression', // タイムライン圧縮
   SUCCESS_CRITERIA_RELAXATION: 'criteria_relaxation', // 成功基準緩和
   SUCCESS_CRITERIA_TIGHTENING: 'criteria_tightening', // 成功基準厳格化
-  GOAL_DECOMPOSITION: 'goal_decomposition',        // 目標分解
-  GOAL_MERGE: 'goal_merge',                        // 目標統合
-  GOAL_DEFERRAL: 'goal_deferral',                  // 目標延期
-  GOAL_CANCELLATION: 'goal_cancellation'           // 目標キャンセル
+  GOAL_DECOMPOSITION: 'goal_decomposition', // 目標分解
+  GOAL_MERGE: 'goal_merge', // 目標統合
+  GOAL_DEFERRAL: 'goal_deferral', // 目標延期
+  GOAL_CANCELLATION: 'goal_cancellation', // 目標キャンセル
 };
 
 /**
@@ -53,7 +53,7 @@ class ImpactAnalyzer {
     this.config = {
       cascadeDepth: options.cascadeDepth || 3,
       impactThreshold: options.impactThreshold || 0.3,
-      ...options
+      ...options,
     };
   }
 
@@ -87,7 +87,7 @@ class ImpactAnalyzer {
       totalScore,
       riskLevel: this._categorizeRisk(totalScore),
       recommendations: this._generateRecommendations(totalScore, modification),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -107,16 +107,16 @@ class ImpactAnalyzer {
       [ModificationType.GOAL_DECOMPOSITION]: 0.4,
       [ModificationType.GOAL_MERGE]: 0.5,
       [ModificationType.GOAL_DEFERRAL]: 0.6,
-      [ModificationType.GOAL_CANCELLATION]: 1.0
+      [ModificationType.GOAL_CANCELLATION]: 1.0,
     };
 
     const baseImpact = impacts[modification.type] || 0.5;
-    const priorityMultiplier = goal.priority === 'critical' ? 1.5 :
-                               goal.priority === 'high' ? 1.2 : 1.0;
+    const priorityMultiplier =
+      goal.priority === 'critical' ? 1.5 : goal.priority === 'high' ? 1.2 : 1.0;
 
     return {
       score: Math.min(1.0, baseImpact * priorityMultiplier),
-      affectedAreas: this._identifyAffectedAreas(modification.type)
+      affectedAreas: this._identifyAffectedAreas(modification.type),
     };
   }
 
@@ -125,9 +125,7 @@ class ImpactAnalyzer {
    * @private
    */
   _analyzeCascadeImpact(goal, modification, context) {
-    const dependentGoals = context.goals?.filter(g => 
-      g.dependencies?.includes(goal.id)
-    ) || [];
+    const dependentGoals = context.goals?.filter(g => g.dependencies?.includes(goal.id)) || [];
 
     let totalCascade = 0;
     const affectedGoals = [];
@@ -139,7 +137,7 @@ class ImpactAnalyzer {
         affectedGoals.push({
           goalId: depGoal.id,
           impact,
-          requires: this._determineCascadeAction(impact)
+          requires: this._determineCascadeAction(impact),
         });
       }
     }
@@ -147,7 +145,7 @@ class ImpactAnalyzer {
     return {
       score: Math.min(1.0, totalCascade / Math.max(1, dependentGoals.length)),
       affectedGoals,
-      depth: Math.min(affectedGoals.length, this.config.cascadeDepth)
+      depth: Math.min(affectedGoals.length, this.config.cascadeDepth),
     };
   }
 
@@ -159,14 +157,18 @@ class ImpactAnalyzer {
     const resourceChanges = {
       freed: [],
       required: [],
-      conflicting: []
+      conflicting: [],
     };
 
-    if (modification.type === ModificationType.SCOPE_REDUCTION ||
-        modification.type === ModificationType.GOAL_CANCELLATION) {
+    if (
+      modification.type === ModificationType.SCOPE_REDUCTION ||
+      modification.type === ModificationType.GOAL_CANCELLATION
+    ) {
       resourceChanges.freed = goal.resources || [];
-    } else if (modification.type === ModificationType.SCOPE_EXPANSION ||
-               modification.type === ModificationType.TIMELINE_COMPRESSION) {
+    } else if (
+      modification.type === ModificationType.SCOPE_EXPANSION ||
+      modification.type === ModificationType.TIMELINE_COMPRESSION
+    ) {
       resourceChanges.required = this._estimateAdditionalResources(goal, modification);
     }
 
@@ -181,7 +183,7 @@ class ImpactAnalyzer {
     return {
       score: resourceChanges.conflicting.length > 0 ? 0.7 : 0.3,
       changes: resourceChanges,
-      feasibility: resourceChanges.conflicting.length === 0
+      feasibility: resourceChanges.conflicting.length === 0,
     };
   }
 
@@ -209,8 +211,8 @@ class ImpactAnalyzer {
     }
 
     if (context.milestones) {
-      affectedMilestones = context.milestones.filter(m =>
-        new Date(m.dueDate) >= new Date(goal.targetDate)
+      affectedMilestones = context.milestones.filter(
+        m => new Date(m.dueDate) >= new Date(goal.targetDate)
       );
     }
 
@@ -218,7 +220,7 @@ class ImpactAnalyzer {
       score: Math.min(1.0, Math.abs(shift) / 14), // 2週間を基準
       shiftDays: shift,
       direction: shift > 0 ? 'delay' : 'accelerate',
-      affectedMilestones: affectedMilestones.length
+      affectedMilestones: affectedMilestones.length,
     };
   }
 
@@ -227,12 +229,7 @@ class ImpactAnalyzer {
    * @private
    */
   _calculateTotalImpact(direct, cascade, resource, timeline) {
-    return (
-      direct.score * 0.3 +
-      cascade.score * 0.25 +
-      resource.score * 0.25 +
-      timeline.score * 0.2
-    );
+    return direct.score * 0.3 + cascade.score * 0.25 + resource.score * 0.25 + timeline.score * 0.2;
   }
 
   /**
@@ -262,7 +259,7 @@ class ImpactAnalyzer {
       [ModificationType.GOAL_DECOMPOSITION]: ['tracking', 'dependencies'],
       [ModificationType.GOAL_MERGE]: ['tracking', 'dependencies', 'scope'],
       [ModificationType.GOAL_DEFERRAL]: ['milestones', 'dependencies'],
-      [ModificationType.GOAL_CANCELLATION]: ['all']
+      [ModificationType.GOAL_CANCELLATION]: ['all'],
     };
     return areaMap[modificationType] || ['unknown'];
   }
@@ -273,10 +270,12 @@ class ImpactAnalyzer {
    */
   _calculateDependencyImpact(depGoal, modification) {
     const baseImpact = depGoal.dependencyStrength || 0.5;
-    const typeMultiplier = 
-      modification.type === ModificationType.GOAL_CANCELLATION ? 1.0 :
-      modification.type === ModificationType.TIMELINE_EXTENSION ? 0.7 :
-      0.4;
+    const typeMultiplier =
+      modification.type === ModificationType.GOAL_CANCELLATION
+        ? 1.0
+        : modification.type === ModificationType.TIMELINE_EXTENSION
+          ? 0.7
+          : 0.4;
     return baseImpact * typeMultiplier;
   }
 
@@ -299,7 +298,7 @@ class ImpactAnalyzer {
     const expansionFactor = modification.expansionFactor || 1.5;
     return currentResources.map(r => ({
       ...r,
-      amount: Math.ceil(r.amount * (expansionFactor - 1))
+      amount: Math.ceil(r.amount * (expansionFactor - 1)),
     }));
   }
 
@@ -320,12 +319,12 @@ class ImpactAnalyzer {
    */
   _generateRecommendations(totalScore, modification) {
     const recommendations = [];
-    
+
     if (totalScore >= 0.7) {
       recommendations.push({
         priority: 'high',
         action: 'Conduct stakeholder review before proceeding',
-        rationale: 'High impact modification requires approval'
+        rationale: 'High impact modification requires approval',
       });
     }
 
@@ -333,7 +332,7 @@ class ImpactAnalyzer {
       recommendations.push({
         priority: 'medium',
         action: 'Review resource allocation',
-        rationale: 'Scope expansion typically requires additional resources'
+        rationale: 'Scope expansion typically requires additional resources',
       });
     }
 
@@ -341,7 +340,7 @@ class ImpactAnalyzer {
       recommendations.push({
         priority: 'high',
         action: 'Assess quality risks',
-        rationale: 'Compressed timelines may affect deliverable quality'
+        rationale: 'Compressed timelines may affect deliverable quality',
       });
     }
 
@@ -361,7 +360,7 @@ class ModificationStrategy {
     this.config = {
       conservativeMode: options.conservativeMode || false,
       autoApproveThreshold: options.autoApproveThreshold || 0.3,
-      ...options
+      ...options,
     };
   }
 
@@ -376,7 +375,7 @@ class ModificationStrategy {
     const strategies = this._generateCandidateStrategies(goal, trigger, context);
     const evaluated = strategies.map(s => ({
       ...s,
-      score: this._evaluateStrategy(s, goal, context)
+      score: this._evaluateStrategy(s, goal, context),
     }));
 
     evaluated.sort((a, b) => b.score - a.score);
@@ -385,7 +384,7 @@ class ModificationStrategy {
       recommended: evaluated[0],
       alternatives: evaluated.slice(1, 3),
       confidence: evaluated[0]?.score || 0,
-      autoApprovable: evaluated[0]?.score >= (1 - this.config.autoApproveThreshold)
+      autoApprovable: evaluated[0]?.score >= 1 - this.config.autoApproveThreshold,
     };
   }
 
@@ -473,8 +472,7 @@ class ModificationStrategy {
     }
 
     // リスクレベル
-    score -= strategy.riskLevel === 'high' ? 0.2 :
-             strategy.riskLevel === 'medium' ? 0.1 : 0;
+    score -= strategy.riskLevel === 'high' ? 0.2 : strategy.riskLevel === 'medium' ? 0.1 : 0;
 
     // 保守的モードの場合
     if (this.config.conservativeMode && strategy.conservative) {
@@ -497,7 +495,7 @@ class ModificationStrategy {
       resourceEfficiency: 'high',
       riskLevel: 'medium',
       conservative: true,
-      feasibility: 0.8
+      feasibility: 0.8,
     };
   }
 
@@ -510,7 +508,7 @@ class ModificationStrategy {
       resourceEfficiency: 'medium',
       riskLevel: 'low',
       conservative: true,
-      feasibility: 0.9
+      feasibility: 0.9,
     };
   }
 
@@ -523,7 +521,7 @@ class ModificationStrategy {
       resourceEfficiency: 'low',
       riskLevel: 'high',
       conservative: false,
-      feasibility: 0.6
+      feasibility: 0.6,
     };
   }
 
@@ -536,7 +534,7 @@ class ModificationStrategy {
       resourceEfficiency: 'high',
       riskLevel: 'medium',
       conservative: false,
-      feasibility: 0.7
+      feasibility: 0.7,
     };
   }
 
@@ -549,7 +547,7 @@ class ModificationStrategy {
       resourceEfficiency: 'medium',
       riskLevel: 'low',
       conservative: true,
-      feasibility: 0.85
+      feasibility: 0.85,
     };
   }
 
@@ -562,7 +560,7 @@ class ModificationStrategy {
       resourceEfficiency: 'high',
       riskLevel: 'medium',
       conservative: true,
-      feasibility: 0.9
+      feasibility: 0.9,
     };
   }
 
@@ -575,7 +573,7 @@ class ModificationStrategy {
       resourceEfficiency: 'medium',
       riskLevel: 'low',
       conservative: true,
-      feasibility: 0.95
+      feasibility: 0.95,
     };
   }
 
@@ -588,7 +586,7 @@ class ModificationStrategy {
       resourceEfficiency: 'low',
       riskLevel: 'medium',
       conservative: false,
-      feasibility: 0.7
+      feasibility: 0.7,
     };
   }
 
@@ -603,7 +601,7 @@ class ModificationStrategy {
       .map(d => ({
         id: d.id,
         name: d.name,
-        estimatedSavings: d.effort || 1
+        estimatedSavings: d.effort || 1,
       }));
   }
 
@@ -617,7 +615,7 @@ class ModificationStrategy {
       id: `${goal.id}-${phase}`,
       name: `${goal.name} - ${phase.charAt(0).toUpperCase() + phase.slice(1)} Phase`,
       priority: index === 0 ? goal.priority : 'normal',
-      estimatedEffort: Math.ceil((goal.estimatedEffort || 10) / 3)
+      estimatedEffort: Math.ceil((goal.estimatedEffort || 10) / 3),
     }));
   }
 }
@@ -634,7 +632,7 @@ class ModificationHistoryManager {
     this.history = new Map();
     this.config = {
       maxHistoryPerGoal: options.maxHistoryPerGoal || 50,
-      ...options
+      ...options,
     };
   }
 
@@ -655,7 +653,7 @@ class ModificationHistoryManager {
       modification,
       impact,
       timestamp: new Date().toISOString(),
-      status: 'applied'
+      status: 'applied',
     });
 
     // 履歴サイズ制限
@@ -697,18 +695,16 @@ class ModificationHistoryManager {
       totalImpact += entry.impact?.totalScore || 0;
     }
 
-    const dominantType = Object.entries(typeCounts)
-      .sort((a, b) => b[1] - a[1])[0];
-    const dominantReason = Object.entries(reasonCounts)
-      .sort((a, b) => b[1] - a[1])[0];
+    const dominantType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0];
+    const dominantReason = Object.entries(reasonCounts).sort((a, b) => b[1] - a[1])[0];
 
     const insights = [];
-    
+
     if (history.length > 5) {
       insights.push({
         type: 'volatility',
         message: 'Goal has been modified frequently - consider stabilization',
-        severity: 'warning'
+        severity: 'warning',
       });
     }
 
@@ -716,7 +712,7 @@ class ModificationHistoryManager {
       insights.push({
         type: 'pattern',
         message: `Recurring ${dominantType[0]} modifications detected`,
-        suggestion: `Address root cause of ${dominantReason?.[0] || 'unknown'}`
+        suggestion: `Address root cause of ${dominantReason?.[0] || 'unknown'}`,
       });
     }
 
@@ -727,7 +723,7 @@ class ModificationHistoryManager {
       reasonDistribution: reasonCounts,
       dominantType: dominantType?.[0],
       dominantReason: dominantReason?.[0],
-      insights
+      insights,
     };
   }
 
@@ -764,12 +760,12 @@ class AdaptiveGoalModifier {
     this.impactAnalyzer = new ImpactAnalyzer(options.impact);
     this.strategy = new ModificationStrategy(options.strategy);
     this.historyManager = new ModificationHistoryManager(options.history);
-    
+
     this.config = {
       requireApproval: options.requireApproval ?? true,
       autoModifyThreshold: options.autoModifyThreshold || 0.3,
       notifyOnModification: options.notifyOnModification ?? true,
-      ...options
+      ...options,
     };
 
     this.goals = new Map();
@@ -796,7 +792,7 @@ class AdaptiveGoalModifier {
       estimatedEffort: goal.estimatedEffort,
       status: 'active',
       createdAt: new Date().toISOString(),
-      modificationCount: 0
+      modificationCount: 0,
     };
 
     this.goals.set(normalizedGoal.id, normalizedGoal);
@@ -837,12 +833,14 @@ class AdaptiveGoalModifier {
       impact,
       confidence: strategyResult.confidence,
       status: 'pending',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     // 自動承認チェック
-    if (!this.config.requireApproval || 
-        (strategyResult.autoApprovable && impact.totalScore < this.config.autoModifyThreshold)) {
+    if (
+      !this.config.requireApproval ||
+      (strategyResult.autoApprovable && impact.totalScore < this.config.autoModifyThreshold)
+    ) {
       return this._applyModification(modification);
     }
 
@@ -853,7 +851,7 @@ class AdaptiveGoalModifier {
     return {
       status: 'pending_approval',
       modification,
-      message: 'Modification requires approval before application'
+      message: 'Modification requires approval before application',
     };
   }
 
@@ -894,7 +892,7 @@ class AdaptiveGoalModifier {
     return {
       status: 'rejected',
       modification,
-      message: `Modification rejected: ${reason}`
+      message: `Modification rejected: ${reason}`,
     };
   }
 
@@ -918,16 +916,13 @@ class AdaptiveGoalModifier {
         break;
 
       case ModificationType.SCOPE_REDUCTION:
-        goal.deliverables = goal.deliverables.filter(d =>
-          !strategy.reductionTargets?.some(t => t.id === d.id)
+        goal.deliverables = goal.deliverables.filter(
+          d => !strategy.reductionTargets?.some(t => t.id === d.id)
         );
         break;
 
       case ModificationType.SCOPE_EXPANSION:
-        goal.deliverables = [
-          ...goal.deliverables,
-          ...(strategy.expansionItems || [])
-        ];
+        goal.deliverables = [...goal.deliverables, ...(strategy.expansionItems || [])];
         break;
 
       case ModificationType.TIMELINE_EXTENSION:
@@ -949,14 +944,14 @@ class AdaptiveGoalModifier {
       case ModificationType.SUCCESS_CRITERIA_RELAXATION:
         goal.successCriteria = goal.successCriteria.map(c => ({
           ...c,
-          threshold: c.threshold ? c.threshold * 0.8 : c.threshold
+          threshold: c.threshold ? c.threshold * 0.8 : c.threshold,
         }));
         break;
 
       case ModificationType.SUCCESS_CRITERIA_TIGHTENING:
         goal.successCriteria = goal.successCriteria.map(c => ({
           ...c,
-          threshold: c.threshold ? c.threshold * 1.2 : c.threshold
+          threshold: c.threshold ? c.threshold * 1.2 : c.threshold,
         }));
         break;
 
@@ -965,7 +960,7 @@ class AdaptiveGoalModifier {
         for (const subGoal of strategy.suggestedSubGoals || []) {
           this.registerGoal({
             ...subGoal,
-            parentGoalId: goal.id
+            parentGoalId: goal.id,
           });
         }
         goal.status = 'decomposed';
@@ -1000,7 +995,7 @@ class AdaptiveGoalModifier {
     this._emit('modification_applied', {
       modification,
       goal,
-      previousState
+      previousState,
     });
 
     return {
@@ -1008,7 +1003,7 @@ class AdaptiveGoalModifier {
       modification,
       goal,
       previousState,
-      message: `Successfully applied ${strategy.type} to goal ${goal.id}`
+      message: `Successfully applied ${strategy.type} to goal ${goal.id}`,
     };
   }
 
@@ -1021,7 +1016,7 @@ class AdaptiveGoalModifier {
       goals: Array.from(this.goals.values()),
       currentGoal: this.goals.get(goalId),
       history: this.historyManager.getHistory(goalId),
-      patterns: this.historyManager.analyzePatterns(goalId)
+      patterns: this.historyManager.analyzePatterns(goalId),
     };
   }
 
@@ -1050,7 +1045,7 @@ class AdaptiveGoalModifier {
   getGoalHistory(goalId) {
     return {
       history: this.historyManager.getHistory(goalId),
-      patterns: this.historyManager.analyzePatterns(goalId)
+      patterns: this.historyManager.analyzePatterns(goalId),
     };
   }
 
@@ -1109,7 +1104,7 @@ class AdaptiveGoalModifier {
       suggestions.push({
         trigger: { reason: ModificationReason.TIME_CONSTRAINT, gap: 0.2 },
         urgency: 'high',
-        description: 'Progress behind schedule - consider scope reduction or timeline extension'
+        description: 'Progress behind schedule - consider scope reduction or timeline extension',
       });
     }
 
@@ -1118,7 +1113,7 @@ class AdaptiveGoalModifier {
       suggestions.push({
         trigger: { reason: ModificationReason.RESOURCE_CONSTRAINT },
         urgency: 'medium',
-        description: 'High resource utilization - consider prioritization'
+        description: 'High resource utilization - consider prioritization',
       });
     }
 
@@ -1127,7 +1122,7 @@ class AdaptiveGoalModifier {
       suggestions.push({
         trigger: { reason: ModificationReason.SCOPE_CREEP },
         urgency: 'medium',
-        description: 'Goal volatility detected - consider stabilization or decomposition'
+        description: 'Goal volatility detected - consider stabilization or decomposition',
       });
     }
 
@@ -1135,7 +1130,7 @@ class AdaptiveGoalModifier {
       goalId,
       suggestions,
       patterns,
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
     };
   }
 }
@@ -1146,5 +1141,5 @@ module.exports = {
   ModificationStrategy,
   ModificationHistoryManager,
   ModificationReason,
-  ModificationType
+  ModificationType,
 };

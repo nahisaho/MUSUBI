@@ -21,7 +21,7 @@ const {
   createMetricsCollector,
   createTracer,
   createObservability,
-  generateId
+  generateId,
 } = require('../../src/monitoring/observability');
 
 describe('Observability Module', () => {
@@ -34,7 +34,7 @@ describe('Observability Module', () => {
       logger = new Logger({
         name: 'test-logger',
         level: LogLevel.DEBUG,
-        outputs: [output]
+        outputs: [output],
       });
     });
 
@@ -56,7 +56,7 @@ describe('Observability Module', () => {
 
     test('should respect log level', () => {
       logger.setLevel(LogLevel.WARN);
-      
+
       logger.debug('Debug');
       logger.info('Info');
       logger.warn('Warning');
@@ -101,8 +101,8 @@ describe('Observability Module', () => {
       expect(logger.isLevelEnabled(LogLevel.ERROR)).toBe(true);
     });
 
-    test('should emit events on log', (done) => {
-      logger.on('log', (entry) => {
+    test('should emit events on log', done => {
+      logger.on('log', entry => {
         expect(entry.message).toBe('Event test');
         done();
       });
@@ -140,7 +140,7 @@ describe('Observability Module', () => {
     beforeEach(() => {
       metrics = createMetricsCollector({
         name: 'test-metrics',
-        prefix: 'app'
+        prefix: 'app',
       });
     });
 
@@ -174,7 +174,7 @@ describe('Observability Module', () => {
 
     test('should create histogram', () => {
       const histogram = metrics.histogram('duration', 'Request duration');
-      
+
       histogram.observe(0.05);
       histogram.observe(0.15);
       histogram.observe(1.5);
@@ -186,11 +186,11 @@ describe('Observability Module', () => {
 
     test('should track histogram buckets', () => {
       const histogram = metrics.histogram('latency', 'Latency', [0.1, 0.5, 1, 2]);
-      
-      histogram.observe(0.05);  // Fits in 0.1 bucket
-      histogram.observe(0.3);   // Fits in 0.5 bucket
-      histogram.observe(1.5);   // Fits in 2 bucket
-      histogram.observe(5);     // Exceeds all buckets
+
+      histogram.observe(0.05); // Fits in 0.1 bucket
+      histogram.observe(0.3); // Fits in 0.5 bucket
+      histogram.observe(1.5); // Fits in 2 bucket
+      histogram.observe(5); // Exceeds all buckets
 
       const data = histogram.get();
       expect(data.buckets[0]).toBe(1); // <= 0.1
@@ -215,7 +215,7 @@ describe('Observability Module', () => {
 
     test('should export metrics as JSON', () => {
       metrics.counter('events', 'Total events').inc();
-      
+
       const json = metrics.toJSON();
       expect(json).toHaveLength(1);
       expect(json[0].name).toBe('app_events');
@@ -262,9 +262,9 @@ describe('Observability Module', () => {
 
     test('should calculate duration', () => {
       const span = new Span({ name: 'test' });
-      
+
       expect(span.getDuration()).toBeNull();
-      
+
       span.end();
       expect(span.getDuration()).toBeGreaterThanOrEqual(0);
     });
@@ -278,9 +278,9 @@ describe('Observability Module', () => {
     });
 
     test('should serialize to JSON', () => {
-      const span = new Span({ 
+      const span = new Span({
         name: 'test',
-        kind: SpanKind.SERVER
+        kind: SpanKind.SERVER,
       });
       span.setAttribute('key', 'value');
       span.end();
@@ -303,7 +303,7 @@ describe('Observability Module', () => {
       tracer = createTracer({
         serviceName: 'test-service',
         version: '1.0.0',
-        exporters: [exporter]
+        exporters: [exporter],
       });
     });
 
@@ -343,8 +343,8 @@ describe('Observability Module', () => {
       expect(trace).toHaveLength(2);
     });
 
-    test('should emit events', (done) => {
-      tracer.on('spanStarted', (span) => {
+    test('should emit events', done => {
+      tracer.on('spanStarted', span => {
         expect(span.name).toBe('event-test');
         done();
       });
@@ -405,7 +405,7 @@ describe('Observability Module', () => {
       const headers = {
         'x-trace-id': 'trace-123',
         'x-span-id': 'span-456',
-        'x-correlation-id': 'corr-789'
+        'x-correlation-id': 'corr-789',
       };
 
       const ctx = CorrelationContext.fromHeaders(headers);
@@ -423,7 +423,7 @@ describe('Observability Module', () => {
       observability = createObservability({
         serviceName: 'test-service',
         version: '1.0.0',
-        logLevel: LogLevel.DEBUG
+        logLevel: LogLevel.DEBUG,
       });
     });
 
@@ -448,7 +448,7 @@ describe('Observability Module', () => {
     });
 
     test('should trace synchronous operation', () => {
-      const result = observability.trace('sync-op', (span) => {
+      const result = observability.trace('sync-op', span => {
         span.setAttribute('key', 'value');
         return 'result';
       });
@@ -457,7 +457,7 @@ describe('Observability Module', () => {
     });
 
     test('should trace asynchronous operation', async () => {
-      const result = await observability.trace('async-op', async (_span) => {
+      const result = await observability.trace('async-op', async _span => {
         await new Promise(resolve => setTimeout(resolve, 10));
         return 'async-result';
       });
@@ -480,7 +480,7 @@ describe('Observability Module', () => {
 
       const metrics = observability.getMetrics().toJSON();
       const requestMetric = metrics.find(m => m.name === 'http_requests_total');
-      
+
       expect(requestMetric).toBeDefined();
       expect(requestMetric.values.length).toBeGreaterThan(0);
     });

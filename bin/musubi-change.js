@@ -135,7 +135,7 @@ program
 
       // Try DeltaSpecManager first (new workflow)
       const delta = deltaManager.load(changeId);
-      
+
       if (delta) {
         // Check status
         if (delta.status !== 'implemented' && !options.force) {
@@ -148,7 +148,7 @@ program
         }
 
         const result = deltaManager.archive(changeId);
-        
+
         console.log(chalk.green('✓ Change archived successfully'));
         console.log(chalk.dim(`Merged to: ${result.mergedTo}`));
         console.log(chalk.dim(`Archive: ${result.archivePath}`));
@@ -308,15 +308,15 @@ program
       console.log(chalk.bold.blue(`Delta Specification: ${delta.id}`));
       console.log(chalk.dim('─'.repeat(50)));
       console.log();
-      
+
       const typeColors = {
         ADDED: chalk.green,
         MODIFIED: chalk.blue,
         REMOVED: chalk.red,
-        RENAMED: chalk.yellow
+        RENAMED: chalk.yellow,
       };
       const typeColor = typeColors[delta.type] || chalk.white;
-      
+
       console.log(`${chalk.bold('Type:')}        ${typeColor(delta.type)}`);
       console.log(`${chalk.bold('Target:')}      ${delta.target}`);
       console.log(`${chalk.bold('Status:')}      ${delta.status}`);
@@ -325,13 +325,13 @@ program
       console.log();
       console.log(chalk.bold('Description:'));
       console.log(chalk.dim(delta.description));
-      
+
       if (delta.rationale) {
         console.log();
         console.log(chalk.bold('Rationale:'));
         console.log(chalk.dim(delta.rationale));
       }
-      
+
       if (delta.impactedAreas && delta.impactedAreas.length > 0) {
         console.log();
         console.log(chalk.bold('Impacted Areas:'));
@@ -339,23 +339,27 @@ program
           console.log(chalk.dim(`  • ${area}`));
         });
       }
-      
+
       if (delta.before) {
         console.log();
         console.log(chalk.bold('Before State:'));
-        console.log(chalk.dim(typeof delta.before === 'object' 
-          ? JSON.stringify(delta.before, null, 2) 
-          : delta.before));
+        console.log(
+          chalk.dim(
+            typeof delta.before === 'object' ? JSON.stringify(delta.before, null, 2) : delta.before
+          )
+        );
       }
-      
+
       if (delta.after) {
         console.log();
         console.log(chalk.bold('After State:'));
-        console.log(chalk.dim(typeof delta.after === 'object' 
-          ? JSON.stringify(delta.after, null, 2) 
-          : delta.after));
+        console.log(
+          chalk.dim(
+            typeof delta.after === 'object' ? JSON.stringify(delta.after, null, 2) : delta.after
+          )
+        );
       }
-      
+
       console.log();
     } catch (error) {
       console.error(chalk.red('✗ Failed to show change'));
@@ -404,7 +408,7 @@ program
       console.log(chalk.bold.blue(`Impact Report: ${report.id}`));
       console.log(chalk.dim('─'.repeat(50)));
       console.log();
-      
+
       console.log(`${chalk.bold('Type:')}        ${report.type}`);
       console.log(`${chalk.bold('Target:')}      ${report.target}`);
       console.log(`${chalk.bold('Analyzed:')}    ${report.timestamp}`);
@@ -421,7 +425,7 @@ program
         high: chalk.yellow,
         medium: chalk.blue,
         low: chalk.green,
-        info: chalk.dim
+        info: chalk.dim,
       };
 
       console.log(chalk.bold('Impact Levels:'));
@@ -471,12 +475,13 @@ program
       if (report.recommendations.length > 0) {
         console.log(chalk.bold('Recommendations:'));
         report.recommendations.forEach(rec => {
-          const emoji = {
-            critical: '🔴',
-            high: '🟠',
-            medium: '🟡',
-            info: 'ℹ️'
-          }[rec.priority] || '•';
+          const emoji =
+            {
+              critical: '🔴',
+              high: '🟠',
+              medium: '🟡',
+              info: 'ℹ️',
+            }[rec.priority] || '•';
           console.log(`  ${emoji} ${rec.message}`);
         });
         console.log();
@@ -499,7 +504,7 @@ program
       const deltaManager = new DeltaSpecManager(workspaceRoot);
 
       deltaManager.updateStatus(changeId, 'approved');
-      
+
       console.log(chalk.green(`✓ Change ${changeId} approved`));
       console.log(chalk.dim(`Status updated to: approved`));
       console.log();
@@ -525,7 +530,7 @@ program
       const deltaManager = new DeltaSpecManager(workspaceRoot);
 
       deltaManager.updateStatus(changeId, 'rejected');
-      
+
       console.log(chalk.red(`✗ Change ${changeId} rejected`));
       if (options.reason) {
         console.log(chalk.dim(`Reason: ${options.reason}`));
@@ -548,7 +553,7 @@ program
   .option('-d, --description <description>', 'Change description')
   .option('-r, --rationale <rationale>', 'Reason for change')
   .option('--impact <areas>', 'Comma-separated impacted areas')
-  .action(async (options) => {
+  .action(async options => {
     try {
       const workspaceRoot = process.cwd();
       const deltaManager = new DeltaSpecManager(workspaceRoot);
@@ -573,9 +578,7 @@ program
         process.exit(1);
       }
 
-      const impactedAreas = options.impact 
-        ? options.impact.split(',').map(a => a.trim())
-        : [];
+      const impactedAreas = options.impact ? options.impact.split(',').map(a => a.trim()) : [];
 
       const delta = deltaManager.create({
         id: options.id,
@@ -583,7 +586,7 @@ program
         target: options.target,
         description: options.description,
         rationale: options.rationale || '',
-        impactedAreas
+        impactedAreas,
       });
 
       // Validate the created delta
@@ -591,7 +594,7 @@ program
 
       console.log(chalk.green(`✓ Delta specification created: ${delta.id}`));
       console.log(chalk.dim(`Location: storage/changes/${delta.id}/`));
-      
+
       if (validation.warnings.length > 0) {
         console.log();
         console.log(chalk.yellow('Warnings:'));
@@ -599,7 +602,7 @@ program
           console.log(chalk.dim(`  • ${w.message}`));
         });
       }
-      
+
       console.log();
       console.log(chalk.yellow('Next steps:'));
       console.log(chalk.dim(`1. Review: musubi-change show ${delta.id}`));
@@ -618,7 +621,7 @@ program
   .description('Validate all delta specifications in the changes directory')
   .option('--changes <dir>', 'Changes directory', 'storage/changes')
   .option('--strict', 'Enable strict validation mode')
-  .action(async (options) => {
+  .action(async options => {
     try {
       const workspaceRoot = process.cwd();
       const path = require('path');
@@ -688,7 +691,7 @@ program
         ADDED: chalk.green,
         MODIFIED: chalk.yellow,
         REMOVED: chalk.red,
-        RENAMED: chalk.cyan
+        RENAMED: chalk.cyan,
       };
       const typeColor = typeColors[delta.type] || chalk.white;
 
@@ -766,7 +769,7 @@ program
       console.log();
       console.log(chalk.bold('Description:'));
       console.log(chalk.dim(delta.description));
-      
+
       if (delta.rationale) {
         console.log();
         console.log(chalk.bold('Rationale:'));
@@ -786,7 +789,7 @@ program
   .command('status')
   .description('Show status summary of all changes')
   .option('--changes <dir>', 'Changes directory', 'storage/changes')
-  .action(async (_options) => {
+  .action(async _options => {
     try {
       const workspaceRoot = process.cwd();
       const deltaManager = new DeltaSpecManager(workspaceRoot);
@@ -803,14 +806,14 @@ program
         approved: 0,
         rejected: 0,
         implemented: 0,
-        archived: 0
+        archived: 0,
       };
 
       const typeCounts = {
         ADDED: 0,
         MODIFIED: 0,
         REMOVED: 0,
-        RENAMED: 0
+        RENAMED: 0,
       };
 
       deltas.forEach(d => {
@@ -842,9 +845,7 @@ program
       console.log();
 
       // Show pending items
-      const pending = deltas.filter(d => 
-        d.status === 'proposed' || d.status === 'approved'
-      );
+      const pending = deltas.filter(d => d.status === 'proposed' || d.status === 'approved');
 
       if (pending.length > 0) {
         console.log(chalk.bold('Pending Actions:'));

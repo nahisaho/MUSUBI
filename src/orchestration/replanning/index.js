@@ -9,42 +9,46 @@
 const { ReplanningEngine } = require('./replanning-engine');
 const { PlanMonitor } = require('./plan-monitor');
 const { PlanEvaluator } = require('./plan-evaluator');
-const { AlternativeGenerator, ContextAnalyzer, ConfidenceScorer } = require('./alternative-generator');
+const {
+  AlternativeGenerator,
+  ContextAnalyzer,
+  ConfidenceScorer,
+} = require('./alternative-generator');
 const { ReplanHistory } = require('./replan-history');
 const {
   ReplanTrigger,
   ReplanDecision,
   defaultReplanningConfig,
   mergeConfig,
-  validateConfig
+  validateConfig,
 } = require('./config');
 
 // v3.6.0+ Advanced Replanning Components
-const { 
-  ProactivePathOptimizer, 
-  PathAnalyzer, 
-  OptimizationStrategy 
+const {
+  ProactivePathOptimizer,
+  PathAnalyzer,
+  OptimizationStrategy,
 } = require('./proactive-path-optimizer');
-const { 
-  GoalProgressTracker, 
-  ProgressCalculator, 
-  MilestoneManager, 
-  DeviationDetector, 
-  ProjectionEngine 
+const {
+  GoalProgressTracker,
+  ProgressCalculator,
+  MilestoneManager,
+  DeviationDetector,
+  ProjectionEngine,
 } = require('./goal-progress-tracker');
-const { 
-  AdaptiveGoalModifier, 
-  ImpactAnalyzer, 
-  ModificationStrategy, 
+const {
+  AdaptiveGoalModifier,
+  ImpactAnalyzer,
+  ModificationStrategy,
   ModificationHistoryManager,
   ModificationReason,
-  ModificationType 
+  ModificationType,
 } = require('./adaptive-goal-modifier');
 
 module.exports = {
   // Core Engine
   ReplanningEngine,
-  
+
   // Components
   PlanMonitor,
   PlanEvaluator,
@@ -52,7 +56,7 @@ module.exports = {
   ContextAnalyzer,
   ConfidenceScorer,
   ReplanHistory,
-  
+
   // Configuration
   ReplanTrigger,
   ReplanDecision,
@@ -78,5 +82,5 @@ module.exports = {
   ModificationStrategy,
   ModificationHistoryManager,
   ModificationReason,
-  ModificationType
+  ModificationType,
 };

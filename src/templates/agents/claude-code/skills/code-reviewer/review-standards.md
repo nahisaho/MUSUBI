@@ -11,6 +11,7 @@ Guidelines and checklists for conducting effective code reviews.
 ### 1. Preparation
 
 Before starting review:
+
 - [ ] Understand the context (ticket/issue)
 - [ ] Review related documentation
 - [ ] Check if tests are included
@@ -27,13 +28,13 @@ Before starting review:
 
 ### 3. Time Guidelines
 
-| PR Size | Max Review Time |
-|---------|-----------------|
-| XS (< 50 lines) | 10 minutes |
-| S (50-200 lines) | 30 minutes |
-| M (200-500 lines) | 1 hour |
-| L (500-1000 lines) | 2 hours |
-| XL (> 1000 lines) | Request split |
+| PR Size            | Max Review Time |
+| ------------------ | --------------- |
+| XS (< 50 lines)    | 10 minutes      |
+| S (50-200 lines)   | 30 minutes      |
+| M (200-500 lines)  | 1 hour          |
+| L (500-1000 lines) | 2 hours         |
+| XL (> 1000 lines)  | Request split   |
 
 ---
 
@@ -115,28 +116,28 @@ Before starting review:
 
 Use prefixes for clarity:
 
-| Prefix | Meaning |
-|--------|---------|
-| `[blocking]` | Must fix before merge |
-| `[suggestion]` | Optional improvement |
-| `[question]` | Seeking understanding |
-| `[nit]` | Minor style issue |
-| `[praise]` | Positive feedback |
+| Prefix         | Meaning               |
+| -------------- | --------------------- |
+| `[blocking]`   | Must fix before merge |
+| `[suggestion]` | Optional improvement  |
+| `[question]`   | Seeking understanding |
+| `[nit]`        | Minor style issue     |
+| `[praise]`     | Positive feedback     |
 
 ### Examples
 
 ```markdown
-[blocking] This SQL query is vulnerable to injection. 
+[blocking] This SQL query is vulnerable to injection.
 Please use parameterized queries.
 
-[suggestion] Consider extracting this into a separate function 
+[suggestion] Consider extracting this into a separate function
 for reusability.
 
 [question] What's the expected behavior when `userId` is null?
 
 [nit] Extra whitespace on line 42.
 
-[praise] Great use of the strategy pattern here! 
+[praise] Great use of the strategy pattern here!
 Makes the code very extensible.
 ```
 
@@ -221,32 +222,36 @@ with open('file.txt') as f:
 
 ### Automated Checks
 
-| Check | Tool |
-|-------|------|
-| Formatting | Prettier, Black |
-| Linting | ESLint, Ruff |
-| Type checking | TypeScript, mypy |
-| Security | npm audit, Bandit |
-| Test coverage | Jest, pytest-cov |
+| Check         | Tool              |
+| ------------- | ----------------- |
+| Formatting    | Prettier, Black   |
+| Linting       | ESLint, Ruff      |
+| Type checking | TypeScript, mypy  |
+| Security      | npm audit, Bandit |
+| Test coverage | Jest, pytest-cov  |
 
 ### GitHub PR Template
 
 ```markdown
 ## Description
+
 [Describe changes]
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation
 
 ## Testing
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated
 - [ ] Manual testing completed
 
 ## Checklist
+
 - [ ] Self-review completed
 - [ ] Code follows style guidelines
 - [ ] Documentation updated

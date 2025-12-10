@@ -63,7 +63,14 @@ describe('Platform Initialization Tests', () => {
     expect(skills.length).toBeGreaterThanOrEqual(27);
 
     // コアスキルの存在確認
-    const coreSkills = ['orchestrator', 'steering', 'requirements-analyst', 'system-architect', 'agent-assistant', 'issue-resolver'];
+    const coreSkills = [
+      'orchestrator',
+      'steering',
+      'requirements-analyst',
+      'system-architect',
+      'agent-assistant',
+      'issue-resolver',
+    ];
     coreSkills.forEach(skill => {
       const skillPath = path.join(skillsPath, skill, 'SKILL.md');
       expect(fs.existsSync(skillPath)).toBe(true);

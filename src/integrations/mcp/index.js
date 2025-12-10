@@ -1,9 +1,9 @@
 /**
  * MUSUBI MCP Integration
- * 
+ *
  * Unified exports for MCP (Model Context Protocol) integration.
  * Provides discovery, tool registration, and context management.
- * 
+ *
  * @module integrations/mcp
  */
 
@@ -57,13 +57,13 @@ function createMCPIntegration(options = {}) {
   const discovery = createMCPDiscovery(options.discovery);
   const registry = createMCPToolRegistry(options.registry);
   const context = new MCPContextProvider(options.context);
-  
+
   // Set connector if provided
   if (options.connector) {
     registry.setConnector(options.connector);
     context.setConnector(options.connector);
   }
-  
+
   // Wire up discovery to registry
   discovery.on('server:discovered', async ({ server }) => {
     try {
@@ -74,12 +74,12 @@ function createMCPIntegration(options = {}) {
       // Silently handle - server might not be running
     }
   });
-  
+
   return {
     discovery,
     registry,
     context,
-    
+
     /**
      * Initialize the MCP integration
      * @param {Object} [initOptions]
@@ -89,18 +89,18 @@ function createMCPIntegration(options = {}) {
     async initialize(initOptions = {}) {
       const autoDiscover = initOptions.autoDiscover ?? true;
       const watchChanges = initOptions.watchChanges ?? false;
-      
+
       if (autoDiscover) {
         await discovery.discover();
       }
-      
+
       if (watchChanges && discovery.watch) {
         discovery.watch();
       }
-      
+
       return this.getStatus();
     },
-    
+
     /**
      * Get all tools from the registry
      * @returns {Object[]}
@@ -108,7 +108,7 @@ function createMCPIntegration(options = {}) {
     getTools() {
       return registry.getAllTools();
     },
-    
+
     /**
      * Get tool definitions in Agent Loop format
      * @returns {Object[]}
@@ -117,10 +117,10 @@ function createMCPIntegration(options = {}) {
       return registry.getAllTools().map(tool => ({
         name: tool.name,
         description: tool.description,
-        inputSchema: tool.inputSchema
+        inputSchema: tool.inputSchema,
       }));
     },
-    
+
     /**
      * Build context for a request
      * @param {Object} contextOptions
@@ -129,7 +129,7 @@ function createMCPIntegration(options = {}) {
     async buildContext(contextOptions) {
       return context.buildContext(contextOptions);
     },
-    
+
     /**
      * Get integration status
      * @returns {Object}
@@ -138,10 +138,10 @@ function createMCPIntegration(options = {}) {
       return {
         discovery: discovery.getSummary(),
         registry: registry.getStats(),
-        context: context.getStats()
+        context: context.getStats(),
       };
     },
-    
+
     /**
      * Clean up resources
      */
@@ -151,7 +151,7 @@ function createMCPIntegration(options = {}) {
       }
       registry.clear();
       context.clear();
-    }
+    },
   };
 }
 
@@ -161,15 +161,15 @@ module.exports = {
   createMCPDiscovery,
   discoverMCPServers,
   CONFIG_LOCATIONS,
-  
+
   // Tool Registry
   MCPToolRegistry,
   createMCPToolRegistry,
-  
+
   // Context Provider
   MCPContextProvider,
   createMCPContextProvider,
-  
+
   // Integration
-  createMCPIntegration
+  createMCPIntegration,
 };

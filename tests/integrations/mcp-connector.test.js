@@ -11,7 +11,7 @@ const {
   MCPResource,
   MCPPrompt,
   ConnectionState,
-  TransportType
+  TransportType,
 } = require('../../src/integrations/mcp-connector');
 
 describe('MCPConnector', () => {
@@ -23,10 +23,10 @@ describe('MCPConnector', () => {
         inputSchema: {
           type: 'object',
           properties: {
-            path: { type: 'string' }
+            path: { type: 'string' },
           },
-          required: ['path']
-        }
+          required: ['path'],
+        },
       });
 
       expect(tool.name).toBe('read_file');
@@ -41,10 +41,10 @@ describe('MCPConnector', () => {
           type: 'object',
           properties: {
             path: { type: 'string' },
-            encoding: { type: 'string' }
+            encoding: { type: 'string' },
           },
-          required: ['path']
-        }
+          required: ['path'],
+        },
       });
 
       const valid = tool.validateInput({ path: '/test.txt' });
@@ -60,7 +60,7 @@ describe('MCPConnector', () => {
       const tool = new MCPTool({
         name: 'test_tool',
         description: 'Test',
-        inputSchema: {}
+        inputSchema: {},
       });
 
       const json = tool.toJSON();
@@ -75,7 +75,7 @@ describe('MCPConnector', () => {
         uri: 'file:///test.txt',
         name: 'Test File',
         description: 'A test file',
-        mimeType: 'text/plain'
+        mimeType: 'text/plain',
       });
 
       expect(resource.uri).toBe('file:///test.txt');
@@ -86,7 +86,7 @@ describe('MCPConnector', () => {
     it('should convert to JSON', () => {
       const resource = new MCPResource({
         uri: 'file:///test.txt',
-        name: 'Test'
+        name: 'Test',
       });
 
       const json = resource.toJSON();
@@ -99,9 +99,7 @@ describe('MCPConnector', () => {
       const prompt = new MCPPrompt({
         name: 'code_review',
         description: 'Review code',
-        arguments: [
-          { name: 'code', type: 'string', required: true }
-        ]
+        arguments: [{ name: 'code', type: 'string', required: true }],
       });
 
       expect(prompt.name).toBe('code_review');
@@ -111,7 +109,7 @@ describe('MCPConnector', () => {
     it('should convert to JSON', () => {
       const prompt = new MCPPrompt({
         name: 'test_prompt',
-        description: 'Test'
+        description: 'Test',
       });
 
       const json = prompt.toJSON();
@@ -128,11 +126,9 @@ describe('MCPConnector', () => {
         transport: TransportType.STDIO,
         mockTools: [
           { name: 'tool1', description: 'Tool 1', inputSchema: {} },
-          { name: 'tool2', description: 'Tool 2', inputSchema: {} }
+          { name: 'tool2', description: 'Tool 2', inputSchema: {} },
         ],
-        mockResources: [
-          { uri: 'file:///test.txt', name: 'Test' }
-        ]
+        mockResources: [{ uri: 'file:///test.txt', name: 'Test' }],
       });
     });
 
@@ -180,8 +176,9 @@ describe('MCPConnector', () => {
     it('should throw on unknown tool', async () => {
       await connection.connect();
 
-      await expect(connection.callTool('unknown_tool'))
-        .rejects.toThrow('Tool not found: unknown_tool');
+      await expect(connection.callTool('unknown_tool')).rejects.toThrow(
+        'Tool not found: unknown_tool'
+      );
     });
 
     it('should read resource', async () => {
@@ -215,7 +212,7 @@ describe('MCPConnector', () => {
     it('should add servers', () => {
       connector.addServer('server1', {
         transport: TransportType.STDIO,
-        mockTools: [{ name: 'tool1', description: 'Tool 1' }]
+        mockTools: [{ name: 'tool1', description: 'Tool 1' }],
       });
 
       expect(connector.servers.size).toBe(1);
@@ -224,16 +221,15 @@ describe('MCPConnector', () => {
     it('should throw on duplicate server', () => {
       connector.addServer('server1', {});
 
-      expect(() => connector.addServer('server1', {}))
-        .toThrow('Server already exists: server1');
+      expect(() => connector.addServer('server1', {})).toThrow('Server already exists: server1');
     });
 
     it('should connect all servers', async () => {
       connector.addServer('server1', {
-        mockTools: [{ name: 'tool1', description: 'Tool 1' }]
+        mockTools: [{ name: 'tool1', description: 'Tool 1' }],
       });
       connector.addServer('server2', {
-        mockTools: [{ name: 'tool2', description: 'Tool 2' }]
+        mockTools: [{ name: 'tool2', description: 'Tool 2' }],
       });
 
       const results = await connector.connectAll();
@@ -244,10 +240,10 @@ describe('MCPConnector', () => {
 
     it('should get all tools from all servers', async () => {
       connector.addServer('server1', {
-        mockTools: [{ name: 'tool1', description: 'Tool 1' }]
+        mockTools: [{ name: 'tool1', description: 'Tool 1' }],
       });
       connector.addServer('server2', {
-        mockTools: [{ name: 'tool2', description: 'Tool 2' }]
+        mockTools: [{ name: 'tool2', description: 'Tool 2' }],
       });
 
       await connector.connectAll();
@@ -258,10 +254,10 @@ describe('MCPConnector', () => {
 
     it('should find tool and route to correct server', async () => {
       connector.addServer('server1', {
-        mockTools: [{ name: 'tool1', description: 'Tool 1' }]
+        mockTools: [{ name: 'tool1', description: 'Tool 1' }],
       });
       connector.addServer('server2', {
-        mockTools: [{ name: 'tool2', description: 'Tool 2' }]
+        mockTools: [{ name: 'tool2', description: 'Tool 2' }],
       });
 
       await connector.connectAll();
@@ -273,7 +269,7 @@ describe('MCPConnector', () => {
 
     it('should call tool across servers', async () => {
       connector.addServer('server1', {
-        mockTools: [{ name: 'tool1', description: 'Tool 1', inputSchema: {} }]
+        mockTools: [{ name: 'tool1', description: 'Tool 1', inputSchema: {} }],
       });
 
       await connector.connectAll();
@@ -295,8 +291,8 @@ describe('MCPConnector', () => {
       connector.loadConfig({
         mcpServers: {
           server1: { transport: 'stdio' },
-          server2: { transport: 'sse' }
-        }
+          server2: { transport: 'sse' },
+        },
       });
 
       expect(connector.servers.size).toBe(2);
@@ -312,7 +308,7 @@ describe('MCPConnector', () => {
 
     it('should get overall status', async () => {
       connector.addServer('server1', {
-        mockTools: [{ name: 'tool1', description: 'Tool 1' }]
+        mockTools: [{ name: 'tool1', description: 'Tool 1' }],
       });
       connector.addServer('server2', {});
 

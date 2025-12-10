@@ -55,12 +55,12 @@ describe('TraceabilityService', () => {
     it('should link requirements to designs', async () => {
       const specsDir = path.join(tempDir, 'storage', 'specs');
       await fs.ensureDir(specsDir);
-      
+
       await fs.writeFile(
         path.join(specsDir, 'feature-requirements.md'),
         '### REQ-001: Login\nContent'
       );
-      
+
       await fs.writeFile(
         path.join(specsDir, 'feature-design.md'),
         '---\ntitle: Design\nrequirements:\n  - REQ-001\n---\n# Design'
@@ -75,12 +75,12 @@ describe('TraceabilityService', () => {
     it('should link requirements to tasks', async () => {
       const specsDir = path.join(tempDir, 'storage', 'specs');
       await fs.ensureDir(specsDir);
-      
+
       await fs.writeFile(
         path.join(specsDir, 'feature-requirements.md'),
         '### REQ-001: Login\nContent'
       );
-      
+
       await fs.writeFile(
         path.join(specsDir, 'feature-tasks.md'),
         '---\nrequirement: REQ-001\n---\n- [ ] Implement login'
@@ -95,12 +95,12 @@ describe('TraceabilityService', () => {
     it('should calculate coverage statistics', async () => {
       const specsDir = path.join(tempDir, 'storage', 'specs');
       await fs.ensureDir(specsDir);
-      
+
       await fs.writeFile(
         path.join(specsDir, 'feature-requirements.md'),
         '### REQ-001: Login\nContent\n\n### REQ-002: Logout\nContent'
       );
-      
+
       await fs.writeFile(
         path.join(specsDir, 'feature-design.md'),
         '---\nrequirements:\n  - REQ-001\n---\n# Design'
@@ -236,12 +236,12 @@ describe('TraceabilityService', () => {
     it('should calculate coverage statistics', async () => {
       const specsDir = path.join(tempDir, 'storage', 'specs');
       await fs.ensureDir(specsDir);
-      
+
       await fs.writeFile(
         path.join(specsDir, 'feature-requirements.md'),
         '### REQ-001: One\n### REQ-002: Two\n### REQ-003: Three'
       );
-      
+
       await fs.writeFile(
         path.join(specsDir, 'feature-design.md'),
         '---\nrequirements:\n  - REQ-001\n---'
@@ -292,12 +292,12 @@ describe('TraceabilityService', () => {
     it('should find tasked but not implemented', async () => {
       const specsDir = path.join(tempDir, 'storage', 'specs');
       await fs.ensureDir(specsDir);
-      
+
       await fs.writeFile(
         path.join(specsDir, 'feature-requirements.md'),
         '### REQ-001: Has tasks\nContent'
       );
-      
+
       await fs.writeFile(
         path.join(specsDir, 'feature-tasks.md'),
         '---\nrequirement: REQ-001\n---\n- [ ] Task'
@@ -317,7 +317,7 @@ describe('TraceabilityService', () => {
       await fs.writeFile(path.join(srcDir, 'sub', 'b.js'), '');
 
       const files = [];
-      await service.walkDirectory(srcDir, (f) => files.push(f));
+      await service.walkDirectory(srcDir, f => files.push(f));
 
       expect(files).toHaveLength(2);
     });
@@ -329,7 +329,7 @@ describe('TraceabilityService', () => {
       await fs.writeFile(path.join(srcDir, 'node_modules', 'b.js'), '');
 
       const files = [];
-      await service.walkDirectory(srcDir, (f) => files.push(f));
+      await service.walkDirectory(srcDir, f => files.push(f));
 
       expect(files).toHaveLength(1);
     });

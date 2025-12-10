@@ -15,7 +15,7 @@ const {
   createSafetyCheckGuardrail,
   RuleBuilder,
   RuleRegistry,
-  CommonRuleSets
+  CommonRuleSets,
 } = require('../../../src/orchestration/guardrails');
 
 describe('Guardrails Integration Tests', () => {
@@ -83,10 +83,7 @@ describe('Guardrails Integration Tests', () => {
   describe('Custom Guardrail Composition', () => {
     it('should create custom guardrail with RuleBuilder', async () => {
       // Test RuleBuilder creates rules
-      const rules = new RuleBuilder()
-        .minLength(5)
-        .maxLength(500)
-        .build();
+      const rules = new RuleBuilder().minLength(5).maxLength(500).build();
 
       expect(rules).toBeDefined();
       expect(Array.isArray(rules)).toBe(true);
@@ -99,9 +96,7 @@ describe('Guardrails Integration Tests', () => {
       // Register custom rules
       registry.register('api-input', [
         ...CommonRuleSets.security,
-        ...new RuleBuilder()
-          .required()
-          .build()
+        ...new RuleBuilder().required().build(),
       ]);
 
       const rules = registry.get('api-input');
@@ -128,9 +123,7 @@ describe('Guardrails Integration Tests', () => {
 
       expect(result.passed).toBe(false);
       // Should have constitutional violations
-      expect(result.violations.some(v => 
-        v.code.startsWith('CONSTITUTIONAL_')
-      )).toBe(true);
+      expect(result.violations.some(v => v.code.startsWith('CONSTITUTIONAL_'))).toBe(true);
     });
 
     it('should pass content with spec and trace references', async () => {
@@ -168,7 +161,7 @@ describe('Guardrails Integration Tests', () => {
 
     it('should stop on first failure when configured', async () => {
       const chain = new GuardrailChain('StopOnFailureChain', {
-        stopOnFirstFailure: true
+        stopOnFirstFailure: true,
       });
 
       // First guardrail will fail

@@ -22,7 +22,10 @@ describe('Server', () => {
   let server;
 
   beforeEach(async () => {
-    tempDir = path.join(os.tmpdir(), `musubi-test-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+    tempDir = path.join(
+      os.tmpdir(),
+      `musubi-test-${Date.now()}-${Math.random().toString(36).substring(7)}`
+    );
     await fs.ensureDir(path.join(tempDir, 'steering', 'rules'));
     await fs.ensureDir(path.join(tempDir, 'storage', 'specs'));
     await fs.writeFile(
@@ -36,7 +39,7 @@ describe('Server', () => {
       try {
         await Promise.race([
           server.stop(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Stop timeout')), 10000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Stop timeout')), 10000)),
         ]);
       } catch (e) {
         // Force cleanup if stop times out
@@ -81,7 +84,7 @@ describe('Server', () => {
     it('should start and stop the server', async () => {
       const port = getNextPort();
       server = new Server(tempDir, { port });
-      
+
       await server.start();
       expect(server.httpServer).not.toBeNull();
       expect(server.httpServer.listening).toBe(true);
@@ -93,10 +96,10 @@ describe('Server', () => {
     it('should handle already stopped server', async () => {
       const port = getNextPort();
       server = new Server(tempDir, { port });
-      
+
       await server.start();
       await server.stop();
-      
+
       // Should not throw
       await server.stop();
     });
@@ -234,7 +237,7 @@ describe('Server', () => {
           }, 100);
         });
 
-        ws.on('message', (data) => {
+        ws.on('message', data => {
           const message = JSON.parse(data.toString());
           if (message.type === 'test') {
             expect(message.data).toBe('hello');
@@ -244,7 +247,7 @@ describe('Server', () => {
           }
         });
 
-        ws.on('error', (err) => {
+        ws.on('error', err => {
           clearTimeout(timeout);
           reject(err);
         });

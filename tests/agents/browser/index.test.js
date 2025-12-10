@@ -84,7 +84,7 @@ describe('BrowserAgent', () => {
       // Mock launch to avoid actual browser startup
       agent.launch = jest.fn().mockResolvedValue(undefined);
       agent.isLaunched = true;
-      
+
       // Parser returns error for gibberish
       const result = await agent.execute('asdfghjkl qwerty');
       expect(result.success).toBe(false);
@@ -95,7 +95,8 @@ describe('BrowserAgent', () => {
     it('should return all results', async () => {
       // Mock methods
       agent.launch = jest.fn().mockResolvedValue(undefined);
-      agent.execute = jest.fn()
+      agent.execute = jest
+        .fn()
         .mockResolvedValueOnce({ success: true, command: 'cmd1' })
         .mockResolvedValueOnce({ success: true, command: 'cmd2' });
 
@@ -107,7 +108,8 @@ describe('BrowserAgent', () => {
 
     it('should stop on first failure', async () => {
       agent.launch = jest.fn().mockResolvedValue(undefined);
-      agent.execute = jest.fn()
+      agent.execute = jest
+        .fn()
         .mockResolvedValueOnce({ success: true, command: 'cmd1' })
         .mockResolvedValueOnce({ success: false, error: 'Failed' })
         .mockResolvedValueOnce({ success: true, command: 'cmd3' });
@@ -135,7 +137,7 @@ describe('BrowserAgent', () => {
     it('should clear history', () => {
       agent.contextManager.recordAction({ type: 'test' }, { success: true });
       expect(agent.getActionHistory()).toHaveLength(1);
-      
+
       agent.clearHistory();
       expect(agent.getActionHistory()).toEqual([]);
     });
@@ -168,10 +170,7 @@ describe('BrowserAgent', () => {
         { type: 'navigate', url: 'https://example.com' },
         { success: true }
       );
-      agent.contextManager.recordAction(
-        { type: 'click', selector: '#button' },
-        { success: true }
-      );
+      agent.contextManager.recordAction({ type: 'click', selector: '#button' }, { success: true });
 
       const code = await agent.generateTest({ name: 'Test Case' });
       expect(code).toContain('test(');

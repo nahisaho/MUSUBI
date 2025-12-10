@@ -83,8 +83,8 @@ class ProjectScanner {
    */
   async getSteering() {
     const steeringPath = path.join(this.projectPath, 'steering');
-    
-    if (!await fs.pathExists(steeringPath)) {
+
+    if (!(await fs.pathExists(steeringPath))) {
       return null;
     }
 
@@ -104,8 +104,8 @@ class ProjectScanner {
    */
   async getConstitution() {
     const constitutionPath = path.join(this.projectPath, 'steering', 'rules', 'constitution.md');
-    
-    if (!await fs.pathExists(constitutionPath)) {
+
+    if (!(await fs.pathExists(constitutionPath))) {
       return null;
     }
 
@@ -146,8 +146,8 @@ class ProjectScanner {
    */
   async getSpecs() {
     const specsPath = path.join(this.projectPath, 'storage', 'specs');
-    
-    if (!await fs.pathExists(specsPath)) {
+
+    if (!(await fs.pathExists(specsPath))) {
       return [];
     }
 
@@ -181,7 +181,7 @@ class ProjectScanner {
 
       const filePath = path.join(specsPath, file);
       const spec = await this.parseSpec(filePath);
-      
+
       if (spec && spec.id === id) {
         return spec;
       }
@@ -232,16 +232,17 @@ class ProjectScanner {
    */
   parseRequirements(content) {
     const requirements = [];
-    const reqRegex = /#{2,3}\s+(REQ[-\w]+)[:\s]*(.+?)(?=\n#{2,3}\s+REQ|\n#{1,2}\s+[^#]|\n#{1,2}$|$)/gs;
+    const reqRegex =
+      /#{2,3}\s+(REQ[-\w]+)[:\s]*(.+?)(?=\n#{2,3}\s+REQ|\n#{1,2}\s+[^#]|\n#{1,2}$|$)/gs;
 
     let match;
     while ((match = reqRegex.exec(content)) !== null) {
       const id = match[1];
       const body = match[2].trim();
-      
+
       // Try to extract EARS pattern
       const pattern = this.detectEARSPattern(body);
-      
+
       requirements.push({
         id,
         body,
@@ -387,8 +388,8 @@ class ProjectScanner {
    */
   async getWorkflow() {
     const workflowPath = path.join(this.projectPath, 'steering', 'rules', 'workflow.md');
-    
-    if (!await fs.pathExists(workflowPath)) {
+
+    if (!(await fs.pathExists(workflowPath))) {
       // Return default workflow stages
       return {
         stages: [
@@ -427,7 +428,7 @@ class ProjectScanner {
         name: match[2].trim(),
         status,
       });
-      
+
       if (status === 'active') {
         currentStage = parseInt(match[1], 10);
       }
@@ -448,7 +449,7 @@ class ProjectScanner {
     };
 
     // Check for steering directory
-    if (!await this.hasSteering()) {
+    if (!(await this.hasSteering())) {
       results.errors.push({
         type: 'missing-steering',
         message: 'steering/ directory not found',
@@ -495,13 +496,13 @@ class ProjectScanner {
    */
   async readMarkdownFile(filePath) {
     try {
-      if (!await fs.pathExists(filePath)) {
+      if (!(await fs.pathExists(filePath))) {
         return null;
       }
-      
+
       const content = await fs.readFile(filePath, 'utf-8');
       const { data, content: body } = matter(content);
-      
+
       return {
         path: filePath,
         metadata: data,
@@ -519,13 +520,13 @@ class ProjectScanner {
    */
   async readYamlFile(filePath) {
     try {
-      if (!await fs.pathExists(filePath)) {
+      if (!(await fs.pathExists(filePath))) {
         return null;
       }
-      
+
       const yaml = require('js-yaml');
       const content = await fs.readFile(filePath, 'utf-8');
-      
+
       return {
         path: filePath,
         data: yaml.load(content),

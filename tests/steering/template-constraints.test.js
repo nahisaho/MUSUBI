@@ -12,7 +12,7 @@ const {
   ConstraintType,
   UncertaintyMarker,
   Severity,
-  createTemplateConstraintEngine
+  createTemplateConstraintEngine,
 } = require('../../src/steering/template-constraints');
 
 describe('Template Constraints', () => {
@@ -28,7 +28,7 @@ describe('Template Constraints', () => {
     test('should validate with custom validator', () => {
       const constraint = new Constraint({
         name: 'min-length',
-        validator: (value) => value.length >= 10 || 'Too short'
+        validator: value => value.length >= 10 || 'Too short',
       });
 
       const valid = constraint.validate('this is long enough');
@@ -42,7 +42,9 @@ describe('Template Constraints', () => {
     test('should handle validator errors', () => {
       const constraint = new Constraint({
         name: 'error-test',
-        validator: () => { throw new Error('Test error'); }
+        validator: () => {
+          throw new Error('Test error');
+        },
       });
 
       const result = constraint.validate('test');
@@ -87,7 +89,7 @@ describe('Template Constraints', () => {
 
     test('should respect conditions', () => {
       const item = new ChecklistItem('Conditional', {
-        condition: (ctx) => ctx.showItem === true
+        condition: ctx => ctx.showItem === true,
       });
 
       expect(item.isApplicable({ showItem: false })).toBe(false);
@@ -96,13 +98,13 @@ describe('Template Constraints', () => {
 
     test('should check dependencies', () => {
       const item = new ChecklistItem('Dependent', {
-        dependencies: ['first-item']
+        dependencies: ['first-item'],
       });
 
       const context = {
         checklist: {
-          'first-item': { checked: false }
-        }
+          'first-item': { checked: false },
+        },
       };
 
       const result = item.validate(context);
@@ -282,7 +284,7 @@ describe('Template Constraints', () => {
       const content = 'Name: {?name?}, Time: {~time~}';
       const resolved = parser.resolve(content, {
         name: 'MUSUBI',
-        time: '1 hour'
+        time: '1 hour',
       });
 
       expect(resolved).toContain('MUSUBI');
@@ -294,7 +296,7 @@ describe('Template Constraints', () => {
     test('should create section with options', () => {
       const section = new TemplateSection('Overview', {
         required: true,
-        minLength: 50
+        minLength: 50,
       });
 
       expect(section.name).toBe('Overview');
@@ -327,7 +329,7 @@ describe('Template Constraints', () => {
 
     test('should validate pattern', () => {
       const section = new TemplateSection('Version', {
-        pattern: /^\d+\.\d+\.\d+$/
+        pattern: /^\d+\.\d+\.\d+$/,
       });
 
       expect(section.validate('1.0.0').valid).toBe(true);
@@ -336,11 +338,11 @@ describe('Template Constraints', () => {
 
     test('should check dependencies', () => {
       const section = new TemplateSection('Details', {
-        dependencies: ['Overview']
+        dependencies: ['Overview'],
       });
 
       const result = section.validate('content', {
-        sections: { Overview: null }
+        sections: { Overview: null },
       });
 
       expect(result.issues.some(i => i.constraint === 'dependency')).toBe(true);
@@ -348,10 +350,12 @@ describe('Template Constraints', () => {
 
     test('should run custom constraints', () => {
       const section = new TemplateSection('Custom');
-      section.addConstraint(new Constraint({
-        name: 'no-foo',
-        validator: (v) => !v.includes('foo') || 'Contains foo'
-      }));
+      section.addConstraint(
+        new Constraint({
+          name: 'no-foo',
+          validator: v => !v.includes('foo') || 'Contains foo',
+        })
+      );
 
       const result = section.validate('has foo in it');
       expect(result.issues.some(i => i.constraint === 'no-foo')).toBe(true);
@@ -364,7 +368,7 @@ describe('Template Constraints', () => {
     beforeEach(() => {
       template = new TemplateDefinition('Test Template', {
         version: '1.0.0',
-        description: 'A test template'
+        description: 'A test template',
       });
     });
 
@@ -396,8 +400,8 @@ describe('Template Constraints', () => {
       const doc = {
         sections: {
           Title: 'My Title',
-          Body: 'My content here'
-        }
+          Body: 'My content here',
+        },
       };
 
       const result = template.validate(doc);
@@ -418,8 +422,8 @@ describe('Template Constraints', () => {
       const doc = {
         sections: {},
         checklists: {
-          Tasks: { 'task-1': false }
-        }
+          Tasks: { 'task-1': false },
+        },
       };
 
       const result = template.validate(doc);
@@ -428,10 +432,12 @@ describe('Template Constraints', () => {
     });
 
     test('should run global constraints', () => {
-      template.addGlobalConstraint(new Constraint({
-        name: 'has-version',
-        validator: (doc) => doc.version != null || 'Version required'
-      }));
+      template.addGlobalConstraint(
+        new Constraint({
+          name: 'has-version',
+          validator: doc => doc.version != null || 'Version required',
+        })
+      );
 
       const result = template.validate({ sections: {} });
       expect(result.global[0].valid).toBe(false);
@@ -489,15 +495,15 @@ This is the overview section.
         sections: {
           Overview: 'This is a detailed overview of the project structure and architecture.',
           Directories: '- src/\n- tests/',
-          Architecture: 'Clean architecture pattern'
+          Architecture: 'Clean architecture pattern',
         },
         checklists: {
           'Review Checklist': {
             'dirs-documented': true,
             'architecture-clear': true,
-            'dependencies-listed': true
-          }
-        }
+            'dependencies-listed': true,
+          },
+        },
       });
 
       expect(result.valid).toBe(true);
@@ -516,9 +522,9 @@ This is the overview section.
         sections: {
           Overview: 'Overview with {?unknown?} value',
           Directories: 'dirs',
-          Architecture: 'arch'
+          Architecture: 'arch',
         },
-        uncertainties: [{ type: 'unknown', value: 'unknown' }]
+        uncertainties: [{ type: 'unknown', value: 'unknown' }],
       };
 
       const result = strictEngine.validate('Structure', doc);
@@ -529,8 +535,8 @@ This is the overview section.
     test('should generate template document', () => {
       const content = engine.generate('Structure', {
         sections: {
-          Overview: 'My project overview'
-        }
+          Overview: 'My project overview',
+        },
       });
 
       expect(content).toContain('# Structure');
@@ -539,8 +545,8 @@ This is the overview section.
       expect(content).toContain('{!TODO:'); // Required unfilled section
     });
 
-    test('should emit events on validation', (done) => {
-      engine.on('validated', (event) => {
+    test('should emit events on validation', done => {
+      engine.on('validated', event => {
         expect(event.template).toBe('Structure');
         done();
       });
@@ -548,8 +554,8 @@ This is the overview section.
       engine.validate('Structure', { sections: {} });
     });
 
-    test('should emit events on template registration', (done) => {
-      engine.on('template:registered', (name) => {
+    test('should emit events on template registration', done => {
+      engine.on('template:registered', name => {
         expect(name).toBe('NewTemplate');
         done();
       });

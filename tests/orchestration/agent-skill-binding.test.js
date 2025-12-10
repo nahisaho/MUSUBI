@@ -8,7 +8,7 @@ const {
   AgentDefinition,
   BindingRecord,
   AgentStatus,
-  CapabilityMatcher
+  CapabilityMatcher,
 } = require('../../src/orchestration/agent-skill-binding');
 
 // Mock dependencies
@@ -46,7 +46,7 @@ const createMockRegistry = () => ({
       }
     }
     return result;
-  }
+  },
 });
 
 describe('AgentSkillBinding', () => {
@@ -63,7 +63,7 @@ describe('AgentSkillBinding', () => {
       name: 'Analysis Skill',
       category: 'analysis',
       tags: ['data-analysis', 'statistics'],
-      requiredCapabilities: ['data-analysis', 'statistics']
+      requiredCapabilities: ['data-analysis', 'statistics'],
     });
 
     mockRegistry.register({
@@ -71,7 +71,7 @@ describe('AgentSkillBinding', () => {
       name: 'Generation Skill',
       category: 'generation',
       tags: ['text-generation'],
-      requiredCapabilities: ['text-generation']
+      requiredCapabilities: ['text-generation'],
     });
 
     mockRegistry.register({
@@ -79,7 +79,7 @@ describe('AgentSkillBinding', () => {
       name: 'Validation Skill',
       category: 'validation',
       tags: ['validation', 'testing'],
-      requiredCapabilities: ['validation', 'testing']
+      requiredCapabilities: ['validation', 'testing'],
     });
   });
 
@@ -90,7 +90,7 @@ describe('AgentSkillBinding', () => {
         name: 'Test Agent',
         description: 'A test agent',
         capabilities: ['data-analysis', 'statistics'],
-        permissions: ['read', 'write']
+        permissions: ['read', 'write'],
       });
 
       const result = binder.registerAgent(agent);
@@ -114,7 +114,7 @@ describe('AgentSkillBinding', () => {
       const agent = new AgentDefinition({
         id: 'event-agent',
         name: 'Event Agent',
-        capabilities: ['test']
+        capabilities: ['test'],
       });
 
       binder.registerAgent(agent);
@@ -124,19 +124,23 @@ describe('AgentSkillBinding', () => {
 
   describe('Skill Binding', () => {
     beforeEach(() => {
-      binder.registerAgent(new AgentDefinition({
-        id: 'capable-agent',
-        name: 'Capable Agent',
-        capabilities: ['data-analysis', 'statistics', 'text-generation'],
-        permissions: ['read', 'write', 'execute']
-      }));
+      binder.registerAgent(
+        new AgentDefinition({
+          id: 'capable-agent',
+          name: 'Capable Agent',
+          capabilities: ['data-analysis', 'statistics', 'text-generation'],
+          permissions: ['read', 'write', 'execute'],
+        })
+      );
 
-      binder.registerAgent(new AgentDefinition({
-        id: 'limited-agent',
-        name: 'Limited Agent',
-        capabilities: ['data-analysis'],
-        permissions: ['read']
-      }));
+      binder.registerAgent(
+        new AgentDefinition({
+          id: 'limited-agent',
+          name: 'Limited Agent',
+          capabilities: ['data-analysis'],
+          permissions: ['read'],
+        })
+      );
     });
 
     test('should bind skill to capable agent', () => {
@@ -165,7 +169,7 @@ describe('AgentSkillBinding', () => {
       expect(listener).toHaveBeenCalledWith(
         expect.objectContaining({
           agentId: 'capable-agent',
-          skillId: 'analysis-skill'
+          skillId: 'analysis-skill',
         })
       );
     });
@@ -173,11 +177,13 @@ describe('AgentSkillBinding', () => {
 
   describe('Skill Unbinding', () => {
     beforeEach(() => {
-      binder.registerAgent(new AgentDefinition({
-        id: 'test-agent',
-        name: 'Test Agent',
-        capabilities: ['data-analysis', 'statistics']
-      }));
+      binder.registerAgent(
+        new AgentDefinition({
+          id: 'test-agent',
+          name: 'Test Agent',
+          capabilities: ['data-analysis', 'statistics'],
+        })
+      );
 
       binder.bind('test-agent', 'analysis-skill');
     });
@@ -201,26 +207,32 @@ describe('AgentSkillBinding', () => {
 
   describe('Best Agent Selection', () => {
     beforeEach(() => {
-      binder.registerAgent(new AgentDefinition({
-        id: 'perfect-match',
-        name: 'Perfect Match',
-        capabilities: ['data-analysis', 'statistics', 'machine-learning'],
-        priority: 'high'
-      }));
+      binder.registerAgent(
+        new AgentDefinition({
+          id: 'perfect-match',
+          name: 'Perfect Match',
+          capabilities: ['data-analysis', 'statistics', 'machine-learning'],
+          priority: 'high',
+        })
+      );
 
-      binder.registerAgent(new AgentDefinition({
-        id: 'partial-match',
-        name: 'Partial Match',
-        capabilities: ['data-analysis'],
-        priority: 'normal'
-      }));
+      binder.registerAgent(
+        new AgentDefinition({
+          id: 'partial-match',
+          name: 'Partial Match',
+          capabilities: ['data-analysis'],
+          priority: 'normal',
+        })
+      );
 
-      binder.registerAgent(new AgentDefinition({
-        id: 'no-match',
-        name: 'No Match',
-        capabilities: ['text-generation'],
-        priority: 'normal'
-      }));
+      binder.registerAgent(
+        new AgentDefinition({
+          id: 'no-match',
+          name: 'No Match',
+          capabilities: ['text-generation'],
+          priority: 'normal',
+        })
+      );
     });
 
     test('should find best agent for skill', () => {
@@ -236,9 +248,9 @@ describe('AgentSkillBinding', () => {
 
     test('should consider agent availability', () => {
       binder.setAgentStatus('perfect-match', AgentStatus.BUSY);
-      
+
       const result = binder.findBestAgentForSkill('analysis-skill');
-      
+
       expect(result).not.toBeNull();
       expect(result.agent.id).not.toBe('perfect-match');
     });
@@ -246,11 +258,13 @@ describe('AgentSkillBinding', () => {
 
   describe('Agent Status Management', () => {
     beforeEach(() => {
-      binder.registerAgent(new AgentDefinition({
-        id: 'status-agent',
-        name: 'Status Agent',
-        capabilities: ['test']
-      }));
+      binder.registerAgent(
+        new AgentDefinition({
+          id: 'status-agent',
+          name: 'Status Agent',
+          capabilities: ['test'],
+        })
+      );
     });
 
     test('should update agent status', () => {
@@ -267,17 +281,19 @@ describe('AgentSkillBinding', () => {
       expect(listener).toHaveBeenCalledWith(
         expect.objectContaining({
           agentId: 'status-agent',
-          newStatus: AgentStatus.MAINTENANCE
+          newStatus: AgentStatus.MAINTENANCE,
         })
       );
     });
 
     test('should get available agents', () => {
-      binder.registerAgent(new AgentDefinition({
-        id: 'busy-agent',
-        name: 'Busy Agent',
-        capabilities: ['test']
-      }));
+      binder.registerAgent(
+        new AgentDefinition({
+          id: 'busy-agent',
+          name: 'Busy Agent',
+          capabilities: ['test'],
+        })
+      );
 
       binder.setAgentStatus('busy-agent', AgentStatus.BUSY);
 
@@ -289,11 +305,13 @@ describe('AgentSkillBinding', () => {
 
   describe('Capability Scoring', () => {
     test('should calculate capability score', () => {
-      binder.registerAgent(new AgentDefinition({
-        id: 'scored-agent',
-        name: 'Scored Agent',
-        capabilities: ['data-analysis', 'statistics', 'visualization']
-      }));
+      binder.registerAgent(
+        new AgentDefinition({
+          id: 'scored-agent',
+          name: 'Scored Agent',
+          capabilities: ['data-analysis', 'statistics', 'visualization'],
+        })
+      );
 
       const matcher = binder.getMatcher();
       const score = matcher.calculateScore(
@@ -306,17 +324,16 @@ describe('AgentSkillBinding', () => {
     });
 
     test('should return 0 for no matching capabilities', () => {
-      binder.registerAgent(new AgentDefinition({
-        id: 'mismatched-agent',
-        name: 'Mismatched Agent',
-        capabilities: ['text-generation']
-      }));
+      binder.registerAgent(
+        new AgentDefinition({
+          id: 'mismatched-agent',
+          name: 'Mismatched Agent',
+          capabilities: ['text-generation'],
+        })
+      );
 
       const matcher = binder.getMatcher();
-      const score = matcher.calculateScore(
-        ['text-generation'],
-        ['validation', 'testing']
-      );
+      const score = matcher.calculateScore(['text-generation'], ['validation', 'testing']);
 
       expect(score).toBe(0);
     });
@@ -326,12 +343,14 @@ describe('AgentSkillBinding', () => {
     beforeEach(() => {
       // Register multiple capable agents
       for (let i = 1; i <= 3; i++) {
-        binder.registerAgent(new AgentDefinition({
-          id: `lb-agent-${i}`,
-          name: `LB Agent ${i}`,
-          capabilities: ['data-analysis', 'statistics'],
-          maxConcurrentTasks: 5
-        }));
+        binder.registerAgent(
+          new AgentDefinition({
+            id: `lb-agent-${i}`,
+            name: `LB Agent ${i}`,
+            capabilities: ['data-analysis', 'statistics'],
+            maxConcurrentTasks: 5,
+          })
+        );
       }
     });
 
@@ -357,11 +376,13 @@ describe('AgentSkillBinding', () => {
 
   describe('Agent Unregistration', () => {
     test('should unregister agent and clean up bindings', () => {
-      binder.registerAgent(new AgentDefinition({
-        id: 'removable-agent',
-        name: 'Removable Agent',
-        capabilities: ['data-analysis', 'statistics']
-      }));
+      binder.registerAgent(
+        new AgentDefinition({
+          id: 'removable-agent',
+          name: 'Removable Agent',
+          capabilities: ['data-analysis', 'statistics'],
+        })
+      );
 
       binder.bind('removable-agent', 'analysis-skill');
 
@@ -380,7 +401,7 @@ describe('AgentDefinition', () => {
       description: 'A test agent',
       capabilities: ['cap1', 'cap2'],
       permissions: ['perm1'],
-      maxConcurrentTasks: 10
+      maxConcurrentTasks: 10,
     });
 
     const validation = agent.validate();
@@ -390,7 +411,7 @@ describe('AgentDefinition', () => {
   test('should detect invalid agent definition', () => {
     const agent = new AgentDefinition({
       id: '',
-      name: ''
+      name: '',
     });
 
     const validation = agent.validate();
@@ -401,7 +422,7 @@ describe('AgentDefinition', () => {
 describe('BindingRecord', () => {
   test('should create binding record', () => {
     const binding = new BindingRecord('agent-1', 'skill-1', {
-      score: 80
+      score: 80,
     });
 
     expect(binding.agentId).toBe('agent-1');
@@ -411,10 +432,10 @@ describe('BindingRecord', () => {
 
   test('should update stats', () => {
     const binding = new BindingRecord('agent-1', 'skill-1');
-    
+
     binding.updateStats(true, 100);
     binding.updateStats(true, 200);
-    
+
     expect(binding.executionCount).toBe(2);
     expect(binding.successRate).toBe(1.0);
   });
@@ -422,7 +443,7 @@ describe('BindingRecord', () => {
 
 describe('CapabilityMatcher', () => {
   let matcher;
-  
+
   beforeEach(() => {
     matcher = new CapabilityMatcher();
   });
@@ -437,19 +458,13 @@ describe('CapabilityMatcher', () => {
   });
 
   test('should handle partial matches', () => {
-    const score = matcher.calculateScore(
-      ['data-analysis'],
-      ['data-analysis', 'statistics']
-    );
+    const score = matcher.calculateScore(['data-analysis'], ['data-analysis', 'statistics']);
 
     expect(score).toBe(50);
   });
 
   test('should handle no match', () => {
-    const score = matcher.calculateScore(
-      ['text-generation'],
-      ['data-analysis', 'statistics']
-    );
+    const score = matcher.calculateScore(['text-generation'], ['data-analysis', 'statistics']);
 
     expect(score).toBe(0);
   });

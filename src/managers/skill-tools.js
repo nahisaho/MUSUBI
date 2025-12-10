@@ -2,7 +2,7 @@
  * @fileoverview Skill Tools Manager
  * @description Manage allowed-tools configuration for MUSUBI skills
  * @version 3.11.0
- * 
+ *
  * Features:
  * - Load skill tool configurations from YAML
  * - Validate tool availability
@@ -22,19 +22,8 @@ const { EventEmitter } = require('events');
  * Default tool sets for common skill categories
  */
 const DEFAULT_TOOL_SETS = {
-  requirements: [
-    'file_read',
-    'file_write',
-    'search_files',
-    'read_resource'
-  ],
-  design: [
-    'file_read',
-    'file_write',
-    'search_files',
-    'create_directory',
-    'read_resource'
-  ],
+  requirements: ['file_read', 'file_write', 'search_files', 'read_resource'],
+  design: ['file_read', 'file_write', 'search_files', 'create_directory', 'read_resource'],
   implementation: [
     'file_read',
     'file_write',
@@ -42,48 +31,23 @@ const DEFAULT_TOOL_SETS = {
     'create_directory',
     'run_command',
     'read_resource',
-    'code_analysis'
-  ],
-  testing: [
-    'file_read',
-    'file_write',
-    'search_files',
-    'run_command',
-    'test_runner'
-  ],
-  validation: [
-    'file_read',
-    'search_files',
-    'read_resource',
-    'validate'
-  ],
-  documentation: [
-    'file_read',
-    'file_write',
-    'search_files',
-    'read_resource'
-  ],
-  analysis: [
-    'file_read',
-    'search_files',
     'code_analysis',
-    'read_resource'
   ],
-  deployment: [
-    'file_read',
-    'run_command',
-    'deploy'
-  ]
+  testing: ['file_read', 'file_write', 'search_files', 'run_command', 'test_runner'],
+  validation: ['file_read', 'search_files', 'read_resource', 'validate'],
+  documentation: ['file_read', 'file_write', 'search_files', 'read_resource'],
+  analysis: ['file_read', 'search_files', 'code_analysis', 'read_resource'],
+  deployment: ['file_read', 'run_command', 'deploy'],
 };
 
 /**
  * Tool restriction levels
  */
 const RestrictionLevel = {
-  NONE: 'none',           // No restrictions
-  STANDARD: 'standard',   // Default restrictions
-  STRICT: 'strict',       // Minimal tools only
-  CUSTOM: 'custom'        // Custom configuration
+  NONE: 'none', // No restrictions
+  STANDARD: 'standard', // Default restrictions
+  STRICT: 'strict', // Minimal tools only
+  CUSTOM: 'custom', // Custom configuration
 };
 
 /**
@@ -161,7 +125,7 @@ class SkillToolConfig {
       deniedTools: this.deniedTools,
       restrictionLevel: this.restrictionLevel,
       toolOverrides: this.toolOverrides,
-      inheritFrom: this.inheritFrom
+      inheritFrom: this.inheritFrom,
     };
   }
 }
@@ -176,7 +140,7 @@ class SkillToolsManager extends EventEmitter {
       configDir: options.configDir || '.musubi/tools',
       defaultToolSet: options.defaultToolSet || 'standard',
       enableInheritance: options.enableInheritance !== false,
-      ...options
+      ...options,
     };
 
     this.skillConfigs = new Map();
@@ -206,7 +170,6 @@ class SkillToolsManager extends EventEmitter {
       await this._processConfig(config);
       this.emit('configLoaded', configPath);
       return config;
-
     } catch (error) {
       if (error.code === 'ENOENT') {
         return null;
@@ -266,7 +229,7 @@ class SkillToolsManager extends EventEmitter {
    */
   setSkillConfig(skillName, config) {
     const skillConfig = new SkillToolConfig(skillName, config);
-    
+
     // Handle inheritance
     if (this.options.enableInheritance && skillConfig.inheritFrom) {
       const parentConfig = this.skillConfigs.get(skillConfig.inheritFrom);
@@ -302,7 +265,7 @@ class SkillToolsManager extends EventEmitter {
    */
   getAllowedTools(skillName, options = {}) {
     const config = this.skillConfigs.get(skillName);
-    
+
     if (!config) {
       // Return default tools based on skill category
       return this._getDefaultToolsForSkill(skillName);
@@ -324,7 +287,7 @@ class SkillToolsManager extends EventEmitter {
    */
   _getDefaultToolsForSkill(skillName) {
     const lowerName = skillName.toLowerCase();
-    
+
     for (const [category, tools] of Object.entries(DEFAULT_TOOL_SETS)) {
       if (lowerName.includes(category)) {
         return [...tools];
@@ -366,7 +329,7 @@ class SkillToolsManager extends EventEmitter {
       valid: missing.length === 0,
       available,
       missing,
-      coverage: available.length / allowedTools.length
+      coverage: available.length / allowedTools.length,
     };
   }
 
@@ -385,22 +348,22 @@ class SkillToolsManager extends EventEmitter {
 
     if (context.readOnly) {
       // Remove write operations
-      optimizedTools = optimizedTools.filter(t => 
-        !t.includes('write') && !t.includes('create') && !t.includes('delete')
+      optimizedTools = optimizedTools.filter(
+        t => !t.includes('write') && !t.includes('create') && !t.includes('delete')
       );
     }
 
     if (context.noNetwork) {
       // Remove network operations
-      optimizedTools = optimizedTools.filter(t => 
-        !t.includes('http') && !t.includes('api') && !t.includes('fetch')
+      optimizedTools = optimizedTools.filter(
+        t => !t.includes('http') && !t.includes('api') && !t.includes('fetch')
       );
     }
 
     if (context.minimalPermissions) {
       // Keep only essential tools
-      optimizedTools = optimizedTools.filter(t => 
-        t.includes('read') || t.includes('search') || t.includes('list')
+      optimizedTools = optimizedTools.filter(
+        t => t.includes('read') || t.includes('search') || t.includes('list')
       );
     }
 
@@ -408,7 +371,7 @@ class SkillToolsManager extends EventEmitter {
       skillName,
       allowedTools: optimizedTools,
       restrictionLevel: config?.restrictionLevel || RestrictionLevel.STANDARD,
-      context
+      context,
     };
   }
 
@@ -422,19 +385,19 @@ class SkillToolsManager extends EventEmitter {
 
     for (const skill of skills) {
       const skillName = skill.name || skill.id;
-      
+
       // Determine category from skill metadata
       const category = this._detectSkillCategory(skill);
       const defaultTools = DEFAULT_TOOL_SETS[category] || DEFAULT_TOOL_SETS.validation;
 
       // Merge with explicitly defined tools
-      const allowedTools = skill.allowedTools 
+      const allowedTools = skill.allowedTools
         ? [...new Set([...defaultTools, ...skill.allowedTools])]
         : defaultTools;
 
       const config = this.setSkillConfig(skillName, {
         allowedTools,
-        restrictionLevel: skill.restrictionLevel || RestrictionLevel.STANDARD
+        restrictionLevel: skill.restrictionLevel || RestrictionLevel.STANDARD,
       });
 
       configs.set(skillName, config);
@@ -448,7 +411,8 @@ class SkillToolsManager extends EventEmitter {
    * @private
    */
   _detectSkillCategory(skill) {
-    const text = `${skill.name || ''} ${skill.description || ''} ${skill.purpose || ''}`.toLowerCase();
+    const text =
+      `${skill.name || ''} ${skill.description || ''} ${skill.purpose || ''}`.toLowerCase();
 
     const categoryKeywords = {
       requirements: ['requirement', 'ears', 'spec', 'feature'],
@@ -458,7 +422,7 @@ class SkillToolsManager extends EventEmitter {
       validation: ['validate', 'check', 'verify', 'lint'],
       documentation: ['document', 'readme', 'guide', 'doc'],
       analysis: ['analyze', 'audit', 'review', 'inspect'],
-      deployment: ['deploy', 'release', 'publish', 'ci']
+      deployment: ['deploy', 'release', 'publish', 'ci'],
     };
 
     for (const [category, keywords] of Object.entries(categoryKeywords)) {
@@ -491,10 +455,10 @@ class SkillToolsManager extends EventEmitter {
       version: '1.0.0',
       exportedAt: new Date().toISOString(),
       defaults: {
-        toolSet: this.options.defaultToolSet
+        toolSet: this.options.defaultToolSet,
       },
       toolDependencies,
-      skills
+      skills,
     };
   }
 
@@ -535,7 +499,7 @@ class SkillToolsManager extends EventEmitter {
    */
   getStats() {
     const skills = Array.from(this.skillConfigs.values());
-    
+
     const byRestriction = {};
     for (const level of Object.values(RestrictionLevel)) {
       byRestriction[level] = skills.filter(s => s.restrictionLevel === level).length;
@@ -552,7 +516,7 @@ class SkillToolsManager extends EventEmitter {
       totalSkills: this.skillConfigs.size,
       totalUniqueTools: allTools.size,
       availableTools: this.availableTools.size,
-      byRestrictionLevel: byRestriction
+      byRestrictionLevel: byRestriction,
     };
   }
 }
@@ -561,5 +525,5 @@ module.exports = {
   SkillToolsManager,
   SkillToolConfig,
   RestrictionLevel,
-  DEFAULT_TOOL_SETS
+  DEFAULT_TOOL_SETS,
 };

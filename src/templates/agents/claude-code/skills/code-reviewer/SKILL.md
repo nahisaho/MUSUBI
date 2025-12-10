@@ -96,11 +96,13 @@ musubi-workflow next testing
 ### レビュー結果に応じたアクション
 
 **レビュー承認の場合**:
+
 ```bash
 musubi-workflow next testing
 ```
 
 **修正が必要な場合（フィードバックループ）**:
+
 ```bash
 musubi-workflow feedback review implementation -r "コード品質の問題を発見"
 ```

@@ -39,7 +39,7 @@ const { StuckDetector } = require('musubi/src/analyzers/stuck-detector');
 
 const detector = new StuckDetector({
   repeatThreshold: 3,
-  minHistoryLength: 5
+  minHistoryLength: 5,
 });
 
 // Monitor debugging actions
@@ -64,7 +64,7 @@ const issue = new IssueInfo({
   number: 42,
   title: 'App crashes on login',
   body: '## Steps to reproduce\n1. Click login\n2. App crashes',
-  labels: ['bug', 'critical']
+  labels: ['bug', 'critical'],
 });
 
 const resolver = new IssueResolver();
@@ -83,7 +83,8 @@ const analyzer = new SecurityAnalyzer();
 const result = analyzer.analyzeContent(code, 'vulnerable.js');
 
 // Check for security vulnerabilities
-result.risks.filter(r => r.category === 'vulnerability')
+result.risks
+  .filter(r => r.category === 'vulnerability')
   .forEach(risk => console.log(risk.pattern, risk.severity));
 ```
 

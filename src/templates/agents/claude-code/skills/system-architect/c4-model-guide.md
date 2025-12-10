@@ -15,6 +15,7 @@ The C4 model is a set of hierarchical diagrams for visualizing software architec
 **Scope**: Single software system
 
 **Primary Elements**:
+
 - Your system (center)
 - Users (people)
 - External systems
@@ -24,16 +25,16 @@ The C4 model is a set of hierarchical diagrams for visualizing software architec
 ```mermaid
 C4Context
     title System Context Diagram - E-Commerce Platform
-    
+
     Person(customer, "Customer", "A user who purchases products")
     Person(admin, "Admin", "System administrator")
-    
+
     System(ecommerce, "E-Commerce Platform", "Allows customers to browse and purchase products")
-    
+
     System_Ext(payment, "Payment Gateway", "Processes credit card payments")
     System_Ext(shipping, "Shipping API", "Calculates shipping rates")
     System_Ext(email, "Email Service", "Sends transactional emails")
-    
+
     Rel(customer, ecommerce, "Browses, purchases")
     Rel(admin, ecommerce, "Manages products, orders")
     Rel(ecommerce, payment, "Processes payments")
@@ -42,21 +43,25 @@ C4Context
 ```
 
 **Template**:
+
 ```markdown
 ## Level 1: System Context
 
 ### System
+
 - **Name**: [System Name]
 - **Description**: [What the system does]
 
 ### Users
-| User | Description |
-|------|-------------|
+
+| User        | Description                  |
+| ----------- | ---------------------------- |
 | [User Type] | [User description and goals] |
 
 ### External Systems
-| System | Description | Integration |
-|--------|-------------|-------------|
+
+| System            | Description    | Integration        |
+| ----------------- | -------------- | ------------------ |
 | [External System] | [What it does] | [How we integrate] |
 ```
 
@@ -69,6 +74,7 @@ C4Context
 **Scope**: Single software system
 
 **Primary Elements**:
+
 - Containers (applications, data stores, etc.)
 - Relationships between containers
 
@@ -77,9 +83,9 @@ C4Context
 ```mermaid
 C4Container
     title Container Diagram - E-Commerce Platform
-    
+
     Person(customer, "Customer")
-    
+
     Container_Boundary(c1, "E-Commerce Platform") {
         Container(web, "Web Application", "React", "Delivers the web frontend")
         Container(api, "API Server", "Node.js/Express", "Provides REST API")
@@ -88,9 +94,9 @@ C4Container
         ContainerDb(cache, "Cache", "Redis", "Caches sessions, products")
         ContainerDb(queue, "Message Queue", "RabbitMQ", "Handles async messaging")
     }
-    
+
     System_Ext(payment, "Payment Gateway")
-    
+
     Rel(customer, web, "Uses", "HTTPS")
     Rel(web, api, "API calls", "HTTPS/JSON")
     Rel(api, db, "Reads/Writes")
@@ -101,26 +107,27 @@ C4Container
 ```
 
 **Template**:
+
 ```markdown
 ## Level 2: Container Diagram
 
 ### Containers
 
-| Container | Technology | Description |
-|-----------|------------|-------------|
-| Web App | React | Frontend SPA |
-| API Server | Node.js/Express | REST API backend |
-| Database | PostgreSQL | Persistent storage |
-| Cache | Redis | Session and data cache |
-| Queue | RabbitMQ | Async message processing |
+| Container  | Technology      | Description              |
+| ---------- | --------------- | ------------------------ |
+| Web App    | React           | Frontend SPA             |
+| API Server | Node.js/Express | REST API backend         |
+| Database   | PostgreSQL      | Persistent storage       |
+| Cache      | Redis           | Session and data cache   |
+| Queue      | RabbitMQ        | Async message processing |
 
 ### Communication
 
-| From | To | Protocol | Purpose |
-|------|----|-----------| --------|
-| Web App | API Server | HTTPS/REST | API calls |
-| API Server | Database | TCP | Data persistence |
-| API Server | Cache | TCP | Caching |
+| From       | To         | Protocol   | Purpose          |
+| ---------- | ---------- | ---------- | ---------------- |
+| Web App    | API Server | HTTPS/REST | API calls        |
+| API Server | Database   | TCP        | Data persistence |
+| API Server | Cache      | TCP        | Caching          |
 ```
 
 ---
@@ -132,6 +139,7 @@ C4Container
 **Scope**: Single container
 
 **Primary Elements**:
+
 - Components (modules, services, controllers)
 - Relationships between components
 
@@ -140,7 +148,7 @@ C4Container
 ```mermaid
 C4Component
     title Component Diagram - API Server
-    
+
     Container_Boundary(api, "API Server") {
         Component(auth, "Auth Controller", "Express Router", "Handles authentication")
         Component(user, "User Controller", "Express Router", "User CRUD operations")
@@ -150,9 +158,9 @@ C4Component
         Component(orderService, "Order Service", "TypeScript", "Order business logic")
         Component(repo, "Repository Layer", "TypeScript", "Data access abstraction")
     }
-    
+
     ContainerDb(db, "Database", "PostgreSQL")
-    
+
     Rel(auth, authService, "Uses")
     Rel(user, userService, "Uses")
     Rel(order, orderService, "Uses")
@@ -163,23 +171,24 @@ C4Component
 ```
 
 **Template**:
+
 ```markdown
 ## Level 3: Component Diagram - [Container Name]
 
 ### Components
 
-| Component | Type | Responsibility |
-|-----------|------|----------------|
+| Component       | Type       | Responsibility        |
+| --------------- | ---------- | --------------------- |
 | Auth Controller | Controller | Handle auth endpoints |
-| Auth Service | Service | Authentication logic |
-| User Repository | Repository | User data access |
+| Auth Service    | Service    | Authentication logic  |
+| User Repository | Repository | User data access      |
 
 ### Dependencies
 
-| Component | Depends On | Purpose |
-|-----------|------------|---------|
-| Auth Controller | Auth Service | Business logic |
-| Auth Service | User Repository | Data access |
+| Component       | Depends On      | Purpose        |
+| --------------- | --------------- | -------------- |
+| Auth Controller | Auth Service    | Business logic |
+| Auth Service    | User Repository | Data access    |
 ```
 
 ---
@@ -191,6 +200,7 @@ C4Component
 **Scope**: Single component
 
 **Primary Elements**:
+
 - Classes, interfaces, modules
 - Relationships (inheritance, composition)
 
@@ -208,18 +218,18 @@ classDiagram
         +validateToken(token): boolean
         +refreshToken(token): string
     }
-    
+
     class UserRepository {
         +findByEmail(email): User
         +create(user): User
         +update(id, data): User
     }
-    
+
     class JwtService {
         +sign(payload): string
         +verify(token): Payload
     }
-    
+
     AuthService --> UserRepository
     AuthService --> JwtService
 ```
@@ -230,14 +240,14 @@ classDiagram
 
 ### Element Types
 
-| Element | Notation | Description |
-|---------|----------|-------------|
-| Person | ![Person](stick figure) | A user of the system |
-| System | ![System](box) | The system being described |
-| External System | ![External](dashed box) | External dependency |
-| Container | ![Container](box in system) | Deployable unit |
-| Component | ![Component](box in container) | Code module |
-| Database | ![Database](cylinder) | Data storage |
+| Element         | Notation                       | Description                |
+| --------------- | ------------------------------ | -------------------------- |
+| Person          | ![Person](stick figure)        | A user of the system       |
+| System          | ![System](box)                 | The system being described |
+| External System | ![External](dashed box)        | External dependency        |
+| Container       | ![Container](box in system)    | Deployable unit            |
+| Component       | ![Component](box in container) | Code module                |
+| Database        | ![Database](cylinder)          | Data storage               |
 
 ### Relationship Arrows
 
@@ -282,27 +292,30 @@ Examples:
 [Mermaid diagram]
 
 ### Systems and Users
+
 | Element | Type | Description |
-|---------|------|-------------|
-| | | |
+| ------- | ---- | ----------- |
+|         |      |             |
 
 ## Level 2: Container Diagram
 
 [Mermaid diagram]
 
 ### Containers
+
 | Container | Technology | Purpose |
-|-----------|------------|---------|
-| | | |
+| --------- | ---------- | ------- |
+|           |            |         |
 
 ## Level 3: Component Diagram - [Container]
 
 [Mermaid diagram]
 
 ### Components
+
 | Component | Type | Responsibility |
-|-----------|------|----------------|
-| | | |
+| --------- | ---- | -------------- |
+|           |      |                |
 
 ## Technology Decisions
 
@@ -310,8 +323,8 @@ See ADR-XXX for rationale.
 
 ## Requirements Traceability
 
-| REQ ID | Addressed By |
-|--------|--------------|
+| REQ ID  | Addressed By |
+| ------- | ------------ |
 | REQ-001 | Auth Service |
 ```
 
@@ -319,10 +332,10 @@ See ADR-XXX for rationale.
 
 ## Tools for C4 Diagrams
 
-| Tool | Format | Notes |
-|------|--------|-------|
-| Mermaid | Markdown | Recommended - works in GitHub |
-| PlantUML | Text | Rich features |
-| Structurizr | DSL | Official C4 tooling |
-| Draw.io | Visual | Easy for non-technical |
-| Lucidchart | Visual | Collaboration features |
+| Tool        | Format   | Notes                         |
+| ----------- | -------- | ----------------------------- |
+| Mermaid     | Markdown | Recommended - works in GitHub |
+| PlantUML    | Text     | Rich features                 |
+| Structurizr | DSL      | Official C4 tooling           |
+| Draw.io     | Visual   | Easy for non-technical        |
+| Lucidchart  | Visual   | Collaboration features        |

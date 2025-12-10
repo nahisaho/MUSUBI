@@ -20,12 +20,12 @@ EXPLAIN SELECT * FROM orders WHERE user_id = 123;
 
 ### Common Query Plan Issues
 
-| Issue | Symptom | Solution |
-|-------|---------|----------|
-| Seq Scan | Full table scan | Add index |
-| Nested Loop | Slow joins | Review join strategy |
-| Sort | Excessive sorting | Add sorted index |
-| Hash Join | Large hash tables | Increase work_mem |
+| Issue       | Symptom           | Solution             |
+| ----------- | ----------------- | -------------------- |
+| Seq Scan    | Full table scan   | Add index            |
+| Nested Loop | Slow joins        | Review join strategy |
+| Sort        | Excessive sorting | Add sorted index     |
+| Hash Join   | Large hash tables | Increase work_mem    |
 
 ---
 
@@ -52,12 +52,12 @@ CREATE INDEX idx_users_lower_email ON users(LOWER(email));
 
 ### Index Types
 
-| Type | Use Case | PostgreSQL | MySQL |
-|------|----------|------------|-------|
-| B-tree | Equality, range | Default | Default |
-| Hash | Equality only | `USING HASH` | Memory only |
-| GIN | Full-text, JSONB | `USING GIN` | N/A |
-| GiST | Geometric, range | `USING GIST` | N/A |
+| Type   | Use Case         | PostgreSQL   | MySQL       |
+| ------ | ---------------- | ------------ | ----------- |
+| B-tree | Equality, range  | Default      | Default     |
+| Hash   | Equality only    | `USING HASH` | Memory only |
+| GIN    | Full-text, JSONB | `USING GIN`  | N/A         |
+| GiST   | Geometric, range | `USING GIST` | N/A         |
 
 ### Avoid Over-Indexing
 
@@ -103,8 +103,8 @@ reserve_pool_size = 5
 const pool = new Pool({
   host: 'localhost',
   database: 'mydb',
-  max: 20,              // Maximum connections
-  min: 5,               // Minimum connections
+  max: 20, // Maximum connections
+  min: 5, // Minimum connections
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 });
@@ -173,7 +173,7 @@ long_query_time = 1
 -- PostgreSQL: Enable pg_stat_statements
 CREATE EXTENSION pg_stat_statements;
 
-SELECT 
+SELECT
   query,
   calls,
   total_exec_time / 1000 AS total_seconds,
@@ -188,7 +188,7 @@ LIMIT 10;
 
 ```sql
 -- PostgreSQL: Tables with sequential scans
-SELECT 
+SELECT
   schemaname,
   relname,
   seq_scan,
@@ -205,7 +205,7 @@ LIMIT 10;
 
 ```sql
 -- PostgreSQL: Unused indexes
-SELECT 
+SELECT
   schemaname,
   tablename,
   indexname,
@@ -247,7 +247,7 @@ ALTER TABLE tablename SET (
 ANALYZE tablename;
 
 -- View statistics
-SELECT 
+SELECT
   attname,
   n_distinct,
   most_common_vals,
@@ -271,16 +271,17 @@ CREATE TABLE orders (
   created_at TIMESTAMP
 ) PARTITION BY RANGE (created_at);
 
-CREATE TABLE orders_2024_01 
+CREATE TABLE orders_2024_01
   PARTITION OF orders
   FOR VALUES FROM ('2024-01-01') TO ('2024-02-01');
 
-CREATE TABLE orders_2024_02 
+CREATE TABLE orders_2024_02
   PARTITION OF orders
   FOR VALUES FROM ('2024-02-01') TO ('2024-03-01');
 ```
 
 ### Benefits of Partitioning
+
 - Faster queries with partition pruning
 - Easier data archival (drop old partitions)
 - Smaller indexes per partition
@@ -291,23 +292,27 @@ CREATE TABLE orders_2024_02
 ## Performance Checklist
 
 ### Query Level
+
 - [ ] Query plan analyzed
 - [ ] Appropriate indexes exist
 - [ ] No unnecessary columns selected
 - [ ] Pagination implemented
 
 ### Configuration Level
+
 - [ ] Buffer pool sized appropriately
 - [ ] Connection pool configured
 - [ ] Slow query logging enabled
 
 ### Maintenance Level
+
 - [ ] Regular VACUUM/ANALYZE
 - [ ] Index bloat monitored
 - [ ] Unused indexes removed
 - [ ] Table statistics current
 
 ### Monitoring Level
+
 - [ ] Query performance tracked
 - [ ] Connection count monitored
 - [ ] Disk I/O monitored

@@ -132,7 +132,7 @@ class TraceabilityService {
 
     try {
       const files = await fs.readdir(specsPath);
-      const reqFiles = files.filter((f) => f.endsWith('-requirements.md'));
+      const reqFiles = files.filter(f => f.endsWith('-requirements.md'));
 
       for (const file of reqFiles) {
         const filePath = path.join(specsPath, file);
@@ -156,7 +156,7 @@ class TraceabilityService {
         // Also check frontmatter for requirements list
         if (frontmatter.requirements) {
           for (const req of frontmatter.requirements) {
-            if (!requirements.find((r) => r.id === req.id)) {
+            if (!requirements.find(r => r.id === req.id)) {
               requirements.push({
                 id: req.id,
                 title: req.title || req.id,
@@ -185,7 +185,7 @@ class TraceabilityService {
 
     try {
       const files = await fs.readdir(specsPath);
-      const designFiles = files.filter((f) => f.endsWith('-design.md'));
+      const designFiles = files.filter(f => f.endsWith('-design.md'));
 
       for (const file of designFiles) {
         const filePath = path.join(specsPath, file);
@@ -216,7 +216,7 @@ class TraceabilityService {
 
     try {
       const files = await fs.readdir(specsPath);
-      const taskFiles = files.filter((f) => f.endsWith('-tasks.md'));
+      const taskFiles = files.filter(f => f.endsWith('-tasks.md'));
 
       for (const file of taskFiles) {
         const filePath = path.join(specsPath, file);
@@ -255,10 +255,10 @@ class TraceabilityService {
     const implementations = [];
 
     try {
-      await this.walkDirectory(srcPath, async (filePath) => {
+      await this.walkDirectory(srcPath, async filePath => {
         if (filePath.endsWith('.js') || filePath.endsWith('.ts')) {
           const content = await fs.readFile(filePath, 'utf-8');
-          
+
           // Look for @implements or @requirement tags
           const tagRegex = /@(?:implements|requirement)\s+(REQ-\d+[^\s]*)/g;
           let match;
@@ -292,10 +292,10 @@ class TraceabilityService {
   async walkDirectory(dir, callback) {
     try {
       const entries = await fs.readdir(dir, { withFileTypes: true });
-      
+
       for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
-        
+
         if (entry.isDirectory()) {
           if (!entry.name.startsWith('.') && entry.name !== 'node_modules') {
             await this.walkDirectory(fullPath, callback);

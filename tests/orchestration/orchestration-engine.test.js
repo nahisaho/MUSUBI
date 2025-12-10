@@ -1,6 +1,6 @@
 /**
  * OrchestrationEngine Tests
- * 
+ *
  * Tests for the core orchestration engine
  */
 
@@ -9,7 +9,7 @@ const {
   ExecutionContext,
   PatternType,
   ExecutionStatus,
-  Priority
+  Priority,
 } = require('../../src/orchestration/orchestration-engine');
 
 describe('OrchestrationEngine', () => {
@@ -29,7 +29,7 @@ describe('OrchestrationEngine', () => {
     it('should accept custom options', () => {
       const customEngine = new OrchestrationEngine({
         maxConcurrent: 10,
-        timeout: 60000
+        timeout: 60000,
       });
       expect(customEngine.config.maxConcurrent).toBe(10);
       expect(customEngine.config.timeout).toBe(60000);
@@ -45,7 +45,7 @@ describe('OrchestrationEngine', () => {
   describe('registerPattern', () => {
     it('should register a valid pattern', () => {
       const pattern = {
-        execute: async () => ({ result: 'test' })
+        execute: async () => ({ result: 'test' }),
       };
       engine.registerPattern('test-pattern', pattern);
       expect(engine.getPattern('test-pattern')).toBe(pattern);
@@ -66,13 +66,13 @@ describe('OrchestrationEngine', () => {
     it('should emit patternRegistered event', () => {
       const listener = jest.fn();
       engine.on('patternRegistered', listener);
-      
+
       const pattern = { execute: async () => {} };
       engine.registerPattern('event-test', pattern);
-      
+
       expect(listener).toHaveBeenCalledWith({
         name: 'event-test',
-        pattern
+        pattern,
       });
     });
 
@@ -104,7 +104,7 @@ describe('OrchestrationEngine', () => {
       engine.registerPattern('a', { execute: async () => {} });
       engine.registerPattern('b', { execute: async () => {} });
       engine.registerPattern('c', { execute: async () => {} });
-      
+
       const patterns = engine.listPatterns();
       expect(patterns).toContain('a');
       expect(patterns).toContain('b');
@@ -129,13 +129,13 @@ describe('OrchestrationEngine', () => {
     it('should emit skillRegistered event', () => {
       const listener = jest.fn();
       engine.on('skillRegistered', listener);
-      
+
       const skill = { name: 'event-skill' };
       engine.registerSkill('event-skill', skill);
-      
+
       expect(listener).toHaveBeenCalledWith({
         name: 'event-skill',
-        skill
+        skill,
       });
     });
   });
@@ -148,7 +148,7 @@ describe('OrchestrationEngine', () => {
     it('should return all registered skill names', () => {
       engine.registerSkill('skill-a', { name: 'a' });
       engine.registerSkill('skill-b', { name: 'b' });
-      
+
       const skills = engine.listSkills();
       expect(skills).toContain('skill-a');
       expect(skills).toContain('skill-b');
@@ -158,21 +158,19 @@ describe('OrchestrationEngine', () => {
 
   describe('execute', () => {
     it('should throw error for unknown pattern', async () => {
-      await expect(engine.execute('unknown')).rejects.toThrow(
-        'Unknown pattern: unknown'
-      );
+      await expect(engine.execute('unknown')).rejects.toThrow('Unknown pattern: unknown');
     });
 
     it('should execute pattern and return completed context', async () => {
       const pattern = {
-        execute: async (_context, _eng) => ({ success: true })
+        execute: async (_context, _eng) => ({ success: true }),
       };
       engine.registerPattern('success', pattern);
-      
+
       const context = await engine.execute('success', {
-        task: 'Test task'
+        task: 'Test task',
       });
-      
+
       expect(context.status).toBe(ExecutionStatus.COMPLETED);
       expect(context.output).toEqual({ success: true });
       expect(context.task).toBe('Test task');
@@ -180,12 +178,14 @@ describe('OrchestrationEngine', () => {
 
     it('should handle pattern execution failure', async () => {
       const pattern = {
-        execute: async () => { throw new Error('Test error'); }
+        execute: async () => {
+          throw new Error('Test error');
+        },
       };
       engine.registerPattern('fail', pattern);
-      
+
       const context = await engine.execute('fail');
-      
+
       expect(context.status).toBe(ExecutionStatus.FAILED);
       expect(context.error).toBe('Test error');
     });
@@ -193,15 +193,15 @@ describe('OrchestrationEngine', () => {
     it('should emit execution events', async () => {
       const startListener = jest.fn();
       const completeListener = jest.fn();
-      
+
       engine.on('executionStarted', startListener);
       engine.on('executionCompleted', completeListener);
-      
+
       const pattern = { execute: async () => ({ done: true }) };
       engine.registerPattern('events', pattern);
-      
+
       await engine.execute('events', { task: 'Event test' });
-      
+
       expect(startListener).toHaveBeenCalled();
       expect(completeListener).toHaveBeenCalled();
     });
@@ -209,48 +209,48 @@ describe('OrchestrationEngine', () => {
     it('should emit executionFailed on error', async () => {
       const failListener = jest.fn();
       engine.on('executionFailed', failListener);
-      
+
       const pattern = {
-        execute: async () => { throw new Error('Fail event'); }
+        execute: async () => {
+          throw new Error('Fail event');
+        },
       };
       engine.registerPattern('fail-event', pattern);
-      
+
       await engine.execute('fail-event');
-      
+
       expect(failListener).toHaveBeenCalled();
     });
 
     it('should set metadata with pattern name', async () => {
       const pattern = { execute: async () => ({}) };
       engine.registerPattern('meta-test', pattern);
-      
+
       const context = await engine.execute('meta-test');
-      
+
       expect(context.metadata.pattern).toBe('meta-test');
     });
   });
 
   describe('executeSkill', () => {
     it('should throw error for unknown skill', async () => {
-      await expect(engine.executeSkill('unknown', {})).rejects.toThrow(
-        'Unknown skill: unknown'
-      );
+      await expect(engine.executeSkill('unknown', {})).rejects.toThrow('Unknown skill: unknown');
     });
 
     it('should execute skill with execute method', async () => {
       const skill = {
-        execute: async (input) => ({ result: input.value * 2 })
+        execute: async input => ({ result: input.value * 2 }),
       };
       engine.registerSkill('double', skill);
-      
+
       const result = await engine.executeSkill('double', { value: 5 });
       expect(result).toEqual({ result: 10 });
     });
 
     it('should execute skill as function', async () => {
-      const skill = async (input) => ({ squared: input.n ** 2 });
+      const skill = async input => ({ squared: input.n ** 2 });
       engine.registerSkill('square', skill);
-      
+
       const result = await engine.executeSkill('square', { n: 4 });
       expect(result).toEqual({ squared: 16 });
     });
@@ -258,15 +258,15 @@ describe('OrchestrationEngine', () => {
     it('should emit skill execution events', async () => {
       const startListener = jest.fn();
       const completeListener = jest.fn();
-      
+
       engine.on('skillExecutionStarted', startListener);
       engine.on('skillExecutionCompleted', completeListener);
-      
+
       const skill = { execute: async () => ({ done: true }) };
       engine.registerSkill('events-skill', skill);
-      
+
       await engine.executeSkill('events-skill', {});
-      
+
       expect(startListener).toHaveBeenCalled();
       expect(completeListener).toHaveBeenCalled();
     });
@@ -274,10 +274,10 @@ describe('OrchestrationEngine', () => {
     it('should add child context to parent', async () => {
       const skill = { execute: async () => ({ done: true }) };
       engine.registerSkill('child-skill', skill);
-      
+
       const parentContext = new ExecutionContext({ task: 'parent' });
       await engine.executeSkill('child-skill', {}, parentContext);
-      
+
       expect(parentContext.children).toHaveLength(1);
       expect(parentContext.children[0].skill).toBe('child-skill');
     });
@@ -286,13 +286,13 @@ describe('OrchestrationEngine', () => {
   describe('resolveSkill', () => {
     beforeEach(() => {
       engine.registerSkill('requirements-analyst', {
-        keywords: ['requirement', 'ears', 'specification']
+        keywords: ['requirement', 'ears', 'specification'],
       });
       engine.registerSkill('test-engineer', {
-        keywords: ['test', 'testing', 'qa']
+        keywords: ['test', 'testing', 'qa'],
       });
       engine.registerSkill('code-generator', {
-        keywords: ['code', 'implement', 'generate']
+        keywords: ['code', 'implement', 'generate'],
       });
     });
 
@@ -313,12 +313,12 @@ describe('OrchestrationEngine', () => {
 
     it('should use custom skillResolver if provided', async () => {
       const customResolver = {
-        resolve: jest.fn().mockResolvedValue('custom-skill')
+        resolve: jest.fn().mockResolvedValue('custom-skill'),
       };
       engine.skillResolver = customResolver;
-      
+
       const skill = await engine.resolveSkill('any task');
-      
+
       expect(skill).toBe('custom-skill');
       expect(customResolver.resolve).toHaveBeenCalled();
     });
@@ -328,32 +328,32 @@ describe('OrchestrationEngine', () => {
     it('should set context to waiting status', async () => {
       const context = new ExecutionContext({ task: 'test' });
       await engine.requestHumanValidation(context, 'Approve?');
-      
+
       expect(context.status).toBe(ExecutionStatus.WAITING_FOR_HUMAN);
     });
 
     it('should emit humanValidationRequested event', async () => {
       const listener = jest.fn();
       engine.on('humanValidationRequested', listener);
-      
+
       const context = new ExecutionContext({ task: 'test' });
       await engine.requestHumanValidation(context, 'Approve this?');
-      
+
       expect(listener).toHaveBeenCalledWith({
         context,
-        question: 'Approve this?'
+        question: 'Approve this?',
       });
     });
 
     it('should use custom humanGate if provided', async () => {
       const humanGate = {
-        request: jest.fn().mockResolvedValue({ approved: true, feedback: 'OK' })
+        request: jest.fn().mockResolvedValue({ approved: true, feedback: 'OK' }),
       };
       engine.humanGate = humanGate;
-      
+
       const context = new ExecutionContext({ task: 'test' });
       const result = await engine.requestHumanValidation(context, 'Check?');
-      
+
       expect(result).toEqual({ approved: true, feedback: 'OK' });
       expect(humanGate.request).toHaveBeenCalled();
     });
@@ -361,7 +361,7 @@ describe('OrchestrationEngine', () => {
     it('should auto-approve when no humanGate', async () => {
       const context = new ExecutionContext({ task: 'test' });
       const result = await engine.requestHumanValidation(context, 'Check?');
-      
+
       expect(result.approved).toBe(true);
     });
   });
@@ -369,7 +369,7 @@ describe('OrchestrationEngine', () => {
   describe('getStatus', () => {
     it('should return empty status for new engine', () => {
       const status = engine.getStatus();
-      
+
       expect(status.activeExecutions).toBe(0);
       expect(status.patterns).toEqual([]);
       expect(status.skills).toEqual([]);
@@ -379,9 +379,9 @@ describe('OrchestrationEngine', () => {
     it('should return registered patterns and skills', () => {
       engine.registerPattern('p1', { execute: async () => {} });
       engine.registerSkill('s1', { name: 's1' });
-      
+
       const status = engine.getStatus();
-      
+
       expect(status.patterns).toContain('p1');
       expect(status.skills).toContain('s1');
     });
@@ -391,18 +391,18 @@ describe('OrchestrationEngine', () => {
     it('should cancel active context', async () => {
       // Start a long-running execution
       const pattern = {
-        execute: () => new Promise(resolve => setTimeout(resolve, 10000))
+        execute: () => new Promise(resolve => setTimeout(resolve, 10000)),
       };
       engine.registerPattern('long', pattern);
-      
+
       const _executePromise = engine.execute('long');
-      
+
       // Wait for execution to start
       await new Promise(resolve => setTimeout(resolve, 10));
-      
+
       // Get context ID from active contexts
       const contextId = Array.from(engine.activeContexts.keys())[0];
-      
+
       if (contextId) {
         engine.cancel(contextId);
         expect(engine.activeContexts.has(contextId)).toBe(false);
@@ -412,12 +412,12 @@ describe('OrchestrationEngine', () => {
     it('should emit executionCancelled event', () => {
       const listener = jest.fn();
       engine.on('executionCancelled', listener);
-      
+
       const context = new ExecutionContext({ task: 'test' });
       engine.activeContexts.set(context.id, context);
-      
+
       engine.cancel(context.id);
-      
+
       expect(listener).toHaveBeenCalled();
     });
   });
@@ -426,12 +426,12 @@ describe('OrchestrationEngine', () => {
     it('should cancel all active contexts', () => {
       const ctx1 = new ExecutionContext({ task: 'test1' });
       const ctx2 = new ExecutionContext({ task: 'test2' });
-      
+
       engine.activeContexts.set(ctx1.id, ctx1);
       engine.activeContexts.set(ctx2.id, ctx2);
-      
+
       engine.cancelAll();
-      
+
       expect(engine.activeContexts.size).toBe(0);
       expect(ctx1.status).toBe(ExecutionStatus.CANCELLED);
       expect(ctx2.status).toBe(ExecutionStatus.CANCELLED);
@@ -443,7 +443,7 @@ describe('ExecutionContext', () => {
   describe('constructor', () => {
     it('should create context with default values', () => {
       const context = new ExecutionContext();
-      
+
       expect(context.id).toBeDefined();
       expect(context.parentId).toBeNull();
       expect(context.status).toBe(ExecutionStatus.PENDING);
@@ -455,9 +455,9 @@ describe('ExecutionContext', () => {
         task: 'Custom task',
         priority: Priority.P0,
         skill: 'test-skill',
-        input: { key: 'value' }
+        input: { key: 'value' },
       });
-      
+
       expect(context.task).toBe('Custom task');
       expect(context.priority).toBe(Priority.P0);
       expect(context.skill).toBe('test-skill');
@@ -474,7 +474,7 @@ describe('ExecutionContext', () => {
 
     it('should start correctly', () => {
       context.start();
-      
+
       expect(context.status).toBe(ExecutionStatus.RUNNING);
       expect(context.startTime).toBeInstanceOf(Date);
     });
@@ -482,7 +482,7 @@ describe('ExecutionContext', () => {
     it('should complete correctly', () => {
       context.start();
       context.complete({ result: 'done' });
-      
+
       expect(context.status).toBe(ExecutionStatus.COMPLETED);
       expect(context.output).toEqual({ result: 'done' });
       expect(context.endTime).toBeInstanceOf(Date);
@@ -491,7 +491,7 @@ describe('ExecutionContext', () => {
     it('should fail correctly', () => {
       context.start();
       context.fail(new Error('Test error'));
-      
+
       expect(context.status).toBe(ExecutionStatus.FAILED);
       expect(context.error).toBe('Test error');
       expect(context.endTime).toBeInstanceOf(Date);
@@ -504,7 +504,7 @@ describe('ExecutionContext', () => {
 
     it('should cancel correctly', () => {
       context.cancel();
-      
+
       expect(context.status).toBe(ExecutionStatus.CANCELLED);
       expect(context.endTime).toBeInstanceOf(Date);
     });
@@ -524,13 +524,15 @@ describe('ExecutionContext', () => {
     it('should return duration when completed', () => {
       const context = new ExecutionContext();
       context.start();
-      
+
       // Wait a bit
       const startTime = Date.now();
-      while (Date.now() - startTime < 10) { /* busy wait */ }
-      
+      while (Date.now() - startTime < 10) {
+        /* busy wait */
+      }
+
       context.complete({});
-      
+
       expect(context.getDuration()).toBeGreaterThanOrEqual(0);
     });
   });
@@ -539,13 +541,13 @@ describe('ExecutionContext', () => {
     it('should serialize context', () => {
       const context = new ExecutionContext({
         task: 'JSON test',
-        priority: Priority.P1
+        priority: Priority.P1,
       });
       context.start();
       context.complete({ result: 'done' });
-      
+
       const json = context.toJSON();
-      
+
       expect(json.task).toBe('JSON test');
       expect(json.priority).toBe(Priority.P1);
       expect(json.status).toBe(ExecutionStatus.COMPLETED);

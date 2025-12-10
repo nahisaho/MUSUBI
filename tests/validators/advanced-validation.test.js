@@ -7,7 +7,7 @@ const {
   createAdvancedValidation,
   VALIDATION_TYPE,
   ARTIFACT_TYPE,
-  GAP_SEVERITY
+  GAP_SEVERITY,
 } = require('../../src/validators/advanced-validation');
 
 describe('AdvancedValidation', () => {
@@ -26,8 +26,8 @@ describe('AdvancedValidation', () => {
     test('should load custom rules', () => {
       const av = new AdvancedValidation({
         rules: {
-          custom: { validate: () => ({ valid: true }) }
-        }
+          custom: { validate: () => ({ valid: true }) },
+        },
       });
       expect(av.customRules.has('custom')).toBe(true);
     });
@@ -43,14 +43,15 @@ describe('AdvancedValidation', () => {
     test('should register an artifact', () => {
       av.registerArtifact('req-1', {
         type: ARTIFACT_TYPE.REQUIREMENT,
-        name: 'Requirement 1'
+        name: 'Requirement 1',
       });
       expect(av.artifacts.has('req-1')).toBe(true);
     });
 
     test('should throw on invalid type', () => {
-      expect(() => av.registerArtifact('invalid', { type: 'invalid' }))
-        .toThrow('Invalid artifact type');
+      expect(() => av.registerArtifact('invalid', { type: 'invalid' })).toThrow(
+        'Invalid artifact type'
+      );
     });
 
     test('should emit event', () => {
@@ -86,13 +87,11 @@ describe('AdvancedValidation', () => {
     });
 
     test('should throw for unknown source', () => {
-      expect(() => av.addTraceLink('unknown', 'design-1'))
-        .toThrow('Source artifact not found');
+      expect(() => av.addTraceLink('unknown', 'design-1')).toThrow('Source artifact not found');
     });
 
     test('should throw for unknown target', () => {
-      expect(() => av.addTraceLink('req-1', 'unknown'))
-        .toThrow('Target artifact not found');
+      expect(() => av.addTraceLink('req-1', 'unknown')).toThrow('Target artifact not found');
     });
   });
 
@@ -120,7 +119,9 @@ describe('AdvancedValidation', () => {
       av.registerArtifact('req-1', { type: ARTIFACT_TYPE.REQUIREMENT });
 
       const result = av.validateCrossArtifact();
-      expect(result.issues.some(i => i.artifactId === 'req-1' && i.type === 'orphaned')).toBe(false);
+      expect(result.issues.some(i => i.artifactId === 'req-1' && i.type === 'orphaned')).toBe(
+        false
+      );
     });
 
     test('should detect broken links', () => {
@@ -230,15 +231,14 @@ describe('AdvancedValidation', () => {
     test('should add a custom rule', () => {
       const av = new AdvancedValidation();
       av.addRule('custom', {
-        validate: () => ({ valid: true })
+        validate: () => ({ valid: true }),
       });
       expect(av.customRules.has('custom')).toBe(true);
     });
 
     test('should throw on invalid rule', () => {
       const av = new AdvancedValidation();
-      expect(() => av.addRule('bad', {}))
-        .toThrow('Rule must have a validate function');
+      expect(() => av.addRule('bad', {})).toThrow('Rule must have a validate function');
     });
   });
 
@@ -267,7 +267,7 @@ describe('AdvancedValidation', () => {
 
     test('should run custom rules', () => {
       av.addRule('custom', {
-        validate: () => ({ valid: true, checked: 1 })
+        validate: () => ({ valid: true, checked: 1 }),
       });
 
       const result = av.runAllValidations();

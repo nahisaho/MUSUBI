@@ -98,16 +98,16 @@ MUSUBI enforces 9 immutable constitutional articles:
 
 MUSUBI provides advanced AI agent assistance modules:
 
-| Module | Purpose | Import |
-|--------|---------|--------|
-| **StuckDetector** | Detect agent stuck states | `src/analyzers/stuck-detector.js` |
-| **MemoryCondenser** | Compress session history | `src/managers/memory-condenser.js` |
-| **AgentMemoryManager** | Extract & persist learnings | `src/managers/agent-memory.js` |
-| **CriticSystem** | Evaluate SDD stage quality | `src/validators/critic-system.js` |
-| **SecurityAnalyzer** | Detect security risks | `src/analyzers/security-analyzer.js` |
-| **IssueResolver** | GitHub Issue analysis | `src/resolvers/issue-resolver.js` |
-| **SkillLoader** | Load keyword-triggered skills | `src/managers/skill-loader.js` |
-| **RepoSkillManager** | Manage project skills | `src/managers/repo-skill-manager.js` |
+| Module                 | Purpose                       | Import                               |
+| ---------------------- | ----------------------------- | ------------------------------------ |
+| **StuckDetector**      | Detect agent stuck states     | `src/analyzers/stuck-detector.js`    |
+| **MemoryCondenser**    | Compress session history      | `src/managers/memory-condenser.js`   |
+| **AgentMemoryManager** | Extract & persist learnings   | `src/managers/agent-memory.js`       |
+| **CriticSystem**       | Evaluate SDD stage quality    | `src/validators/critic-system.js`    |
+| **SecurityAnalyzer**   | Detect security risks         | `src/analyzers/security-analyzer.js` |
+| **IssueResolver**      | GitHub Issue analysis         | `src/resolvers/issue-resolver.js`    |
+| **SkillLoader**        | Load keyword-triggered skills | `src/managers/skill-loader.js`       |
+| **RepoSkillManager**   | Manage project skills         | `src/managers/repo-skill-manager.js` |
 
 ## Quick Start
 
@@ -146,47 +146,47 @@ npx musubi-sdd <command>
 
 ### Core Commands
 
-| Command | Purpose | Example |
-|---------|---------|--------|
-| `musubi-workflow` | Workflow state & metrics | `npx musubi-workflow status` |
-| `musubi-requirements` | EARS requirements | `npx musubi-requirements init <feature>` |
-| `musubi-design` | C4 + ADR design | `npx musubi-design init <feature>` |
-| `musubi-tasks` | Task breakdown | `npx musubi-tasks init <feature>` |
-| `musubi-trace` | Traceability | `npx musubi-trace matrix` |
-| `musubi-validate` | Constitutional validation | `npx musubi-validate all` |
+| Command               | Purpose                   | Example                                  |
+| --------------------- | ------------------------- | ---------------------------------------- |
+| `musubi-workflow`     | Workflow state & metrics  | `npx musubi-workflow status`             |
+| `musubi-requirements` | EARS requirements         | `npx musubi-requirements init <feature>` |
+| `musubi-design`       | C4 + ADR design           | `npx musubi-design init <feature>`       |
+| `musubi-tasks`        | Task breakdown            | `npx musubi-tasks init <feature>`        |
+| `musubi-trace`        | Traceability              | `npx musubi-trace matrix`                |
+| `musubi-validate`     | Constitutional validation | `npx musubi-validate all`                |
 
 ### Advanced Commands (v3.5.0 NEW)
 
-| Command | Purpose | Example |
-|---------|---------|--------|
-| `musubi-orchestrate` | Multi-skill orchestration | `npx musubi-orchestrate auto <task>` |
-| `musubi-browser` | Browser automation & E2E | `npx musubi-browser run "click login"` |
-| `musubi-gui` | Web GUI dashboard | `npx musubi-gui start` |
-| `musubi-remember` | Agent memory management | `npx musubi-remember extract` |
-| `musubi-resolve` | GitHub Issue resolution | `npx musubi-resolve <issue-number>` |
-| `musubi-convert` | Format conversion | `npx musubi-convert to-speckit` |
+| Command              | Purpose                   | Example                                |
+| -------------------- | ------------------------- | -------------------------------------- |
+| `musubi-orchestrate` | Multi-skill orchestration | `npx musubi-orchestrate auto <task>`   |
+| `musubi-browser`     | Browser automation & E2E  | `npx musubi-browser run "click login"` |
+| `musubi-gui`         | Web GUI dashboard         | `npx musubi-gui start`                 |
+| `musubi-remember`    | Agent memory management   | `npx musubi-remember extract`          |
+| `musubi-resolve`     | GitHub Issue resolution   | `npx musubi-resolve <issue-number>`    |
+| `musubi-convert`     | Format conversion         | `npx musubi-convert to-speckit`        |
 
 ### Replanning Commands (v3.6.0 NEW)
 
-| Command | Purpose | Example |
-|---------|---------|--------|
-| `musubi-orchestrate replan` | Execute dynamic replanning | `npx musubi-orchestrate replan <context-id>` |
-| `musubi-orchestrate goal register` | Register a new goal | `npx musubi-orchestrate goal register --name "Deploy API"` |
-| `musubi-orchestrate goal update` | Update goal progress | `npx musubi-orchestrate goal update <goal-id> --progress 50` |
-| `musubi-orchestrate goal status` | View goal status | `npx musubi-orchestrate goal status [goal-id]` |
-| `musubi-orchestrate optimize run` | Run path optimization | `npx musubi-orchestrate optimize run <path-id>` |
-| `musubi-orchestrate optimize suggest` | Get optimization suggestions | `npx musubi-orchestrate optimize suggest <path-id>` |
-| `musubi-orchestrate path analyze` | Analyze execution path | `npx musubi-orchestrate path analyze <path-id>` |
-| `musubi-orchestrate path optimize` | Optimize execution path | `npx musubi-orchestrate path optimize <path-id>` |
+| Command                               | Purpose                      | Example                                                      |
+| ------------------------------------- | ---------------------------- | ------------------------------------------------------------ |
+| `musubi-orchestrate replan`           | Execute dynamic replanning   | `npx musubi-orchestrate replan <context-id>`                 |
+| `musubi-orchestrate goal register`    | Register a new goal          | `npx musubi-orchestrate goal register --name "Deploy API"`   |
+| `musubi-orchestrate goal update`      | Update goal progress         | `npx musubi-orchestrate goal update <goal-id> --progress 50` |
+| `musubi-orchestrate goal status`      | View goal status             | `npx musubi-orchestrate goal status [goal-id]`               |
+| `musubi-orchestrate optimize run`     | Run path optimization        | `npx musubi-orchestrate optimize run <path-id>`              |
+| `musubi-orchestrate optimize suggest` | Get optimization suggestions | `npx musubi-orchestrate optimize suggest <path-id>`          |
+| `musubi-orchestrate path analyze`     | Analyze execution path       | `npx musubi-orchestrate path analyze <path-id>`              |
+| `musubi-orchestrate path optimize`    | Optimize execution path      | `npx musubi-orchestrate path optimize <path-id>`             |
 
 ### Guardrails Commands (v3.9.0 NEW)
 
-| Command | Purpose | Example |
-|---------|---------|--------|
-| `musubi-validate guardrails` | Input/Output guardrail validation | `npx musubi-validate guardrails --type input` |
-| `musubi-validate guardrails --type output` | Output content validation | `echo "content" \| npx musubi-validate guardrails --type output` |
-| `musubi-validate guardrails --type safety` | Safety check with constitutional | `npx musubi-validate guardrails --type safety --constitutional` |
-| `musubi-validate guardrails-chain` | Chain multiple guardrails | `npx musubi-validate guardrails-chain --parallel` |
+| Command                                    | Purpose                           | Example                                                          |
+| ------------------------------------------ | --------------------------------- | ---------------------------------------------------------------- |
+| `musubi-validate guardrails`               | Input/Output guardrail validation | `npx musubi-validate guardrails --type input`                    |
+| `musubi-validate guardrails --type output` | Output content validation         | `echo "content" \| npx musubi-validate guardrails --type output` |
+| `musubi-validate guardrails --type safety` | Safety check with constitutional  | `npx musubi-validate guardrails --type safety --constitutional`  |
+| `musubi-validate guardrails-chain`         | Chain multiple guardrails         | `npx musubi-validate guardrails-chain --parallel`                |
 
 ## Learn More
 

@@ -2,7 +2,7 @@
 
 /**
  * Constitutional Validator
- * 
+ *
  * Validates compliance with the 9 Constitutional Articles.
  * Part of MUSUBI SDD governance system.
  */
@@ -25,15 +25,15 @@ class ConstitutionalValidator {
   async validateAll() {
     console.log('🏛️  Constitutional Validation Starting...\n');
 
-    await this.validateArticleI();    // Library-First
-    await this.validateArticleII();   // CLI Interface
-    await this.validateArticleIII();  // Test-First
-    await this.validateArticleIV();   // EARS Format
-    await this.validateArticleV();    // Traceability
-    await this.validateArticleVI();   // Project Memory
-    await this.validateArticleVII();  // Simplicity Gate
+    await this.validateArticleI(); // Library-First
+    await this.validateArticleII(); // CLI Interface
+    await this.validateArticleIII(); // Test-First
+    await this.validateArticleIV(); // EARS Format
+    await this.validateArticleV(); // Traceability
+    await this.validateArticleVI(); // Project Memory
+    await this.validateArticleVII(); // Simplicity Gate
     await this.validateArticleVIII(); // Anti-Abstraction
-    await this.validateArticleIX();   // Integration-First
+    await this.validateArticleIX(); // Integration-First
 
     return this.generateReport();
   }
@@ -43,9 +43,9 @@ class ConstitutionalValidator {
    */
   async validateArticleI() {
     const article = 'Article I: Library-First';
-    
+
     // Check for lib/ or packages/ directory
-    const libDirs = ['lib', 'packages', 'libs'].filter(dir => 
+    const libDirs = ['lib', 'packages', 'libs'].filter(dir =>
       fs.existsSync(path.join(this.projectRoot, dir))
     );
 
@@ -53,31 +53,31 @@ class ConstitutionalValidator {
       this.warnings.push({
         article,
         message: 'No library directory found (lib/, packages/, libs/)',
-        recommendation: 'Create a lib/ directory for reusable components'
+        recommendation: 'Create a lib/ directory for reusable components',
       });
     } else {
       this.passes.push({
         article,
-        message: `Library directory found: ${libDirs.join(', ')}`
+        message: `Library directory found: ${libDirs.join(', ')}`,
       });
     }
 
     // Check if features have test suites
     const libPath = path.join(this.projectRoot, libDirs[0] || 'lib');
     if (fs.existsSync(libPath)) {
-      const subDirs = fs.readdirSync(libPath).filter(f => 
-        fs.statSync(path.join(libPath, f)).isDirectory()
-      );
+      const subDirs = fs
+        .readdirSync(libPath)
+        .filter(f => fs.statSync(path.join(libPath, f)).isDirectory());
 
       for (const lib of subDirs) {
         const testPath = path.join(libPath, lib, 'tests');
         const testFile = glob.sync(path.join(libPath, lib, '*.test.{js,ts}'));
-        
+
         if (!fs.existsSync(testPath) && testFile.length === 0) {
           this.warnings.push({
             article,
             message: `Library '${lib}' has no test suite`,
-            recommendation: `Add tests to ${libPath}/${lib}/`
+            recommendation: `Add tests to ${libPath}/${lib}/`,
           });
         }
       }
@@ -89,7 +89,7 @@ class ConstitutionalValidator {
    */
   async validateArticleII() {
     const article = 'Article II: CLI Interface';
-    
+
     // Check for bin/ directory
     const binPath = path.join(this.projectRoot, 'bin');
     const packageJson = this.readPackageJson();
@@ -98,18 +98,18 @@ class ConstitutionalValidator {
       const cliFiles = fs.readdirSync(binPath);
       this.passes.push({
         article,
-        message: `CLI interfaces found in bin/: ${cliFiles.length} file(s)`
+        message: `CLI interfaces found in bin/: ${cliFiles.length} file(s)`,
       });
     } else if (packageJson?.bin) {
       this.passes.push({
         article,
-        message: `CLI entry points defined in package.json`
+        message: `CLI entry points defined in package.json`,
       });
     } else {
       this.warnings.push({
         article,
         message: 'No CLI interface found',
-        recommendation: 'Add bin/ directory or define "bin" in package.json'
+        recommendation: 'Add bin/ directory or define "bin" in package.json',
       });
     }
   }
@@ -119,7 +119,7 @@ class ConstitutionalValidator {
    */
   async validateArticleIII() {
     const article = 'Article III: Test-First';
-    
+
     // Check for test directory
     const testDirs = ['tests', 'test', '__tests__', 'spec'].filter(dir =>
       fs.existsSync(path.join(this.projectRoot, dir))
@@ -130,7 +130,7 @@ class ConstitutionalValidator {
         article,
         message: 'No test directory found',
         severity: 'critical',
-        recommendation: 'Create tests/ directory with test files'
+        recommendation: 'Create tests/ directory with test files',
       });
       return;
     }
@@ -143,12 +143,12 @@ class ConstitutionalValidator {
       this.warnings.push({
         article,
         message: 'No test coverage configuration found',
-        recommendation: 'Configure test coverage (80% threshold required)'
+        recommendation: 'Configure test coverage (80% threshold required)',
       });
     } else {
       this.passes.push({
         article,
-        message: `Test infrastructure found: ${testDirs.join(', ')}`
+        message: `Test infrastructure found: ${testDirs.join(', ')}`,
       });
     }
   }
@@ -158,17 +158,17 @@ class ConstitutionalValidator {
    */
   async validateArticleIV() {
     const article = 'Article IV: EARS Format';
-    
+
     // Find requirements files
     const reqFiles = glob.sync(path.join(this.projectRoot, '**/*requirements*.md'), {
-      ignore: ['**/node_modules/**', '**/templates/**']
+      ignore: ['**/node_modules/**', '**/templates/**'],
     });
 
     if (reqFiles.length === 0) {
       this.warnings.push({
         article,
         message: 'No requirements files found',
-        recommendation: 'Create requirements using EARS format'
+        recommendation: 'Create requirements using EARS format',
       });
       return;
     }
@@ -183,18 +183,18 @@ class ConstitutionalValidator {
           article,
           message: `${path.basename(file)} not in EARS format`,
           severity: 'high',
-          recommendation: 'Use EARS patterns: WHEN/WHILE/IF/WHERE + SHALL'
+          recommendation: 'Use EARS patterns: WHEN/WHILE/IF/WHERE + SHALL',
         });
       } else if (hasAmbiguous) {
         this.warnings.push({
           article,
           message: `${path.basename(file)} contains ambiguous keywords`,
-          recommendation: 'Replace should/may with SHALL/MUST'
+          recommendation: 'Replace should/may with SHALL/MUST',
         });
       } else {
         this.passes.push({
           article,
-          message: `${path.basename(file)} uses EARS format`
+          message: `${path.basename(file)} uses EARS format`,
         });
       }
     }
@@ -205,28 +205,28 @@ class ConstitutionalValidator {
    */
   async validateArticleV() {
     const article = 'Article V: Traceability';
-    
+
     // Check for traceability matrix
     const traceFiles = glob.sync(path.join(this.projectRoot, '**/*{trace,coverage-matrix}*.md'), {
-      ignore: ['**/node_modules/**']
+      ignore: ['**/node_modules/**'],
     });
 
     if (traceFiles.length === 0) {
       this.warnings.push({
         article,
         message: 'No traceability matrix found',
-        recommendation: 'Create coverage-matrix.md linking REQ → Design → Test'
+        recommendation: 'Create coverage-matrix.md linking REQ → Design → Test',
       });
     } else {
       this.passes.push({
         article,
-        message: `Traceability files found: ${traceFiles.length}`
+        message: `Traceability files found: ${traceFiles.length}`,
       });
     }
 
     // Check for REQ-XXX patterns in test files
     const testFiles = glob.sync(path.join(this.projectRoot, '**/*.test.{js,ts}'), {
-      ignore: ['**/node_modules/**']
+      ignore: ['**/node_modules/**'],
     });
 
     let testsWithReqs = 0;
@@ -241,7 +241,7 @@ class ConstitutionalValidator {
       this.warnings.push({
         article,
         message: 'Test files do not reference requirement IDs',
-        recommendation: 'Add REQ-XXX-NNN references to test descriptions'
+        recommendation: 'Add REQ-XXX-NNN references to test descriptions',
       });
     }
   }
@@ -251,7 +251,7 @@ class ConstitutionalValidator {
    */
   async validateArticleVI() {
     const article = 'Article VI: Project Memory';
-    
+
     const steeringPath = path.join(this.projectRoot, 'steering');
     const requiredFiles = ['structure.md', 'tech.md', 'product.md'];
 
@@ -260,7 +260,7 @@ class ConstitutionalValidator {
         article,
         message: 'No steering/ directory found',
         severity: 'critical',
-        recommendation: 'Run "musubi init" to create steering files'
+        recommendation: 'Run "musubi init" to create steering files',
       });
       return;
     }
@@ -272,12 +272,12 @@ class ConstitutionalValidator {
           article,
           message: `Missing steering file: ${file}`,
           severity: 'high',
-          recommendation: `Create steering/${file}`
+          recommendation: `Create steering/${file}`,
         });
       } else {
         this.passes.push({
           article,
-          message: `Found steering/${file}`
+          message: `Found steering/${file}`,
         });
       }
     }
@@ -288,7 +288,7 @@ class ConstitutionalValidator {
    */
   async validateArticleVII() {
     const article = 'Article VII: Simplicity Gate';
-    
+
     // Count top-level directories that look like projects
     const projectIndicators = ['package.json', 'Cargo.toml', 'pyproject.toml', 'go.mod'];
     let projectCount = 0;
@@ -307,9 +307,7 @@ class ConstitutionalValidator {
       const subProjects = fs.readdirSync(packagesPath).filter(f => {
         const subPath = path.join(packagesPath, f);
         if (!fs.statSync(subPath).isDirectory()) return false;
-        return projectIndicators.some(ind => 
-          fs.existsSync(path.join(subPath, ind))
-        );
+        return projectIndicators.some(ind => fs.existsSync(path.join(subPath, ind)));
       });
       projectCount += subProjects.length;
     }
@@ -321,19 +319,19 @@ class ConstitutionalValidator {
           article,
           message: `${projectCount} projects detected (> 3 limit)`,
           severity: 'high',
-          recommendation: 'Document justification in steering/complexity-tracking.md'
+          recommendation: 'Document justification in steering/complexity-tracking.md',
         });
       } else {
         this.warnings.push({
           article,
           message: `${projectCount} projects (complexity justified)`,
-          recommendation: 'Review complexity-tracking.md periodically'
+          recommendation: 'Review complexity-tracking.md periodically',
         });
       }
     } else {
       this.passes.push({
         article,
-        message: `${projectCount} project(s) - within limit`
+        message: `${projectCount} project(s) - within limit`,
       });
     }
   }
@@ -343,20 +341,20 @@ class ConstitutionalValidator {
    */
   async validateArticleVIII() {
     const article = 'Article VIII: Anti-Abstraction';
-    
+
     // Check for common wrapper patterns
     const wrapperPatterns = [
       '**/BaseRepository.{js,ts}',
       '**/BaseService.{js,ts}',
       '**/AbstractFactory.{js,ts}',
       '**/wrapper/*.{js,ts}',
-      '**/adapters/*.{js,ts}'
+      '**/adapters/*.{js,ts}',
     ];
 
     const potentialWrappers = [];
     for (const pattern of wrapperPatterns) {
       const matches = glob.sync(path.join(this.projectRoot, pattern), {
-        ignore: ['**/node_modules/**', '**/templates/**']
+        ignore: ['**/node_modules/**', '**/templates/**'],
       });
       potentialWrappers.push(...matches);
     }
@@ -365,12 +363,12 @@ class ConstitutionalValidator {
       this.warnings.push({
         article,
         message: `Potential wrapper abstractions detected: ${potentialWrappers.length} file(s)`,
-        recommendation: 'Verify abstractions are justified per Phase -1 Gate'
+        recommendation: 'Verify abstractions are justified per Phase -1 Gate',
       });
     } else {
       this.passes.push({
         article,
-        message: 'No unnecessary abstraction layers detected'
+        message: 'No unnecessary abstraction layers detected',
       });
     }
   }
@@ -380,14 +378,15 @@ class ConstitutionalValidator {
    */
   async validateArticleIX() {
     const article = 'Article IX: Integration-First';
-    
+
     // Check for docker-compose for test infrastructure
-    const hasDockerCompose = fs.existsSync(path.join(this.projectRoot, 'docker-compose.yml')) ||
-                            fs.existsSync(path.join(this.projectRoot, 'docker-compose.test.yml'));
+    const hasDockerCompose =
+      fs.existsSync(path.join(this.projectRoot, 'docker-compose.yml')) ||
+      fs.existsSync(path.join(this.projectRoot, 'docker-compose.test.yml'));
 
     // Check for mock usage
     const testFiles = glob.sync(path.join(this.projectRoot, '**/*.test.{js,ts}'), {
-      ignore: ['**/node_modules/**']
+      ignore: ['**/node_modules/**'],
     });
 
     let mockCount = 0;
@@ -401,12 +400,12 @@ class ConstitutionalValidator {
       this.warnings.push({
         article,
         message: 'No docker-compose for test infrastructure',
-        recommendation: 'Add docker-compose.yml for real service testing'
+        recommendation: 'Add docker-compose.yml for real service testing',
       });
     } else if (hasDockerCompose) {
       this.passes.push({
         article,
-        message: 'Docker Compose available for integration tests'
+        message: 'Docker Compose available for integration tests',
       });
     }
 
@@ -414,7 +413,7 @@ class ConstitutionalValidator {
       this.warnings.push({
         article,
         message: `High mock usage detected (${mockCount} mocks)`,
-        recommendation: 'Prefer real services; document mock justifications'
+        recommendation: 'Prefer real services; document mock justifications',
       });
     }
   }
@@ -441,19 +440,21 @@ class ConstitutionalValidator {
         passes: this.passes.length,
         warnings: this.warnings.length,
         violations: this.violations.length,
-        status: this.violations.length === 0 ? 'COMPLIANT' : 'NON-COMPLIANT'
+        status: this.violations.length === 0 ? 'COMPLIANT' : 'NON-COMPLIANT',
       },
       passes: this.passes,
       warnings: this.warnings,
-      violations: this.violations
+      violations: this.violations,
     };
 
     console.log('\n' + '='.repeat(60));
     console.log('📜 CONSTITUTIONAL VALIDATION REPORT');
     console.log('='.repeat(60));
     console.log(`Status: ${report.summary.status}`);
-    console.log(`Passes: ${report.summary.passes} | Warnings: ${report.summary.warnings} | Violations: ${report.summary.violations}`);
-    
+    console.log(
+      `Passes: ${report.summary.passes} | Warnings: ${report.summary.warnings} | Violations: ${report.summary.violations}`
+    );
+
     if (this.violations.length > 0) {
       console.log('\n❌ VIOLATIONS:');
       this.violations.forEach(v => {
@@ -481,14 +482,17 @@ class ConstitutionalValidator {
 if (require.main === module) {
   const projectRoot = process.argv[2] || process.cwd();
   const validator = new ConstitutionalValidator(projectRoot);
-  
-  validator.validateAll().then(report => {
-    const exitCode = report.summary.violations > 0 ? 1 : 0;
-    process.exit(exitCode);
-  }).catch(err => {
-    console.error('Validation error:', err);
-    process.exit(1);
-  });
+
+  validator
+    .validateAll()
+    .then(report => {
+      const exitCode = report.summary.violations > 0 ? 1 : 0;
+      process.exit(exitCode);
+    })
+    .catch(err => {
+      console.error('Validation error:', err);
+      process.exit(1);
+    });
 }
 
 module.exports = { ConstitutionalValidator };

@@ -9,21 +9,24 @@ const {
   DiscoveredTool,
   ToolCategory,
   CapabilityScore,
-  CATEGORY_KEYWORDS
+  CATEGORY_KEYWORDS,
 } = require('../../src/integrations/tool-discovery');
 
 describe('ToolDiscovery', () => {
   describe('DiscoveredTool', () => {
     it('should create discovered tool with metadata', () => {
-      const tool = new DiscoveredTool({
-        name: 'read_file',
-        description: 'Read file contents',
-        inputSchema: {},
-        server: 'filesystem'
-      }, {
-        category: ToolCategory.FILE_SYSTEM,
-        tags: ['file', 'read']
-      });
+      const tool = new DiscoveredTool(
+        {
+          name: 'read_file',
+          description: 'Read file contents',
+          inputSchema: {},
+          server: 'filesystem',
+        },
+        {
+          category: ToolCategory.FILE_SYSTEM,
+          tags: ['file', 'read'],
+        }
+      );
 
       expect(tool.name).toBe('read_file');
       expect(tool.category).toBe(ToolCategory.FILE_SYSTEM);
@@ -40,7 +43,7 @@ describe('ToolDiscovery', () => {
 
       expect(tool.usageCount).toBe(3);
       expect(tool.averageLatency).toBe(150);
-      expect(tool.errorRate).toBeCloseTo(1/3, 2);
+      expect(tool.errorRate).toBeCloseTo(1 / 3, 2);
       expect(tool.lastUsed).toBeInstanceOf(Date);
     });
 
@@ -57,18 +60,21 @@ describe('ToolDiscovery', () => {
 
       // One failure
       tool.recordUsage(100, false);
-      expect(tool.getReliabilityScore()).toBeCloseTo(2/3, 2);
+      expect(tool.getReliabilityScore()).toBeCloseTo(2 / 3, 2);
     });
 
     it('should convert to JSON', () => {
-      const tool = new DiscoveredTool({
-        name: 'test_tool',
-        description: 'Test',
-        server: 'test-server'
-      }, {
-        category: ToolCategory.UTILITY,
-        tags: ['test']
-      });
+      const tool = new DiscoveredTool(
+        {
+          name: 'test_tool',
+          description: 'Test',
+          server: 'test-server',
+        },
+        {
+          category: ToolCategory.UTILITY,
+          tags: ['test'],
+        }
+      );
 
       const json = tool.toJSON();
 
@@ -95,7 +101,7 @@ describe('ToolDiscovery', () => {
       it('should detect file system category', () => {
         const category = discovery._detectCategory({
           name: 'read_file',
-          description: 'Read file contents from path'
+          description: 'Read file contents from path',
         });
         expect(category).toBe(ToolCategory.FILE_SYSTEM);
       });
@@ -103,7 +109,7 @@ describe('ToolDiscovery', () => {
       it('should detect code analysis category', () => {
         const category = discovery._detectCategory({
           name: 'analyze_code',
-          description: 'Parse and analyze source code'
+          description: 'Parse and analyze source code',
         });
         expect(category).toBe(ToolCategory.CODE_ANALYSIS);
       });
@@ -111,7 +117,7 @@ describe('ToolDiscovery', () => {
       it('should detect search category', () => {
         const category = discovery._detectCategory({
           name: 'grep_search',
-          description: 'Search for patterns in files'
+          description: 'Search for patterns in files',
         });
         expect(category).toBe(ToolCategory.SEARCH);
       });
@@ -119,7 +125,7 @@ describe('ToolDiscovery', () => {
       it('should return unknown for unrecognized tools', () => {
         const category = discovery._detectCategory({
           name: 'xyz',
-          description: 'Something unusual'
+          description: 'Something unusual',
         });
         expect(category).toBe(ToolCategory.UNKNOWN);
       });
@@ -129,7 +135,7 @@ describe('ToolDiscovery', () => {
       it('should extract tags from tool name', () => {
         const tags = discovery._extractTags({
           name: 'file-system-read',
-          description: ''
+          description: '',
         });
         expect(tags).toContain('file');
         expect(tags).toContain('system');
@@ -139,7 +145,7 @@ describe('ToolDiscovery', () => {
       it('should extract action verbs', () => {
         const tags = discovery._extractTags({
           name: 'tool',
-          description: 'Create and update files'
+          description: 'Create and update files',
         });
         expect(tags).toContain('create');
         expect(tags).toContain('update');
@@ -152,9 +158,9 @@ describe('ToolDiscovery', () => {
           name: 'read_file',
           inputSchema: {
             properties: {
-              filePath: { type: 'string' }
-            }
-          }
+              filePath: { type: 'string' },
+            },
+          },
         });
         expect(capabilities).toContain('file-operations');
       });
@@ -162,7 +168,7 @@ describe('ToolDiscovery', () => {
       it('should detect read capabilities', () => {
         const capabilities = discovery._analyzeCapabilities({
           name: 'list_files',
-          inputSchema: {}
+          inputSchema: {},
         });
         expect(capabilities).toContain('read');
       });
@@ -170,7 +176,7 @@ describe('ToolDiscovery', () => {
       it('should detect write capabilities', () => {
         const capabilities = discovery._analyzeCapabilities({
           name: 'create_document',
-          inputSchema: {}
+          inputSchema: {},
         });
         expect(capabilities).toContain('write');
       });
@@ -180,9 +186,9 @@ describe('ToolDiscovery', () => {
           name: 'tool',
           inputSchema: {
             properties: {
-              url: { type: 'string' }
-            }
-          }
+              url: { type: 'string' },
+            },
+          },
         });
         expect(capabilities).toContain('network');
       });
@@ -194,7 +200,7 @@ describe('ToolDiscovery', () => {
           name: 'test_read_file',
           description: 'Read a file',
           inputSchema: {},
-          server: 'test-server'
+          server: 'test-server',
         };
 
         const discovered = discovery._processTool(mockTool);
@@ -207,12 +213,12 @@ describe('ToolDiscovery', () => {
         discovery._processTool({
           name: 'tool1',
           description: 'Read file',
-          server: 'server1'
+          server: 'server1',
         });
         discovery._processTool({
           name: 'tool2',
           description: 'Write file',
-          server: 'server1'
+          server: 'server1',
         });
 
         expect(discovery.toolsByCategory.get(ToolCategory.FILE_SYSTEM).size).toBe(2);
@@ -225,8 +231,8 @@ describe('ToolDiscovery', () => {
         const mockConnector = {
           getAllTools: () => [
             { name: 'tool1', description: 'File read', server: 's1' },
-            { name: 'tool2', description: 'Search files', server: 's2' }
-          ]
+            { name: 'tool2', description: 'Search files', server: 's2' },
+          ],
         };
 
         const discovered = await discovery.discoverFromConnector(mockConnector);
@@ -240,7 +246,7 @@ describe('ToolDiscovery', () => {
         discovery.on('discovered', onDiscovered);
 
         const mockConnector = {
-          getAllTools: () => [{ name: 'tool1', description: 'Test' }]
+          getAllTools: () => [{ name: 'tool1', description: 'Test' }],
         };
 
         await discovery.discoverFromConnector(mockConnector);
@@ -315,7 +321,7 @@ describe('ToolDiscovery', () => {
 
       it('should respect minimum score', () => {
         const matches = discovery.matchToolsToTask('completely unrelated task', {
-          minScore: 0.5
+          minScore: 0.5,
         });
 
         expect(matches).toHaveLength(0);
@@ -323,7 +329,7 @@ describe('ToolDiscovery', () => {
 
       it('should limit results', () => {
         const matches = discovery.matchToolsToTask('file operations', {
-          limit: 1
+          limit: 1,
         });
 
         expect(matches.length).toBeLessThanOrEqual(1);
@@ -338,9 +344,7 @@ describe('ToolDiscovery', () => {
       });
 
       it('should map skills to tools by allowed-tools', () => {
-        const skills = [
-          { name: 'requirements', allowedTools: ['read_file', 'write_file'] }
-        ];
+        const skills = [{ name: 'requirements', allowedTools: ['read_file', 'write_file'] }];
 
         const mappings = discovery.mapSkillsToTools(skills);
 
@@ -349,9 +353,7 @@ describe('ToolDiscovery', () => {
       });
 
       it('should map skills by description', () => {
-        const skills = [
-          { name: 'tester', description: 'Run and validate tests' }
-        ];
+        const skills = [{ name: 'tester', description: 'Run and validate tests' }];
 
         const mappings = discovery.mapSkillsToTools(skills);
 
@@ -362,9 +364,7 @@ describe('ToolDiscovery', () => {
     describe('getToolsForSkill', () => {
       beforeEach(() => {
         discovery._processTool({ name: 'read_file', description: 'Read file' });
-        discovery.mapSkillsToTools([
-          { name: 'reader', allowedTools: ['read_file'] }
-        ]);
+        discovery.mapSkillsToTools([{ name: 'reader', allowedTools: ['read_file'] }]);
       });
 
       it('should get tools for mapped skill', () => {
@@ -400,7 +400,7 @@ describe('ToolDiscovery', () => {
         expect(onUsed).toHaveBeenCalledWith({
           toolName: 'test_tool',
           latency: 100,
-          success: true
+          success: true,
         });
       });
     });

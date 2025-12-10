@@ -36,7 +36,7 @@ program
   .option('-b, --browser <type>', 'Browser type (chromium/firefox/webkit)', 'chromium')
   .option('-o, --output <dir>', 'Screenshot output directory', './screenshots')
   .option('-t, --timeout <ms>', 'Default timeout in milliseconds', '30000')
-  .action(async (options) => {
+  .action(async options => {
     await runInteractive(options);
   });
 
@@ -82,7 +82,7 @@ program
   .option('-o, --output <file>', 'Output file path')
   .option('-f, --format <format>', 'Test format (playwright/jest)', 'playwright')
   .option('-H, --history <file>', 'Action history JSON file')
-  .action(async (options) => {
+  .action(async options => {
     await generateTest(options);
   });
 
@@ -91,7 +91,7 @@ program
  */
 async function runInteractive(options) {
   const Agent = loadBrowserAgent();
-  
+
   console.log(chalk.cyan('\n🌐 MUSUBI Browser Agent - Interactive Mode'));
   console.log(chalk.gray('Type browser commands in natural language. Type "help" for commands.\n'));
 
@@ -112,7 +112,7 @@ async function runInteractive(options) {
     });
 
     const prompt = () => {
-      rl.question(chalk.yellow('browser> '), async (input) => {
+      rl.question(chalk.yellow('browser> '), async input => {
         const command = input.trim();
 
         if (!command) {
@@ -183,7 +183,6 @@ async function runInteractive(options) {
     };
 
     prompt();
-
   } catch (error) {
     console.error(chalk.red(`Error: ${error.message}`));
     process.exit(1);
@@ -195,7 +194,7 @@ async function runInteractive(options) {
  */
 async function runCommand(command, options) {
   const Agent = loadBrowserAgent();
-  
+
   console.log(chalk.cyan('🌐 MUSUBI Browser Agent'));
   console.log(chalk.gray(`Command: ${command}\n`));
 
@@ -211,7 +210,7 @@ async function runCommand(command, options) {
 
     if (result.success) {
       console.log(chalk.green('✓ Command executed successfully'));
-      
+
       if (result.results) {
         for (const r of result.results) {
           console.log(chalk.gray(`  ${r.type}: ${JSON.stringify(r.data)}`));
@@ -221,7 +220,6 @@ async function runCommand(command, options) {
       console.log(chalk.red(`✗ Failed: ${result.error}`));
       process.exitCode = 1;
     }
-
   } catch (error) {
     console.error(chalk.red(`Error: ${error.message}`));
     process.exitCode = 1;
@@ -235,8 +233,8 @@ async function runCommand(command, options) {
  */
 async function runScript(file, options) {
   const Agent = loadBrowserAgent();
-  
-  if (!await fs.pathExists(file)) {
+
+  if (!(await fs.pathExists(file))) {
     console.error(chalk.red(`Script file not found: ${file}`));
     process.exit(1);
   }
@@ -259,7 +257,7 @@ async function runScript(file, options) {
 
   try {
     await agent.launch();
-    
+
     let passed = 0;
     let failed = 0;
 
@@ -290,7 +288,6 @@ async function runScript(file, options) {
     if (failed > 0) {
       process.exitCode = 1;
     }
-
   } catch (error) {
     console.error(chalk.red(`Error: ${error.message}`));
     process.exitCode = 1;
@@ -305,7 +302,7 @@ async function runScript(file, options) {
 async function compareScreenshots(expected, actual, options) {
   const Agent = loadBrowserAgent();
   const { AIComparator } = Agent;
-  
+
   console.log(chalk.cyan('🖼️ Screenshot Comparison'));
   console.log(chalk.gray(`Expected: ${expected}`));
   console.log(chalk.gray(`Actual: ${actual}`));
@@ -323,15 +320,17 @@ async function compareScreenshots(expected, actual, options) {
     if (result.passed) {
       console.log(chalk.green(`✓ PASSED - Similarity: ${result.similarity}%`));
     } else {
-      console.log(chalk.red(`✗ FAILED - Similarity: ${result.similarity}% (threshold: ${result.threshold}%)`));
-      
+      console.log(
+        chalk.red(`✗ FAILED - Similarity: ${result.similarity}% (threshold: ${result.threshold}%)`)
+      );
+
       if (result.differences.length > 0) {
         console.log(chalk.yellow('\nDifferences:'));
         for (const diff of result.differences) {
           console.log(chalk.yellow(`  - ${diff}`));
         }
       }
-      
+
       process.exitCode = 1;
     }
 
@@ -340,7 +339,6 @@ async function compareScreenshots(expected, actual, options) {
     const reportPath = path.join(path.dirname(actual), 'comparison-report.md');
     await fs.writeFile(reportPath, report);
     console.log(chalk.gray(`\nReport saved: ${reportPath}`));
-
   } catch (error) {
     console.error(chalk.red(`Error: ${error.message}`));
     process.exitCode = 1;
@@ -353,14 +351,14 @@ async function compareScreenshots(expected, actual, options) {
 async function generateTest(options) {
   const Agent = loadBrowserAgent();
   const { TestGenerator } = Agent;
-  
+
   console.log(chalk.cyan('📝 Generate Test Code'));
 
   const generator = new TestGenerator();
-  
+
   let history = [];
   if (options.history) {
-    if (!await fs.pathExists(options.history)) {
+    if (!(await fs.pathExists(options.history))) {
       console.error(chalk.red(`History file not found: ${options.history}`));
       process.exit(1);
     }
@@ -379,7 +377,6 @@ async function generateTest(options) {
     } else {
       console.log('\n' + code);
     }
-
   } catch (error) {
     console.error(chalk.red(`Error: ${error.message}`));
     process.exitCode = 1;
@@ -396,7 +393,9 @@ function showHelp() {
   console.log(chalk.gray('  Click:'));
   console.log('    "ログインボタンをクリック" or "click login button"');
   console.log(chalk.gray('  Fill:'));
-  console.log('    "メール欄に「test@example.com」と入力" or "type test@example.com in email field"');
+  console.log(
+    '    "メール欄に「test@example.com」と入力" or "type test@example.com in email field"'
+  );
   console.log(chalk.gray('  Wait:'));
   console.log('    "3秒待つ" or "wait 3 seconds"');
   console.log(chalk.gray('  Screenshot:'));
@@ -416,7 +415,7 @@ function showHelp() {
  */
 function showHistory(agent) {
   const history = agent.getActionHistory();
-  
+
   if (history.length === 0) {
     console.log(chalk.gray('No actions in history.'));
     return;
@@ -426,7 +425,9 @@ function showHistory(agent) {
   for (let i = 0; i < history.length; i++) {
     const item = history[i];
     const status = item.result?.success ? chalk.green('✓') : chalk.red('✗');
-    console.log(`  ${i + 1}. ${status} ${item.action.type}: ${item.action.raw || JSON.stringify(item.action)}`);
+    console.log(
+      `  ${i + 1}. ${status} ${item.action.type}: ${item.action.raw || JSON.stringify(item.action)}`
+    );
   }
   console.log('');
 }
@@ -436,7 +437,7 @@ function showHistory(agent) {
  */
 async function saveTest(agent, outputPath) {
   const history = agent.getActionHistory();
-  
+
   if (history.length === 0) {
     console.log(chalk.yellow('No actions in history to save.'));
     return;

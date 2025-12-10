@@ -1,17 +1,17 @@
 /**
  * Observability Module - Logs, Metrics, and Traces
- * 
+ *
  * Provides unified observability capabilities:
  * - Structured logging
  * - Metrics collection
  * - Distributed tracing
  * - Correlation IDs
- * 
+ *
  * Part of MUSUBI v5.0.0 - Production Readiness
- * 
+ *
  * @module monitoring/observability
  * @version 1.0.0
- * 
+ *
  * @traceability
  * - Requirement: REQ-P5-004 (Observability Integration)
  * - Design: docs/design/tdd-musubi-v5.0.0.md#3.4
@@ -29,7 +29,7 @@ const LogLevel = {
   INFO: 'info',
   WARN: 'warn',
   ERROR: 'error',
-  FATAL: 'fatal'
+  FATAL: 'fatal',
 };
 
 /**
@@ -41,7 +41,7 @@ const LOG_PRIORITY = {
   [LogLevel.INFO]: 2,
   [LogLevel.WARN]: 3,
   [LogLevel.ERROR]: 4,
-  [LogLevel.FATAL]: 5
+  [LogLevel.FATAL]: 5,
 };
 
 /**
@@ -50,7 +50,7 @@ const LOG_PRIORITY = {
 const TraceStatus = {
   OK: 'ok',
   ERROR: 'error',
-  UNSET: 'unset'
+  UNSET: 'unset',
 };
 
 /**
@@ -61,7 +61,7 @@ const SpanKind = {
   SERVER: 'server',
   CLIENT: 'client',
   PRODUCER: 'producer',
-  CONSUMER: 'consumer'
+  CONSUMER: 'consumer',
 };
 
 /**
@@ -98,7 +98,7 @@ class Logger extends EventEmitter {
       level: this.level,
       context: { ...this.context, ...context },
       outputs: this.outputs,
-      parent: this
+      parent: this,
     });
   }
 
@@ -121,7 +121,7 @@ class Logger extends EventEmitter {
       logger: this.name,
       message,
       ...this.context,
-      ...meta
+      ...meta,
     };
 
     for (const output of this.outputs) {
@@ -131,12 +131,24 @@ class Logger extends EventEmitter {
     this.emit('log', entry);
   }
 
-  trace(message, meta) { this.log(LogLevel.TRACE, message, meta); }
-  debug(message, meta) { this.log(LogLevel.DEBUG, message, meta); }
-  info(message, meta) { this.log(LogLevel.INFO, message, meta); }
-  warn(message, meta) { this.log(LogLevel.WARN, message, meta); }
-  error(message, meta) { this.log(LogLevel.ERROR, message, meta); }
-  fatal(message, meta) { this.log(LogLevel.FATAL, message, meta); }
+  trace(message, meta) {
+    this.log(LogLevel.TRACE, message, meta);
+  }
+  debug(message, meta) {
+    this.log(LogLevel.DEBUG, message, meta);
+  }
+  info(message, meta) {
+    this.log(LogLevel.INFO, message, meta);
+  }
+  warn(message, meta) {
+    this.log(LogLevel.WARN, message, meta);
+  }
+  error(message, meta) {
+    this.log(LogLevel.ERROR, message, meta);
+  }
+  fatal(message, meta) {
+    this.log(LogLevel.FATAL, message, meta);
+  }
 
   /**
    * Add an output
@@ -166,10 +178,8 @@ class ConsoleOutput {
 
   write(entry) {
     if (this.format === 'json') {
-      const output = this.pretty 
-        ? JSON.stringify(entry, null, 2)
-        : JSON.stringify(entry);
-      
+      const output = this.pretty ? JSON.stringify(entry, null, 2) : JSON.stringify(entry);
+
       if (entry.level === LogLevel.ERROR || entry.level === LogLevel.FATAL) {
         console.error(output);
       } else if (entry.level === LogLevel.WARN) {
@@ -197,7 +207,7 @@ class FileOutput {
 
   write(entry) {
     this.buffer.push(JSON.stringify(entry) + '\n');
-    
+
     if (this.buffer.length >= this.bufferSize) {
       this.flush();
     }
@@ -242,7 +252,7 @@ class MetricsCollector extends EventEmitter {
         type: 'counter',
         name: fullName,
         help,
-        values: new Map()
+        values: new Map(),
       });
     }
     return new CounterMetric(this.metrics.get(fullName), this.labels);
@@ -258,7 +268,7 @@ class MetricsCollector extends EventEmitter {
         type: 'gauge',
         name: fullName,
         help,
-        values: new Map()
+        values: new Map(),
       });
     }
     return new GaugeMetric(this.metrics.get(fullName), this.labels);
@@ -275,7 +285,7 @@ class MetricsCollector extends EventEmitter {
         name: fullName,
         help,
         buckets,
-        values: new Map()
+        values: new Map(),
       });
     }
     return new HistogramMetric(this.metrics.get(fullName), this.labels);
@@ -323,13 +333,13 @@ class MetricsCollector extends EventEmitter {
         name: metric.name,
         type: metric.type,
         help: metric.help,
-        values: []
+        values: [],
       };
 
       for (const [labelsKey, value] of metric.values) {
         metricData.values.push({
           labels: labelsKey,
-          value: metric.type === 'histogram' ? { ...value } : value
+          value: metric.type === 'histogram' ? { ...value } : value,
         });
       }
 
@@ -430,12 +440,12 @@ class HistogramMetric {
   observe(value, labels = {}) {
     const key = this._labelKey(labels);
     let data = this.metric.values.get(key);
-    
+
     if (!data) {
       data = {
         buckets: this.metric.buckets.map(() => 0),
         sum: 0,
-        count: 0
+        count: 0,
       };
       this.metric.values.set(key, data);
     }
@@ -500,7 +510,7 @@ class Span {
     this.events.push({
       name,
       timestamp: Date.now(),
-      attributes
+      attributes,
     });
     return this;
   }
@@ -536,7 +546,7 @@ class Span {
   getContext() {
     return {
       traceId: this.traceId,
-      spanId: this.spanId
+      spanId: this.spanId,
     };
   }
 
@@ -554,7 +564,7 @@ class Span {
       statusMessage: this.statusMessage,
       attributes: this.attributes,
       events: this.events,
-      links: this.links
+      links: this.links,
     };
   }
 }
@@ -583,9 +593,9 @@ class Tracer extends EventEmitter {
       attributes: {
         'service.name': this.serviceName,
         'service.version': this.version,
-        ...options.attributes
+        ...options.attributes,
       },
-      links: options.links
+      links: options.links,
     });
 
     this.spans.push(span);
@@ -600,7 +610,7 @@ class Tracer extends EventEmitter {
     return this.startSpan(name, {
       traceId: parent.traceId,
       parentSpanId: parent.spanId,
-      ...options
+      ...options,
     });
   }
 
@@ -610,11 +620,11 @@ class Tracer extends EventEmitter {
   endSpan(span) {
     span.end();
     this.emit('spanEnded', span);
-    
+
     for (const exporter of this.exporters) {
       exporter.export(span);
     }
-    
+
     return span;
   }
 
@@ -722,7 +732,7 @@ class CorrelationContext {
    */
   toHeaders() {
     const headers = {};
-    
+
     if (this.has('traceId')) {
       headers['x-trace-id'] = this.get('traceId');
     }
@@ -732,7 +742,7 @@ class CorrelationContext {
     if (this.has('correlationId')) {
       headers['x-correlation-id'] = this.get('correlationId');
     }
-    
+
     return headers;
   }
 
@@ -741,7 +751,7 @@ class CorrelationContext {
    */
   static fromHeaders(headers) {
     const ctx = new CorrelationContext();
-    
+
     if (headers['x-trace-id']) {
       ctx.set('traceId', headers['x-trace-id']);
     }
@@ -751,7 +761,7 @@ class CorrelationContext {
     if (headers['x-correlation-id']) {
       ctx.set('correlationId', headers['x-correlation-id']);
     }
-    
+
     return ctx;
   }
 }
@@ -764,22 +774,22 @@ class ObservabilityProvider extends EventEmitter {
     super();
     this.serviceName = options.serviceName || 'musubi-service';
     this.version = options.version || '1.0.0';
-    
+
     this.logger = new Logger({
       name: this.serviceName,
-      level: options.logLevel || LogLevel.INFO
+      level: options.logLevel || LogLevel.INFO,
     });
-    
+
     this.metrics = new MetricsCollector({
       name: this.serviceName,
-      prefix: options.metricsPrefix || ''
+      prefix: options.metricsPrefix || '',
     });
-    
+
     this.tracer = new Tracer({
       serviceName: this.serviceName,
-      version: this.version
+      version: this.version,
     });
-    
+
     // Standard metrics
     this._setupStandardMetrics();
   }
@@ -790,9 +800,12 @@ class ObservabilityProvider extends EventEmitter {
   _setupStandardMetrics() {
     // Request metrics
     this.requestCounter = this.metrics.counter('http_requests_total', 'Total HTTP requests');
-    this.requestDuration = this.metrics.histogram('http_request_duration_seconds', 'HTTP request duration');
+    this.requestDuration = this.metrics.histogram(
+      'http_request_duration_seconds',
+      'HTTP request duration'
+    );
     this.requestErrors = this.metrics.counter('http_request_errors_total', 'Total HTTP errors');
-    
+
     // Resource metrics
     this.activeConnections = this.metrics.gauge('active_connections', 'Active connections');
   }
@@ -823,10 +836,10 @@ class ObservabilityProvider extends EventEmitter {
    */
   trace(name, fn, options = {}) {
     const span = this.tracer.startSpan(name, options);
-    
+
     try {
       const result = fn(span);
-      
+
       if (result && typeof result.then === 'function') {
         return result
           .then(r => {
@@ -838,13 +851,13 @@ class ObservabilityProvider extends EventEmitter {
             span.setStatus(TraceStatus.ERROR, err.message);
             span.addEvent('exception', {
               'exception.type': err.name,
-              'exception.message': err.message
+              'exception.message': err.message,
             });
             this.tracer.endSpan(span);
             throw err;
           });
       }
-      
+
       span.setStatus(TraceStatus.OK);
       this.tracer.endSpan(span);
       return result;
@@ -852,7 +865,7 @@ class ObservabilityProvider extends EventEmitter {
       span.setStatus(TraceStatus.ERROR, err.message);
       span.addEvent('exception', {
         'exception.type': err.name,
-        'exception.message': err.message
+        'exception.message': err.message,
       });
       this.tracer.endSpan(span);
       throw err;
@@ -864,10 +877,10 @@ class ObservabilityProvider extends EventEmitter {
    */
   recordRequest(method, path, statusCode, duration) {
     const labels = { method, path, status_code: statusCode.toString() };
-    
+
     this.requestCounter.inc(labels);
     this.requestDuration.observe(duration / 1000, { method, path }); // Convert to seconds
-    
+
     if (statusCode >= 400) {
       this.requestErrors.inc(labels);
     }
@@ -880,10 +893,10 @@ class ObservabilityProvider extends EventEmitter {
     return {
       service: {
         name: this.serviceName,
-        version: this.version
+        version: this.version,
       },
       metrics: this.metrics.toJSON(),
-      traces: this.tracer.getAllSpans()
+      traces: this.tracer.getAllSpans(),
     };
   }
 }
@@ -931,18 +944,18 @@ module.exports = {
   MemoryExporter,
   CorrelationContext,
   ObservabilityProvider,
-  
+
   // Constants
   LogLevel,
   TraceStatus,
   SpanKind,
-  
+
   // Factories
   createLogger,
   createMetricsCollector,
   createTracer,
   createObservability,
-  
+
   // Utilities
-  generateId
+  generateId,
 };

@@ -22,7 +22,7 @@ class AlternativeGenerator {
       maxAlternatives: 3,
       minConfidence: 0.5,
       includeRetryOption: true,
-      respectDependencies: true
+      respectDependencies: true,
     };
     this.contextAnalyzer = new ContextAnalyzer();
     this.confidenceScorer = new ConfidenceScorer(options.scorerConfig);
@@ -60,9 +60,7 @@ class AlternativeGenerator {
     const scoredAlternatives = await this.scoreAlternatives(alternatives, context);
 
     // Filter by minimum confidence
-    const filtered = scoredAlternatives.filter(
-      alt => alt.confidence >= this.config.minConfidence
-    );
+    const filtered = scoredAlternatives.filter(alt => alt.confidence >= this.config.minConfidence);
 
     // Limit to max alternatives
     const limited = filtered.slice(0, this.config.maxAlternatives);
@@ -112,7 +110,7 @@ class AlternativeGenerator {
    * @private
    */
   buildPrompt(failedTask, context, analysis, goal) {
-    const errorInfo = failedTask.error 
+    const errorInfo = failedTask.error
       ? `Error: ${failedTask.error.message || failedTask.error}`
       : 'Unknown error';
 
@@ -168,16 +166,16 @@ Provide your confidence (0.0-1.0) for each alternative based on likelihood of su
                 properties: {
                   name: { type: 'string' },
                   skill: { type: 'string' },
-                  parameters: { type: 'object' }
-                }
+                  parameters: { type: 'object' },
+                },
               },
               confidence: { type: 'number', minimum: 0, maximum: 1 },
               reasoning: { type: 'string' },
-              risks: { type: 'array', items: { type: 'string' } }
-            }
-          }
-        }
-      }
+              risks: { type: 'array', items: { type: 'string' } },
+            },
+          },
+        },
+      },
     };
   }
 
@@ -202,14 +200,14 @@ Provide your confidence (0.0-1.0) for each alternative based on likelihood of su
         name: alt.task?.name || failedTask.name,
         skill: alt.task?.skill || failedTask.skill,
         parameters: alt.task?.parameters || failedTask.parameters,
-        originalTaskId: failedTask.id
+        originalTaskId: failedTask.id,
       },
       confidence: alt.confidence || 0.5,
       llmConfidence: alt.confidence || 0.5,
       reasoning: alt.reasoning || '',
       risks: alt.risks || [],
       source: 'llm',
-      analysisContext: response.analysis
+      analysisContext: response.analysis,
     }));
   }
 
@@ -226,13 +224,13 @@ Provide your confidence (0.0-1.0) for each alternative based on likelihood of su
       task: {
         ...failedTask,
         id: `${failedTask.id || 'task'}-retry`,
-        retryOf: failedTask.id
+        retryOf: failedTask.id,
       },
       confidence: 0.3, // Low initial confidence for retries
       llmConfidence: 0.3,
       reasoning: 'Retry the failed task - may succeed on transient errors',
       risks: ['May fail with same error', 'Time cost if error persists'],
-      source: 'system'
+      source: 'system',
     };
   }
 
@@ -245,12 +243,12 @@ Provide your confidence (0.0-1.0) for each alternative based on likelihood of su
    */
   async scoreAlternatives(alternatives, context) {
     const scored = await Promise.all(
-      alternatives.map(async (alt) => {
+      alternatives.map(async alt => {
         const score = await this.confidenceScorer.score(alt, context);
         return {
           ...alt,
           confidence: score.overall,
-          confidenceBreakdown: score
+          confidenceBreakdown: score,
         };
       })
     );
@@ -286,8 +284,8 @@ class ContextAnalyzer {
       failureContext: {
         error: failedTask.error,
         attemptCount: failedTask.attempts || 1,
-        lastAttemptTime: failedTask.lastAttemptTime || Date.now()
-      }
+        lastAttemptTime: failedTask.lastAttemptTime || Date.now(),
+      },
     };
   }
 
@@ -300,10 +298,7 @@ class ContextAnalyzer {
   extractAvailableSkills(context) {
     if (context.skills) return Object.keys(context.skills);
     if (context.registry) return context.registry.getSkillNames();
-    return [
-      'analyze', 'generate', 'validate', 'implement',
-      'test', 'review', 'document', 'deploy'
-    ];
+    return ['analyze', 'generate', 'validate', 'implement', 'test', 'review', 'document', 'deploy'];
   }
 
   /**
@@ -316,11 +311,11 @@ class ContextAnalyzer {
   extractDependencies(task, context) {
     const taskDeps = task.dependencies || [];
     const completedIds = (context.completed || []).map(t => t.id);
-    
+
     return {
       required: taskDeps,
       satisfied: taskDeps.filter(d => completedIds.includes(d)),
-      unsatisfied: taskDeps.filter(d => !completedIds.includes(d))
+      unsatisfied: taskDeps.filter(d => !completedIds.includes(d)),
     };
   }
 
@@ -333,10 +328,10 @@ class ContextAnalyzer {
   extractResources(context) {
     return {
       concurrency: context.maxConcurrency || 5,
-      timeRemaining: context.timeout 
+      timeRemaining: context.timeout
         ? context.timeout - (Date.now() - (context.startTime || Date.now()))
         : null,
-      memoryAvailable: true
+      memoryAvailable: true,
     };
   }
 }
@@ -354,7 +349,7 @@ class ConfidenceScorer {
       llm: config.llmWeight || 0.4,
       history: config.historyWeight || 0.3,
       resource: config.resourceWeight || 0.2,
-      complexity: config.complexityWeight || 0.1
+      complexity: config.complexityWeight || 0.1,
     };
     this.history = new Map();
   }
@@ -379,7 +374,7 @@ class ConfidenceScorer {
     const complexityScore = this.getComplexityScore(alternative);
 
     // Weighted combination
-    const overall = 
+    const overall =
       llmScore * this.weights.llm +
       historyScore * this.weights.history +
       resourceScore * this.weights.resource +
@@ -391,8 +386,8 @@ class ConfidenceScorer {
         llm: Math.round(llmScore * 100) / 100,
         history: Math.round(historyScore * 100) / 100,
         resource: Math.round(resourceScore * 100) / 100,
-        complexity: Math.round(complexityScore * 100) / 100
-      }
+        complexity: Math.round(complexityScore * 100) / 100,
+      },
     };
   }
 
@@ -417,7 +412,7 @@ class ConfidenceScorer {
    */
   getResourceScore(alternative, context) {
     let score = 1.0;
-    
+
     // Check time constraints
     if (context.resources?.timeRemaining != null) {
       const estimatedTime = alternative.estimatedTime || 30000;
@@ -445,12 +440,12 @@ class ConfidenceScorer {
    */
   getComplexityScore(alternative) {
     let complexity = 0;
-    
+
     // More risks = lower score
     if (alternative.risks) {
       complexity += alternative.risks.length * 0.1;
     }
-    
+
     // More parameters = slightly lower score
     const params = alternative.task.parameters || {};
     complexity += Object.keys(params).length * 0.02;
@@ -501,8 +496,8 @@ class ConfidenceScorer {
  * @property {Object} components - Component scores
  */
 
-module.exports = { 
-  AlternativeGenerator, 
-  ContextAnalyzer, 
-  ConfidenceScorer 
+module.exports = {
+  AlternativeGenerator,
+  ContextAnalyzer,
+  ConfidenceScorer,
 };

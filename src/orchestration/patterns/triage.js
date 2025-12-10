@@ -1,21 +1,21 @@
 /**
  * TriagePattern - Request classification and routing pattern
- * 
+ *
  * Classifies incoming requests and routes them to specialized agents.
  * Implements intelligent routing based on intent detection and agent capabilities.
- * 
+ *
  * @module orchestration/patterns/triage
  * @version 1.0.0
  */
 
 const { BasePattern } = require('../pattern-registry');
 const { ExecutionContext, _ExecutionStatus } = require('../orchestration-engine');
-const { 
-  HandoffPattern, 
-  HandoffPatternType, 
-  HandoffConfig: _HandoffConfig, 
+const {
+  HandoffPattern,
+  HandoffPatternType,
+  HandoffConfig: _HandoffConfig,
   EscalationData,
-  handoff 
+  handoff,
 } = require('./handoff');
 
 /**
@@ -29,18 +29,18 @@ const TriageCategory = {
   REFUND: 'refund',
   GENERAL: 'general',
   ESCALATION: 'escalation',
-  UNKNOWN: 'unknown'
+  UNKNOWN: 'unknown',
 };
 
 /**
  * Triage routing strategies
  */
 const TriageStrategy = {
-  KEYWORD: 'keyword',           // Keyword-based classification
-  INTENT: 'intent',             // Intent detection
-  CAPABILITY: 'capability',     // Match agent capabilities
-  HYBRID: 'hybrid',             // Combine multiple strategies
-  LLM: 'llm'                    // LLM-based classification
+  KEYWORD: 'keyword', // Keyword-based classification
+  INTENT: 'intent', // Intent detection
+  CAPABILITY: 'capability', // Match agent capabilities
+  HYBRID: 'hybrid', // Combine multiple strategies
+  LLM: 'llm', // LLM-based classification
 };
 
 /**
@@ -62,8 +62,7 @@ class AgentCapability {
    * Check if agent can handle given category
    */
   canHandle(category) {
-    return this.categories.includes(category) || 
-           this.categories.includes(TriageCategory.GENERAL);
+    return this.categories.includes(category) || this.categories.includes(TriageCategory.GENERAL);
   }
 
   /**
@@ -79,26 +78,26 @@ class AgentCapability {
    */
   calculateScore(input, category) {
     let score = 0;
-    
+
     // Category match
     if (this.canHandle(category)) score += 10;
-    
+
     // Keyword matches
-    const keywordMatches = this.keywords.filter(kw => 
+    const keywordMatches = this.keywords.filter(kw =>
       input.toLowerCase().includes(kw.toLowerCase())
     ).length;
     score += keywordMatches * 2;
-    
+
     // Priority bonus
     score += this.priority;
-    
+
     // Load penalty (prefer less loaded agents)
     if (this.currentLoad >= this.maxConcurrent) {
       score -= 100; // Heavy penalty for overloaded agents
     } else {
       score -= (this.currentLoad / this.maxConcurrent) * 5;
     }
-    
+
     return score;
   }
 
@@ -111,7 +110,7 @@ class AgentCapability {
       description: this.description,
       priority: this.priority,
       maxConcurrent: this.maxConcurrent,
-      currentLoad: this.currentLoad
+      currentLoad: this.currentLoad,
     };
   }
 }
@@ -140,7 +139,7 @@ class TriageResult {
       selectedAgent: this.selectedAgent?.name || this.selectedAgent,
       alternativeAgents: this.alternativeAgents.map(a => a.name || a),
       reasoning: this.reasoning,
-      timestamp: this.timestamp.toISOString()
+      timestamp: this.timestamp.toISOString(),
     };
   }
 }
@@ -150,29 +149,75 @@ class TriageResult {
  */
 const DEFAULT_KEYWORD_MAPPINGS = {
   [TriageCategory.BILLING]: [
-    'invoice', 'payment', 'charge', 'bill', 'subscription', 
-    'pricing', 'cost', 'fee', 'receipt', 'transaction'
+    'invoice',
+    'payment',
+    'charge',
+    'bill',
+    'subscription',
+    'pricing',
+    'cost',
+    'fee',
+    'receipt',
+    'transaction',
   ],
   [TriageCategory.REFUND]: [
-    'refund', 'money back', 'return', 'cancel', 'cancelled',
-    'reimbursement', 'credit', 'chargeback'
+    'refund',
+    'money back',
+    'return',
+    'cancel',
+    'cancelled',
+    'reimbursement',
+    'credit',
+    'chargeback',
   ],
   [TriageCategory.SUPPORT]: [
-    'help', 'issue', 'problem', 'not working', 'error', 'bug',
-    'broken', 'fix', 'trouble', 'stuck', 'assistance'
+    'help',
+    'issue',
+    'problem',
+    'not working',
+    'error',
+    'bug',
+    'broken',
+    'fix',
+    'trouble',
+    'stuck',
+    'assistance',
   ],
   [TriageCategory.TECHNICAL]: [
-    'api', 'code', 'integration', 'developer', 'sdk', 'documentation',
-    'endpoint', 'authentication', 'token', 'webhook'
+    'api',
+    'code',
+    'integration',
+    'developer',
+    'sdk',
+    'documentation',
+    'endpoint',
+    'authentication',
+    'token',
+    'webhook',
   ],
   [TriageCategory.SALES]: [
-    'buy', 'purchase', 'pricing', 'plan', 'upgrade', 'enterprise',
-    'demo', 'trial', 'quote', 'discount'
+    'buy',
+    'purchase',
+    'pricing',
+    'plan',
+    'upgrade',
+    'enterprise',
+    'demo',
+    'trial',
+    'quote',
+    'discount',
   ],
   [TriageCategory.ESCALATION]: [
-    'manager', 'supervisor', 'escalate', 'complaint', 'urgent',
-    'unacceptable', 'lawyer', 'legal', 'sue'
-  ]
+    'manager',
+    'supervisor',
+    'escalate',
+    'complaint',
+    'urgent',
+    'unacceptable',
+    'lawyer',
+    'legal',
+    'sue',
+  ],
 };
 
 /**
@@ -191,12 +236,12 @@ class TriagePattern extends BasePattern {
         'Intent-based agent selection',
         'Load-balanced request distribution',
         'Specialized agent dispatch',
-        'Escalation handling'
+        'Escalation handling',
       ],
       complexity: 'medium',
       supportsParallel: false,
       supportsReplanning: true,
-      requiresHuman: false
+      requiresHuman: false,
     });
 
     this.options = {
@@ -208,16 +253,16 @@ class TriagePattern extends BasePattern {
       enableHandoff: options.enableHandoff !== false,
       maxRetries: options.maxRetries || 2,
       llmClassifier: options.llmClassifier || null, // Optional LLM for classification
-      ...options
+      ...options,
     };
 
     // Agent registry with capabilities
     this.agentRegistry = new Map();
-    
+
     // Internal handoff pattern for delegation
     this.handoffPattern = new HandoffPattern({
       strategy: 'best-match',
-      maxHandoffs: options.maxHandoffs || 5
+      maxHandoffs: options.maxHandoffs || 5,
     });
 
     // Classification history
@@ -231,13 +276,14 @@ class TriagePattern extends BasePattern {
    * @returns {TriagePattern} This pattern for chaining
    */
   registerAgent(agent, capability) {
-    const cap = capability instanceof AgentCapability 
-      ? capability 
-      : new AgentCapability({ agent, ...capability });
-    
+    const cap =
+      capability instanceof AgentCapability
+        ? capability
+        : new AgentCapability({ agent, ...capability });
+
     const agentName = typeof agent === 'string' ? agent : agent.name;
     this.agentRegistry.set(agentName, cap);
-    
+
     return this;
   }
 
@@ -281,7 +327,7 @@ class TriagePattern extends BasePattern {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -304,13 +350,11 @@ class TriagePattern extends BasePattern {
       history = [],
       agents = [],
       sharedContext = {},
-      enableHandoff
+      enableHandoff,
     } = context.input;
 
     // Override enableHandoff from input if provided
-    const shouldHandoff = enableHandoff !== undefined 
-      ? enableHandoff 
-      : this.options.enableHandoff;
+    const shouldHandoff = enableHandoff !== undefined ? enableHandoff : this.options.enableHandoff;
 
     // Auto-register agents from input if registry is empty
     if (this.agentRegistry.size === 0 && agents.length > 0) {
@@ -327,30 +371,25 @@ class TriagePattern extends BasePattern {
       context,
       inputText: inputText.substring(0, 100),
       strategy: this.options.strategy,
-      registeredAgents: this.agentRegistry.size
+      registeredAgents: this.agentRegistry.size,
     });
 
     try {
       // Step 1: Classify the request
       engine.emit('triage:classifying', {
         context,
-        strategy: this.options.strategy
+        strategy: this.options.strategy,
       });
 
       const classification = await this.classifyRequest(inputText, context);
 
       engine.emit('triage:classified', {
         context,
-        classification: classification.toJSON()
+        classification: classification.toJSON(),
       });
 
       // Step 2: Select best agent
-      const selectedAgent = await this.selectAgent(
-        classification,
-        inputText,
-        context,
-        engine
-      );
+      const selectedAgent = await this.selectAgent(classification, inputText, context, engine);
 
       if (!selectedAgent) {
         // Use fallback agent if available
@@ -368,7 +407,7 @@ class TriagePattern extends BasePattern {
       this.classificationHistory.push({
         timestamp: new Date(),
         input: inputText.substring(0, 200),
-        classification: classification.toJSON()
+        classification: classification.toJSON(),
       });
 
       // Step 4: Perform handoff if enabled
@@ -376,7 +415,7 @@ class TriagePattern extends BasePattern {
       if (shouldHandoff && classification.selectedAgent) {
         engine.emit('triage:routing', {
           context,
-          targetAgent: this._getAgentName(classification.selectedAgent)
+          targetAgent: this._getAgentName(classification.selectedAgent),
         });
 
         result = await this.routeToAgent(
@@ -391,7 +430,7 @@ class TriagePattern extends BasePattern {
         result = {
           action: 'classified',
           classification: classification.toJSON(),
-          message: 'Request classified but handoff disabled'
+          message: 'Request classified but handoff disabled',
         };
       }
 
@@ -402,20 +441,19 @@ class TriagePattern extends BasePattern {
         context,
         classification: classification.toJSON(),
         selectedAgent: this._getAgentName(classification.selectedAgent),
-        duration: endTime - startTime
+        duration: endTime - startTime,
       });
 
       return {
         success: true,
         classification: classification.toJSON(),
         result,
-        duration: endTime - startTime
+        duration: endTime - startTime,
       };
-
     } catch (error) {
       engine.emit('triage:failed', {
         context,
-        error: error.message
+        error: error.message,
       });
 
       throw error;
@@ -485,7 +523,7 @@ class TriagePattern extends BasePattern {
       category: bestCategory,
       confidence,
       keywords: matchedKeywords,
-      reasoning: `Matched ${bestScore} keywords for category ${bestCategory}`
+      reasoning: `Matched ${bestScore} keywords for category ${bestCategory}`,
     });
   }
 
@@ -515,23 +553,23 @@ class TriagePattern extends BasePattern {
 
     // Map intents to categories
     const intentToCategory = {
-      'request_refund': TriageCategory.REFUND,
-      'ask_question': TriageCategory.SUPPORT,
-      'report_issue': TriageCategory.TECHNICAL,
-      'purchase': TriageCategory.SALES,
-      'cancel_subscription': TriageCategory.BILLING
+      request_refund: TriageCategory.REFUND,
+      ask_question: TriageCategory.SUPPORT,
+      report_issue: TriageCategory.TECHNICAL,
+      purchase: TriageCategory.SALES,
+      cancel_subscription: TriageCategory.BILLING,
     };
 
     if (intents.length > 0) {
       // Sort by confidence
       intents.sort((a, b) => b.confidence - a.confidence);
       const topIntent = intents[0];
-      
+
       return new TriageResult({
         category: intentToCategory[topIntent.intent] || this.options.defaultCategory,
         confidence: topIntent.confidence,
         intents,
-        reasoning: `Detected intent: ${topIntent.intent} with ${(topIntent.confidence * 100).toFixed(0)}% confidence`
+        reasoning: `Detected intent: ${topIntent.intent} with ${(topIntent.confidence * 100).toFixed(0)}% confidence`,
       });
     }
 
@@ -562,14 +600,14 @@ class TriagePattern extends BasePattern {
         category,
         confidence: Math.min(bestScore / 20, 1),
         selectedAgent: bestMatch.agent,
-        reasoning: `Best capability match: ${this._getAgentName(bestMatch.agent)} with score ${bestScore.toFixed(2)}`
+        reasoning: `Best capability match: ${this._getAgentName(bestMatch.agent)} with score ${bestScore.toFixed(2)}`,
       });
     }
 
     return new TriageResult({
       category: this.options.defaultCategory,
       confidence: 0,
-      reasoning: 'No agent capability matches found'
+      reasoning: 'No agent capability matches found',
     });
   }
 
@@ -596,7 +634,7 @@ Respond with JSON: {"category": "<category>", "confidence": <0-1>, "reasoning": 
       return new TriageResult({
         category: parsed.category || this.options.defaultCategory,
         confidence: parsed.confidence || 0.5,
-        reasoning: parsed.reasoning || 'LLM classification'
+        reasoning: parsed.reasoning || 'LLM classification',
       });
     } catch (error) {
       // Fall back to hybrid on LLM failure
@@ -610,27 +648,28 @@ Respond with JSON: {"category": "<category>", "confidence": <0-1>, "reasoning": 
   _classifyHybrid(inputText, context) {
     // Run keyword classification
     const keywordResult = this._classifyByKeyword(inputText);
-    
+
     // Run intent classification
     const intentResult = this._classifyByIntent(inputText, context);
-    
+
     // Run capability classification if agents registered
-    const capabilityResult = this.agentRegistry.size > 0 
-      ? this._classifyByCapability(inputText)
-      : null;
+    const capabilityResult =
+      this.agentRegistry.size > 0 ? this._classifyByCapability(inputText) : null;
 
     // Combine results with weighted voting
     const votes = {};
-    
+
     // Keyword vote (weight: 1)
     votes[keywordResult.category] = (votes[keywordResult.category] || 0) + keywordResult.confidence;
-    
+
     // Intent vote (weight: 1.5)
-    votes[intentResult.category] = (votes[intentResult.category] || 0) + (intentResult.confidence * 1.5);
-    
+    votes[intentResult.category] =
+      (votes[intentResult.category] || 0) + intentResult.confidence * 1.5;
+
     // Capability vote (weight: 2) - more weight to direct agent matching
     if (capabilityResult && capabilityResult.category !== TriageCategory.UNKNOWN) {
-      votes[capabilityResult.category] = (votes[capabilityResult.category] || 0) + (capabilityResult.confidence * 2);
+      votes[capabilityResult.category] =
+        (votes[capabilityResult.category] || 0) + capabilityResult.confidence * 2;
     }
 
     // Find winning category
@@ -654,7 +693,7 @@ Respond with JSON: {"category": "<category>", "confidence": <0-1>, "reasoning": 
       keywords: keywordResult.keywords,
       intents: intentResult.intents,
       selectedAgent: capabilityResult?.selectedAgent,
-      reasoning: `Hybrid classification: keyword=${keywordResult.category}, intent=${intentResult.category}, capability=${capabilityResult?.category || 'N/A'}`
+      reasoning: `Hybrid classification: keyword=${keywordResult.category}, intent=${intentResult.category}, capability=${capabilityResult?.category || 'N/A'}`,
     });
   }
 
@@ -712,8 +751,8 @@ Respond with JSON: {"category": "<category>", "confidence": <0-1>, "reasoning": 
       sourceAgent: 'triage-agent',
       context: {
         classification: classification.toJSON(),
-        originalInput: inputText.substring(0, 500)
-      }
+        originalInput: inputText.substring(0, 500),
+      },
     });
 
     // Create target agents list
@@ -731,10 +770,10 @@ Respond with JSON: {"category": "<category>", "confidence": <0-1>, "reasoning": 
       task: `Route ${classification.category} request to specialized agent`,
       input: {
         sourceAgent: 'triage-agent',
-        targetAgents: targetAgents.map(agent => 
+        targetAgents: targetAgents.map(agent =>
           handoff({
             agent,
-            inputFilter: (h) => h // Keep all history for now
+            inputFilter: h => h, // Keep all history for now
           })
         ),
         message: inputText,
@@ -742,13 +781,13 @@ Respond with JSON: {"category": "<category>", "confidence": <0-1>, "reasoning": 
         escalationData: escalation,
         sharedContext: {
           ...sharedContext,
-          triageClassification: classification.toJSON()
-        }
+          triageClassification: classification.toJSON(),
+        },
       },
       metadata: {
         triageCategory: classification.category,
-        triageConfidence: classification.confidence
-      }
+        triageConfidence: classification.confidence,
+      },
     });
 
     parentContext.children.push(handoffContext);
@@ -772,7 +811,7 @@ Respond with JSON: {"category": "<category>", "confidence": <0-1>, "reasoning": 
    */
   getStats() {
     const categoryStats = {};
-    
+
     for (const record of this.classificationHistory) {
       const category = record.classification.category;
       categoryStats[category] = (categoryStats[category] || 0) + 1;
@@ -782,9 +821,11 @@ Respond with JSON: {"category": "<category>", "confidence": <0-1>, "reasoning": 
       totalClassifications: this.classificationHistory.length,
       registeredAgents: this.agentRegistry.size,
       categoryDistribution: categoryStats,
-      averageConfidence: this.classificationHistory.length > 0
-        ? this.classificationHistory.reduce((sum, r) => sum + r.classification.confidence, 0) / this.classificationHistory.length
-        : 0
+      averageConfidence:
+        this.classificationHistory.length > 0
+          ? this.classificationHistory.reduce((sum, r) => sum + r.classification.confidence, 0) /
+            this.classificationHistory.length
+          : 0,
     };
   }
 
@@ -814,5 +855,5 @@ module.exports = {
   AgentCapability,
   TriageResult,
   DEFAULT_KEYWORD_MAPPINGS,
-  createTriagePattern
+  createTriagePattern,
 };

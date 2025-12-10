@@ -62,13 +62,34 @@ describe('TraceabilityMatrixReport', () => {
     it('should preserve traceability data', () => {
       const traceabilityData = {
         forward: [
-          { requirement: { id: 'REQ-001' }, design: [], tasks: [], code: [], tests: [], complete: false },
+          {
+            requirement: { id: 'REQ-001' },
+            design: [],
+            tasks: [],
+            code: [],
+            tests: [],
+            complete: false,
+          },
         ],
         backward: [
-          { test: { file: 'test.js' }, code: [], tasks: [], design: [], requirements: [], complete: false },
+          {
+            test: { file: 'test.js' },
+            code: [],
+            tasks: [],
+            design: [],
+            requirements: [],
+            complete: false,
+          },
         ],
         orphaned: { requirements: [], design: [], tasks: [], code: [], tests: [] },
-        completeness: { forwardComplete: 0, forwardTotal: 1, forwardPercentage: 0, backwardComplete: 0, backwardTotal: 1, backwardPercentage: 0 },
+        completeness: {
+          forwardComplete: 0,
+          forwardTotal: 1,
+          forwardPercentage: 0,
+          backwardComplete: 0,
+          backwardTotal: 1,
+          backwardPercentage: 0,
+        },
       };
 
       const data = reporter.prepareReportData(traceabilityData);
@@ -81,15 +102,8 @@ describe('TraceabilityMatrixReport', () => {
   describe('calculateSummary', () => {
     it('should calculate correct summary', () => {
       const data = {
-        forward: [
-          { complete: true },
-          { complete: true },
-          { complete: false },
-        ],
-        backward: [
-          { complete: true },
-          { complete: false },
-        ],
+        forward: [{ complete: true }, { complete: true }, { complete: false }],
+        backward: [{ complete: true }, { complete: false }],
         orphaned: {
           requirements: [{ id: 'REQ-001' }],
           design: [],
@@ -192,14 +206,24 @@ describe('TraceabilityMatrixReport', () => {
   describe('generateHTML', () => {
     it('should include dark theme styles', () => {
       const darkReporter = new TraceabilityMatrixReport(testDir, { theme: 'dark' });
-      const data = darkReporter.prepareReportData({ forward: [], backward: [], orphaned: {}, completeness: {} });
+      const data = darkReporter.prepareReportData({
+        forward: [],
+        backward: [],
+        orphaned: {},
+        completeness: {},
+      });
       const html = darkReporter.generateHTML(data);
 
       expect(html).toContain('#1a1a2e'); // Dark background
     });
 
     it('should include interactive script when enabled', () => {
-      const data = reporter.prepareReportData({ forward: [], backward: [], orphaned: {}, completeness: {} });
+      const data = reporter.prepareReportData({
+        forward: [],
+        backward: [],
+        orphaned: {},
+        completeness: {},
+      });
       const html = reporter.generateHTML(data);
 
       expect(html).toContain('filterForward');
@@ -208,7 +232,12 @@ describe('TraceabilityMatrixReport', () => {
 
     it('should exclude interactive script when disabled', () => {
       const staticReporter = new TraceabilityMatrixReport(testDir, { interactive: false });
-      const data = staticReporter.prepareReportData({ forward: [], backward: [], orphaned: {}, completeness: {} });
+      const data = staticReporter.prepareReportData({
+        forward: [],
+        backward: [],
+        orphaned: {},
+        completeness: {},
+      });
       const html = staticReporter.generateHTML(data);
 
       // When interactive is false, the script tag content should not contain the function definitions
@@ -348,9 +377,14 @@ describe('TraceabilityMatrixReport', () => {
 
   describe('saveReport', () => {
     it('should save HTML report to file', async () => {
-      const data = reporter.prepareReportData({ forward: [], backward: [], orphaned: {}, completeness: {} });
+      const data = reporter.prepareReportData({
+        forward: [],
+        backward: [],
+        orphaned: {},
+        completeness: {},
+      });
       const html = reporter.generateHTML(data);
-      
+
       const filePath = await reporter.saveReport(html, 'test-report', ReportFormat.HTML);
 
       expect(filePath).toContain('test-report.html');
@@ -362,7 +396,12 @@ describe('TraceabilityMatrixReport', () => {
     });
 
     it('should save Markdown report with .md extension', async () => {
-      const data = reporter.prepareReportData({ forward: [], backward: [], orphaned: {}, completeness: {} });
+      const data = reporter.prepareReportData({
+        forward: [],
+        backward: [],
+        orphaned: {},
+        completeness: {},
+      });
       const md = reporter.generateMarkdown(data);
 
       const filePath = await reporter.saveReport(md, 'test-report', ReportFormat.MARKDOWN);
@@ -374,7 +413,12 @@ describe('TraceabilityMatrixReport', () => {
     });
 
     it('should save JSON report with .json extension', async () => {
-      const data = reporter.prepareReportData({ forward: [], backward: [], orphaned: {}, completeness: {} });
+      const data = reporter.prepareReportData({
+        forward: [],
+        backward: [],
+        orphaned: {},
+        completeness: {},
+      });
       const json = reporter.generateJSON(data);
 
       const filePath = await reporter.saveReport(json, 'test-report', ReportFormat.JSON);

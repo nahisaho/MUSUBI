@@ -50,6 +50,7 @@ musubi-browser generate-test --history ./user-flow.json --output tests/e2e/user-
 ```
 
 **UI/UXテストに活用**:
+
 - ワイヤーフレーム → 実装の視覚的比較
 - ユーザーフロー操作の自動化
 - レスポンシブデザインの確認（複数画面サイズ）

@@ -96,32 +96,32 @@ The Orchestrator can leverage all MUSUBI CLI commands to execute tasks efficient
 
 ### Advanced Commands (v3.5.0 NEW)
 
-| Command             | Purpose                           | Example                                    |
-| ------------------- | --------------------------------- | ------------------------------------------ |
-| `musubi-orchestrate`| Multi-skill workflow orchestration| `musubi-orchestrate auto <task>`           |
-| `musubi-browser`    | Browser automation & E2E testing  | `musubi-browser run "click login button"`  |
-| `musubi-gui`        | Web GUI dashboard                 | `musubi-gui start`                         |
-| `musubi-remember`   | Agent memory management           | `musubi-remember extract`                  |
-| `musubi-resolve`    | GitHub Issue auto-resolution      | `musubi-resolve <issue-number>`            |
-| `musubi-convert`    | Format conversion (Spec Kit)      | `musubi-convert to-speckit`                |
+| Command              | Purpose                            | Example                                   |
+| -------------------- | ---------------------------------- | ----------------------------------------- |
+| `musubi-orchestrate` | Multi-skill workflow orchestration | `musubi-orchestrate auto <task>`          |
+| `musubi-browser`     | Browser automation & E2E testing   | `musubi-browser run "click login button"` |
+| `musubi-gui`         | Web GUI dashboard                  | `musubi-gui start`                        |
+| `musubi-remember`    | Agent memory management            | `musubi-remember extract`                 |
+| `musubi-resolve`     | GitHub Issue auto-resolution       | `musubi-resolve <issue-number>`           |
+| `musubi-convert`     | Format conversion (Spec Kit)       | `musubi-convert to-speckit`               |
 
 ### Replanning Commands (v3.6.0 NEW)
 
-| Command                        | Purpose                      | Example                                           |
-| ------------------------------ | ---------------------------- | ------------------------------------------------- |
-| `musubi-orchestrate replan`    | Execute dynamic replanning   | `musubi-orchestrate replan <context-id>`          |
-| `musubi-orchestrate goal`      | Goal management              | `musubi-orchestrate goal register --name "Deploy"`|
-| `musubi-orchestrate optimize`  | Path optimization            | `musubi-orchestrate optimize run <path-id>`       |
-| `musubi-orchestrate path`      | Path analysis                | `musubi-orchestrate path analyze <path-id>`       |
+| Command                       | Purpose                    | Example                                            |
+| ----------------------------- | -------------------------- | -------------------------------------------------- |
+| `musubi-orchestrate replan`   | Execute dynamic replanning | `musubi-orchestrate replan <context-id>`           |
+| `musubi-orchestrate goal`     | Goal management            | `musubi-orchestrate goal register --name "Deploy"` |
+| `musubi-orchestrate optimize` | Path optimization          | `musubi-orchestrate optimize run <path-id>`        |
+| `musubi-orchestrate path`     | Path analysis              | `musubi-orchestrate path analyze <path-id>`        |
 
 ### Guardrails Commands (v3.9.0 NEW)
 
-| Command                                    | Purpose                        | Example                                               |
-| ------------------------------------------ | ------------------------------ | ----------------------------------------------------- |
-| `musubi-validate guardrails`               | Input/Output validation        | `musubi-validate guardrails --type input`             |
-| `musubi-validate guardrails --type output` | Output content validation      | `echo "content" \| musubi-validate guardrails --type output` |
-| `musubi-validate guardrails --type safety` | Safety check with constitutional| `musubi-validate guardrails --type safety --constitutional` |
-| `musubi-validate guardrails-chain`         | Chain multiple guardrails      | `musubi-validate guardrails-chain --parallel`         |
+| Command                                    | Purpose                          | Example                                                      |
+| ------------------------------------------ | -------------------------------- | ------------------------------------------------------------ |
+| `musubi-validate guardrails`               | Input/Output validation          | `musubi-validate guardrails --type input`                    |
+| `musubi-validate guardrails --type output` | Output content validation        | `echo "content" \| musubi-validate guardrails --type output` |
+| `musubi-validate guardrails --type safety` | Safety check with constitutional | `musubi-validate guardrails --type safety --constitutional`  |
+| `musubi-validate guardrails-chain`         | Chain multiple guardrails        | `musubi-validate guardrails-chain --parallel`                |
 
 ### Detailed Command Options
 
@@ -265,20 +265,21 @@ Orchestrator can leverage advanced AI agent modules inspired by OpenHands:
 
 ### Available Modules
 
-| Module | Purpose | Use Case |
-|--------|---------|----------|
-| **StuckDetector** | Detect agent stuck states | When agent loops or doesn't progress |
-| **MemoryCondenser** | Compress session history | Long sessions exceeding context |
-| **AgentMemoryManager** | Extract & persist learnings | Session knowledge capture |
-| **CriticSystem** | Evaluate SDD stage quality | Quality gates before transitions |
-| **SecurityAnalyzer** | Detect security risks | Pre-commit/deployment checks |
-| **IssueResolver** | GitHub Issue analysis | Issue → SDD workflow |
-| **SkillLoader** | Load keyword-triggered skills | Dynamic skill activation |
-| **RepoSkillManager** | Manage .musubi/skills/ | Project-specific skills |
+| Module                 | Purpose                       | Use Case                             |
+| ---------------------- | ----------------------------- | ------------------------------------ |
+| **StuckDetector**      | Detect agent stuck states     | When agent loops or doesn't progress |
+| **MemoryCondenser**    | Compress session history      | Long sessions exceeding context      |
+| **AgentMemoryManager** | Extract & persist learnings   | Session knowledge capture            |
+| **CriticSystem**       | Evaluate SDD stage quality    | Quality gates before transitions     |
+| **SecurityAnalyzer**   | Detect security risks         | Pre-commit/deployment checks         |
+| **IssueResolver**      | GitHub Issue analysis         | Issue → SDD workflow                 |
+| **SkillLoader**        | Load keyword-triggered skills | Dynamic skill activation             |
+| **RepoSkillManager**   | Manage .musubi/skills/        | Project-specific skills              |
 
 ### Module Integration Examples
 
 #### Stuck Detection
+
 ```javascript
 const { StuckDetector } = require('musubi/src/analyzers/stuck-detector');
 const detector = new StuckDetector();
@@ -291,6 +292,7 @@ if (analysis) {
 ```
 
 #### Quality Evaluation
+
 ```javascript
 const { CriticSystem } = require('musubi/src/validators/critic-system');
 const critic = new CriticSystem();
@@ -301,6 +303,7 @@ if (result.success) {
 ```
 
 #### Security Pre-check
+
 ```javascript
 const { SecurityAnalyzer } = require('musubi/src/analyzers/security-analyzer');
 const analyzer = new SecurityAnalyzer({ strictMode: true });
@@ -508,11 +511,11 @@ codegraph-mcp community "/path/to/project"
 
 ### Orchestration & Governance (3 agents)
 
-| Agent                     | Specialty                 | Key Deliverables                        | CLI Command           |
-| ------------------------- | ------------------------- | --------------------------------------- | --------------------- |
-| **Orchestrator**          | Multi-agent coordination  | Execution plans, integrated reports     | `musubi-orchestrate`  |
-| **Steering**              | Project memory management | Steering files (structure/tech/product) | `musubi-remember`     |
-| **Constitution Enforcer** | Constitutional validation | Compliance reports, violation alerts    | `musubi-validate`     |
+| Agent                     | Specialty                 | Key Deliverables                        | CLI Command          |
+| ------------------------- | ------------------------- | --------------------------------------- | -------------------- |
+| **Orchestrator**          | Multi-agent coordination  | Execution plans, integrated reports     | `musubi-orchestrate` |
+| **Steering**              | Project memory management | Steering files (structure/tech/product) | `musubi-remember`    |
+| **Constitution Enforcer** | Constitutional validation | Compliance reports, violation alerts    | `musubi-validate`    |
 
 ### Design & Architecture (5 agents)
 
@@ -526,25 +529,25 @@ codegraph-mcp community "/path/to/project"
 
 ### Development & Quality (7 agents)
 
-| Agent                     | Specialty                    | Key Deliverables                                              | CLI Command        |
-| ------------------------- | ---------------------------- | ------------------------------------------------------------- | ------------------ |
-| **Software Developer**    | Code implementation          | Production-ready source code, unit tests, integration tests   | -                  |
-| **Code Reviewer**         | Code review                  | Review reports, improvement suggestions, refactoring plans    | -                  |
-| **Test Engineer**         | Test design & implementation | Test code, test design documents, test cases                  | `musubi-tasks`     |
-| **Security Auditor**      | Security auditing            | Vulnerability reports, remediation plans, security guidelines | -                  |
-| **Quality Assurance**     | Quality assurance strategy   | Test plans, quality metrics, QA reports                       | `musubi-validate`  |
-| **Bug Hunter**            | Bug investigation & fixes    | Bug reports, root cause analysis, fix code                    | `musubi-resolve`   |
-| **Performance Optimizer** | Performance optimization     | Performance reports, optimization code, benchmarks            | -                  |
+| Agent                     | Specialty                    | Key Deliverables                                              | CLI Command       |
+| ------------------------- | ---------------------------- | ------------------------------------------------------------- | ----------------- |
+| **Software Developer**    | Code implementation          | Production-ready source code, unit tests, integration tests   | -                 |
+| **Code Reviewer**         | Code review                  | Review reports, improvement suggestions, refactoring plans    | -                 |
+| **Test Engineer**         | Test design & implementation | Test code, test design documents, test cases                  | `musubi-tasks`    |
+| **Security Auditor**      | Security auditing            | Vulnerability reports, remediation plans, security guidelines | -                 |
+| **Quality Assurance**     | Quality assurance strategy   | Test plans, quality metrics, QA reports                       | `musubi-validate` |
+| **Bug Hunter**            | Bug investigation & fixes    | Bug reports, root cause analysis, fix code                    | `musubi-resolve`  |
+| **Performance Optimizer** | Performance optimization     | Performance reports, optimization code, benchmarks            | -                 |
 
 ### Operations & Infrastructure (5 agents)
 
-| Agent                         | Specialty                         | Key Deliverables                                     | CLI Command      |
-| ----------------------------- | --------------------------------- | ---------------------------------------------------- | ---------------- |
-| **Project Manager**           | Project management                | Project plans, WBS, Gantt charts, risk registers     | `musubi-tasks`   |
-| **DevOps Engineer**           | CI/CD & infrastructure automation | Pipeline definitions, Dockerfiles, K8s manifests     | -                |
-| **Technical Writer**          | Technical documentation           | API docs, README, user guides, runbooks              | -                |
-| **Site Reliability Engineer** | SRE & observability               | SLI/SLO/SLA definitions, monitoring configs          | `musubi-gui`     |
-| **Release Coordinator**       | Release management                | Release notes, deployment plans, rollback procedures | -                |
+| Agent                         | Specialty                         | Key Deliverables                                     | CLI Command    |
+| ----------------------------- | --------------------------------- | ---------------------------------------------------- | -------------- |
+| **Project Manager**           | Project management                | Project plans, WBS, Gantt charts, risk registers     | `musubi-tasks` |
+| **DevOps Engineer**           | CI/CD & infrastructure automation | Pipeline definitions, Dockerfiles, K8s manifests     | -              |
+| **Technical Writer**          | Technical documentation           | API docs, README, user guides, runbooks              | -              |
+| **Site Reliability Engineer** | SRE & observability               | SLI/SLO/SLA definitions, monitoring configs          | `musubi-gui`   |
+| **Release Coordinator**       | Release management                | Release notes, deployment plans, rollback procedures | -              |
 
 ### Specialized Experts (5 agents)
 
@@ -638,18 +641,18 @@ musubi-workflow next implementation
 
 ### 10ステージ ワークフロー
 
-| Stage | Name | Description | CLI Command |
-|-------|------|-------------|-------------|
-| 0 | Spike/PoC | 調査・プロトタイピング | `musubi-workflow next spike` |
-| 1 | Requirements | 要件定義 | `musubi-requirements` |
-| 2 | Design | 設計（C4 + ADR） | `musubi-design` |
-| 3 | Tasks | タスク分解 | `musubi-tasks` |
-| 4 | Implementation | 実装 | - |
-| 5 | Review | コードレビュー | `musubi-workflow next review` |
-| 6 | Testing | テスト | `musubi-validate` |
-| 7 | Deployment | デプロイ | - |
-| 8 | Monitoring | モニタリング | - |
-| 9 | Retrospective | 振り返り | `musubi-workflow complete` |
+| Stage | Name           | Description            | CLI Command                   |
+| ----- | -------------- | ---------------------- | ----------------------------- |
+| 0     | Spike/PoC      | 調査・プロトタイピング | `musubi-workflow next spike`  |
+| 1     | Requirements   | 要件定義               | `musubi-requirements`         |
+| 2     | Design         | 設計（C4 + ADR）       | `musubi-design`               |
+| 3     | Tasks          | タスク分解             | `musubi-tasks`                |
+| 4     | Implementation | 実装                   | -                             |
+| 5     | Review         | コードレビュー         | `musubi-workflow next review` |
+| 6     | Testing        | テスト                 | `musubi-validate`             |
+| 7     | Deployment     | デプロイ               | -                             |
+| 8     | Monitoring     | モニタリング           | -                             |
+| 9     | Retrospective  | 振り返り               | `musubi-workflow complete`    |
 
 ### フィードバックループ
 

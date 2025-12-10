@@ -45,7 +45,7 @@ function createAutoProvider(config) {
   for (const providerName of PROVIDER_PRIORITY) {
     try {
       const provider = createNamedProvider(providerName, config);
-      
+
       // Check if provider can be used
       if (providerName === 'github-copilot') {
         // Copilot is available in VS Code context or with token
@@ -75,11 +75,11 @@ function createAutoProvider(config) {
 
   throw new Error(
     'No LLM provider available. Please configure one of:\n' +
-    '  - Run inside VS Code with GitHub Copilot extension\n' +
-    '  - Set GITHUB_COPILOT_TOKEN environment variable\n' +
-    '  - Set OLLAMA_HOST or MUSUBI_USE_OLLAMA for local Ollama\n' +
-    '  - Set ANTHROPIC_API_KEY environment variable\n' +
-    '  - Set OPENAI_API_KEY environment variable'
+      '  - Run inside VS Code with GitHub Copilot extension\n' +
+      '  - Set GITHUB_COPILOT_TOKEN environment variable\n' +
+      '  - Set OLLAMA_HOST or MUSUBI_USE_OLLAMA for local Ollama\n' +
+      '  - Set ANTHROPIC_API_KEY environment variable\n' +
+      '  - Set OPENAI_API_KEY environment variable'
   );
 }
 
@@ -95,19 +95,19 @@ function createNamedProvider(name, config) {
     case 'github-copilot':
     case 'copilot':
       return new CopilotLMProvider(config);
-    
+
     case 'anthropic':
     case 'claude':
       return new AnthropicLMProvider(config);
-    
+
     case 'openai':
     case 'gpt':
       return new OpenAILMProvider(config);
-    
+
     case 'ollama':
     case 'local':
       return new OllamaProvider(config);
-    
+
     default:
       throw new Error(`Unknown LLM provider: ${name}`);
   }
@@ -124,7 +124,7 @@ async function getAvailableProviders() {
     { name: 'github-copilot', class: CopilotLMProvider },
     { name: 'ollama', class: OllamaProvider },
     { name: 'anthropic', class: AnthropicLMProvider },
-    { name: 'openai', class: OpenAILMProvider }
+    { name: 'openai', class: OpenAILMProvider },
   ];
 
   for (const { name, class: ProviderClass } of providers) {
@@ -134,13 +134,13 @@ async function getAvailableProviders() {
       results.push({
         name,
         available,
-        info: provider.getInfo()
+        info: provider.getInfo(),
       });
     } catch (e) {
       results.push({
         name,
         available: false,
-        error: e.message
+        error: e.message,
       });
     }
   }
@@ -176,19 +176,20 @@ class MockLLMProvider extends LLMProvider {
             task: { name: 'mock-task', skill: 'mock-skill', parameters: {} },
             confidence: 0.85,
             reasoning: 'Mock reasoning',
-            risks: []
-          }
-        ]
-      })
+            risks: [],
+          },
+        ],
+      }),
     };
 
     this.responseIndex = (this.responseIndex + 1) % Math.max(1, this.responses.length);
 
     return {
-      content: typeof response.content === 'string' ? response.content : JSON.stringify(response.content),
+      content:
+        typeof response.content === 'string' ? response.content : JSON.stringify(response.content),
       model: 'mock-model',
       usage: { promptTokens: 100, completionTokens: 50, totalTokens: 150 },
-      finishReason: 'stop'
+      finishReason: 'stop',
     };
   }
 
@@ -215,7 +216,7 @@ module.exports = {
   // Factory function
   createLLMProvider,
   getAvailableProviders,
-  
+
   // Provider classes
   LLMProvider,
   CopilotLMProvider,
@@ -223,11 +224,11 @@ module.exports = {
   OpenAILMProvider,
   OllamaProvider,
   MockLLMProvider,
-  
+
   // Ollama helpers
   MODEL_PRESETS,
   OLLAMA_DEFAULTS,
-  
+
   // Constants
-  PROVIDER_PRIORITY
+  PROVIDER_PRIORITY,
 };

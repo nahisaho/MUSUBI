@@ -1,6 +1,6 @@
 /**
  * Quality Metrics Dashboard Module
- * 
+ *
  * Provides:
  * - Coverage metrics (code, test, documentation)
  * - Compliance scoring (steering, constitutional)
@@ -17,7 +17,7 @@ const MetricCategory = {
   COMPLIANCE: 'compliance',
   QUALITY: 'quality',
   HEALTH: 'health',
-  TREND: 'trend'
+  TREND: 'trend',
 };
 
 // Health Status
@@ -25,7 +25,7 @@ const HealthStatus = {
   HEALTHY: 'healthy',
   WARNING: 'warning',
   CRITICAL: 'critical',
-  UNKNOWN: 'unknown'
+  UNKNOWN: 'unknown',
 };
 
 // Trend Direction
@@ -33,7 +33,7 @@ const TrendDirection = {
   UP: 'up',
   DOWN: 'down',
   STABLE: 'stable',
-  UNKNOWN: 'unknown'
+  UNKNOWN: 'unknown',
 };
 
 /**
@@ -77,7 +77,7 @@ class Metric {
       target: this.target,
       progress: this.getProgress(),
       onTarget: this.isOnTarget(),
-      timestamp: this.timestamp.toISOString()
+      timestamp: this.timestamp.toISOString(),
     };
   }
 }
@@ -104,7 +104,7 @@ class CoverageMetric extends Metric {
     return {
       ...super.toJSON(),
       covered: this.coveredItems,
-      total: this.totalItems
+      total: this.totalItems,
     };
   }
 }
@@ -127,7 +127,7 @@ class ComplianceMetric extends Metric {
   addViolation(violation) {
     this.violations.push({
       ...violation,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
     this.recalculate();
     return this;
@@ -144,7 +144,7 @@ class ComplianceMetric extends Metric {
       this.value = 100;
       return;
     }
-    
+
     const violatedRules = new Set(this.violations.map(v => v.rule));
     const compliantCount = this.rules.length - violatedRules.size;
     this.value = (compliantCount / this.rules.length) * 100;
@@ -156,7 +156,7 @@ class ComplianceMetric extends Metric {
       ...super.toJSON(),
       rules: this.rules.length,
       violations: this.violations.length,
-      violatedRules: [...new Set(this.violations.map(v => v.rule))]
+      violatedRules: [...new Set(this.violations.map(v => v.rule))],
     };
   }
 }
@@ -204,7 +204,7 @@ class HealthIndicator {
       status: this.status,
       message: this.message,
       lastCheck: this.lastCheck?.toISOString(),
-      healthy: this.isHealthy()
+      healthy: this.isHealthy(),
     };
   }
 }
@@ -221,7 +221,7 @@ class TrendAnalyzer {
 
   addDataPoint(value, timestamp = new Date()) {
     this.dataPoints.push({ value, timestamp });
-    
+
     // Keep only maxPoints
     if (this.dataPoints.length > this.maxPoints) {
       this.dataPoints = this.dataPoints.slice(-this.maxPoints);
@@ -256,7 +256,7 @@ class TrendAnalyzer {
       percentChange,
       first,
       last,
-      dataPoints: recent.length
+      dataPoints: recent.length,
     };
   }
 
@@ -282,7 +282,7 @@ class TrendAnalyzer {
       average: this.getAverage(),
       min: this.getMin(),
       max: this.getMax(),
-      dataPoints: this.dataPoints.length
+      dataPoints: this.dataPoints.length,
     };
   }
 }
@@ -296,7 +296,7 @@ class QualityScoreCalculator {
       coverage: 0.3,
       compliance: 0.3,
       health: 0.2,
-      trends: 0.2
+      trends: 0.2,
     };
   }
 
@@ -305,18 +305,18 @@ class QualityScoreCalculator {
       coverage: this.calculateCoverageScore(metrics.coverage || []),
       compliance: this.calculateComplianceScore(metrics.compliance || []),
       health: this.calculateHealthScore(metrics.health || []),
-      trends: this.calculateTrendScore(metrics.trends || [])
+      trends: this.calculateTrendScore(metrics.trends || []),
     };
 
     const overall = Object.entries(this.weights).reduce((acc, [key, weight]) => {
-      return acc + (scores[key] * weight);
+      return acc + scores[key] * weight;
     }, 0);
 
     return {
       overall: Math.round(overall * 100) / 100,
       breakdown: scores,
       grade: this.getGrade(overall),
-      weights: this.weights
+      weights: this.weights,
     };
   }
 
@@ -334,15 +334,17 @@ class QualityScoreCalculator {
 
   calculateHealthScore(healthIndicators) {
     if (healthIndicators.length === 0) return 100;
-    
+
     const statusScores = {
       [HealthStatus.HEALTHY]: 100,
       [HealthStatus.WARNING]: 60,
       [HealthStatus.CRITICAL]: 0,
-      [HealthStatus.UNKNOWN]: 50
+      [HealthStatus.UNKNOWN]: 50,
     };
 
-    const avg = healthIndicators.reduce((acc, h) => acc + statusScores[h.status], 0) / healthIndicators.length;
+    const avg =
+      healthIndicators.reduce((acc, h) => acc + statusScores[h.status], 0) /
+      healthIndicators.length;
     return avg;
   }
 
@@ -353,7 +355,7 @@ class QualityScoreCalculator {
       [TrendDirection.UP]: 100,
       [TrendDirection.STABLE]: 70,
       [TrendDirection.DOWN]: 30,
-      [TrendDirection.UNKNOWN]: 50
+      [TrendDirection.UNKNOWN]: 50,
     };
 
     const avg = trends.reduce((acc, t) => acc + directionScores[t.direction], 0) / trends.length;
@@ -469,7 +471,7 @@ class QualityMetricsDashboard extends EventEmitter {
       coverage: this.getMetricsByCategory(MetricCategory.COVERAGE),
       compliance: this.getMetricsByCategory(MetricCategory.COMPLIANCE),
       health: [...this.healthIndicators.values()],
-      trends: Object.values(this.getTrends())
+      trends: Object.values(this.getTrends()),
     };
 
     const score = this.scoreCalculator.calculate(data);
@@ -483,7 +485,7 @@ class QualityMetricsDashboard extends EventEmitter {
       type,
       name,
       value,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     if (this.history.length > this.maxHistory) {
@@ -532,8 +534,8 @@ class QualityMetricsDashboard extends EventEmitter {
         totalMetrics: metrics.length,
         healthyIndicators: health.filter(h => h.healthy).length,
         totalIndicators: health.length,
-        metricsOnTarget: metrics.filter(m => m.onTarget).length
-      }
+        metricsOnTarget: metrics.filter(m => m.onTarget).length,
+      },
     };
   }
 
@@ -558,12 +560,14 @@ class QualityMetricsDashboard extends EventEmitter {
       `| Trends | ${summary.score.breakdown.trends.toFixed(1)}% |`,
       '',
       '## Metrics',
-      ''
+      '',
     ];
 
     for (const metric of summary.metrics) {
-      const status = metric.onTarget ? '✅' : (metric.onTarget === false ? '⚠️' : '➖');
-      lines.push(`- ${status} **${metric.name}**: ${metric.value.toFixed(1)}${metric.unit === 'percent' ? '%' : ` ${metric.unit}`}`);
+      const status = metric.onTarget ? '✅' : metric.onTarget === false ? '⚠️' : '➖';
+      lines.push(
+        `- ${status} **${metric.name}**: ${metric.value.toFixed(1)}${metric.unit === 'percent' ? '%' : ` ${metric.unit}`}`
+      );
       if (metric.target) {
         lines.push(`  - Target: ${metric.target}%`);
       }
@@ -572,7 +576,7 @@ class QualityMetricsDashboard extends EventEmitter {
     lines.push('', '## Health Indicators', '');
 
     for (const indicator of summary.health) {
-      const icon = indicator.healthy ? '🟢' : (indicator.status === 'warning' ? '🟡' : '🔴');
+      const icon = indicator.healthy ? '🟢' : indicator.status === 'warning' ? '🟡' : '🔴';
       lines.push(`- ${icon} **${indicator.name}**: ${indicator.status}`);
       if (indicator.message) {
         lines.push(`  - ${indicator.message}`);
@@ -582,8 +586,10 @@ class QualityMetricsDashboard extends EventEmitter {
     lines.push('', '## Trends', '');
 
     for (const [name, trend] of Object.entries(summary.trends)) {
-      const icon = trend.direction === 'up' ? '📈' : (trend.direction === 'down' ? '📉' : '➡️');
-      lines.push(`- ${icon} **${name}**: ${trend.direction} (${trend.percentChange?.toFixed(1) || 0}%)`);
+      const icon = trend.direction === 'up' ? '📈' : trend.direction === 'down' ? '📉' : '➡️';
+      lines.push(
+        `- ${icon} **${name}**: ${trend.direction} (${trend.percentChange?.toFixed(1) || 0}%)`
+      );
     }
 
     return lines.join('\n');
@@ -635,7 +641,7 @@ module.exports = {
   MetricCategory,
   HealthStatus,
   TrendDirection,
-  
+
   // Classes
   Metric,
   CoverageMetric,
@@ -644,7 +650,7 @@ module.exports = {
   TrendAnalyzer,
   QualityScoreCalculator,
   QualityMetricsDashboard,
-  
+
   // Factory
-  createQualityDashboard
+  createQualityDashboard,
 };

@@ -1,7 +1,7 @@
 /**
  * MCP Tool Adapters - Bidirectional MCP-Skill Integration
  * Sprint 3.3.5: MCP Tool Ecosystem
- * 
+ *
  * Features:
  * - MCP tool to MUSUBI skill conversion
  * - MUSUBI skill to MCP tool export
@@ -19,7 +19,7 @@ const MCPTransport = {
   STDIO: 'stdio',
   SSE: 'sse',
   HTTP: 'http',
-  WEBSOCKET: 'websocket'
+  WEBSOCKET: 'websocket',
 };
 
 /**
@@ -27,7 +27,7 @@ const MCPTransport = {
  */
 const AdapterDirection = {
   MCP_TO_SKILL: 'mcp-to-skill',
-  SKILL_TO_MCP: 'skill-to-mcp'
+  SKILL_TO_MCP: 'skill-to-mcp',
 };
 
 /**
@@ -45,18 +45,18 @@ class MCPToolDefinition {
 
   validate() {
     const errors = [];
-    
+
     if (!this.name) {
       errors.push('Tool name is required');
     }
-    
+
     if (!this.inputSchema || this.inputSchema.type !== 'object') {
       errors.push('Input schema must be an object type');
     }
-    
+
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 }
@@ -73,14 +73,14 @@ class SchemaTranslator {
       return {
         type: 'object',
         properties: {},
-        required: []
+        required: [],
       };
     }
 
     const musubiSchema = {
       type: mcpSchema.type || 'object',
       properties: {},
-      required: mcpSchema.required || []
+      required: mcpSchema.required || [],
     };
 
     if (mcpSchema.properties) {
@@ -91,7 +91,7 @@ class SchemaTranslator {
 
     // Add MUSUBI-specific metadata
     musubiSchema.$schema = 'https://musubi.dev/schemas/skill-input/v1';
-    
+
     return musubiSchema;
   }
 
@@ -102,13 +102,13 @@ class SchemaTranslator {
     if (!musubiSchema) {
       return {
         type: 'object',
-        properties: {}
+        properties: {},
       };
     }
 
     const mcpSchema = {
       type: musubiSchema.type || 'object',
-      properties: {}
+      properties: {},
     };
 
     if (musubiSchema.required && musubiSchema.required.length > 0) {
@@ -129,7 +129,7 @@ class SchemaTranslator {
    */
   static _translateProperty(prop) {
     const result = {
-      type: prop.type || 'string'
+      type: prop.type || 'string',
     };
 
     if (prop.description) {
@@ -173,7 +173,7 @@ class SchemaTranslator {
    */
   static _translatePropertyToMcp(prop) {
     const result = {
-      type: prop.type || 'string'
+      type: prop.type || 'string',
     };
 
     if (prop.description) {
@@ -219,7 +219,7 @@ class MCPToSkillAdapter extends EventEmitter {
     this.retryConfig = options.retry || {
       maxRetries: 3,
       baseDelay: 1000,
-      maxDelay: 10000
+      maxDelay: 10000,
     };
   }
 
@@ -239,7 +239,7 @@ class MCPToSkillAdapter extends EventEmitter {
       transport,
       endpoint,
       status: 'connected',
-      registeredAt: new Date()
+      registeredAt: new Date(),
     });
 
     // Import tools as skills
@@ -253,9 +253,9 @@ class MCPToSkillAdapter extends EventEmitter {
       }
     }
 
-    this.emit('server-registered', { 
-      serverId: id, 
-      skillCount: importedSkills.length 
+    this.emit('server-registered', {
+      serverId: id,
+      skillCount: importedSkills.length,
     });
 
     return importedSkills;
@@ -267,14 +267,14 @@ class MCPToSkillAdapter extends EventEmitter {
   async importTool(serverId, mcpTool) {
     const toolDef = new MCPToolDefinition(mcpTool);
     const validation = toolDef.validate();
-    
+
     if (!validation.valid) {
       throw new Error(`Invalid MCP tool: ${validation.errors.join(', ')}`);
     }
 
     // Generate skill ID from server and tool name
     const skillId = `mcp.${serverId}.${mcpTool.name}`;
-    
+
     // Create skill definition
     const skillDefinition = {
       id: skillId,
@@ -287,8 +287,8 @@ class MCPToSkillAdapter extends EventEmitter {
         type: 'object',
         properties: {
           content: { type: 'array' },
-          isError: { type: 'boolean' }
-        }
+          isError: { type: 'boolean' },
+        },
       },
       tags: ['mcp', `mcp-server:${serverId}`],
       metadata: {
@@ -296,12 +296,12 @@ class MCPToSkillAdapter extends EventEmitter {
         serverId,
         originalName: mcpTool.name,
         transport: toolDef.transport,
-        annotations: mcpTool.annotations || {}
+        annotations: mcpTool.annotations || {},
       },
       // Execution handler
-      handler: async (input) => {
+      handler: async input => {
         return this.executeMCPTool(serverId, mcpTool.name, input);
-      }
+      },
     };
 
     // Store adapter mapping
@@ -309,7 +309,7 @@ class MCPToSkillAdapter extends EventEmitter {
       skillId,
       serverId,
       toolName: mcpTool.name,
-      definition: toolDef
+      definition: toolDef,
     });
 
     // Register with skill registry if available
@@ -327,7 +327,7 @@ class MCPToSkillAdapter extends EventEmitter {
    */
   async executeMCPTool(serverId, toolName, input) {
     const connection = this.connections.get(serverId);
-    
+
     if (!connection) {
       throw new Error(`Server ${serverId} not found`);
     }
@@ -345,24 +345,23 @@ class MCPToSkillAdapter extends EventEmitter {
         method: 'tools/call',
         params: {
           name: toolName,
-          arguments: input
+          arguments: input,
         },
-        id: this._generateRequestId()
+        id: this._generateRequestId(),
       };
 
       // Execute based on transport
       const response = await this._sendRequest(connection, request);
 
       const duration = Date.now() - startTime;
-      this.emit('tool-executed', { 
-        serverId, 
-        toolName, 
+      this.emit('tool-executed', {
+        serverId,
+        toolName,
         duration,
-        success: !response.isError
+        success: !response.isError,
       });
 
       return response;
-
     } catch (error) {
       this.emit('tool-error', { serverId, toolName, error });
       throw error;
@@ -375,20 +374,20 @@ class MCPToSkillAdapter extends EventEmitter {
   async _sendRequest(connection, request) {
     // Note: This is a simplified implementation
     // Real implementation would handle actual transport protocols
-    
+
     switch (connection.transport) {
       case MCPTransport.STDIO:
         return this._sendStdioRequest(connection, request);
-      
+
       case MCPTransport.HTTP:
         return this._sendHttpRequest(connection, request);
-      
+
       case MCPTransport.SSE:
         return this._sendSseRequest(connection, request);
-      
+
       case MCPTransport.WEBSOCKET:
         return this._sendWebSocketRequest(connection, request);
-      
+
       default:
         throw new Error(`Unsupported transport: ${connection.transport}`);
     }
@@ -405,7 +404,7 @@ class MCPToSkillAdapter extends EventEmitter {
     // 3. Read response from stdout
     return {
       content: [{ type: 'text', text: 'Stdio transport result' }],
-      isError: false
+      isError: false,
     };
   }
 
@@ -416,7 +415,7 @@ class MCPToSkillAdapter extends EventEmitter {
     // Placeholder for HTTP transport implementation
     return {
       content: [{ type: 'text', text: 'HTTP transport result' }],
-      isError: false
+      isError: false,
     };
   }
 
@@ -427,7 +426,7 @@ class MCPToSkillAdapter extends EventEmitter {
     // Placeholder for SSE transport implementation
     return {
       content: [{ type: 'text', text: 'SSE transport result' }],
-      isError: false
+      isError: false,
     };
   }
 
@@ -438,7 +437,7 @@ class MCPToSkillAdapter extends EventEmitter {
     // Placeholder for WebSocket transport implementation
     return {
       content: [{ type: 'text', text: 'WebSocket transport result' }],
-      isError: false
+      isError: false,
     };
   }
 
@@ -454,7 +453,7 @@ class MCPToSkillAdapter extends EventEmitter {
    */
   async disconnectServer(serverId) {
     const connection = this.connections.get(serverId);
-    
+
     if (!connection) {
       return false;
     }
@@ -480,7 +479,7 @@ class MCPToSkillAdapter extends EventEmitter {
    */
   getServerSkills(serverId) {
     const skills = [];
-    
+
     for (const [_skillId, adapter] of this.adapters) {
       if (adapter.serverId === serverId) {
         skills.push(adapter);
@@ -495,13 +494,13 @@ class MCPToSkillAdapter extends EventEmitter {
    */
   getConnectionStatus() {
     const status = {};
-    
+
     for (const [id, conn] of this.connections) {
       status[id] = {
         status: conn.status,
         transport: conn.transport,
         skillCount: this.getServerSkills(id).length,
-        registeredAt: conn.registeredAt
+        registeredAt: conn.registeredAt,
       };
     }
 
@@ -522,7 +521,7 @@ class SkillToMCPAdapter extends EventEmitter {
     this.serverInfo = {
       name: options.serverName || 'musubi-mcp-server',
       version: options.version || '1.0.0',
-      protocolVersion: '2024-11-05'
+      protocolVersion: '2024-11-05',
     };
   }
 
@@ -547,8 +546,8 @@ class SkillToMCPAdapter extends EventEmitter {
         musubiSkillId: skillId,
         category: skill.category,
         version: skill.version,
-        tags: skill.tags
-      }
+        tags: skill.tags,
+      },
     };
 
     this.exportedTools.set(skillId, mcpTool);
@@ -562,7 +561,7 @@ class SkillToMCPAdapter extends EventEmitter {
    */
   exportSkills(skillIds) {
     const tools = [];
-    
+
     for (const skillId of skillIds) {
       try {
         tools.push(this.exportSkill(skillId));
@@ -591,7 +590,7 @@ class SkillToMCPAdapter extends EventEmitter {
    */
   handleListTools() {
     const tools = [];
-    
+
     for (const [_skillId, tool] of this.exportedTools) {
       tools.push(tool);
     }
@@ -604,7 +603,7 @@ class SkillToMCPAdapter extends EventEmitter {
    */
   async handleCallTool(params) {
     const { name, arguments: args } = params;
-    
+
     // Find skill by tool name
     let skillId = null;
     for (const [id, tool] of this.exportedTools) {
@@ -617,7 +616,7 @@ class SkillToMCPAdapter extends EventEmitter {
     if (!skillId) {
       return {
         content: [{ type: 'text', text: `Tool not found: ${name}` }],
-        isError: true
+        isError: true,
       };
     }
 
@@ -637,14 +636,13 @@ class SkillToMCPAdapter extends EventEmitter {
 
       return {
         content: [{ type: 'text', text: 'No handler available for skill' }],
-        isError: true
+        isError: true,
       };
-
     } catch (error) {
       this.emit('call-error', { toolName: name, skillId, error });
       return {
         content: [{ type: 'text', text: error.message }],
-        isError: true
+        isError: true,
       };
     }
   }
@@ -656,14 +654,14 @@ class SkillToMCPAdapter extends EventEmitter {
     if (result === null || result === undefined) {
       return {
         content: [{ type: 'text', text: 'null' }],
-        isError: false
+        isError: false,
       };
     }
 
     if (typeof result === 'string') {
       return {
         content: [{ type: 'text', text: result }],
-        isError: false
+        isError: false,
       };
     }
 
@@ -675,17 +673,19 @@ class SkillToMCPAdapter extends EventEmitter {
 
       // Convert to JSON text
       return {
-        content: [{ 
-          type: 'text', 
-          text: JSON.stringify(result, null, 2) 
-        }],
-        isError: false
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+        isError: false,
       };
     }
 
     return {
       content: [{ type: 'text', text: String(result) }],
-      isError: false
+      isError: false,
     };
   }
 
@@ -704,8 +704,8 @@ class SkillToMCPAdapter extends EventEmitter {
     return {
       ...this.serverInfo,
       capabilities: {
-        tools: { listChanged: true }
-      }
+        tools: { listChanged: true },
+      },
     };
   }
 
@@ -713,7 +713,7 @@ class SkillToMCPAdapter extends EventEmitter {
    * Create MCP protocol handler
    */
   createProtocolHandler() {
-    return async (request) => {
+    return async request => {
       const { method, params, id } = request;
 
       switch (method) {
@@ -721,14 +721,14 @@ class SkillToMCPAdapter extends EventEmitter {
           return {
             jsonrpc: '2.0',
             id,
-            result: this.getServerManifest()
+            result: this.getServerManifest(),
           };
 
         case 'tools/list':
           return {
             jsonrpc: '2.0',
             id,
-            result: this.handleListTools()
+            result: this.handleListTools(),
           };
 
         case 'tools/call': {
@@ -736,7 +736,7 @@ class SkillToMCPAdapter extends EventEmitter {
           return {
             jsonrpc: '2.0',
             id,
-            result
+            result,
           };
         }
 
@@ -746,8 +746,8 @@ class SkillToMCPAdapter extends EventEmitter {
             id,
             error: {
               code: -32601,
-              message: `Method not found: ${method}`
-            }
+              message: `Method not found: ${method}`,
+            },
           };
       }
     };
@@ -763,18 +763,18 @@ class MCPAdapterManager extends EventEmitter {
     super();
     this.registry = options.registry || null;
     this.executor = options.executor || null;
-    
+
     this.importAdapter = new MCPToSkillAdapter({
       registry: this.registry,
       timeout: options.timeout,
-      retry: options.retry
+      retry: options.retry,
     });
 
     this.exportAdapter = new SkillToMCPAdapter({
       registry: this.registry,
       executor: this.executor,
       serverName: options.serverName,
-      version: options.version
+      version: options.version,
     });
 
     // Forward events
@@ -786,28 +786,24 @@ class MCPAdapterManager extends EventEmitter {
    */
   _setupEventForwarding() {
     const importEvents = [
-      'server-registered', 
-      'server-disconnected', 
-      'tool-imported', 
+      'server-registered',
+      'server-disconnected',
+      'tool-imported',
       'tool-executed',
       'tool-error',
-      'import-error'
+      'import-error',
     ];
 
-    const exportEvents = [
-      'skill-exported',
-      'export-error',
-      'call-error'
-    ];
+    const exportEvents = ['skill-exported', 'export-error', 'call-error'];
 
     for (const event of importEvents) {
-      this.importAdapter.on(event, (data) => {
+      this.importAdapter.on(event, data => {
         this.emit(`import:${event}`, data);
       });
     }
 
     for (const event of exportEvents) {
-      this.exportAdapter.on(event, (data) => {
+      this.exportAdapter.on(event, data => {
         this.emit(`export:${event}`, data);
       });
     }
@@ -862,12 +858,12 @@ class MCPAdapterManager extends EventEmitter {
     return {
       import: {
         connections: this.importAdapter.getConnectionStatus(),
-        adapterCount: this.importAdapter.adapters.size
+        adapterCount: this.importAdapter.adapters.size,
       },
       export: {
         toolCount: this.exportAdapter.exportedTools.size,
-        serverInfo: this.exportAdapter.serverInfo
-      }
+        serverInfo: this.exportAdapter.serverInfo,
+      },
     };
   }
 
@@ -893,5 +889,5 @@ module.exports = {
   SchemaTranslator,
   MCPToSkillAdapter,
   SkillToMCPAdapter,
-  MCPAdapterManager
+  MCPAdapterManager,
 };

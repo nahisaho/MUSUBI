@@ -14,19 +14,22 @@ Template for documenting machine learning models following best practices.
 ## Model Details
 
 ### Basic Information
-| Field | Value |
-|-------|-------|
-| Model Name | [Name] |
-| Version | [X.Y.Z] |
-| Type | [Classification/Regression/etc.] |
-| Framework | [TensorFlow/PyTorch/scikit-learn] |
-| Date | YYYY-MM-DD |
-| Authors | [Team/Names] |
+
+| Field      | Value                             |
+| ---------- | --------------------------------- |
+| Model Name | [Name]                            |
+| Version    | [X.Y.Z]                           |
+| Type       | [Classification/Regression/etc.]  |
+| Framework  | [TensorFlow/PyTorch/scikit-learn] |
+| Date       | YYYY-MM-DD                        |
+| Authors    | [Team/Names]                      |
 
 ### Description
+
 [Brief description of what the model does]
 
 ### Intended Use
+
 - **Primary Use Cases**: [What it's designed for]
 - **Intended Users**: [Who should use it]
 - **Out-of-Scope Uses**: [What it shouldn't be used for]
@@ -36,75 +39,87 @@ Template for documenting machine learning models following best practices.
 ## Model Architecture
 
 ### Overview
+
 [Description of model architecture]
 
 ### Inputs
-| Name | Type | Shape | Description |
-|------|------|-------|-------------|
-| feature_1 | float | (1,) | Transaction amount |
-| feature_2 | int | (1,) | Category code |
+
+| Name      | Type  | Shape | Description        |
+| --------- | ----- | ----- | ------------------ |
+| feature_1 | float | (1,)  | Transaction amount |
+| feature_2 | int   | (1,)  | Category code      |
 
 ### Outputs
-| Name | Type | Shape | Description |
-|------|------|-------|-------------|
-| prediction | int | (1,) | Class label |
+
+| Name        | Type  | Shape        | Description         |
+| ----------- | ----- | ------------ | ------------------- |
+| prediction  | int   | (1,)         | Class label         |
 | probability | float | (n_classes,) | Class probabilities |
 
 ### Hyperparameters
-| Parameter | Value |
-|-----------|-------|
+
+| Parameter     | Value |
+| ------------- | ----- |
 | learning_rate | 0.001 |
-| batch_size | 32 |
-| epochs | 100 |
+| batch_size    | 32    |
+| epochs        | 100   |
 
 ---
 
 ## Training Data
 
 ### Dataset Description
-| Field | Value |
-|-------|-------|
-| Name | [Dataset name] |
-| Version | [Version] |
-| Size | [N samples] |
+
+| Field      | Value            |
+| ---------- | ---------------- |
+| Name       | [Dataset name]   |
+| Version    | [Version]        |
+| Size       | [N samples]      |
 | Date Range | [Start] to [End] |
 
 ### Data Distribution
+
 | Feature | Distribution |
-|---------|--------------|
-| Class 0 | 85% |
-| Class 1 | 15% |
+| ------- | ------------ |
+| Class 0 | 85%          |
+| Class 1 | 15%          |
 
 ### Preprocessing
+
 - [Step 1]: [Description]
 - [Step 2]: [Description]
 
 ### Data Splits
-| Split | Size | Purpose |
-|-------|------|---------|
-| Train | 70% | Model training |
-| Validation | 15% | Hyperparameter tuning |
-| Test | 15% | Final evaluation |
+
+| Split      | Size | Purpose               |
+| ---------- | ---- | --------------------- |
+| Train      | 70%  | Model training        |
+| Validation | 15%  | Hyperparameter tuning |
+| Test       | 15%  | Final evaluation      |
 
 ---
 
 ## Evaluation
 
 ### Metrics
-| Metric | Value | Threshold |
-|--------|-------|-----------|
-| Accuracy | 0.95 | > 0.90 |
-| Precision | 0.92 | > 0.85 |
-| Recall | 0.88 | > 0.80 |
-| F1 Score | 0.90 | > 0.85 |
-| AUC-ROC | 0.97 | > 0.90 |
+
+| Metric    | Value | Threshold |
+| --------- | ----- | --------- |
+| Accuracy  | 0.95  | > 0.90    |
+| Precision | 0.92  | > 0.85    |
+| Recall    | 0.88  | > 0.80    |
+| F1 Score  | 0.90  | > 0.85    |
+| AUC-ROC   | 0.97  | > 0.90    |
 
 ### Confusion Matrix
 ```
+
               Predicted
               0     1
-Actual  0   850    50
-        1    30   120
+
+Actual 0 850 50
+1 30 120
+
 ```
 
 ### Performance by Subgroup
@@ -149,9 +164,11 @@ Actual  0   850    50
 
 ### Requirements
 ```
+
 python>=3.9
 tensorflow==2.12.0
 numpy==1.24.0
+
 ```
 
 ### Resource Requirements
@@ -229,6 +246,7 @@ For questions or issues:
 ## Quick Checklist
 
 ### Before Release
+
 - [ ] Model architecture documented
 - [ ] Training data described
 - [ ] Evaluation metrics included
@@ -239,6 +257,7 @@ For questions or issues:
 - [ ] Version history updated
 
 ### Review Questions
+
 1. Is the intended use clearly defined?
 2. Are limitations and risks documented?
 3. Can another team reproduce training?

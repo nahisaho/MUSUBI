@@ -3,9 +3,9 @@
  * @module monitoring/cost-tracker
  * @version 1.0.0
  * @description Tracks LLM API usage and costs across providers
- * 
+ *
  * Part of MUSUBI v5.0.0 - Production Readiness
- * 
+ *
  * @traceability
  * - Requirement: REQ-P5-005 (Cost Tracking)
  * - Design: docs/design/tdd-musubi-v5.0.0.md#3.5
@@ -24,38 +24,38 @@ const EventEmitter = require('events');
  */
 const DEFAULT_PRICING = {
   // OpenAI
-  'gpt-4o': { input: 2.50, output: 10.00 },
-  'gpt-4o-mini': { input: 0.15, output: 0.60 },
-  'gpt-4-turbo': { input: 10.00, output: 30.00 },
-  'gpt-4': { input: 30.00, output: 60.00 },
-  'gpt-3.5-turbo': { input: 0.50, output: 1.50 },
-  'o1': { input: 15.00, output: 60.00 },
-  'o1-mini': { input: 3.00, output: 12.00 },
-  'o3-mini': { input: 1.10, output: 4.40 },
-  
+  'gpt-4o': { input: 2.5, output: 10.0 },
+  'gpt-4o-mini': { input: 0.15, output: 0.6 },
+  'gpt-4-turbo': { input: 10.0, output: 30.0 },
+  'gpt-4': { input: 30.0, output: 60.0 },
+  'gpt-3.5-turbo': { input: 0.5, output: 1.5 },
+  o1: { input: 15.0, output: 60.0 },
+  'o1-mini': { input: 3.0, output: 12.0 },
+  'o3-mini': { input: 1.1, output: 4.4 },
+
   // Anthropic Claude
-  'claude-opus-4': { input: 15.00, output: 75.00 },
-  'claude-sonnet-4': { input: 3.00, output: 15.00 },
-  'claude-3.5-sonnet': { input: 3.00, output: 15.00 },
-  'claude-3.5-haiku': { input: 0.80, output: 4.00 },
-  'claude-3-opus': { input: 15.00, output: 75.00 },
-  'claude-3-sonnet': { input: 3.00, output: 15.00 },
+  'claude-opus-4': { input: 15.0, output: 75.0 },
+  'claude-sonnet-4': { input: 3.0, output: 15.0 },
+  'claude-3.5-sonnet': { input: 3.0, output: 15.0 },
+  'claude-3.5-haiku': { input: 0.8, output: 4.0 },
+  'claude-3-opus': { input: 15.0, output: 75.0 },
+  'claude-3-sonnet': { input: 3.0, output: 15.0 },
   'claude-3-haiku': { input: 0.25, output: 1.25 },
-  
+
   // Google Gemini
-  'gemini-2.0-flash': { input: 0.10, output: 0.40 },
-  'gemini-1.5-pro': { input: 1.25, output: 5.00 },
-  'gemini-1.5-flash': { input: 0.075, output: 0.30 },
-  
+  'gemini-2.0-flash': { input: 0.1, output: 0.4 },
+  'gemini-1.5-pro': { input: 1.25, output: 5.0 },
+  'gemini-1.5-flash': { input: 0.075, output: 0.3 },
+
   // GitHub Copilot (estimated based on value)
-  'github-copilot': { input: 0.00, output: 0.00 }, // Subscription-based
-  
+  'github-copilot': { input: 0.0, output: 0.0 }, // Subscription-based
+
   // Local models (free)
-  'ollama': { input: 0.00, output: 0.00 },
-  'llama3.2': { input: 0.00, output: 0.00 },
-  'codellama': { input: 0.00, output: 0.00 },
-  'mistral': { input: 0.00, output: 0.00 },
-  'qwen2.5': { input: 0.00, output: 0.00 },
+  ollama: { input: 0.0, output: 0.0 },
+  'llama3.2': { input: 0.0, output: 0.0 },
+  codellama: { input: 0.0, output: 0.0 },
+  mistral: { input: 0.0, output: 0.0 },
+  'qwen2.5': { input: 0.0, output: 0.0 },
 };
 
 /**
@@ -90,11 +90,11 @@ class CostTracker extends EventEmitter {
     this.pricing = { ...DEFAULT_PRICING, ...options.pricing };
     this.budgetLimit = options.budgetLimit || 0;
     this.budgetPeriod = options.budgetPeriod || 'monthly';
-    
+
     // In-memory session tracking
     this.sessionUsage = [];
     this.sessionStart = new Date();
-    
+
     // Running totals for current period
     this.periodTotals = {
       inputTokens: 0,
@@ -242,9 +242,8 @@ class CostTracker extends EventEmitter {
       ...this.periodTotals,
       budgetLimit: this.budgetLimit,
       budgetRemaining: this.budgetLimit > 0 ? this.budgetLimit - this.periodTotals.cost : null,
-      budgetUsedPercent: this.budgetLimit > 0
-        ? (this.periodTotals.cost / this.budgetLimit) * 100
-        : null,
+      budgetUsedPercent:
+        this.budgetLimit > 0 ? (this.periodTotals.cost / this.budgetLimit) * 100 : null,
     };
   }
 
@@ -275,9 +274,7 @@ class CostTracker extends EventEmitter {
   generateReport(options = {}) {
     const { period = 'session', format = 'text' } = options;
 
-    const summary = period === 'session'
-      ? this.getSessionSummary()
-      : this.getPeriodSummary();
+    const summary = period === 'session' ? this.getSessionSummary() : this.getPeriodSummary();
 
     if (format === 'json') {
       return JSON.stringify(summary, null, 2);
@@ -304,7 +301,9 @@ class CostTracker extends EventEmitter {
         lines.push('── By Provider ──────────────────────────────');
         for (const [provider, stats] of Object.entries(summary.byProvider)) {
           lines.push(`  ${provider}:`);
-          lines.push(`    Requests: ${stats.requests}, Tokens: ${stats.tokens.toLocaleString()}, Cost: $${stats.cost.toFixed(4)}`);
+          lines.push(
+            `    Requests: ${stats.requests}, Tokens: ${stats.tokens.toLocaleString()}, Cost: $${stats.cost.toFixed(4)}`
+          );
         }
         lines.push('');
       }
@@ -313,7 +312,9 @@ class CostTracker extends EventEmitter {
         lines.push('── By Model ─────────────────────────────────');
         for (const [model, stats] of Object.entries(summary.byModel)) {
           lines.push(`  ${model}:`);
-          lines.push(`    Requests: ${stats.requests}, Tokens: ${stats.tokens.toLocaleString()}, Cost: $${stats.cost.toFixed(4)}`);
+          lines.push(
+            `    Requests: ${stats.requests}, Tokens: ${stats.tokens.toLocaleString()}, Cost: $${stats.cost.toFixed(4)}`
+          );
         }
       }
     } else {
@@ -322,7 +323,7 @@ class CostTracker extends EventEmitter {
       lines.push(`Input Tokens: ${summary.inputTokens.toLocaleString()}`);
       lines.push(`Output Tokens: ${summary.outputTokens.toLocaleString()}`);
       lines.push(`Total Cost: $${summary.cost.toFixed(4)}`);
-      
+
       if (summary.budgetLimit) {
         lines.push('');
         lines.push('── Budget ───────────────────────────────────');
@@ -400,11 +401,11 @@ class CostTracker extends EventEmitter {
    */
   async _loadPeriodTotals() {
     const periodFile = path.join(this.storageDir, `period-${this.budgetPeriod}.json`);
-    
+
     try {
       if (await fs.pathExists(periodFile)) {
         const data = await fs.readJSON(periodFile);
-        
+
         // Check if period is still current
         const periodStart = new Date(data.periodStart);
         if (this._isCurrentPeriod(periodStart)) {
@@ -422,7 +423,7 @@ class CostTracker extends EventEmitter {
    */
   async _savePeriodTotals() {
     const periodFile = path.join(this.storageDir, `period-${this.budgetPeriod}.json`);
-    
+
     const data = {
       periodStart: this._getPeriodStart().toISOString(),
       period: this.budgetPeriod,
@@ -448,7 +449,7 @@ class CostTracker extends EventEmitter {
    */
   _getPeriodStart() {
     const now = new Date();
-    
+
     switch (this.budgetPeriod) {
       case 'daily':
         return new Date(now.getFullYear(), now.getMonth(), now.getDate());

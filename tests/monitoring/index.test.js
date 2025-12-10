@@ -9,7 +9,7 @@ describe('Monitoring Module', () => {
     test('should export SLI class', () => {
       const sli = new monitoring.SLI({
         name: 'test-sli',
-        type: monitoring.SLOType.AVAILABILITY
+        type: monitoring.SLOType.AVAILABILITY,
       });
       expect(sli.name).toBe('test-sli');
     });
@@ -19,7 +19,7 @@ describe('Monitoring Module', () => {
       const slo = new monitoring.SLO({
         name: 'test-slo',
         sli,
-        target: 0.99
+        target: 0.99,
       });
       expect(slo.name).toBe('test-slo');
       expect(slo.target).toBe(0.99);
@@ -29,7 +29,7 @@ describe('Monitoring Module', () => {
       const rule = new monitoring.AlertRule({
         name: 'test-alert',
         expr: 'up == 0',
-        severity: monitoring.AlertSeverity.CRITICAL
+        severity: monitoring.AlertSeverity.CRITICAL,
       });
       expect(rule.name).toBe('test-alert');
     });
@@ -37,14 +37,14 @@ describe('Monitoring Module', () => {
     test('should export HealthCheck class', () => {
       const check = new monitoring.HealthCheck({
         name: 'test-health',
-        endpoint: '/health'
+        endpoint: '/health',
       });
       expect(check.name).toBe('test-health');
     });
 
     test('should export MonitoringConfig class', () => {
       const config = new monitoring.MonitoringConfig({
-        serviceName: 'test-service'
+        serviceName: 'test-service',
       });
       expect(config.serviceName).toBe('test-service');
     });
@@ -89,7 +89,7 @@ describe('Monitoring Module', () => {
   describe('Factory Functions', () => {
     test('should export createMonitoringConfig', () => {
       const config = monitoring.createMonitoringConfig({
-        serviceName: 'my-service'
+        serviceName: 'my-service',
       });
       expect(config).toBeInstanceOf(monitoring.MonitoringConfig);
     });
@@ -98,14 +98,14 @@ describe('Monitoring Module', () => {
   describe('Release Manager Integration', () => {
     test('should export Release class', () => {
       const release = new monitoring.Release({
-        version: '1.0.0'
+        version: '1.0.0',
       });
       expect(release.version).toBe('1.0.0');
     });
 
     test('should export FeatureFlag class', () => {
       const flag = new monitoring.FeatureFlag({
-        key: 'test-flag'
+        key: 'test-flag',
       });
       expect(flag.key).toBe('test-flag');
     });
@@ -139,14 +139,14 @@ describe('Monitoring Module', () => {
   describe('Incident Manager Integration', () => {
     test('should export Incident class', () => {
       const incident = new monitoring.Incident({
-        title: 'Test Incident'
+        title: 'Test Incident',
       });
       expect(incident.title).toBe('Test Incident');
     });
 
     test('should export Runbook class', () => {
       const runbook = new monitoring.Runbook({
-        name: 'Test Runbook'
+        name: 'Test Runbook',
       });
       expect(runbook.name).toBe('Test Runbook');
     });
@@ -192,7 +192,7 @@ describe('Monitoring Module', () => {
   describe('Integration Scenarios', () => {
     test('should create monitoring config with SLOs', () => {
       const config = monitoring.createMonitoringConfig({
-        serviceName: 'api-gateway'
+        serviceName: 'api-gateway',
       });
 
       const slo = monitoring.SLOTemplates.API_AVAILABILITY(0.999);
@@ -206,11 +206,11 @@ describe('Monitoring Module', () => {
 
       const release = manager.createRelease({
         version: '2.0.0',
-        type: monitoring.ReleaseType.MAJOR
+        type: monitoring.ReleaseType.MAJOR,
       });
 
       const flag = manager.createFeatureFlag({
-        key: 'new-ui'
+        key: 'new-ui',
       });
 
       expect(release.version).toBe('2.0.0');
@@ -222,7 +222,7 @@ describe('Monitoring Module', () => {
 
       const incident = incidentManager.createIncident({
         title: 'Service Down',
-        severity: monitoring.IncidentSeverity.SEV1
+        severity: monitoring.IncidentSeverity.SEV1,
       });
 
       incidentManager.acknowledgeIncident(incident.id, 'alice');
@@ -236,7 +236,7 @@ describe('Monitoring Module', () => {
 
       const incident = manager.createIncident({
         title: 'Database Outage',
-        severity: monitoring.IncidentSeverity.SEV1
+        severity: monitoring.IncidentSeverity.SEV1,
       });
       incident.acknowledge('alice');
       incident.setResolution('Increased connection pool');

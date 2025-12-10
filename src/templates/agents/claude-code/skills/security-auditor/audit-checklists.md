@@ -161,18 +161,18 @@ Comprehensive security checklists for application and infrastructure audits.
 
 ### OWASP Top 10 (2021)
 
-| # | Vulnerability | Key Controls |
-|---|---------------|--------------|
-| A01 | Broken Access Control | RBAC, ABAC, deny by default |
-| A02 | Cryptographic Failures | TLS, encryption at rest |
-| A03 | Injection | Input validation, parameterized |
-| A04 | Insecure Design | Threat modeling, secure patterns |
-| A05 | Security Misconfiguration | Hardening, minimal install |
-| A06 | Vulnerable Components | SCA, dependency updates |
-| A07 | Auth Failures | MFA, session security |
-| A08 | Integrity Failures | CI/CD security, signing |
-| A09 | Logging Failures | Audit logs, monitoring |
-| A10 | SSRF | Input validation, allowlists |
+| #   | Vulnerability             | Key Controls                     |
+| --- | ------------------------- | -------------------------------- |
+| A01 | Broken Access Control     | RBAC, ABAC, deny by default      |
+| A02 | Cryptographic Failures    | TLS, encryption at rest          |
+| A03 | Injection                 | Input validation, parameterized  |
+| A04 | Insecure Design           | Threat modeling, secure patterns |
+| A05 | Security Misconfiguration | Hardening, minimal install       |
+| A06 | Vulnerable Components     | SCA, dependency updates          |
+| A07 | Auth Failures             | MFA, session security            |
+| A08 | Integrity Failures        | CI/CD security, signing          |
+| A09 | Logging Failures          | Audit logs, monitoring           |
+| A10 | SSRF                      | Input validation, allowlists     |
 
 ### Security Headers
 
@@ -210,27 +210,27 @@ Permissions-Policy: geolocation=(), camera=()
 
 ### Critical (Immediately address)
 
-| ID | Finding | Risk | Recommendation |
-|----|---------|------|----------------|
-| C1 | [Finding] | Critical | [Fix] |
+| ID  | Finding   | Risk     | Recommendation |
+| --- | --------- | -------- | -------------- |
+| C1  | [Finding] | Critical | [Fix]          |
 
 ### High (Address within 7 days)
 
-| ID | Finding | Risk | Recommendation |
-|----|---------|------|----------------|
-| H1 | [Finding] | High | [Fix] |
+| ID  | Finding   | Risk | Recommendation |
+| --- | --------- | ---- | -------------- |
+| H1  | [Finding] | High | [Fix]          |
 
 ### Medium (Address within 30 days)
 
-| ID | Finding | Risk | Recommendation |
-|----|---------|------|----------------|
-| M1 | [Finding] | Medium | [Fix] |
+| ID  | Finding   | Risk   | Recommendation |
+| --- | --------- | ------ | -------------- |
+| M1  | [Finding] | Medium | [Fix]          |
 
 ### Low (Address as resources allow)
 
-| ID | Finding | Risk | Recommendation |
-|----|---------|------|----------------|
-| L1 | [Finding] | Low | [Fix] |
+| ID  | Finding   | Risk | Recommendation |
+| --- | --------- | ---- | -------------- |
+| L1  | [Finding] | Low  | [Fix]          |
 
 ## Positive Findings
 

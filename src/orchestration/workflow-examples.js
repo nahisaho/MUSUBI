@@ -1,7 +1,7 @@
 /**
  * Complex Workflow Examples
  * Sprint 3.5: Advanced Workflows
- * 
+ *
  * Real-world workflow templates demonstrating:
  * - Multi-stage feature development
  * - CI/CD integration
@@ -14,7 +14,7 @@ const { WorkflowDefinition, StepType, RecoveryStrategy } = require('./workflow-e
 
 /**
  * Feature Development Workflow
- * 
+ *
  * Complete SDD-based feature development from requirements to deployment
  */
 const featureDevelopmentWorkflow = new WorkflowDefinition(
@@ -29,16 +29,16 @@ const featureDevelopmentWorkflow = new WorkflowDefinition(
       input: {
         feature: { $var: 'feature_name' },
         description: { $var: 'description' },
-        stakeholders: { $var: 'stakeholders', default: [] }
+        stakeholders: { $var: 'stakeholders', default: [] },
       },
-      outputVariable: 'requirements'
+      outputVariable: 'requirements',
     },
     {
       id: 'requirements-checkpoint',
       type: StepType.CHECKPOINT,
-      name: 'requirements-complete'
+      name: 'requirements-complete',
     },
-    
+
     // Stage 2: Design
     {
       id: 'create-design',
@@ -46,22 +46,22 @@ const featureDevelopmentWorkflow = new WorkflowDefinition(
       skillId: 'sdd-design',
       input: {
         feature: { $var: 'feature_name' },
-        requirements: { $var: 'requirements' }
+        requirements: { $var: 'requirements' },
       },
-      outputVariable: 'design'
+      outputVariable: 'design',
     },
     {
       id: 'design-review',
       type: StepType.HUMAN_REVIEW,
       message: 'Review design for ${feature_name}:\n\n${design}',
-      options: ['approve', 'request-changes', 'reject']
+      options: ['approve', 'request-changes', 'reject'],
     },
     {
       id: 'design-checkpoint',
       type: StepType.CHECKPOINT,
-      name: 'design-approved'
+      name: 'design-approved',
     },
-    
+
     // Stage 3: Task Breakdown
     {
       id: 'create-tasks',
@@ -69,11 +69,11 @@ const featureDevelopmentWorkflow = new WorkflowDefinition(
       skillId: 'sdd-tasks',
       input: {
         feature: { $var: 'feature_name' },
-        design: { $var: 'design' }
+        design: { $var: 'design' },
       },
-      outputVariable: 'tasks'
+      outputVariable: 'tasks',
     },
-    
+
     // Stage 4: Implementation (parallel where possible)
     {
       id: 'implement-tasks',
@@ -88,21 +88,21 @@ const featureDevelopmentWorkflow = new WorkflowDefinition(
           skillId: 'sdd-implement',
           input: {
             task: { $var: 'current_task' },
-            design: { $var: 'design' }
+            design: { $var: 'design' },
           },
-          outputVariable: 'implementation_${task_index}'
+          outputVariable: 'implementation_${task_index}',
         },
         {
           id: 'run-tests',
           type: StepType.TOOL,
           toolName: 'run_tests',
           arguments: {
-            files: { $var: 'implementation_${task_index}.testFiles' }
-          }
-        }
-      ]
+            files: { $var: 'implementation_${task_index}.testFiles' },
+          },
+        },
+      ],
     },
-    
+
     // Stage 5: Validation
     {
       id: 'validate-implementation',
@@ -110,15 +110,15 @@ const featureDevelopmentWorkflow = new WorkflowDefinition(
       skillId: 'sdd-validate',
       input: {
         feature: { $var: 'feature_name' },
-        design: { $var: 'design' }
+        design: { $var: 'design' },
       },
       outputVariable: 'validation_result',
       onError: {
         strategy: RecoveryStrategy.ROLLBACK,
-        rollbackTo: 'design-approved'
-      }
+        rollbackTo: 'design-approved',
+      },
     },
-    
+
     // Stage 6: Documentation
     {
       id: 'generate-docs',
@@ -129,23 +129,23 @@ const featureDevelopmentWorkflow = new WorkflowDefinition(
           id: 'api-docs',
           type: StepType.SKILL,
           skillId: 'documentation',
-          input: { type: 'api', source: { $var: 'implementation' } }
+          input: { type: 'api', source: { $var: 'implementation' } },
         },
         {
           id: 'user-docs',
           type: StepType.SKILL,
           skillId: 'documentation',
-          input: { type: 'user-guide', feature: { $var: 'feature_name' } }
+          input: { type: 'user-guide', feature: { $var: 'feature_name' } },
         },
         {
           id: 'changelog',
           type: StepType.SKILL,
           skillId: 'documentation',
-          input: { type: 'changelog', feature: { $var: 'feature_name' } }
-        }
+          input: { type: 'changelog', feature: { $var: 'feature_name' } },
+        },
       ],
-      outputVariable: 'documentation'
-    }
+      outputVariable: 'documentation',
+    },
   ],
   {
     description: 'Complete feature development workflow following SDD methodology',
@@ -153,29 +153,29 @@ const featureDevelopmentWorkflow = new WorkflowDefinition(
     inputs: [
       { name: 'feature_name', type: 'string', required: true },
       { name: 'description', type: 'string', required: true },
-      { name: 'stakeholders', type: 'array', required: false }
+      { name: 'stakeholders', type: 'array', required: false },
     ],
     outputs: [
       { name: 'requirements', from: 'requirements' },
       { name: 'design', from: 'design' },
       { name: 'tasks', from: 'tasks' },
       { name: 'validation', from: 'validation_result' },
-      { name: 'documentation', from: 'documentation' }
+      { name: 'documentation', from: 'documentation' },
     ],
     errorHandling: {
       strategy: RecoveryStrategy.ROLLBACK,
-      rollbackTo: 'requirements-complete'
+      rollbackTo: 'requirements-complete',
     },
     retryPolicy: {
       maxRetries: 2,
-      backoffMs: 5000
-    }
+      backoffMs: 5000,
+    },
   }
 );
 
 /**
  * CI/CD Pipeline Workflow
- * 
+ *
  * Automated build, test, and deployment pipeline
  */
 const cicdPipelineWorkflow = new WorkflowDefinition(
@@ -191,24 +191,24 @@ const cicdPipelineWorkflow = new WorkflowDefinition(
           id: 'lint-check',
           type: StepType.TOOL,
           toolName: 'run_command',
-          arguments: { command: 'npm run lint' }
+          arguments: { command: 'npm run lint' },
         },
         {
           id: 'type-check',
           type: StepType.TOOL,
           toolName: 'run_command',
-          arguments: { command: 'npm run typecheck' }
+          arguments: { command: 'npm run typecheck' },
         },
         {
           id: 'security-scan',
           type: StepType.TOOL,
           toolName: 'run_command',
           arguments: { command: 'npm audit --production' },
-          onError: { strategy: RecoveryStrategy.SKIP }
-        }
-      ]
+          onError: { strategy: RecoveryStrategy.SKIP },
+        },
+      ],
     },
-    
+
     // Build
     {
       id: 'build',
@@ -218,18 +218,18 @@ const cicdPipelineWorkflow = new WorkflowDefinition(
         command: 'npm run build',
         env: {
           NODE_ENV: 'production',
-          BUILD_ID: { $var: 'build_id' }
-        }
+          BUILD_ID: { $var: 'build_id' },
+        },
       },
       outputVariable: 'build_result',
-      retry: { maxRetries: 2, backoffMs: 10000 }
+      retry: { maxRetries: 2, backoffMs: 10000 },
     },
     {
       id: 'build-checkpoint',
       type: StepType.CHECKPOINT,
-      name: 'build-complete'
+      name: 'build-complete',
     },
-    
+
     // Test stages
     {
       id: 'unit-tests',
@@ -238,9 +238,9 @@ const cicdPipelineWorkflow = new WorkflowDefinition(
       arguments: {
         type: 'unit',
         coverage: true,
-        coverageThreshold: 80
+        coverageThreshold: 80,
       },
-      outputVariable: 'unit_test_result'
+      outputVariable: 'unit_test_result',
     },
     {
       id: 'integration-tests',
@@ -248,7 +248,7 @@ const cicdPipelineWorkflow = new WorkflowDefinition(
       toolName: 'run_tests',
       arguments: { type: 'integration' },
       outputVariable: 'integration_test_result',
-      when: { $var: 'run_integration_tests' }
+      when: { $var: 'run_integration_tests' },
     },
     {
       id: 'e2e-tests',
@@ -259,37 +259,34 @@ const cicdPipelineWorkflow = new WorkflowDefinition(
           id: 'start-test-env',
           type: StepType.TOOL,
           toolName: 'run_command',
-          arguments: { command: 'docker-compose up -d test-env' }
+          arguments: { command: 'docker-compose up -d test-env' },
         },
         {
           id: 'run-e2e',
           type: StepType.TOOL,
           toolName: 'run_tests',
-          arguments: { type: 'e2e' }
+          arguments: { type: 'e2e' },
         },
         {
           id: 'stop-test-env',
           type: StepType.TOOL,
           toolName: 'run_command',
-          arguments: { command: 'docker-compose down test-env' }
-        }
-      ]
+          arguments: { command: 'docker-compose down test-env' },
+        },
+      ],
     },
     {
       id: 'tests-checkpoint',
       type: StepType.CHECKPOINT,
-      name: 'tests-passed'
+      name: 'tests-passed',
     },
-    
+
     // Deployment decision
     {
       id: 'deployment-decision',
       type: StepType.CONDITION,
       condition: {
-        $and: [
-          { $eq: [{ $var: 'branch' }, 'main'] },
-          { $eq: [{ $var: 'auto_deploy' }, true] }
-        ]
+        $and: [{ $eq: [{ $var: 'branch' }, 'main'] }, { $eq: [{ $var: 'auto_deploy' }, true] }],
       },
       thenSteps: [
         {
@@ -298,9 +295,9 @@ const cicdPipelineWorkflow = new WorkflowDefinition(
           toolName: 'deploy',
           arguments: {
             environment: 'staging',
-            version: { $var: 'build_id' }
+            version: { $var: 'build_id' },
           },
-          outputVariable: 'staging_deploy'
+          outputVariable: 'staging_deploy',
         },
         {
           id: 'smoke-tests',
@@ -317,17 +314,17 @@ const cicdPipelineWorkflow = new WorkflowDefinition(
                 arguments: {
                   environment: 'staging',
                   version: { $var: 'previous_version' },
-                  action: 'rollback'
-                }
-              }
-            ]
-          }
+                  action: 'rollback',
+                },
+              },
+            ],
+          },
         },
         {
           id: 'production-approval',
           type: StepType.HUMAN_REVIEW,
           message: 'Staging deployment successful. Approve production deployment?',
-          options: ['deploy-to-production', 'hold', 'cancel']
+          options: ['deploy-to-production', 'hold', 'cancel'],
         },
         {
           id: 'deploy-production',
@@ -337,9 +334,9 @@ const cicdPipelineWorkflow = new WorkflowDefinition(
           arguments: {
             environment: 'production',
             version: { $var: 'build_id' },
-            strategy: 'blue-green'
-          }
-        }
+            strategy: 'blue-green',
+          },
+        },
       ],
       elseSteps: [
         {
@@ -348,11 +345,11 @@ const cicdPipelineWorkflow = new WorkflowDefinition(
           toolName: 'send_notification',
           arguments: {
             channel: 'builds',
-            message: 'Build ${build_id} complete. Manual deployment required.'
-          }
-        }
-      ]
-    }
+            message: 'Build ${build_id} complete. Manual deployment required.',
+          },
+        },
+      ],
+    },
   ],
   {
     description: 'Automated CI/CD pipeline with staging and production deployment',
@@ -362,24 +359,24 @@ const cicdPipelineWorkflow = new WorkflowDefinition(
       { name: 'branch', type: 'string', required: true },
       { name: 'auto_deploy', type: 'boolean', default: false },
       { name: 'run_integration_tests', type: 'boolean', default: true },
-      { name: 'run_e2e_tests', type: 'boolean', default: false }
+      { name: 'run_e2e_tests', type: 'boolean', default: false },
     ],
     outputs: [
       { name: 'build_result', from: 'build_result' },
       { name: 'test_coverage', from: 'unit_test_result.coverage' },
-      { name: 'deployment_status', from: 'staging_deploy' }
+      { name: 'deployment_status', from: 'staging_deploy' },
     ],
     timeout: 3600000, // 1 hour
     errorHandling: {
       strategy: RecoveryStrategy.ROLLBACK,
-      rollbackTo: 'build-complete'
-    }
+      rollbackTo: 'build-complete',
+    },
   }
 );
 
 /**
  * Automated Code Review Workflow
- * 
+ *
  * AI-assisted code review with human oversight
  */
 const codeReviewWorkflow = new WorkflowDefinition(
@@ -395,11 +392,11 @@ const codeReviewWorkflow = new WorkflowDefinition(
       arguments: {
         owner: { $var: 'repo_owner' },
         repo: { $var: 'repo_name' },
-        pr_number: { $var: 'pr_number' }
+        pr_number: { $var: 'pr_number' },
       },
-      outputVariable: 'pr_details'
+      outputVariable: 'pr_details',
     },
-    
+
     // Get changed files
     {
       id: 'get-diff',
@@ -409,11 +406,11 @@ const codeReviewWorkflow = new WorkflowDefinition(
       arguments: {
         owner: { $var: 'repo_owner' },
         repo: { $var: 'repo_name' },
-        pr_number: { $var: 'pr_number' }
+        pr_number: { $var: 'pr_number' },
       },
-      outputVariable: 'diff'
+      outputVariable: 'diff',
     },
-    
+
     // Parallel analysis
     {
       id: 'parallel-analysis',
@@ -426,36 +423,36 @@ const codeReviewWorkflow = new WorkflowDefinition(
           skillId: 'code-analysis',
           input: {
             type: 'quality',
-            diff: { $var: 'diff' }
+            diff: { $var: 'diff' },
           },
-          outputVariable: 'quality_report'
+          outputVariable: 'quality_report',
         },
         {
           id: 'security-review',
           type: StepType.SKILL,
           skillId: 'security-analysis',
           input: { diff: { $var: 'diff' } },
-          outputVariable: 'security_report'
+          outputVariable: 'security_report',
         },
         {
           id: 'performance-review',
           type: StepType.SKILL,
           skillId: 'performance-analysis',
           input: { diff: { $var: 'diff' } },
-          outputVariable: 'performance_report'
+          outputVariable: 'performance_report',
         },
         {
           id: 'test-coverage-check',
           type: StepType.SKILL,
           skillId: 'coverage-analysis',
           input: {
-            changed_files: { $var: 'diff.files' }
+            changed_files: { $var: 'diff.files' },
           },
-          outputVariable: 'coverage_report'
-        }
-      ]
+          outputVariable: 'coverage_report',
+        },
+      ],
     },
-    
+
     // Aggregate findings
     {
       id: 'aggregate-findings',
@@ -465,11 +462,11 @@ const codeReviewWorkflow = new WorkflowDefinition(
         quality: { $var: 'quality_report' },
         security: { $var: 'security_report' },
         performance: { $var: 'performance_report' },
-        coverage: { $var: 'coverage_report' }
+        coverage: { $var: 'coverage_report' },
       },
-      outputVariable: 'aggregated_review'
+      outputVariable: 'aggregated_review',
     },
-    
+
     // Determine review outcome
     {
       id: 'determine-outcome',
@@ -477,8 +474,8 @@ const codeReviewWorkflow = new WorkflowDefinition(
       condition: {
         $or: [
           { $gt: [{ $var: 'aggregated_review.critical_issues' }, 0] },
-          { $gt: [{ $var: 'aggregated_review.security_vulnerabilities' }, 0] }
-        ]
+          { $gt: [{ $var: 'aggregated_review.security_vulnerabilities' }, 0] },
+        ],
       },
       thenSteps: [
         {
@@ -492,9 +489,9 @@ const codeReviewWorkflow = new WorkflowDefinition(
             pr_number: { $var: 'pr_number' },
             event: 'REQUEST_CHANGES',
             body: { $var: 'aggregated_review.summary' },
-            comments: { $var: 'aggregated_review.comments' }
-          }
-        }
+            comments: { $var: 'aggregated_review.comments' },
+          },
+        },
       ],
       elseSteps: [
         {
@@ -506,8 +503,8 @@ const codeReviewWorkflow = new WorkflowDefinition(
               id: 'request-human-review',
               type: StepType.HUMAN_REVIEW,
               message: 'Multiple issues found. Please review:\n${aggregated_review.summary}',
-              options: ['approve-with-comments', 'request-changes', 'approve']
-            }
+              options: ['approve-with-comments', 'request-changes', 'approve'],
+            },
           ],
           elseSteps: [
             {
@@ -520,14 +517,14 @@ const codeReviewWorkflow = new WorkflowDefinition(
                 repo: { $var: 'repo_name' },
                 pr_number: { $var: 'pr_number' },
                 event: 'APPROVE',
-                body: 'LGTM! Automated review passed.\n\n${aggregated_review.summary}'
-              }
-            }
-          ]
-        }
-      ]
+                body: 'LGTM! Automated review passed.\n\n${aggregated_review.summary}',
+              },
+            },
+          ],
+        },
+      ],
     },
-    
+
     // Post review comments
     {
       id: 'post-comments',
@@ -546,12 +543,12 @@ const codeReviewWorkflow = new WorkflowDefinition(
             pr_number: { $var: 'pr_number' },
             path: { $var: 'comment.file' },
             line: { $var: 'comment.line' },
-            body: { $var: 'comment.body' }
-          }
-        }
+            body: { $var: 'comment.body' },
+          },
+        },
       ],
-      maxIterations: 50
-    }
+      maxIterations: 50,
+    },
   ],
   {
     description: 'AI-powered code review with quality, security, and performance analysis',
@@ -559,22 +556,22 @@ const codeReviewWorkflow = new WorkflowDefinition(
     inputs: [
       { name: 'repo_owner', type: 'string', required: true },
       { name: 'repo_name', type: 'string', required: true },
-      { name: 'pr_number', type: 'number', required: true }
+      { name: 'pr_number', type: 'number', required: true },
     ],
     outputs: [
       { name: 'review_summary', from: 'aggregated_review' },
-      { name: 'critical_issues', from: 'aggregated_review.critical_issues' }
+      { name: 'critical_issues', from: 'aggregated_review.critical_issues' },
     ],
     retryPolicy: {
       maxRetries: 2,
-      backoffMs: 3000
-    }
+      backoffMs: 3000,
+    },
   }
 );
 
 /**
  * Incident Response Workflow
- * 
+ *
  * Automated incident detection, triage, and resolution
  */
 const incidentResponseWorkflow = new WorkflowDefinition(
@@ -588,11 +585,11 @@ const incidentResponseWorkflow = new WorkflowDefinition(
       skillId: 'incident-classifier',
       input: {
         alert: { $var: 'alert_data' },
-        service: { $var: 'affected_service' }
+        service: { $var: 'affected_service' },
       },
-      outputVariable: 'classification'
+      outputVariable: 'classification',
     },
-    
+
     // Severity-based routing
     {
       id: 'severity-routing',
@@ -600,8 +597,8 @@ const incidentResponseWorkflow = new WorkflowDefinition(
       condition: {
         $or: [
           { $eq: [{ $var: 'classification.severity' }, 'critical'] },
-          { $eq: [{ $var: 'classification.severity' }, 'high'] }
-        ]
+          { $eq: [{ $var: 'classification.severity' }, 'high'] },
+        ],
       },
       thenSteps: [
         // Critical/High: Immediate response
@@ -616,8 +613,8 @@ const incidentResponseWorkflow = new WorkflowDefinition(
               arguments: {
                 service: { $var: 'affected_service' },
                 title: { $var: 'classification.title' },
-                urgency: 'high'
-              }
+                urgency: 'high',
+              },
             },
             {
               id: 'create-incident-channel',
@@ -625,11 +622,11 @@ const incidentResponseWorkflow = new WorkflowDefinition(
               toolName: 'slack_create_channel',
               arguments: {
                 name: 'incident-${incident_id}',
-                topic: { $var: 'classification.title' }
+                topic: { $var: 'classification.title' },
               },
-              outputVariable: 'incident_channel'
-            }
-          ]
+              outputVariable: 'incident_channel',
+            },
+          ],
         },
         {
           id: 'gather-diagnostics',
@@ -642,9 +639,9 @@ const incidentResponseWorkflow = new WorkflowDefinition(
               arguments: {
                 service: { $var: 'affected_service' },
                 timeRange: '15m',
-                level: 'error'
+                level: 'error',
               },
-              outputVariable: 'error_logs'
+              outputVariable: 'error_logs',
             },
             {
               id: 'fetch-metrics',
@@ -652,20 +649,20 @@ const incidentResponseWorkflow = new WorkflowDefinition(
               toolName: 'fetch_metrics',
               arguments: {
                 service: { $var: 'affected_service' },
-                timeRange: '1h'
+                timeRange: '1h',
               },
-              outputVariable: 'metrics'
+              outputVariable: 'metrics',
             },
             {
               id: 'check-dependencies',
               type: StepType.TOOL,
               toolName: 'check_service_health',
               arguments: {
-                services: { $var: 'classification.dependencies' }
+                services: { $var: 'classification.dependencies' },
               },
-              outputVariable: 'dependency_health'
-            }
-          ]
+              outputVariable: 'dependency_health',
+            },
+          ],
         },
         {
           id: 'ai-diagnosis',
@@ -675,9 +672,9 @@ const incidentResponseWorkflow = new WorkflowDefinition(
             logs: { $var: 'error_logs' },
             metrics: { $var: 'metrics' },
             dependencies: { $var: 'dependency_health' },
-            classification: { $var: 'classification' }
+            classification: { $var: 'classification' },
           },
-          outputVariable: 'diagnosis'
+          outputVariable: 'diagnosis',
         },
         {
           id: 'post-diagnosis',
@@ -685,9 +682,9 @@ const incidentResponseWorkflow = new WorkflowDefinition(
           toolName: 'slack_post_message',
           arguments: {
             channel: { $var: 'incident_channel.id' },
-            blocks: { $var: 'diagnosis.slack_blocks' }
-          }
-        }
+            blocks: { $var: 'diagnosis.slack_blocks' },
+          },
+        },
       ],
       elseSteps: [
         // Medium/Low: Create ticket
@@ -699,9 +696,9 @@ const incidentResponseWorkflow = new WorkflowDefinition(
             project: 'OPS',
             type: 'Bug',
             summary: { $var: 'classification.title' },
-            priority: { $var: 'classification.jira_priority' }
+            priority: { $var: 'classification.jira_priority' },
           },
-          outputVariable: 'ticket'
+          outputVariable: 'ticket',
         },
         {
           id: 'notify-team',
@@ -709,12 +706,12 @@ const incidentResponseWorkflow = new WorkflowDefinition(
           toolName: 'slack_post_message',
           arguments: {
             channel: '#ops-alerts',
-            text: 'New incident: ${classification.title}\nTicket: ${ticket.key}'
-          }
-        }
-      ]
+            text: 'New incident: ${classification.title}\nTicket: ${ticket.key}',
+          },
+        },
+      ],
     },
-    
+
     // Resolution attempt
     {
       id: 'attempt-auto-resolution',
@@ -722,8 +719,8 @@ const incidentResponseWorkflow = new WorkflowDefinition(
       condition: {
         $and: [
           { $exists: 'diagnosis.auto_remediation' },
-          { $eq: [{ $var: 'classification.auto_remediation_allowed' }, true] }
-        ]
+          { $eq: [{ $var: 'classification.auto_remediation_allowed' }, true] },
+        ],
       },
       thenSteps: [
         {
@@ -739,23 +736,23 @@ const incidentResponseWorkflow = new WorkflowDefinition(
               arguments: { $var: 'step.arguments' },
               onError: {
                 strategy: RecoveryStrategy.MANUAL,
-                message: 'Remediation step failed: ${step.name}'
-              }
-            }
-          ]
+                message: 'Remediation step failed: ${step.name}',
+              },
+            },
+          ],
         },
         {
           id: 'verify-resolution',
           type: StepType.TOOL,
           toolName: 'check_service_health',
           arguments: {
-            services: [{ $var: 'affected_service' }]
+            services: [{ $var: 'affected_service' }],
           },
-          outputVariable: 'post_remediation_health'
-        }
-      ]
+          outputVariable: 'post_remediation_health',
+        },
+      ],
     },
-    
+
     // Post-incident
     {
       id: 'finalize-incident',
@@ -767,8 +764,8 @@ const incidentResponseWorkflow = new WorkflowDefinition(
           toolName: 'statuspage_update',
           arguments: {
             incident_id: { $var: 'incident_id' },
-            status: 'resolved'
-          }
+            status: 'resolved',
+          },
         },
         {
           id: 'schedule-postmortem',
@@ -778,11 +775,11 @@ const incidentResponseWorkflow = new WorkflowDefinition(
           arguments: {
             title: 'Postmortem: ${classification.title}',
             duration: 60,
-            attendees: { $var: 'classification.stakeholders' }
-          }
-        }
-      ]
-    }
+            attendees: { $var: 'classification.stakeholders' },
+          },
+        },
+      ],
+    },
   ],
   {
     description: 'Automated incident response with AI-powered diagnosis and remediation',
@@ -790,22 +787,22 @@ const incidentResponseWorkflow = new WorkflowDefinition(
     inputs: [
       { name: 'incident_id', type: 'string', required: true },
       { name: 'alert_data', type: 'object', required: true },
-      { name: 'affected_service', type: 'string', required: true }
+      { name: 'affected_service', type: 'string', required: true },
     ],
     outputs: [
       { name: 'classification', from: 'classification' },
       { name: 'diagnosis', from: 'diagnosis' },
-      { name: 'resolution_status', from: 'post_remediation_health' }
+      { name: 'resolution_status', from: 'post_remediation_health' },
     ],
     errorHandling: {
-      strategy: RecoveryStrategy.MANUAL
-    }
+      strategy: RecoveryStrategy.MANUAL,
+    },
   }
 );
 
 /**
  * Data Pipeline Workflow
- * 
+ *
  * ETL/ELT pipeline with quality checks and monitoring
  */
 const dataPipelineWorkflow = new WorkflowDefinition(
@@ -823,10 +820,10 @@ const dataPipelineWorkflow = new WorkflowDefinition(
           toolName: 'data_extract',
           arguments: {
             source: { $var: 'source_a_config' },
-            query: { $var: 'source_a_query' }
+            query: { $var: 'source_a_query' },
           },
           outputVariable: 'data_a',
-          retry: { maxRetries: 3, backoffMs: 5000 }
+          retry: { maxRetries: 3, backoffMs: 5000 },
         },
         {
           id: 'extract-source-b',
@@ -834,19 +831,19 @@ const dataPipelineWorkflow = new WorkflowDefinition(
           toolName: 'data_extract',
           arguments: {
             source: { $var: 'source_b_config' },
-            query: { $var: 'source_b_query' }
+            query: { $var: 'source_b_query' },
           },
           outputVariable: 'data_b',
-          retry: { maxRetries: 3, backoffMs: 5000 }
-        }
-      ]
+          retry: { maxRetries: 3, backoffMs: 5000 },
+        },
+      ],
     },
     {
       id: 'extraction-checkpoint',
       type: StepType.CHECKPOINT,
-      name: 'extraction-complete'
+      name: 'extraction-complete',
     },
-    
+
     // Data quality checks
     {
       id: 'quality-checks',
@@ -859,9 +856,9 @@ const dataPipelineWorkflow = new WorkflowDefinition(
           input: {
             check: 'completeness',
             data: [{ $var: 'data_a' }, { $var: 'data_b' }],
-            thresholds: { $var: 'quality_thresholds' }
+            thresholds: { $var: 'quality_thresholds' },
           },
-          outputVariable: 'completeness_result'
+          outputVariable: 'completeness_result',
         },
         {
           id: 'check-consistency',
@@ -869,9 +866,9 @@ const dataPipelineWorkflow = new WorkflowDefinition(
           skillId: 'data-quality',
           input: {
             check: 'consistency',
-            data: [{ $var: 'data_a' }, { $var: 'data_b' }]
+            data: [{ $var: 'data_a' }, { $var: 'data_b' }],
           },
-          outputVariable: 'consistency_result'
+          outputVariable: 'consistency_result',
         },
         {
           id: 'check-freshness',
@@ -880,13 +877,13 @@ const dataPipelineWorkflow = new WorkflowDefinition(
           input: {
             check: 'freshness',
             data: [{ $var: 'data_a' }, { $var: 'data_b' }],
-            maxAge: { $var: 'max_data_age' }
+            maxAge: { $var: 'max_data_age' },
           },
-          outputVariable: 'freshness_result'
-        }
-      ]
+          outputVariable: 'freshness_result',
+        },
+      ],
     },
-    
+
     // Quality gate
     {
       id: 'quality-gate',
@@ -895,8 +892,8 @@ const dataPipelineWorkflow = new WorkflowDefinition(
         $and: [
           { $var: 'completeness_result.passed' },
           { $var: 'consistency_result.passed' },
-          { $var: 'freshness_result.passed' }
-        ]
+          { $var: 'freshness_result.passed' },
+        ],
       },
       thenSteps: [
         // Transform
@@ -907,18 +904,18 @@ const dataPipelineWorkflow = new WorkflowDefinition(
           input: {
             sources: {
               a: { $var: 'data_a' },
-              b: { $var: 'data_b' }
+              b: { $var: 'data_b' },
             },
-            transformations: { $var: 'transform_config' }
+            transformations: { $var: 'transform_config' },
           },
-          outputVariable: 'transformed_data'
+          outputVariable: 'transformed_data',
         },
         {
           id: 'transform-checkpoint',
           type: StepType.CHECKPOINT,
-          name: 'transform-complete'
+          name: 'transform-complete',
         },
-        
+
         // Load
         {
           id: 'load-data',
@@ -927,15 +924,15 @@ const dataPipelineWorkflow = new WorkflowDefinition(
           arguments: {
             destination: { $var: 'destination_config' },
             data: { $var: 'transformed_data' },
-            mode: { $var: 'load_mode' }
+            mode: { $var: 'load_mode' },
           },
           outputVariable: 'load_result',
           onError: {
             strategy: RecoveryStrategy.ROLLBACK,
-            rollbackTo: 'transform-complete'
-          }
+            rollbackTo: 'transform-complete',
+          },
         },
-        
+
         // Post-load validation
         {
           id: 'validate-load',
@@ -943,10 +940,10 @@ const dataPipelineWorkflow = new WorkflowDefinition(
           toolName: 'data_validate',
           arguments: {
             destination: { $var: 'destination_config' },
-            expectedRows: { $var: 'transformed_data.rowCount' }
+            expectedRows: { $var: 'transformed_data.rowCount' },
           },
-          outputVariable: 'validation_result'
-        }
+          outputVariable: 'validation_result',
+        },
       ],
       elseSteps: [
         {
@@ -960,19 +957,19 @@ const dataPipelineWorkflow = new WorkflowDefinition(
             details: {
               completeness: { $var: 'completeness_result' },
               consistency: { $var: 'consistency_result' },
-              freshness: { $var: 'freshness_result' }
-            }
-          }
+              freshness: { $var: 'freshness_result' },
+            },
+          },
         },
         {
           id: 'quality-human-review',
           type: StepType.HUMAN_REVIEW,
           message: 'Data quality check failed. Review and decide:',
-          options: ['proceed-anyway', 'retry-extraction', 'abort']
-        }
-      ]
+          options: ['proceed-anyway', 'retry-extraction', 'abort'],
+        },
+      ],
     },
-    
+
     // Metrics and reporting
     {
       id: 'record-metrics',
@@ -985,11 +982,11 @@ const dataPipelineWorkflow = new WorkflowDefinition(
           duration: { $var: '__duration' },
           qualityScores: {
             completeness: { $var: 'completeness_result.score' },
-            consistency: { $var: 'consistency_result.score' }
-          }
-        }
-      }
-    }
+            consistency: { $var: 'consistency_result.score' },
+          },
+        },
+      },
+    },
   ],
   {
     description: 'ETL/ELT data pipeline with quality gates and monitoring',
@@ -1004,18 +1001,18 @@ const dataPipelineWorkflow = new WorkflowDefinition(
       { name: 'transform_config', type: 'object', required: true },
       { name: 'quality_thresholds', type: 'object', required: false },
       { name: 'max_data_age', type: 'string', default: '24h' },
-      { name: 'load_mode', type: 'string', default: 'append' }
+      { name: 'load_mode', type: 'string', default: 'append' },
     ],
     outputs: [
       { name: 'load_result', from: 'load_result' },
       { name: 'validation', from: 'validation_result' },
-      { name: 'quality_report', from: 'quality_gate_results' }
+      { name: 'quality_report', from: 'quality_gate_results' },
     ],
     timeout: 7200000, // 2 hours
     errorHandling: {
       strategy: RecoveryStrategy.ROLLBACK,
-      rollbackTo: 'extraction-complete'
-    }
+      rollbackTo: 'extraction-complete',
+    },
   }
 );
 
@@ -1028,7 +1025,7 @@ function createWorkflowFromTemplate(templateName, customizations = {}) {
     'cicd-pipeline': cicdPipelineWorkflow,
     'code-review': codeReviewWorkflow,
     'incident-response': incidentResponseWorkflow,
-    'data-pipeline': dataPipelineWorkflow
+    'data-pipeline': dataPipelineWorkflow,
   };
 
   const template = templates[templateName];
@@ -1048,7 +1045,7 @@ function createWorkflowFromTemplate(templateName, customizations = {}) {
       outputs: customizations.outputs || template.outputs,
       errorHandling: customizations.errorHandling || template.errorHandling,
       timeout: customizations.timeout || template.timeout,
-      retryPolicy: customizations.retryPolicy || template.retryPolicy
+      retryPolicy: customizations.retryPolicy || template.retryPolicy,
     }
   );
 
@@ -1062,11 +1059,11 @@ module.exports = {
   codeReviewWorkflow,
   incidentResponseWorkflow,
   dataPipelineWorkflow,
-  
+
   // Factory
   createWorkflowFromTemplate,
-  
+
   // Re-export types
   StepType,
-  RecoveryStrategy
+  RecoveryStrategy,
 };

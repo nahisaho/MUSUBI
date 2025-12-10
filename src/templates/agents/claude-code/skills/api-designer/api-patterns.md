@@ -24,28 +24,28 @@ POST /createOrder
 
 ### HTTP Methods
 
-| Method | Action | Idempotent | Safe |
-|--------|--------|------------|------|
-| GET | Read | Yes | Yes |
-| POST | Create | No | No |
-| PUT | Replace | Yes | No |
-| PATCH | Update | Yes | No |
-| DELETE | Remove | Yes | No |
+| Method | Action  | Idempotent | Safe |
+| ------ | ------- | ---------- | ---- |
+| GET    | Read    | Yes        | Yes  |
+| POST   | Create  | No         | No   |
+| PUT    | Replace | Yes        | No   |
+| PATCH  | Update  | Yes        | No   |
+| DELETE | Remove  | Yes        | No   |
 
 ### Status Codes
 
-| Code | Meaning | Use Case |
-|------|---------|----------|
-| 200 | OK | Successful GET, PUT, PATCH |
-| 201 | Created | Successful POST |
-| 204 | No Content | Successful DELETE |
-| 400 | Bad Request | Invalid input |
-| 401 | Unauthorized | Missing auth |
-| 403 | Forbidden | No permission |
-| 404 | Not Found | Resource doesn't exist |
-| 409 | Conflict | Resource conflict |
-| 422 | Unprocessable | Validation error |
-| 500 | Server Error | Unexpected error |
+| Code | Meaning       | Use Case                   |
+| ---- | ------------- | -------------------------- |
+| 200  | OK            | Successful GET, PUT, PATCH |
+| 201  | Created       | Successful POST            |
+| 204  | No Content    | Successful DELETE          |
+| 400  | Bad Request   | Invalid input              |
+| 401  | Unauthorized  | Missing auth               |
+| 403  | Forbidden     | No permission              |
+| 404  | Not Found     | Resource doesn't exist     |
+| 409  | Conflict      | Resource conflict          |
+| 422  | Unprocessable | Validation error           |
+| 500  | Server Error  | Unexpected error           |
 
 ---
 
@@ -192,18 +192,21 @@ GET /users?fields=id,name,email
 ## Versioning
 
 ### URL Versioning
+
 ```
 GET /v1/users
 GET /v2/users
 ```
 
 ### Header Versioning
+
 ```
 GET /users
 Accept: application/vnd.api.v1+json
 ```
 
 ### Query Parameter
+
 ```
 GET /users?version=1
 ```
@@ -309,28 +312,33 @@ components:
 ## Design Checklist
 
 ### Naming
+
 - [ ] Resources are nouns
 - [ ] Plural names for collections
 - [ ] Lowercase with hyphens
 - [ ] Consistent naming
 
 ### Methods
+
 - [ ] Correct HTTP methods
 - [ ] Idempotency maintained
 - [ ] Proper status codes
 
 ### Responses
+
 - [ ] Consistent format
 - [ ] Useful error messages
 - [ ] Pagination for lists
 
 ### Security
+
 - [ ] Authentication required
 - [ ] Rate limiting enabled
 - [ ] Input validation
 - [ ] CORS configured
 
 ### Documentation
+
 - [ ] OpenAPI spec available
 - [ ] Examples included
 - [ ] Error codes documented

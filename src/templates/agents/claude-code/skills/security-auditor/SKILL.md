@@ -103,15 +103,12 @@ The SecurityAnalyzer module provides automated security risk detection for code,
 ### Module Usage
 
 ```javascript
-const { 
-  SecurityAnalyzer, 
-  RiskLevel 
-} = require('musubi/src/analyzers/security-analyzer');
+const { SecurityAnalyzer, RiskLevel } = require('musubi/src/analyzers/security-analyzer');
 
 const analyzer = new SecurityAnalyzer({
-  strictMode: true,        // Block critical risks
+  strictMode: true, // Block critical risks
   allowedCommands: ['npm', 'git', 'node'],
-  ignorePaths: ['node_modules', '.git', 'test']
+  ignorePaths: ['node_modules', '.git', 'test'],
 });
 
 // Analyze code content
@@ -120,7 +117,7 @@ const result = analyzer.analyzeContent(code, 'src/auth/login.js');
 // Check validation status
 const validation = analyzer.validateAction({
   type: 'command',
-  command: 'rm -rf /tmp/cache'
+  command: 'rm -rf /tmp/cache',
 });
 
 if (validation.blocked) {
@@ -133,12 +130,12 @@ const report = analyzer.generateReport(result);
 
 ### Detection Categories
 
-| Category | Examples |
-|----------|----------|
-| **Secrets** | API keys, passwords, tokens, private keys |
-| **Dangerous Commands** | `rm -rf /`, `chmod 777`, `curl \| bash` |
-| **Vulnerabilities** | eval(), innerHTML, SQL injection |
-| **Network Risks** | Insecure HTTP, disabled TLS verification |
+| Category               | Examples                                  |
+| ---------------------- | ----------------------------------------- |
+| **Secrets**            | API keys, passwords, tokens, private keys |
+| **Dangerous Commands** | `rm -rf /`, `chmod 777`, `curl \| bash`   |
+| **Vulnerabilities**    | eval(), innerHTML, SQL injection          |
+| **Network Risks**      | Insecure HTTP, disabled TLS verification  |
 
 ### Risk Levels
 
@@ -1286,14 +1283,15 @@ security-audit/
 
 Use MUSUBI Guardrails for automated security validation:
 
-| Command | Purpose | Example |
-|---------|---------|---------|
-| `musubi-validate guardrails --type input` | Input validation (injection prevention) | `npx musubi-validate guardrails "user input" --type input` |
-| `musubi-validate guardrails --type output --redact` | Output sanitization with PII redaction | `npx musubi-validate guardrails "output" --type output --redact` |
-| `musubi-validate guardrails --type safety` | Safety check with threat detection | `npx musubi-validate guardrails "code" --type safety --level high` |
-| `musubi-validate guardrails-chain` | Run complete security guardrail chain | `npx musubi-validate guardrails-chain "content" --parallel` |
+| Command                                             | Purpose                                 | Example                                                            |
+| --------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------ |
+| `musubi-validate guardrails --type input`           | Input validation (injection prevention) | `npx musubi-validate guardrails "user input" --type input`         |
+| `musubi-validate guardrails --type output --redact` | Output sanitization with PII redaction  | `npx musubi-validate guardrails "output" --type output --redact`   |
+| `musubi-validate guardrails --type safety`          | Safety check with threat detection      | `npx musubi-validate guardrails "code" --type safety --level high` |
+| `musubi-validate guardrails-chain`                  | Run complete security guardrail chain   | `npx musubi-validate guardrails-chain "content" --parallel`        |
 
 **Security Presets**:
+
 ```bash
 # Input validation with strict security
 npx musubi-validate guardrails --type input --preset strict
@@ -1306,6 +1304,7 @@ npx musubi-validate guardrails --type safety --constitutional --level critical
 ```
 
 **Batch Security Scan**:
+
 ```bash
 # Scan all source files
 npx musubi-validate guardrails --type safety --file "src/**/*.js" --level high

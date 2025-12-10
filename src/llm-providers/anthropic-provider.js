@@ -59,17 +59,15 @@ class AnthropicLMProvider extends LLMProvider {
           headers: {
             'x-api-key': this.apiKey,
             'anthropic-version': '2023-06-01',
-            'content-type': 'application/json'
+            'content-type': 'application/json',
           },
           body: JSON.stringify({
             model: this.config.model,
             max_tokens: options.maxTokens || this.config.maxTokens,
             system: systemPrompt,
-            messages: [
-              { role: 'user', content: prompt }
-            ]
+            messages: [{ role: 'user', content: prompt }],
           }),
-          signal: AbortSignal.timeout(this.config.timeout)
+          signal: AbortSignal.timeout(this.config.timeout),
         });
 
         if (!response.ok) {
@@ -85,9 +83,9 @@ class AnthropicLMProvider extends LLMProvider {
           usage: {
             promptTokens: data.usage?.input_tokens || 0,
             completionTokens: data.usage?.output_tokens || 0,
-            totalTokens: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0)
+            totalTokens: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0),
           },
-          finishReason: data.stop_reason
+          finishReason: data.stop_reason,
         };
       });
     });
@@ -99,7 +97,9 @@ class AnthropicLMProvider extends LLMProvider {
    * @returns {Promise<number[]>}
    */
   async embed(_text) {
-    throw new Error('Embedding not supported by Anthropic Claude API. Use OpenAI or a dedicated embedding service.');
+    throw new Error(
+      'Embedding not supported by Anthropic Claude API. Use OpenAI or a dedicated embedding service.'
+    );
   }
 
   /**
@@ -133,8 +133,8 @@ class AnthropicLMProvider extends LLMProvider {
         completion: true,
         embedding: false,
         streaming: true,
-        functionCalling: true
-      }
+        functionCalling: true,
+      },
     };
   }
 

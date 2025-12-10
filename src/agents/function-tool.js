@@ -1,10 +1,10 @@
 /**
  * MUSUBI Function Tool
- * 
+ *
  * Provides decorator-style function registration and automatic
  * schema generation from JSDoc comments. Inspired by OpenAI
  * Agents SDK function tool patterns.
- * 
+ *
  * @module agents/function-tool
  */
 
@@ -29,18 +29,18 @@
  * Map JavaScript types to JSON Schema types
  */
 const TYPE_MAP = {
-  'string': 'string',
-  'number': 'number',
-  'integer': 'integer',
-  'boolean': 'boolean',
-  'object': 'object',
-  'array': 'array',
-  'any': 'object',
-  'null': 'null',
-  'undefined': 'null',
-  'function': 'object',
-  'symbol': 'string',
-  'bigint': 'integer'
+  string: 'string',
+  number: 'number',
+  integer: 'integer',
+  boolean: 'boolean',
+  object: 'object',
+  array: 'array',
+  any: 'object',
+  null: 'null',
+  undefined: 'null',
+  function: 'object',
+  symbol: 'string',
+  bigint: 'integer',
 };
 
 /**
@@ -52,18 +52,18 @@ function parseJSDoc(jsdoc) {
   if (!jsdoc) {
     return { description: '', params: [], returns: null };
   }
-  
+
   const lines = jsdoc.split('\n').map(l => l.replace(/^\s*\*\s?/, '').trim());
   const result = {
     description: '',
     params: [],
     returns: null,
-    example: null
+    example: null,
   };
-  
+
   let currentSection = 'description';
   let descriptionLines = [];
-  
+
   for (const line of lines) {
     if (line.startsWith('@param')) {
       currentSection = 'param';
@@ -74,7 +74,7 @@ function parseJSDoc(jsdoc) {
           name,
           type: type.toLowerCase(),
           required: !optional,
-          description: description || ''
+          description: description || '',
         });
       }
     } else if (line.startsWith('@returns') || line.startsWith('@return')) {
@@ -83,7 +83,7 @@ function parseJSDoc(jsdoc) {
       if (match) {
         result.returns = {
           type: match[1].toLowerCase(),
-          description: match[2] || ''
+          description: match[2] || '',
         };
       }
     } else if (line.startsWith('@example')) {
@@ -97,7 +97,7 @@ function parseJSDoc(jsdoc) {
       result.example += (result.example ? '\n' : '') + line;
     }
   }
-  
+
   result.description = descriptionLines.join(' ').trim();
   return result;
 }
@@ -110,44 +110,44 @@ function parseJSDoc(jsdoc) {
 function paramsToSchema(params) {
   const properties = {};
   const required = [];
-  
+
   for (const param of params) {
     const schemaType = TYPE_MAP[param.type] || 'string';
-    
+
     properties[param.name] = {
       type: schemaType,
-      description: param.description || `Parameter: ${param.name}`
+      description: param.description || `Parameter: ${param.name}`,
     };
-    
+
     // Handle union types (e.g., "string|number")
     if (param.type.includes('|')) {
       const types = param.type.split('|').map(t => TYPE_MAP[t.trim()] || 'string');
       properties[param.name] = {
         anyOf: types.map(t => ({ type: t })),
-        description: param.description
+        description: param.description,
       };
     }
-    
+
     // Handle array types (e.g., "string[]")
     if (param.type.endsWith('[]')) {
       const itemType = TYPE_MAP[param.type.slice(0, -2)] || 'string';
       properties[param.name] = {
         type: 'array',
         items: { type: itemType },
-        description: param.description
+        description: param.description,
       };
     }
-    
+
     if (param.required) {
       required.push(param.name);
     }
   }
-  
+
   return {
     type: 'object',
     properties,
     required: required.length > 0 ? required : undefined,
-    additionalProperties: false
+    additionalProperties: false,
   };
 }
 
@@ -160,10 +160,10 @@ function paramsToSchema(params) {
 function functionTool(fn, options = {}) {
   const fnStr = fn.toString();
   const name = options.name || fn.name || 'anonymous_tool';
-  
+
   // Try to extract JSDoc comment
   let jsdocInfo = { description: '', params: [], returns: null };
-  
+
   // Check if function has __jsdoc property (from decorator)
   if (fn.__jsdoc) {
     jsdocInfo = parseJSDoc(fn.__jsdoc);
@@ -174,43 +174,49 @@ function functionTool(fn, options = {}) {
       jsdocInfo = parseJSDoc(jsdocMatch[0]);
     }
   }
-  
+
   // Build parameter schema
   let parameters = options.parameters;
-  
+
   if (!parameters && jsdocInfo.params.length > 0) {
     parameters = paramsToSchema(jsdocInfo.params);
   }
-  
+
   if (!parameters) {
     // Try to infer from function parameters
     const paramMatch = fnStr.match(/\(([^)]*)\)/);
     if (paramMatch) {
       const paramNames = paramMatch[1]
         .split(',')
-        .map(p => p.trim().replace(/=.*$/, '').replace(/\{.*\}/, '').trim())
+        .map(p =>
+          p
+            .trim()
+            .replace(/=.*$/, '')
+            .replace(/\{.*\}/, '')
+            .trim()
+        )
         .filter(p => p && p !== '');
-      
+
       if (paramNames.length > 0) {
         parameters = {
           type: 'object',
           properties: Object.fromEntries(
             paramNames.map(name => [name, { type: 'string', description: `Parameter: ${name}` }])
           ),
-          required: paramNames
+          required: paramNames,
         };
       }
     }
   }
-  
+
   // Default empty schema
   parameters = parameters || { type: 'object', properties: {} };
-  
+
   return {
     name,
     description: options.description || jsdocInfo.description || `Function: ${name}`,
     parameters,
-    handler: async (args) => {
+    handler: async args => {
       // Call the original function with arguments
       if (typeof args === 'object' && !Array.isArray(args)) {
         // Pass as keyword arguments if possible
@@ -223,19 +229,19 @@ function functionTool(fn, options = {}) {
       return await fn(args);
     },
     __original: fn,
-    __jsdocInfo: jsdocInfo
+    __jsdocInfo: jsdocInfo,
   };
 }
 
 /**
  * Decorator-style wrapper for creating function tools
  * Use with: const tool = asTool(myFunction, { description: '...' })
- * 
+ *
  * @param {FunctionToolOptions} [options]
  * @returns {Function} Decorator function
  */
 function asTool(options = {}) {
-  return function(fn) {
+  return function (fn) {
     return functionTool(fn, options);
   };
 }
@@ -259,7 +265,7 @@ function functionTools(functions, options = {}) {
  * @returns {Function} Decorator
  */
 function withJSDoc(jsdoc) {
-  return function(fn) {
+  return function (fn) {
     fn.__jsdoc = jsdoc;
     return fn;
   };
@@ -276,7 +282,7 @@ const SchemaBuilder = {
   string(options = {}) {
     return { type: 'string', ...options };
   },
-  
+
   /**
    * Create a number schema
    * @param {Object} [options]
@@ -284,7 +290,7 @@ const SchemaBuilder = {
   number(options = {}) {
     return { type: 'number', ...options };
   },
-  
+
   /**
    * Create an integer schema
    * @param {Object} [options]
@@ -292,7 +298,7 @@ const SchemaBuilder = {
   integer(options = {}) {
     return { type: 'integer', ...options };
   },
-  
+
   /**
    * Create a boolean schema
    * @param {Object} [options]
@@ -300,7 +306,7 @@ const SchemaBuilder = {
   boolean(options = {}) {
     return { type: 'boolean', ...options };
   },
-  
+
   /**
    * Create an array schema
    * @param {Object} itemSchema - Schema for array items
@@ -309,7 +315,7 @@ const SchemaBuilder = {
   array(itemSchema, options = {}) {
     return { type: 'array', items: itemSchema, ...options };
   },
-  
+
   /**
    * Create an object schema
    * @param {Object} properties - Property schemas
@@ -322,10 +328,10 @@ const SchemaBuilder = {
       properties,
       required: required.length > 0 ? required : undefined,
       additionalProperties: options.additionalProperties ?? false,
-      ...options
+      ...options,
     };
   },
-  
+
   /**
    * Create an enum schema
    * @param {Array} values - Allowed values
@@ -334,7 +340,7 @@ const SchemaBuilder = {
   enum(values, options = {}) {
     return { type: 'string', enum: values, ...options };
   },
-  
+
   /**
    * Create a oneOf schema
    * @param {Array} schemas - Possible schemas
@@ -342,14 +348,14 @@ const SchemaBuilder = {
   oneOf(schemas) {
     return { oneOf: schemas };
   },
-  
+
   /**
    * Create an anyOf schema
    * @param {Array} schemas - Possible schemas
    */
   anyOf(schemas) {
     return { anyOf: schemas };
-  }
+  },
 };
 
 /**
@@ -360,7 +366,7 @@ const SchemaBuilder = {
  */
 function validateArgs(args, schema) {
   const errors = [];
-  
+
   if (schema.type === 'object' && schema.properties) {
     // Check required properties
     if (schema.required) {
@@ -370,7 +376,7 @@ function validateArgs(args, schema) {
         }
       }
     }
-    
+
     // Type check each property
     for (const [name, value] of Object.entries(args)) {
       const propSchema = schema.properties[name];
@@ -378,7 +384,7 @@ function validateArgs(args, schema) {
         errors.push(`Unknown parameter: ${name}`);
         continue;
       }
-      
+
       if (propSchema) {
         const typeError = validateType(value, propSchema, name);
         if (typeError) {
@@ -387,10 +393,10 @@ function validateArgs(args, schema) {
       }
     }
   }
-  
+
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -404,7 +410,7 @@ function validateArgs(args, schema) {
 function validateType(value, schema, name) {
   const expectedType = schema.type;
   const actualType = Array.isArray(value) ? 'array' : typeof value;
-  
+
   if (expectedType && actualType !== expectedType) {
     // Allow number for integer
     if (expectedType === 'integer' && typeof value === 'number' && Number.isInteger(value)) {
@@ -412,11 +418,11 @@ function validateType(value, schema, name) {
     }
     return `Parameter '${name}' expected ${expectedType}, got ${actualType}`;
   }
-  
+
   if (schema.enum && !schema.enum.includes(value)) {
     return `Parameter '${name}' must be one of: ${schema.enum.join(', ')}`;
   }
-  
+
   return null;
 }
 
@@ -428,5 +434,5 @@ module.exports = {
   parseJSDoc,
   paramsToSchema,
   SchemaBuilder,
-  validateArgs
+  validateArgs,
 };

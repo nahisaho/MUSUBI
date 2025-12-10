@@ -1,6 +1,6 @@
 /**
  * SequentialPattern - Linear skill execution pattern
- * 
+ *
  * Executes skills in sequence, passing output from one skill
  * as input to the next. Supports error handling and recovery.
  */
@@ -14,7 +14,7 @@ const { PatternType, ExecutionContext, ExecutionStatus } = require('../orchestra
 const SequentialOptions = {
   STOP_ON_ERROR: 'stop-on-error',
   CONTINUE_ON_ERROR: 'continue-on-error',
-  RETRY_ON_ERROR: 'retry-on-error'
+  RETRY_ON_ERROR: 'retry-on-error',
 };
 
 /**
@@ -31,11 +31,11 @@ class SequentialPattern extends BasePattern {
       useCases: [
         'Step-by-step workflows',
         'Data transformation pipelines',
-        'Dependent task chains'
+        'Dependent task chains',
       ],
       complexity: 'low',
       supportsParallel: false,
-      requiresHuman: false
+      requiresHuman: false,
     });
 
     this.options = {
@@ -43,7 +43,7 @@ class SequentialPattern extends BasePattern {
       maxRetries: options.maxRetries || 3,
       retryDelay: options.retryDelay || 1000,
       transformOutput: options.transformOutput || ((output, _context) => output),
-      ...options
+      ...options,
     };
   }
 
@@ -73,7 +73,7 @@ class SequentialPattern extends BasePattern {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -97,7 +97,7 @@ class SequentialPattern extends BasePattern {
     engine.emit('sequentialStarted', {
       context,
       skills,
-      totalSteps: skills.length
+      totalSteps: skills.length,
     });
 
     for (let i = 0; i < skills.length; i++) {
@@ -110,8 +110,8 @@ class SequentialPattern extends BasePattern {
         metadata: {
           stepIndex: i,
           totalSteps: skills.length,
-          pattern: PatternType.SEQUENTIAL
-        }
+          pattern: PatternType.SEQUENTIAL,
+        },
       });
 
       context.children.push(stepContext);
@@ -120,12 +120,12 @@ class SequentialPattern extends BasePattern {
         context,
         stepContext,
         stepIndex: i,
-        skillName
+        skillName,
       });
 
       try {
         stepContext.start();
-        
+
         const output = await this._executeWithRetry(
           () => engine.executeSkill(skillName, currentInput, context),
           skillName,
@@ -134,15 +134,15 @@ class SequentialPattern extends BasePattern {
 
         stepContext.complete(output);
         lastOutput = output;
-        
+
         // Transform output for next step
         currentInput = this.options.transformOutput(output, stepContext);
-        
+
         results.push({
           step: i + 1,
           skill: skillName,
           status: ExecutionStatus.COMPLETED,
-          output
+          output,
         });
 
         engine.emit('sequentialStepCompleted', {
@@ -150,9 +150,8 @@ class SequentialPattern extends BasePattern {
           stepContext,
           stepIndex: i,
           skillName,
-          output
+          output,
         });
-
       } catch (error) {
         stepContext.fail(error);
 
@@ -160,7 +159,7 @@ class SequentialPattern extends BasePattern {
           step: i + 1,
           skill: skillName,
           status: ExecutionStatus.FAILED,
-          error: error.message
+          error: error.message,
         });
 
         engine.emit('sequentialStepFailed', {
@@ -168,7 +167,7 @@ class SequentialPattern extends BasePattern {
           stepContext,
           stepIndex: i,
           skillName,
-          error
+          error,
         });
 
         // Handle error based on configuration
@@ -177,13 +176,13 @@ class SequentialPattern extends BasePattern {
             `Sequential execution failed at step ${i + 1} (${skillName}): ${error.message}`
           );
         }
-        
+
         // Continue on error - use previous output as input
         engine.emit('sequentialContinuingAfterError', {
           context,
           stepIndex: i,
           skillName,
-          error
+          error,
         });
       }
     }
@@ -193,13 +192,13 @@ class SequentialPattern extends BasePattern {
     engine.emit('sequentialCompleted', {
       context,
       results,
-      summary
+      summary,
     });
 
     return {
       results,
       summary,
-      finalOutput: lastOutput
+      finalOutput: lastOutput,
     };
   }
 
@@ -209,29 +208,31 @@ class SequentialPattern extends BasePattern {
    */
   async _executeWithRetry(fn, skillName, engine) {
     let lastError;
-    
+
     for (let attempt = 1; attempt <= this.options.maxRetries; attempt++) {
       try {
         return await fn();
       } catch (error) {
         lastError = error;
-        
-        if (attempt < this.options.maxRetries && 
-            this.options.errorHandling === SequentialOptions.RETRY_ON_ERROR) {
+
+        if (
+          attempt < this.options.maxRetries &&
+          this.options.errorHandling === SequentialOptions.RETRY_ON_ERROR
+        ) {
           engine.emit('sequentialRetrying', {
             skillName,
             attempt,
             maxRetries: this.options.maxRetries,
-            error
+            error,
           });
-          
+
           await this._delay(this.options.retryDelay * attempt);
         } else {
           throw error;
         }
       }
     }
-    
+
     throw lastError;
   }
 
@@ -250,14 +251,14 @@ class SequentialPattern extends BasePattern {
   _createSummary(results, skills) {
     const completed = results.filter(r => r.status === ExecutionStatus.COMPLETED).length;
     const failed = results.filter(r => r.status === ExecutionStatus.FAILED).length;
-    
+
     return {
       totalSteps: skills.length,
       completed,
       failed,
-      successRate: skills.length > 0 ? (completed / skills.length * 100).toFixed(1) + '%' : '0%',
+      successRate: skills.length > 0 ? ((completed / skills.length) * 100).toFixed(1) + '%' : '0%',
       allCompleted: completed === skills.length,
-      hasFailed: failed > 0
+      hasFailed: failed > 0,
     };
   }
 }
@@ -274,5 +275,5 @@ function createSequentialPattern(options = {}) {
 module.exports = {
   SequentialPattern,
   SequentialOptions,
-  createSequentialPattern
+  createSequentialPattern,
 };

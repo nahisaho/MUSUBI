@@ -24,7 +24,7 @@ class ReplanHistory {
       maxEvents: 1000,
       persist: false,
       filePath: 'storage/replanning-history.json',
-      ...options.config
+      ...options.config,
     };
     this.events = [];
     this.snapshots = new Map();
@@ -33,7 +33,7 @@ class ReplanHistory {
       successfulReplans: 0,
       failedReplans: 0,
       byTrigger: {},
-      byDecision: {}
+      byDecision: {},
     };
   }
 
@@ -48,7 +48,7 @@ class ReplanHistory {
       ...event,
       id: event.id || this.generateEventId(),
       timestamp: event.timestamp || Date.now(),
-      version: 1
+      version: 1,
     };
 
     // Add to events list
@@ -82,7 +82,7 @@ class ReplanHistory {
       timestamp: Date.now(),
       reason,
       plan: JSON.parse(JSON.stringify(plan)), // Deep clone
-      version: snapshots.length + 1
+      version: snapshots.length + 1,
     });
     this.snapshots.set(planId, snapshots);
   }
@@ -154,10 +154,11 @@ class ReplanHistory {
   getMetrics() {
     return {
       ...this.metrics,
-      successRate: this.metrics.totalReplans > 0
-        ? this.metrics.successfulReplans / this.metrics.totalReplans
-        : 0,
-      eventCount: this.events.length
+      successRate:
+        this.metrics.totalReplans > 0
+          ? this.metrics.successfulReplans / this.metrics.totalReplans
+          : 0,
+      eventCount: this.events.length,
     };
   }
 
@@ -187,13 +188,17 @@ Generated: ${new Date().toISOString()}
 
 | Trigger | Count |
 |---------|-------|
-${Object.entries(metrics.byTrigger).map(([k, v]) => `| ${k} | ${v} |`).join('\n')}
+${Object.entries(metrics.byTrigger)
+  .map(([k, v]) => `| ${k} | ${v} |`)
+  .join('\n')}
 
 ## Decisions Distribution
 
 | Decision | Count |
 |----------|-------|
-${Object.entries(metrics.byDecision).map(([k, v]) => `| ${k} | ${v} |`).join('\n')}
+${Object.entries(metrics.byDecision)
+  .map(([k, v]) => `| ${k} | ${v} |`)
+  .join('\n')}
 
 ## Events
 
@@ -247,12 +252,16 @@ ${Object.entries(metrics.byDecision).map(([k, v]) => `| ${k} | ${v} |`).join('\n
     const events = this.getEvents(options.filter || {});
     const metrics = this.getMetrics();
 
-    return JSON.stringify({
-      exportTime: Date.now(),
-      metrics,
-      events,
-      snapshots: Object.fromEntries(this.snapshots)
-    }, null, 2);
+    return JSON.stringify(
+      {
+        exportTime: Date.now(),
+        metrics,
+        events,
+        snapshots: Object.fromEntries(this.snapshots),
+      },
+      null,
+      2
+    );
   }
 
   /**
@@ -262,11 +271,11 @@ ${Object.entries(metrics.byDecision).map(([k, v]) => `| ${k} | ${v} |`).join('\n
   importJSON(json) {
     try {
       const data = JSON.parse(json);
-      
+
       if (data.events) {
         this.events = data.events;
       }
-      
+
       if (data.snapshots) {
         this.snapshots = new Map(Object.entries(data.snapshots));
       }
@@ -289,7 +298,7 @@ ${Object.entries(metrics.byDecision).map(([k, v]) => `| ${k} | ${v} |`).join('\n
       successfulReplans: 0,
       failedReplans: 0,
       byTrigger: {},
-      byDecision: {}
+      byDecision: {},
     };
   }
 
@@ -309,14 +318,12 @@ ${Object.entries(metrics.byDecision).map(([k, v]) => `| ${k} | ${v} |`).join('\n
 
     // Track by trigger
     if (event.trigger) {
-      this.metrics.byTrigger[event.trigger] = 
-        (this.metrics.byTrigger[event.trigger] || 0) + 1;
+      this.metrics.byTrigger[event.trigger] = (this.metrics.byTrigger[event.trigger] || 0) + 1;
     }
 
     // Track by decision
     if (event.decision) {
-      this.metrics.byDecision[event.decision] = 
-        (this.metrics.byDecision[event.decision] || 0) + 1;
+      this.metrics.byDecision[event.decision] = (this.metrics.byDecision[event.decision] || 0) + 1;
     }
   }
 
@@ -330,7 +337,7 @@ ${Object.entries(metrics.byDecision).map(([k, v]) => `| ${k} | ${v} |`).join('\n
       successfulReplans: 0,
       failedReplans: 0,
       byTrigger: {},
-      byDecision: {}
+      byDecision: {},
     };
 
     for (const event of this.events) {
@@ -355,10 +362,10 @@ ${Object.entries(metrics.byDecision).map(([k, v]) => `| ${k} | ${v} |`).join('\n
     try {
       const filePath = path.resolve(this.config.filePath);
       const dir = path.dirname(filePath);
-      
+
       // Ensure directory exists
       await fs.mkdir(dir, { recursive: true });
-      
+
       // Write history
       await fs.writeFile(filePath, this.exportJSON(), 'utf8');
     } catch (error) {

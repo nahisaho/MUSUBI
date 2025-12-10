@@ -55,7 +55,7 @@ jobs:
         run: |
           musubi-resolve analyze ${{ steps.issue.outputs.number }} \
             --output json > analysis.json
-          
+
           echo "result<<EOF" >> $GITHUB_OUTPUT
           cat analysis.json >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -65,11 +65,11 @@ jobs:
         with:
           script: |
             const analysis = ${{ steps.analyze.outputs.result }};
-            
+
             let comment = `## 🤖 MUSUBI Issue Analysis\n\n`;
             comment += `**Type**: ${analysis.issueType}\n`;
             comment += `**Status**: ${analysis.status}\n\n`;
-            
+
             if (analysis.requirements && analysis.requirements.length > 0) {
               comment += `### Extracted Requirements\n\n`;
               analysis.requirements.forEach((req, i) => {
@@ -77,12 +77,12 @@ jobs:
               });
               comment += '\n';
             }
-            
+
             comment += `### Next Steps\n\n`;
             comment += `- Add label \`musubi-implement\` to create a branch and PR\n`;
             comment += `- Or comment \`/musubi implement\` to proceed\n\n`;
             comment += `---\n_Analyzed by MUSUBI Issue Resolver_`;
-            
+
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,

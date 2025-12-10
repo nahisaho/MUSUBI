@@ -1,6 +1,6 @@
 /**
  * GroupChatPattern - Multi-skill collaborative discussion pattern
- * 
+ *
  * Enables multiple skills to collaborate on a task through
  * iterative discussion and consensus building.
  */
@@ -12,18 +12,18 @@ const { PatternType, ExecutionContext, ExecutionStatus } = require('../orchestra
  * Discussion mode
  */
 const DiscussionMode = {
-  ROUND_ROBIN: 'round-robin',   // Each skill speaks in turn
-  OPEN_FLOOR: 'open-floor',     // Skills speak based on relevance
-  MODERATED: 'moderated'        // Moderator skill controls discussion
+  ROUND_ROBIN: 'round-robin', // Each skill speaks in turn
+  OPEN_FLOOR: 'open-floor', // Skills speak based on relevance
+  MODERATED: 'moderated', // Moderator skill controls discussion
 };
 
 /**
  * Consensus type
  */
 const ConsensusType = {
-  UNANIMOUS: 'unanimous',       // All must agree
-  MAJORITY: 'majority',         // 50%+ must agree
-  FIRST_AGREEMENT: 'first'      // First agreement wins
+  UNANIMOUS: 'unanimous', // All must agree
+  MAJORITY: 'majority', // 50%+ must agree
+  FIRST_AGREEMENT: 'first', // First agreement wins
 };
 
 /**
@@ -37,15 +37,10 @@ class GroupChatPattern extends BasePattern {
       description: 'Enable multi-skill collaborative discussion and consensus',
       version: '1.0.0',
       tags: ['collaboration', 'discussion', 'consensus', 'multi-agent'],
-      useCases: [
-        'Design reviews',
-        'Code reviews',
-        'Decision making',
-        'Brainstorming'
-      ],
+      useCases: ['Design reviews', 'Code reviews', 'Decision making', 'Brainstorming'],
       complexity: 'high',
       supportsParallel: false,
-      requiresHuman: false
+      requiresHuman: false,
     });
 
     this.options = {
@@ -54,7 +49,7 @@ class GroupChatPattern extends BasePattern {
       maxRounds: options.maxRounds || 5,
       moderator: options.moderator || null,
       convergenceThreshold: options.convergenceThreshold || 0.8,
-      ...options
+      ...options,
     };
   }
 
@@ -99,7 +94,7 @@ class GroupChatPattern extends BasePattern {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -125,7 +120,7 @@ class GroupChatPattern extends BasePattern {
       context,
       participants,
       topic,
-      mode: this.options.mode
+      mode: this.options.mode,
     });
 
     try {
@@ -135,7 +130,7 @@ class GroupChatPattern extends BasePattern {
         engine.emit('groupChatRoundStarted', {
           context,
           round,
-          maxRounds: this.options.maxRounds
+          maxRounds: this.options.maxRounds,
         });
 
         const roundResponses = await this._executeRound(
@@ -150,13 +145,13 @@ class GroupChatPattern extends BasePattern {
 
         transcript.push({
           round,
-          responses: roundResponses
+          responses: roundResponses,
         });
 
         // Check for consensus
         const consensusResult = this._checkConsensus(roundResponses);
         consensusReached = consensusResult.reached;
-        
+
         if (consensusReached) {
           finalDecision = consensusResult.decision;
         }
@@ -165,7 +160,7 @@ class GroupChatPattern extends BasePattern {
           context,
           round,
           responses: roundResponses,
-          consensusReached
+          consensusReached,
         });
       }
 
@@ -176,7 +171,7 @@ class GroupChatPattern extends BasePattern {
         transcript,
         consensusReached,
         finalDecision,
-        summary
+        summary,
       });
 
       return {
@@ -184,15 +179,14 @@ class GroupChatPattern extends BasePattern {
         rounds: round,
         consensusReached,
         finalDecision,
-        summary
+        summary,
       };
-
     } catch (error) {
       engine.emit('groupChatFailed', {
         context,
         transcript,
         round,
-        error
+        error,
       });
       throw error;
     }
@@ -202,13 +196,21 @@ class GroupChatPattern extends BasePattern {
    * Execute a single round of discussion
    * @private
    */
-  async _executeRound(participants, topic, transcript, initialContext, parentContext, engine, round) {
+  async _executeRound(
+    participants,
+    topic,
+    transcript,
+    initialContext,
+    parentContext,
+    engine,
+    round
+  ) {
     const responses = [];
     const discussionContext = {
       topic,
       round,
       previousRounds: transcript,
-      ...initialContext
+      ...initialContext,
     };
 
     for (const participant of participants) {
@@ -218,48 +220,43 @@ class GroupChatPattern extends BasePattern {
         input: {
           ...discussionContext,
           previousResponses: responses,
-          role: 'participant'
+          role: 'participant',
         },
         parentId: parentContext.id,
         metadata: {
           pattern: PatternType.GROUP_CHAT,
           round,
-          participant
-        }
+          participant,
+        },
       });
 
       parentContext.children.push(stepContext);
 
       try {
         stepContext.start();
-        
-        const response = await engine.executeSkill(
-          participant,
-          stepContext.input,
-          parentContext
-        );
+
+        const response = await engine.executeSkill(participant, stepContext.input, parentContext);
 
         stepContext.complete(response);
 
         responses.push({
           participant,
           response,
-          status: ExecutionStatus.COMPLETED
+          status: ExecutionStatus.COMPLETED,
         });
 
         engine.emit('groupChatResponse', {
           participant,
           round,
-          response
+          response,
         });
-
       } catch (error) {
         stepContext.fail(error);
-        
+
         responses.push({
           participant,
           error: error.message,
-          status: ExecutionStatus.FAILED
+          status: ExecutionStatus.FAILED,
         });
       }
     }
@@ -272,21 +269,21 @@ class GroupChatPattern extends BasePattern {
    * @private
    */
   _checkConsensus(responses) {
-    const validResponses = responses.filter(r => 
-      r.status === ExecutionStatus.COMPLETED
-    );
+    const validResponses = responses.filter(r => r.status === ExecutionStatus.COMPLETED);
 
     if (validResponses.length === 0) {
       return { reached: false, decision: null };
     }
 
     // Extract decisions from responses
-    const decisions = validResponses.map(r => {
-      if (r.response && typeof r.response === 'object') {
-        return r.response.decision || r.response.recommendation || r.response.answer;
-      }
-      return r.response;
-    }).filter(d => d !== undefined && d !== null);
+    const decisions = validResponses
+      .map(r => {
+        if (r.response && typeof r.response === 'object') {
+          return r.response.decision || r.response.recommendation || r.response.answer;
+        }
+        return r.response;
+      })
+      .filter(d => d !== undefined && d !== null);
 
     if (decisions.length === 0) {
       return { reached: false, decision: null };
@@ -295,9 +292,7 @@ class GroupChatPattern extends BasePattern {
     // Count votes for each decision
     const votes = {};
     for (const decision of decisions) {
-      const key = typeof decision === 'object' 
-        ? JSON.stringify(decision) 
-        : String(decision);
+      const key = typeof decision === 'object' ? JSON.stringify(decision) : String(decision);
       votes[key] = (votes[key] || 0) + 1;
     }
 
@@ -317,30 +312,30 @@ class GroupChatPattern extends BasePattern {
 
     // Check consensus based on type
     const total = validResponses.length;
-    
+
     switch (this.options.consensusType) {
       case ConsensusType.UNANIMOUS:
         return {
           reached: maxVotes === total,
-          decision: maxVotes === total ? winningDecision : null
+          decision: maxVotes === total ? winningDecision : null,
         };
-        
+
       case ConsensusType.MAJORITY:
         return {
           reached: maxVotes > total / 2,
-          decision: maxVotes > total / 2 ? winningDecision : null
+          decision: maxVotes > total / 2 ? winningDecision : null,
         };
-        
+
       case ConsensusType.FIRST_AGREEMENT:
         return {
           reached: maxVotes >= 2,
-          decision: maxVotes >= 2 ? winningDecision : null
+          decision: maxVotes >= 2 ? winningDecision : null,
         };
-        
+
       default:
         return {
           reached: maxVotes >= total * this.options.convergenceThreshold,
-          decision: winningDecision
+          decision: winningDecision,
         };
     }
   }
@@ -371,9 +366,8 @@ class GroupChatPattern extends BasePattern {
       successfulResponses,
       failedResponses,
       consensusReached,
-      successRate: totalResponses > 0 
-        ? (successfulResponses / totalResponses * 100).toFixed(1) + '%' 
-        : '0%'
+      successRate:
+        totalResponses > 0 ? ((successfulResponses / totalResponses) * 100).toFixed(1) + '%' : '0%',
     };
   }
 }
@@ -391,5 +385,5 @@ module.exports = {
   GroupChatPattern,
   DiscussionMode,
   ConsensusType,
-  createGroupChatPattern
+  createGroupChatPattern,
 };

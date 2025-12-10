@@ -43,17 +43,17 @@ const critic = new CriticSystem();
 // Evaluate requirements quality
 const reqResult = await critic.evaluate('requirements', {
   projectRoot: process.cwd(),
-  content: reqDocument
+  content: reqDocument,
 });
 
-console.log(reqResult.score);      // 0.85
-console.log(reqResult.grade);      // 'B'
-console.log(reqResult.success);    // true (score >= 0.5)
-console.log(reqResult.feedback);   // Improvement suggestions
+console.log(reqResult.score); // 0.85
+console.log(reqResult.grade); // 'B'
+console.log(reqResult.success); // true (score >= 0.5)
+console.log(reqResult.feedback); // Improvement suggestions
 
 // Evaluate all stages
 const allResults = await critic.evaluateAll({
-  projectRoot: process.cwd()
+  projectRoot: process.cwd(),
 });
 
 // Generate markdown report
@@ -62,11 +62,11 @@ const report = critic.generateReport(allResults);
 
 ### Quality Gate Criteria
 
-| Stage | Minimum Score | Key Checks |
-|-------|--------------|------------|
-| Requirements | 0.5 | EARS format, completeness, testability |
-| Design | 0.5 | C4 diagrams, ADR presence |
-| Implementation | 0.5 | Test coverage, code quality, docs |
+| Stage          | Minimum Score | Key Checks                             |
+| -------------- | ------------- | -------------------------------------- |
+| Requirements   | 0.5           | EARS format, completeness, testability |
+| Design         | 0.5           | C4 diagrams, ADR presence              |
+| Implementation | 0.5           | Test coverage, code quality, docs      |
 
 ### MemoryCondenser (`src/managers/memory-condenser.js`)
 
@@ -77,15 +77,18 @@ const { MemoryCondenser, MemoryEvent } = require('musubi/src/managers/memory-con
 
 const condenser = MemoryCondenser.create('recent', {
   maxEvents: 100,
-  keepRecent: 30
+  keepRecent: 30,
 });
 
 // Condense long QA session history
-const events = qaSessionEvents.map(e => new MemoryEvent({
-  type: e.type,
-  content: e.content,
-  important: e.type === 'defect_found'
-}));
+const events = qaSessionEvents.map(
+  e =>
+    new MemoryEvent({
+      type: e.type,
+      content: e.content,
+      important: e.type === 'defect_found',
+    })
+);
 
 const condensed = await condenser.condense(events);
 ```

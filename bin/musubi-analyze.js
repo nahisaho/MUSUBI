@@ -62,7 +62,11 @@ program
   .name('musubi-analyze')
   .description('Analyze codebase for quality, complexity, and technical debt')
   .version('3.6.1')
-  .option('-t, --type <type>', 'Analysis type: quality, dependencies, security, stuck, codegraph, all', 'all')
+  .option(
+    '-t, --type <type>',
+    'Analysis type: quality, dependencies, security, stuck, codegraph, all',
+    'all'
+  )
   .option('-o, --output <file>', 'Output file for analysis report')
   .option('--json', 'Output in JSON format')
   .option('--threshold <level>', 'Quality threshold: low, medium, high', 'medium')
@@ -438,29 +442,29 @@ async function runCodeGraphIndex(full = false) {
     if (full) {
       args.push('--full');
     }
-    
+
     log(`Running CodeGraph MCP index (${full ? 'full' : 'incremental'})...`, 'analyze');
-    
+
     const proc = spawn('codegraph-mcp', args, {
       cwd: process.cwd(),
-      stdio: ['inherit', 'pipe', 'pipe']
+      stdio: ['inherit', 'pipe', 'pipe'],
     });
-    
+
     let stdout = '';
     let stderr = '';
-    
-    proc.stdout.on('data', (data) => {
+
+    proc.stdout.on('data', data => {
       stdout += data.toString();
       if (options.verbose) {
         process.stdout.write(data);
       }
     });
-    
-    proc.stderr.on('data', (data) => {
+
+    proc.stderr.on('data', data => {
       stderr += data.toString();
     });
-    
-    proc.on('close', (code) => {
+
+    proc.on('close', code => {
       if (code === 0) {
         resolve({ success: true, output: stdout });
       } else {
@@ -478,16 +482,16 @@ async function getCodeGraphStats() {
   return new Promise((resolve, reject) => {
     const proc = spawn('codegraph-mcp', ['stats', '.'], {
       cwd: process.cwd(),
-      stdio: ['inherit', 'pipe', 'pipe']
+      stdio: ['inherit', 'pipe', 'pipe'],
     });
-    
+
     let stdout = '';
-    
-    proc.stdout.on('data', (data) => {
+
+    proc.stdout.on('data', data => {
       stdout += data.toString();
     });
-    
-    proc.on('close', (code) => {
+
+    proc.on('close', code => {
       if (code === 0) {
         // Parse the stats output
         const stats = parseCodeGraphStats(stdout);
@@ -510,12 +514,12 @@ function parseCodeGraphStats(output) {
     relations: 0,
     communities: 0,
     files: 0,
-    entityTypes: {}
+    entityTypes: {},
   };
-  
+
   const lines = output.split('\n');
   let inEntityTypes = false;
-  
+
   for (const line of lines) {
     if (line.startsWith('Entities:')) {
       stats.entities = parseInt(line.split(':')[1].trim(), 10);
@@ -534,7 +538,7 @@ function parseCodeGraphStats(output) {
       }
     }
   }
-  
+
   return stats;
 }
 
@@ -546,7 +550,7 @@ async function generateCodeGraphReport(stats) {
   const reportPath = 'steering/memories/codegraph.md';
   const timestamp = new Date().toISOString();
   const version = require('../package.json').version;
-  
+
   let report = `# CodeGraph MCP Index Report
 
 **Generated**: ${timestamp}
@@ -602,9 +606,9 @@ codegraph-mcp serve --repo .
 
   fs.ensureDirSync(path.dirname(reportPath));
   fs.writeFileSync(reportPath, report);
-  
+
   log(`CodeGraph report saved to: ${reportPath}`, 'success');
-  
+
   return reportPath;
 }
 
@@ -616,7 +620,7 @@ codegraph-mcp serve --repo .
 async function analyzeCodeGraph(full = false) {
   log('CodeGraph MCP Analysis', 'analyze');
   console.log();
-  
+
   // Check if CodeGraph MCP is installed
   if (!isCodeGraphInstalled()) {
     log('CodeGraph MCP is not installed. Install with:', 'warning');
@@ -624,15 +628,15 @@ async function analyzeCodeGraph(full = false) {
     console.log();
     return null;
   }
-  
+
   try {
     // Run index
     await runCodeGraphIndex(full);
     console.log();
-    
+
     // Get statistics
     const stats = await getCodeGraphStats();
-    
+
     // Display stats
     console.log(chalk.bold('CodeGraph Statistics:'));
     console.log(`  Entities:    ${chalk.green(stats.entities.toLocaleString())}`);
@@ -640,7 +644,7 @@ async function analyzeCodeGraph(full = false) {
     console.log(`  Communities: ${chalk.green(stats.communities)}`);
     console.log(`  Files:       ${chalk.green(stats.files.toLocaleString())}`);
     console.log();
-    
+
     if (Object.keys(stats.entityTypes).length > 0) {
       console.log(chalk.bold('Entity Types:'));
       for (const [type, count] of Object.entries(stats.entityTypes)) {
@@ -648,10 +652,10 @@ async function analyzeCodeGraph(full = false) {
       }
       console.log();
     }
-    
+
     // Generate report
     await generateCodeGraphReport(stats);
-    
+
     return stats;
   } catch (error) {
     log(`CodeGraph analysis failed: ${error.message}`, 'error');
@@ -671,39 +675,40 @@ async function analyzeStuckPatterns() {
     isStuck: false,
     confidence: 0,
     patterns: [],
-    suggestions: []
+    suggestions: [],
   };
 
   try {
     // Check git log for repetitive patterns
     const { execSync } = require('child_process');
-    
+
     // Get recent commits
     let commits = [];
     try {
-      const gitLog = execSync(
-        'git log --oneline -20 --format="%h|%s" 2>/dev/null',
-        { encoding: 'utf8' }
-      ).trim();
-      commits = gitLog.split('\n').filter(Boolean).map(line => {
-        const [hash, ...msgParts] = line.split('|');
-        return { hash, message: msgParts.join('|') };
-      });
+      const gitLog = execSync('git log --oneline -20 --format="%h|%s" 2>/dev/null', {
+        encoding: 'utf8',
+      }).trim();
+      commits = gitLog
+        .split('\n')
+        .filter(Boolean)
+        .map(line => {
+          const [hash, ...msgParts] = line.split('|');
+          return { hash, message: msgParts.join('|') };
+        });
     } catch {
       // Not in git repo or no commits
     }
 
     // Pattern 1: Repetitive revert/fix cycles
-    const revertPattern = commits.filter(c => 
-      c.message.toLowerCase().includes('revert') ||
-      c.message.toLowerCase().includes('undo')
+    const revertPattern = commits.filter(
+      c => c.message.toLowerCase().includes('revert') || c.message.toLowerCase().includes('undo')
     );
     if (revertPattern.length >= 3) {
       stuckPatterns.patterns.push({
         type: 'revert-cycle',
         severity: 'high',
         message: `${revertPattern.length} revert commits detected in recent history`,
-        commits: revertPattern.slice(0, 3).map(c => c.message)
+        commits: revertPattern.slice(0, 3).map(c => c.message),
       });
       stuckPatterns.confidence += 30;
     }
@@ -711,10 +716,9 @@ async function analyzeStuckPatterns() {
     // Pattern 2: Same file edited repeatedly
     let _recentChanges = [];
     try {
-      const gitDiff = execSync(
-        'git diff --stat HEAD~5 HEAD 2>/dev/null',
-        { encoding: 'utf8' }
-      ).trim();
+      const gitDiff = execSync('git diff --stat HEAD~5 HEAD 2>/dev/null', {
+        encoding: 'utf8',
+      }).trim();
       _recentChanges = gitDiff.split('\n').filter(Boolean);
     } catch {
       // No recent changes or not enough history
@@ -723,10 +727,12 @@ async function analyzeStuckPatterns() {
     const fileEditCounts = {};
     for (let i = 0; i < Math.min(commits.length, 10); i++) {
       try {
-        const files = execSync(
-          `git show --name-only --format= ${commits[i].hash} 2>/dev/null`,
-          { encoding: 'utf8' }
-        ).trim().split('\n').filter(Boolean);
+        const files = execSync(`git show --name-only --format= ${commits[i].hash} 2>/dev/null`, {
+          encoding: 'utf8',
+        })
+          .trim()
+          .split('\n')
+          .filter(Boolean);
         files.forEach(f => {
           fileEditCounts[f] = (fileEditCounts[f] || 0) + 1;
         });
@@ -744,7 +750,7 @@ async function analyzeStuckPatterns() {
         type: 'circular-edit',
         severity: 'medium',
         message: 'Files being edited repeatedly without resolution',
-        files: frequentlyEdited
+        files: frequentlyEdited,
       });
       stuckPatterns.confidence += 25;
     }
@@ -759,7 +765,7 @@ async function analyzeStuckPatterns() {
             type: 'test-failure',
             severity: 'medium',
             message: `${testResults.numFailedTests} tests failing`,
-            failedTests: testResults.testResults?.filter(t => t.status === 'failed').slice(0, 5)
+            failedTests: testResults.testResults?.filter(t => t.status === 'failed').slice(0, 5),
           });
           stuckPatterns.confidence += 20;
         }
@@ -792,7 +798,7 @@ async function analyzeStuckPatterns() {
             type: 'repetitive-error',
             severity: 'high',
             message: 'Same errors occurring repeatedly',
-            errors: repetitiveErrors
+            errors: repetitiveErrors,
           });
           stuckPatterns.confidence += 30;
         }
@@ -835,11 +841,12 @@ async function analyzeStuckPatterns() {
     console.log(chalk.dim(`Confidence: ${stuckPatterns.confidence}%\n`));
 
     stuckPatterns.patterns.forEach(pattern => {
-      const severityColor = {
-        high: chalk.red,
-        medium: chalk.yellow,
-        low: chalk.blue
-      }[pattern.severity] || chalk.white;
+      const severityColor =
+        {
+          high: chalk.red,
+          medium: chalk.yellow,
+          low: chalk.blue,
+        }[pattern.severity] || chalk.white;
 
       console.log(severityColor(`[${pattern.severity.toUpperCase()}] ${pattern.type}`));
       console.log(chalk.dim(`  ${pattern.message}`));
@@ -876,11 +883,11 @@ async function main() {
     // Handle --codegraph or --codegraph-full options
     if (options.codegraph || options.codegraphFull || options.type === 'codegraph') {
       analysisData.codegraph = await analyzeCodeGraph(options.codegraphFull);
-      
+
       if (options.json && analysisData.codegraph) {
         console.log(JSON.stringify(analysisData.codegraph, null, 2));
       }
-      
+
       if (options.type === 'codegraph') {
         log('CodeGraph analysis complete!', 'success');
         process.exit(0);
@@ -890,11 +897,11 @@ async function main() {
     // Handle --detect-stuck option
     if (options.detectStuck || options.type === 'stuck') {
       analysisData.stuck = await analyzeStuckPatterns();
-      
+
       if (options.json) {
         console.log(JSON.stringify(analysisData.stuck, null, 2));
       }
-      
+
       if (options.type === 'stuck') {
         process.exit(analysisData.stuck?.isStuck ? 1 : 0);
       }

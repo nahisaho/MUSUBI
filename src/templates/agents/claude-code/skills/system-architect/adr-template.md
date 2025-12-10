@@ -34,24 +34,29 @@ We will...
 ## Consequences
 
 ### Positive
+
 - [Benefit 1]
 - [Benefit 2]
 
 ### Negative
+
 - [Tradeoff 1]
 - [Tradeoff 2]
 
 ### Neutral
+
 - [Neither positive nor negative consequence]
 
 ## Alternatives Considered
 
 ### Alternative 1: [Name]
+
 - **Pros**: [Benefits]
 - **Cons**: [Drawbacks]
 - **Reason for rejection**: [Why not chosen]
 
 ### Alternative 2: [Name]
+
 - **Pros**: [Benefits]
 - **Cons**: [Drawbacks]
 - **Reason for rejection**: [Why not chosen]
@@ -81,6 +86,7 @@ Accepted
 ## Context
 
 We need to choose a primary database for our e-commerce platform. The system needs to:
+
 - Handle complex relational data (users, orders, products)
 - Support ACID transactions for payment processing
 - Scale to 10,000+ concurrent users
@@ -93,6 +99,7 @@ Our team has experience with both PostgreSQL and MySQL. The project has 12 month
 We will use **PostgreSQL 16** as our primary database.
 
 Specific configuration:
+
 - Managed PostgreSQL on AWS RDS
 - Primary-replica setup for read scaling
 - pg_trgm extension for full-text search
@@ -101,6 +108,7 @@ Specific configuration:
 ## Consequences
 
 ### Positive
+
 - Rich feature set (JSON, full-text search, extensions)
 - Strong ACID compliance for financial transactions
 - Excellent open-source community support
@@ -108,27 +116,32 @@ Specific configuration:
 - Cost-effective (open source)
 
 ### Negative
+
 - More complex configuration than MySQL
 - Requires dedicated DBA knowledge for optimization
 - Memory-intensive for complex queries
 
 ### Neutral
+
 - Similar performance to MySQL for our use case
 - Learning curve for advanced features (CTEs, window functions)
 
 ## Alternatives Considered
 
 ### Alternative 1: MySQL 8.0
+
 - **Pros**: Simpler setup, lower memory footprint, wide hosting support
 - **Cons**: Weaker JSON support, limited extensions
 - **Reason for rejection**: PostgreSQL's richer feature set better suits complex e-commerce queries
 
 ### Alternative 2: MongoDB
+
 - **Pros**: Flexible schema, horizontal scaling, JSON-native
 - **Cons**: Weak transactions, eventual consistency concerns for payments
 - **Reason for rejection**: ACID transactions required for financial operations
 
 ### Alternative 3: CockroachDB
+
 - **Pros**: Distributed, PostgreSQL-compatible, auto-scaling
 - **Cons**: Higher cost, newer technology, fewer DBAs available
 - **Reason for rejection**: Overkill for initial scale, can migrate later if needed
@@ -145,30 +158,35 @@ Specific configuration:
 ## ADR Categories
 
 ### Technology Selection
+
 - Database choice
 - Framework selection
 - Cloud provider
 - Third-party services
 
 ### Architecture Patterns
+
 - Microservices vs. Monolith
 - Event-driven architecture
 - API design (REST vs. GraphQL)
 - Caching strategy
 
 ### Development Practices
+
 - Testing strategy
 - CI/CD approach
 - Code organization
 - Dependency management
 
 ### Security
+
 - Authentication method
 - Authorization model
 - Data encryption
 - Secret management
 
 ### Performance
+
 - Scaling strategy
 - Caching layers
 - Database optimization
@@ -274,17 +292,17 @@ docs/
 
 ## Active ADRs
 
-| ADR | Title | Date | Status |
-|-----|-------|------|--------|
+| ADR                            | Title                              | Date       | Status   |
+| ------------------------------ | ---------------------------------- | ---------- | -------- |
 | [ADR-001](ADR-001-database.md) | Use PostgreSQL as Primary Database | 2025-01-15 | Accepted |
-| [ADR-002](ADR-002-caching.md) | Use Redis for Caching | 2025-01-16 | Accepted |
-| [ADR-003](ADR-003-auth.md) | Use JWT for Authentication | 2025-01-17 | Accepted |
+| [ADR-002](ADR-002-caching.md)  | Use Redis for Caching              | 2025-01-16 | Accepted |
+| [ADR-003](ADR-003-auth.md)     | Use JWT for Authentication         | 2025-01-17 | Accepted |
 
 ## Superseded ADRs
 
-| ADR | Title | Superseded By |
-|-----|-------|---------------|
-| [ADR-004](ADR-004-old-api.md) | REST API v1 Design | ADR-010 |
+| ADR                           | Title              | Superseded By |
+| ----------------------------- | ------------------ | ------------- |
+| [ADR-004](ADR-004-old-api.md) | REST API v1 Design | ADR-010       |
 
 ## How to Propose a New ADR
 

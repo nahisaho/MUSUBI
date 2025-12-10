@@ -53,6 +53,7 @@ musubi-orchestrate status
 ```
 
 **オーケストレーションパターン**:
+
 - **auto**: タスク内容から最適なスキルを自動選択
 - **sequential**: スキルを順番に実行（依存関係を考慮）
 - **group-chat**: 複数スキルが協議して結論を出す
@@ -114,13 +115,13 @@ musubi-workflow status
 
 ### プロジェクトマネージャーの役割
 
-| ワークフローステージ | PMの主な責務 |
-|---------------------|-------------|
-| Stage 0: Spike | 調査範囲の定義、期間設定 |
-| Stage 1-3: Requirements→Design→Tasks | 進捗追跡、リソース配分 |
+| ワークフローステージ                     | PMの主な責務               |
+| ---------------------------------------- | -------------------------- |
+| Stage 0: Spike                           | 調査範囲の定義、期間設定   |
+| Stage 1-3: Requirements→Design→Tasks     | 進捗追跡、リソース配分     |
 | Stage 4-6: Implementation→Review→Testing | リスク管理、ブロッカー解消 |
-| Stage 7-8: Deployment→Monitoring | リリース計画、本番監視 |
-| Stage 9: Retrospective | 振り返りファシリテーション |
+| Stage 7-8: Deployment→Monitoring         | リリース計画、本番監視     |
+| Stage 9: Retrospective                   | 振り返りファシリテーション |
 
 ### 推奨コマンド
 

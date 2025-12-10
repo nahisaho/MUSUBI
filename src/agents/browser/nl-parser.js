@@ -26,36 +26,21 @@
  */
 const ACTION_PATTERNS = {
   navigate: {
-    patterns: [
-      /(?:に)?移動|開く|アクセス/,
-      /(?:go to|navigate|open|visit)/i,
-    ],
+    patterns: [/(?:に)?移動|開く|アクセス/, /(?:go to|navigate|open|visit)/i],
     urlPattern: /(https?:\/\/[^\s]+)/,
   },
   click: {
-    patterns: [
-      /クリック|押す|タップ|選択/,
-      /click|press|tap|select/i,
-    ],
+    patterns: [/クリック|押す|タップ|選択/, /click|press|tap|select/i],
   },
   fill: {
-    patterns: [
-      /(?:に|を)?入力|記入|タイプ/,
-      /fill|type|enter|input/i,
-    ],
+    patterns: [/(?:に|を)?入力|記入|タイプ/, /fill|type|enter|input/i],
     valuePattern: /[「「]([^」」]+)[」」]|"([^"]+)"|'([^']+)'/,
   },
   select: {
-    patterns: [
-      /ドロップダウン.*選択|選択.*オプション/,
-      /select.*dropdown|choose.*option/i,
-    ],
+    patterns: [/ドロップダウン.*選択|選択.*オプション/, /select.*dropdown|choose.*option/i],
   },
   wait: {
-    patterns: [
-      /秒?待つ|待機/,
-      /wait|pause|delay/i,
-    ],
+    patterns: [/秒?待つ|待機/, /wait|pause|delay/i],
     durationPattern: /(\d+)\s*秒|(\d+)\s*(?:seconds?|ms|milliseconds?)/i,
   },
   screenshot: {
@@ -66,10 +51,7 @@ const ACTION_PATTERNS = {
     namePattern: /[「「]([^」」]+)[」」]|"([^"]+)"|として\s*(\S+)/,
   },
   assert: {
-    patterns: [
-      /(?:が)?表示|確認|検証|存在/,
-      /(?:is )?visible|assert|verify|check|exists?/i,
-    ],
+    patterns: [/(?:が)?表示|確認|検証|存在/, /(?:is )?visible|assert|verify|check|exists?/i],
     textPattern: /[「「]([^」」]+)[」」]|"([^"]+)"/,
   },
 };
@@ -79,17 +61,19 @@ const ACTION_PATTERNS = {
  */
 const ELEMENT_PATTERNS = {
   // Japanese element names
-  'ログインボタン': 'button:has-text("ログイン"), [data-testid="login-button"], button[type="submit"]',
-  '送信ボタン': 'button:has-text("送信"), [data-testid="submit-button"], button[type="submit"]',
-  'メール': 'input[type="email"], input[name="email"], [data-testid="email-input"]',
-  'パスワード': 'input[type="password"], [data-testid="password-input"]',
-  '検索': 'input[type="search"], [data-testid="search-input"], input[name="q"]',
+  ログインボタン:
+    'button:has-text("ログイン"), [data-testid="login-button"], button[type="submit"]',
+  送信ボタン: 'button:has-text("送信"), [data-testid="submit-button"], button[type="submit"]',
+  メール: 'input[type="email"], input[name="email"], [data-testid="email-input"]',
+  パスワード: 'input[type="password"], [data-testid="password-input"]',
+  検索: 'input[type="search"], [data-testid="search-input"], input[name="q"]',
   // English element names
   'login button': 'button:has-text("Login"), [data-testid="login-button"], button[type="submit"]',
-  'submit button': 'button:has-text("Submit"), [data-testid="submit-button"], button[type="submit"]',
-  'email': 'input[type="email"], input[name="email"], [data-testid="email-input"]',
-  'password': 'input[type="password"], [data-testid="password-input"]',
-  'search': 'input[type="search"], [data-testid="search-input"], input[name="q"]',
+  'submit button':
+    'button:has-text("Submit"), [data-testid="submit-button"], button[type="submit"]',
+  email: 'input[type="email"], input[name="email"], [data-testid="email-input"]',
+  password: 'input[type="password"], [data-testid="password-input"]',
+  search: 'input[type="search"], [data-testid="search-input"], input[name="q"]',
 };
 
 /**
@@ -138,11 +122,7 @@ class NLParser {
    * @returns {string}
    */
   normalizeCommand(command) {
-    return command
-      .trim()
-      .replace(/\s+/g, ' ')
-      .replace(/、/g, ',')
-      .replace(/。/g, '.');
+    return command.trim().replace(/\s+/g, ' ').replace(/、/g, ',').replace(/。/g, '.');
   }
 
   /**
@@ -172,7 +152,10 @@ class NLParser {
   splitCommand(command) {
     // Split by conjunctions and separators
     const separators = /[,、]|\s+(?:そして|して|and|then)\s+/i;
-    return command.split(separators).map(s => s.trim()).filter(Boolean);
+    return command
+      .split(separators)
+      .map(s => s.trim())
+      .filter(Boolean);
   }
 
   /**
@@ -262,7 +245,7 @@ class NLParser {
   parseFill(text) {
     const selector = this.extractSelector(text);
     const valueMatch = text.match(this.actionPatterns.fill.valuePattern);
-    const value = valueMatch ? (valueMatch[1] || valueMatch[2] || valueMatch[3]) : '';
+    const value = valueMatch ? valueMatch[1] || valueMatch[2] || valueMatch[3] : '';
 
     return {
       type: 'fill',
@@ -280,7 +263,7 @@ class NLParser {
   parseSelect(text) {
     const selector = this.extractSelector(text);
     const valueMatch = text.match(this.actionPatterns.fill.valuePattern);
-    const value = valueMatch ? (valueMatch[1] || valueMatch[2] || valueMatch[3]) : '';
+    const value = valueMatch ? valueMatch[1] || valueMatch[2] || valueMatch[3] : '';
 
     return {
       type: 'select',
@@ -302,7 +285,7 @@ class NLParser {
     if (durationMatch) {
       const seconds = durationMatch[1] || durationMatch[2];
       delay = parseInt(seconds, 10) * 1000;
-      
+
       // Check if it's milliseconds
       if (/ms|milliseconds?/i.test(text)) {
         delay = parseInt(seconds, 10);
@@ -323,7 +306,7 @@ class NLParser {
    */
   parseScreenshot(text) {
     const nameMatch = text.match(this.actionPatterns.screenshot.namePattern);
-    const name = nameMatch ? (nameMatch[1] || nameMatch[2] || nameMatch[3]) : undefined;
+    const name = nameMatch ? nameMatch[1] || nameMatch[2] || nameMatch[3] : undefined;
     const fullPage = /全体|full\s*page/i.test(text);
 
     return {
@@ -341,7 +324,7 @@ class NLParser {
    */
   parseAssert(text) {
     const textMatch = text.match(this.actionPatterns.assert.textPattern);
-    const expectedText = textMatch ? (textMatch[1] || textMatch[2]) : null;
+    const expectedText = textMatch ? textMatch[1] || textMatch[2] : null;
     const selector = expectedText ? `text="${expectedText}"` : this.extractSelector(text);
 
     return {
@@ -378,7 +361,9 @@ class NLParser {
     }
 
     // Try to extract element description
-    const elementMatch = text.match(/(?:の)?(?:ボタン|リンク|入力欄?|フィールド|テキスト|button|link|input|field|text)\s*[「「]?([^」」\s]*)[」」]?/i);
+    const elementMatch = text.match(
+      /(?:の)?(?:ボタン|リンク|入力欄?|フィールド|テキスト|button|link|input|field|text)\s*[「「]?([^」」\s]*)[」」]?/i
+    );
     if (elementMatch && elementMatch[1]) {
       return `text="${elementMatch[1]}"`;
     }

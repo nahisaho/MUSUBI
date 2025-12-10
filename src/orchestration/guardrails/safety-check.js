@@ -1,9 +1,9 @@
 /**
  * @fileoverview Safety Check integration for Guardrails
- * 
+ *
  * Provides safety checks that can integrate with MUSUBI's
  * Constitutional Articles for governance compliance.
- * 
+ *
  * @module orchestration/guardrails/safety-check
  * @version 3.9.0
  */
@@ -24,7 +24,7 @@ const SafetyLevel = {
   /** Strict safety checks with constitutional compliance */
   STRICT: 'strict',
   /** Maximum safety with all checks enabled */
-  PARANOID: 'paranoid'
+  PARANOID: 'paranoid',
 };
 
 /**
@@ -35,56 +35,56 @@ const ConstitutionalMapping = {
   SPEC_SUPREMACY: {
     article: 'I',
     title: 'Spec Supremacy',
-    checks: ['required', 'format']
+    checks: ['required', 'format'],
   },
-  // Article II: Traceability Mandate  
+  // Article II: Traceability Mandate
   TRACEABILITY: {
     article: 'II',
     title: 'Traceability Mandate',
-    checks: ['traceId']
+    checks: ['traceId'],
   },
   // Article III: Immutable History
   IMMUTABLE_HISTORY: {
     article: 'III',
     title: 'Immutable History',
-    checks: ['noModification']
+    checks: ['noModification'],
   },
   // Article IV: Validation Gates
   VALIDATION_GATES: {
     article: 'IV',
     title: 'Validation Gates',
-    checks: ['validate']
+    checks: ['validate'],
   },
   // Article V: Agent Boundaries
   AGENT_BOUNDARIES: {
     article: 'V',
     title: 'Agent Boundaries',
-    checks: ['agentScope']
+    checks: ['agentScope'],
   },
   // Article VI: Graceful Degradation
   GRACEFUL_DEGRADATION: {
     article: 'VI',
     title: 'Graceful Degradation',
-    checks: ['fallback']
+    checks: ['fallback'],
   },
   // Article VII: Quality Assurance
   QUALITY_ASSURANCE: {
     article: 'VII',
     title: 'Quality Assurance',
-    checks: ['quality']
+    checks: ['quality'],
   },
   // Article VIII: Human Override
   HUMAN_OVERRIDE: {
     article: 'VIII',
     title: 'Human Override',
-    checks: ['humanApproval']
+    checks: ['humanApproval'],
   },
   // Article IX: Continuous Improvement
   CONTINUOUS_IMPROVEMENT: {
     article: 'IX',
     title: 'Continuous Improvement',
-    checks: ['metrics']
-  }
+    checks: ['metrics'],
+  },
 };
 
 /**
@@ -116,7 +116,7 @@ class SafetyCheckGuardrail extends BaseGuardrail {
       enabled: config.enabled,
       failFast: config.failFast,
       severity: config.severity || 'error',
-      tripwireEnabled: config.tripwireEnabled
+      tripwireEnabled: config.tripwireEnabled,
     });
 
     this.level = config.level || SafetyLevel.STANDARD;
@@ -142,18 +142,11 @@ class SafetyCheckGuardrail extends BaseGuardrail {
         break;
 
       case SafetyLevel.STANDARD:
-        builder
-          .required()
-          .maxLength(50000)
-          .noInjection({ sql: true, xss: true, command: false });
+        builder.required().maxLength(50000).noInjection({ sql: true, xss: true, command: false });
         break;
 
       case SafetyLevel.STRICT:
-        builder
-          .required()
-          .maxLength(50000)
-          .noInjection()
-          .noPII();
+        builder.required().maxLength(50000).noInjection().noPII();
         break;
 
       case SafetyLevel.PARANOID:
@@ -190,19 +183,16 @@ class SafetyCheckGuardrail extends BaseGuardrail {
         let passed = typeof result === 'object' ? result.passed : result;
 
         if (!passed) {
-          violations.push(this.createViolation(
-            rule.id.toUpperCase(),
-            rule.message,
-            rule.severity || 'error',
-            { rule: rule.id }
-          ));
+          violations.push(
+            this.createViolation(rule.id.toUpperCase(), rule.message, rule.severity || 'error', {
+              rule: rule.id,
+            })
+          );
         }
       } catch (error) {
-        violations.push(this.createViolation(
-          'RULE_ERROR',
-          `Rule '${rule.id}' error: ${error.message}`,
-          'error'
-        ));
+        violations.push(
+          this.createViolation('RULE_ERROR', `Rule '${rule.id}' error: ${error.message}`, 'error')
+        );
       }
     }
 
@@ -218,20 +208,24 @@ class SafetyCheckGuardrail extends BaseGuardrail {
       try {
         const result = await checkFn(input, context);
         scores[checkName] = result.score || (result.passed ? 1.0 : 0.0);
-        
+
         if (!result.passed) {
-          violations.push(this.createViolation(
-            `CUSTOM_${checkName.toUpperCase()}`,
-            result.message || `Custom check '${checkName}' failed`,
-            result.severity || 'warning'
-          ));
+          violations.push(
+            this.createViolation(
+              `CUSTOM_${checkName.toUpperCase()}`,
+              result.message || `Custom check '${checkName}' failed`,
+              result.severity || 'warning'
+            )
+          );
         }
       } catch (error) {
-        violations.push(this.createViolation(
-          'CUSTOM_CHECK_ERROR',
-          `Custom check '${checkName}' error: ${error.message}`,
-          'warning'
-        ));
+        violations.push(
+          this.createViolation(
+            'CUSTOM_CHECK_ERROR',
+            `Custom check '${checkName}' error: ${error.message}`,
+            'warning'
+          )
+        );
       }
     }
 
@@ -250,7 +244,7 @@ class SafetyCheckGuardrail extends BaseGuardrail {
         safe,
         constitutionalCompliance: this.enforceConstitution,
         constitutionalViolations,
-        scores
+        scores,
       }
     );
   }
@@ -276,12 +270,14 @@ class SafetyCheckGuardrail extends BaseGuardrail {
 
       if (!articleResult.compliant) {
         complianceScore -= (1 / this.enabledArticles.length) * (1 - articleResult.score);
-        violations.push(this.createViolation(
-          `CONSTITUTIONAL_ARTICLE_${mapping.article}`,
-          `Constitutional Article ${mapping.article} (${mapping.title}) violation: ${articleResult.message}`,
-          'error',
-          { article: mapping.article, title: mapping.title }
-        ));
+        violations.push(
+          this.createViolation(
+            `CONSTITUTIONAL_ARTICLE_${mapping.article}`,
+            `Constitutional Article ${mapping.article} (${mapping.title}) violation: ${articleResult.message}`,
+            'error',
+            { article: mapping.article, title: mapping.title }
+          )
+        );
       }
     }
 
@@ -289,7 +285,7 @@ class SafetyCheckGuardrail extends BaseGuardrail {
       compliant: violations.length === 0,
       score: Math.max(0, complianceScore),
       violations,
-      articleScores
+      articleScores,
     };
   }
 
@@ -333,13 +329,15 @@ class SafetyCheckGuardrail extends BaseGuardrail {
    */
   async checkSpecSupremacy(input, context) {
     // Check if the operation references specification
-    const hasSpecRef = context.specId || context.requirementId || 
-                       (typeof input === 'object' && (input.specId || input.requirementId));
-    
+    const hasSpecRef =
+      context.specId ||
+      context.requirementId ||
+      (typeof input === 'object' && (input.specId || input.requirementId));
+
     return {
       compliant: hasSpecRef !== false,
       score: hasSpecRef ? 1.0 : 0.5,
-      message: hasSpecRef ? 'Specification reference found' : 'No specification reference'
+      message: hasSpecRef ? 'Specification reference found' : 'No specification reference',
     };
   }
 
@@ -348,13 +346,15 @@ class SafetyCheckGuardrail extends BaseGuardrail {
    * @private
    */
   async checkTraceability(input, context) {
-    const hasTraceId = context.traceId || context.correlationId ||
-                       (typeof input === 'object' && (input.traceId || input.correlationId));
-    
+    const hasTraceId =
+      context.traceId ||
+      context.correlationId ||
+      (typeof input === 'object' && (input.traceId || input.correlationId));
+
     return {
       compliant: hasTraceId !== false,
       score: hasTraceId ? 1.0 : 0.5,
-      message: hasTraceId ? 'Trace ID found' : 'No trace ID'
+      message: hasTraceId ? 'Trace ID found' : 'No trace ID',
     };
   }
 
@@ -363,13 +363,13 @@ class SafetyCheckGuardrail extends BaseGuardrail {
    * @private
    */
   async checkValidationGates(input, context) {
-    const isValidated = context.validated === true ||
-                        (typeof input === 'object' && input.validated === true);
-    
+    const isValidated =
+      context.validated === true || (typeof input === 'object' && input.validated === true);
+
     return {
       compliant: true, // Validation is optional at input stage
       score: isValidated ? 1.0 : 0.7,
-      message: isValidated ? 'Content validated' : 'Content not yet validated'
+      message: isValidated ? 'Content validated' : 'Content not yet validated',
     };
   }
 
@@ -380,19 +380,19 @@ class SafetyCheckGuardrail extends BaseGuardrail {
   async checkAgentBoundaries(input, context) {
     const agentId = context.agentId || (typeof input === 'object' && input.agentId);
     const allowedAgents = context.allowedAgents || [];
-    
+
     if (!agentId) {
       return { compliant: true, score: 0.8, message: 'No agent specified' };
     }
-    
+
     if (allowedAgents.length > 0 && !allowedAgents.includes(agentId)) {
       return {
         compliant: false,
         score: 0.0,
-        message: `Agent '${agentId}' not in allowed list`
+        message: `Agent '${agentId}' not in allowed list`,
       };
     }
-    
+
     return { compliant: true, score: 1.0, message: 'Agent within boundaries' };
   }
 
@@ -418,7 +418,7 @@ class SafetyCheckGuardrail extends BaseGuardrail {
       level: this.level,
       enforceConstitution: this.enforceConstitution,
       enabledArticles: this.enabledArticles,
-      customChecksCount: Object.keys(this.customChecks).length
+      customChecksCount: Object.keys(this.customChecks).length,
     };
   }
 }
@@ -433,33 +433,33 @@ function createSafetyCheckGuardrail(preset = 'standard', overrides = {}) {
   const presets = {
     basic: {
       name: 'BasicSafetyGuardrail',
-      level: SafetyLevel.BASIC
+      level: SafetyLevel.BASIC,
     },
     standard: {
       name: 'StandardSafetyGuardrail',
-      level: SafetyLevel.STANDARD
+      level: SafetyLevel.STANDARD,
     },
     strict: {
       name: 'StrictSafetyGuardrail',
       level: SafetyLevel.STRICT,
-      enforceConstitution: true
+      enforceConstitution: true,
     },
     paranoid: {
       name: 'ParanoidSafetyGuardrail',
       level: SafetyLevel.PARANOID,
       enforceConstitution: true,
       tripwireEnabled: true,
-      failFast: true
+      failFast: true,
     },
     constitutional: {
       name: 'ConstitutionalGuardrail',
       level: SafetyLevel.STANDARD,
       enforceConstitution: true,
-      enabledArticles: Object.keys(ConstitutionalMapping)
-    }
+      enabledArticles: Object.keys(ConstitutionalMapping),
+    },
   };
 
-  const config = { ...presets[preset] || presets.standard, ...overrides };
+  const config = { ...(presets[preset] || presets.standard), ...overrides };
   return new SafetyCheckGuardrail(config);
 }
 
@@ -467,5 +467,5 @@ module.exports = {
   SafetyCheckGuardrail,
   createSafetyCheckGuardrail,
   SafetyLevel,
-  ConstitutionalMapping
+  ConstitutionalMapping,
 };

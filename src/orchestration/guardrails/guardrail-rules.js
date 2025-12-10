@@ -1,8 +1,8 @@
 /**
  * @fileoverview Guardrail validation rules DSL
- * 
+ *
  * Provides a declarative DSL for defining guardrail validation rules.
- * 
+ *
  * @module orchestration/guardrails/guardrail-rules
  * @version 3.9.0
  */
@@ -30,18 +30,18 @@ const RuleType = {
   MAX_LENGTH: 'maxLength',
   MIN_LENGTH: 'minLength',
   PATTERN: 'pattern',
-  
+
   // Security rules
   NO_PII: 'noPII',
   NO_PROHIBITED_WORDS: 'noProhibitedWords',
   NO_INJECTION: 'noInjection',
-  
+
   // Format rules
   TYPE: 'type',
   ENUM: 'enum',
-  
+
   // Custom rules
-  CUSTOM: 'custom'
+  CUSTOM: 'custom',
 };
 
 /**
@@ -55,11 +55,12 @@ const SecurityPatterns = {
   SSN: /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/g,
   CREDIT_CARD: /\b(?:\d{4}[-\s]?){3}\d{4}\b/g,
   IP_ADDRESS: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g,
-  
+
   // Injection patterns
-  SQL_INJECTION: /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER)\b.*\b(FROM|INTO|WHERE|TABLE)\b)|(--.*)|(\/\*.*\*\/)/gi,
+  SQL_INJECTION:
+    /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER)\b.*\b(FROM|INTO|WHERE|TABLE)\b)|(--.*)|(\/\*.*\*\/)/gi,
   XSS: /<script[^>]*>[\s\S]*?<\/script>|javascript:|on\w+\s*=/gi,
-  COMMAND_INJECTION: /[;&|`$(){}[\]]/g
+  COMMAND_INJECTION: /[;&|`$(){}[\]]/g,
 };
 
 /**
@@ -79,14 +80,14 @@ class RuleBuilder {
     this.rules.push({
       id: 'required',
       type: RuleType.REQUIRED,
-      check: (value) => {
+      check: value => {
         if (value === null || value === undefined) return false;
         if (typeof value === 'string' && value.trim() === '') return false;
         if (Array.isArray(value) && value.length === 0) return false;
         return true;
       },
       message,
-      severity: 'error'
+      severity: 'error',
     });
     return this;
   }
@@ -101,15 +102,15 @@ class RuleBuilder {
     this.rules.push({
       id: `maxLength_${max}`,
       type: RuleType.MAX_LENGTH,
-      check: (value) => {
+      check: value => {
         if (value === null || value === undefined) return true;
-        const len = typeof value === 'string' ? value.length : 
-                    Array.isArray(value) ? value.length : 0;
+        const len =
+          typeof value === 'string' ? value.length : Array.isArray(value) ? value.length : 0;
         return len <= max;
       },
       message: message || `Exceeds maximum length of ${max}`,
       severity: 'error',
-      options: { max }
+      options: { max },
     });
     return this;
   }
@@ -124,15 +125,15 @@ class RuleBuilder {
     this.rules.push({
       id: `minLength_${min}`,
       type: RuleType.MIN_LENGTH,
-      check: (value) => {
+      check: value => {
         if (value === null || value === undefined) return false;
-        const len = typeof value === 'string' ? value.length : 
-                    Array.isArray(value) ? value.length : 0;
+        const len =
+          typeof value === 'string' ? value.length : Array.isArray(value) ? value.length : 0;
         return len >= min;
       },
       message: message || `Below minimum length of ${min}`,
       severity: 'error',
-      options: { min }
+      options: { min },
     });
     return this;
   }
@@ -147,14 +148,14 @@ class RuleBuilder {
     this.rules.push({
       id: `pattern_${pattern.source}`,
       type: RuleType.PATTERN,
-      check: (value) => {
+      check: value => {
         if (value === null || value === undefined) return true;
         if (typeof value !== 'string') return false;
         return pattern.test(value);
       },
       message: message || `Does not match required pattern`,
       severity: 'error',
-      options: { pattern: pattern.source }
+      options: { pattern: pattern.source },
     });
     return this;
   }
@@ -169,14 +170,14 @@ class RuleBuilder {
     this.rules.push({
       id: `noPattern_${pattern.source}`,
       type: RuleType.PATTERN,
-      check: (value) => {
+      check: value => {
         if (value === null || value === undefined) return true;
         if (typeof value !== 'string') return true;
         return !pattern.test(value);
       },
       message: message || `Contains prohibited pattern`,
       severity: 'error',
-      options: { pattern: pattern.source, inverted: true }
+      options: { pattern: pattern.source, inverted: true },
     });
     return this;
   }
@@ -199,12 +200,12 @@ class RuleBuilder {
     this.rules.push({
       id: 'noPII',
       type: RuleType.NO_PII,
-      check: (value) => {
+      check: value => {
         if (value === null || value === undefined) return { passed: true };
         if (typeof value !== 'string') return { passed: true };
-        
+
         const detections = [];
-        
+
         if (detectEmail && SecurityPatterns.EMAIL.test(value)) {
           detections.push('email');
           SecurityPatterns.EMAIL.lastIndex = 0;
@@ -230,12 +231,12 @@ class RuleBuilder {
 
         return {
           passed: detections.length === 0,
-          detections
+          detections,
         };
       },
       message: 'Contains personally identifiable information (PII)',
       severity: 'error',
-      options
+      options,
     });
     return this;
   }
@@ -249,14 +250,14 @@ class RuleBuilder {
    */
   noProhibitedWords(words, options = {}) {
     const caseSensitive = options.caseSensitive || false;
-    
+
     this.rules.push({
       id: 'noProhibitedWords',
       type: RuleType.NO_PROHIBITED_WORDS,
-      check: (value) => {
+      check: value => {
         if (value === null || value === undefined) return { passed: true };
         if (typeof value !== 'string') return { passed: true };
-        
+
         const checkValue = caseSensitive ? value : value.toLowerCase();
         const foundWords = words.filter(word => {
           const checkWord = caseSensitive ? word : word.toLowerCase();
@@ -265,12 +266,12 @@ class RuleBuilder {
 
         return {
           passed: foundWords.length === 0,
-          foundWords
+          foundWords,
         };
       },
       message: 'Contains prohibited content',
       severity: 'error',
-      options: { words, caseSensitive }
+      options: { words, caseSensitive },
     });
     return this;
   }
@@ -291,12 +292,12 @@ class RuleBuilder {
     this.rules.push({
       id: 'noInjection',
       type: RuleType.NO_INJECTION,
-      check: (value) => {
+      check: value => {
         if (value === null || value === undefined) return { passed: true };
         if (typeof value !== 'string') return { passed: true };
-        
+
         const detections = [];
-        
+
         if (checkSql && SecurityPatterns.SQL_INJECTION.test(value)) {
           detections.push('sql');
           SecurityPatterns.SQL_INJECTION.lastIndex = 0;
@@ -312,12 +313,12 @@ class RuleBuilder {
 
         return {
           passed: detections.length === 0,
-          detections
+          detections,
         };
       },
       message: 'Contains potential injection attack',
       severity: 'error',
-      options
+      options,
     });
     return this;
   }
@@ -332,9 +333,9 @@ class RuleBuilder {
     this.rules.push({
       id: `type_${expectedType}`,
       type: RuleType.TYPE,
-      check: (value) => {
+      check: value => {
         if (value === null || value === undefined) return true;
-        
+
         if (expectedType === 'array') {
           return Array.isArray(value);
         }
@@ -342,7 +343,7 @@ class RuleBuilder {
       },
       message: message || `Expected type ${expectedType}`,
       severity: 'error',
-      options: { expectedType }
+      options: { expectedType },
     });
     return this;
   }
@@ -357,13 +358,13 @@ class RuleBuilder {
     this.rules.push({
       id: 'enum',
       type: RuleType.ENUM,
-      check: (value) => {
+      check: value => {
         if (value === null || value === undefined) return true;
         return allowedValues.includes(value);
       },
       message: message || `Must be one of: ${allowedValues.join(', ')}`,
       severity: 'error',
-      options: { allowedValues }
+      options: { allowedValues },
     });
     return this;
   }
@@ -382,7 +383,7 @@ class RuleBuilder {
       type: RuleType.CUSTOM,
       check: checkFn,
       message,
-      severity
+      severity,
     });
     return this;
   }
@@ -480,37 +481,22 @@ const CommonRuleSets = {
   /**
    * Basic security rules
    */
-  security: rules()
-    .noPII()
-    .noInjection()
-    .build(),
+  security: rules().noPII().noInjection().build(),
 
   /**
    * Strict content rules
    */
-  strictContent: rules()
-    .required()
-    .maxLength(10000)
-    .noPII()
-    .noInjection()
-    .build(),
+  strictContent: rules().required().maxLength(10000).noPII().noInjection().build(),
 
   /**
    * User input rules
    */
-  userInput: rules()
-    .required()
-    .maxLength(5000)
-    .noInjection()
-    .build(),
+  userInput: rules().required().maxLength(5000).noInjection().build(),
 
   /**
    * Agent output rules
    */
-  agentOutput: rules()
-    .required()
-    .noPII()
-    .build()
+  agentOutput: rules().required().noPII().build(),
 };
 
 // Global registry instance
@@ -528,5 +514,5 @@ module.exports = {
   RuleRegistry,
   rules,
   CommonRuleSets,
-  globalRuleRegistry
+  globalRuleRegistry,
 };

@@ -1,8 +1,8 @@
 /**
  * MUSUBI GitHub Client
- * 
+ *
  * GitHub API 統合クライアント
- * 
+ *
  * @module src/integrations/github-client
  * @see REQ-P0-B006
  */
@@ -23,11 +23,11 @@ class GitHubClient {
     this.token = options.token || process.env.GITHUB_TOKEN;
     this.owner = options.owner;
     this.repo = options.repo;
-    
+
     if (!this.token) {
       console.warn('GitHubClient: No GITHUB_TOKEN provided. API calls may fail.');
     }
-    
+
     this.octokit = new Octokit({
       auth: this.token,
     });
@@ -35,7 +35,7 @@ class GitHubClient {
 
   /**
    * Issue を取得
-   * @param {number} issueNumber 
+   * @param {number} issueNumber
    * @returns {Promise<Object>}
    */
   async getIssue(issueNumber) {
@@ -49,7 +49,7 @@ class GitHubClient {
 
   /**
    * Issue のコメントを取得
-   * @param {number} issueNumber 
+   * @param {number} issueNumber
    * @returns {Promise<Object[]>}
    */
   async getIssueComments(issueNumber) {
@@ -63,8 +63,8 @@ class GitHubClient {
 
   /**
    * Issue にコメントを追加
-   * @param {number} issueNumber 
-   * @param {string} body 
+   * @param {number} issueNumber
+   * @param {string} body
    * @returns {Promise<Object>}
    */
   async addIssueComment(issueNumber, body) {
@@ -79,8 +79,8 @@ class GitHubClient {
 
   /**
    * Issue にラベルを追加
-   * @param {number} issueNumber 
-   * @param {string[]} labels 
+   * @param {number} issueNumber
+   * @param {string[]} labels
    * @returns {Promise<Object>}
    */
   async addLabels(issueNumber, labels) {
@@ -95,7 +95,7 @@ class GitHubClient {
 
   /**
    * ブランチを作成
-   * @param {string} branchName 
+   * @param {string} branchName
    * @param {string} baseBranch - ベースブランチ (default: 'main')
    * @returns {Promise<Object>}
    */
@@ -128,7 +128,7 @@ class GitHubClient {
    */
   async createOrUpdateFile(path, content, message, branch) {
     let sha;
-    
+
     // 既存ファイルの SHA を取得（更新の場合に必要）
     try {
       const { data: existingFile } = await this.octokit.repos.getContent({
@@ -181,8 +181,8 @@ class GitHubClient {
 
   /**
    * PR にレビュアーを追加
-   * @param {number} pullNumber 
-   * @param {string[]} reviewers 
+   * @param {number} pullNumber
+   * @param {string[]} reviewers
    * @returns {Promise<Object>}
    */
   async addReviewers(pullNumber, reviewers) {
@@ -197,7 +197,7 @@ class GitHubClient {
 
   /**
    * Issue を Close
-   * @param {number} issueNumber 
+   * @param {number} issueNumber
    * @returns {Promise<Object>}
    */
   async closeIssue(issueNumber) {
@@ -261,7 +261,7 @@ class GitHubClient {
 
 /**
  * URL からリポジトリ情報を抽出
- * @param {string} url 
+ * @param {string} url
  * @returns {Object|null}
  */
 function parseGitHubUrl(url) {
@@ -277,7 +277,7 @@ function parseGitHubUrl(url) {
 
 /**
  * Issue URL から番号を抽出
- * @param {string} url 
+ * @param {string} url
  * @returns {number|null}
  */
 function parseIssueNumber(url) {

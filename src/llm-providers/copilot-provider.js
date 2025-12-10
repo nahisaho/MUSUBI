@@ -47,7 +47,7 @@ class CopilotLMProvider extends LLMProvider {
         this.languageModelAPI = null;
       }
     }
-    
+
     this.isInitialized = true;
   }
 
@@ -75,7 +75,9 @@ class CopilotLMProvider extends LLMProvider {
       return this.completeWithRestAPI(messages, options);
     }
 
-    throw new Error('GitHub Copilot LM API not available. Run inside VS Code with Copilot extension or provide GITHUB_COPILOT_TOKEN.');
+    throw new Error(
+      'GitHub Copilot LM API not available. Run inside VS Code with Copilot extension or provide GITHUB_COPILOT_TOKEN.'
+    );
   }
 
   /**
@@ -87,11 +89,11 @@ class CopilotLMProvider extends LLMProvider {
    */
   async completeWithVSCodeAPI(messages, _options) {
     const vscode = this.vscode;
-    
+
     // Select the appropriate model
     const models = await vscode.lm.selectChatModels({
       vendor: 'copilot',
-      family: this.config.model
+      family: this.config.model,
     });
 
     if (models.length === 0) {
@@ -113,7 +115,7 @@ class CopilotLMProvider extends LLMProvider {
 
     // Create request options
     const requestOptions = {
-      justification: 'MUSUBI Replanning Engine alternative path generation'
+      justification: 'MUSUBI Replanning Engine alternative path generation',
     };
 
     // Send request
@@ -135,9 +137,9 @@ class CopilotLMProvider extends LLMProvider {
       usage: {
         promptTokens: 0, // VS Code API doesn't expose token counts
         completionTokens: 0,
-        totalTokens: 0
+        totalTokens: 0,
       },
-      finishReason: 'stop'
+      finishReason: 'stop',
     };
   }
 
@@ -149,24 +151,25 @@ class CopilotLMProvider extends LLMProvider {
    * @private
    */
   async completeWithRestAPI(messages, options) {
-    const endpoint = process.env.GITHUB_COPILOT_ENDPOINT || 'https://api.githubcopilot.com/chat/completions';
+    const endpoint =
+      process.env.GITHUB_COPILOT_ENDPOINT || 'https://api.githubcopilot.com/chat/completions';
     const token = process.env.GITHUB_COPILOT_TOKEN;
 
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
         'Editor-Version': 'MUSUBI/1.0.0',
-        'Editor-Plugin-Version': 'MUSUBI/1.0.0'
+        'Editor-Plugin-Version': 'MUSUBI/1.0.0',
       },
       body: JSON.stringify({
         model: this.config.model,
         messages,
         max_tokens: options.maxTokens || this.config.maxTokens,
-        temperature: options.temperature || this.config.temperature
+        temperature: options.temperature || this.config.temperature,
       }),
-      signal: AbortSignal.timeout(this.config.timeout)
+      signal: AbortSignal.timeout(this.config.timeout),
     });
 
     if (!response.ok) {
@@ -182,9 +185,9 @@ class CopilotLMProvider extends LLMProvider {
       usage: {
         promptTokens: data.usage?.prompt_tokens || 0,
         completionTokens: data.usage?.completion_tokens || 0,
-        totalTokens: data.usage?.total_tokens || 0
+        totalTokens: data.usage?.total_tokens || 0,
       },
-      finishReason: data.choices[0].finish_reason
+      finishReason: data.choices[0].finish_reason,
     };
   }
 
@@ -210,7 +213,7 @@ class CopilotLMProvider extends LLMProvider {
       // Check VS Code LM API
       if (this.languageModelAPI) {
         const models = await this.vscode.lm.selectChatModels({
-          vendor: 'copilot'
+          vendor: 'copilot',
         });
         return models.length > 0;
       }
@@ -235,9 +238,9 @@ class CopilotLMProvider extends LLMProvider {
         completion: true,
         embedding: false,
         streaming: true,
-        functionCalling: false
+        functionCalling: false,
       },
-      context: this.languageModelAPI ? 'vscode' : 'rest'
+      context: this.languageModelAPI ? 'vscode' : 'rest',
     };
   }
 

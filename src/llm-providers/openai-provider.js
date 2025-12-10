@@ -60,17 +60,17 @@ class OpenAILMProvider extends LLMProvider {
         const response = await fetch(`${this.endpoint}/chat/completions`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${this.apiKey}`,
-            'Content-Type': 'application/json'
+            Authorization: `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             model: this.config.model,
             messages,
             max_tokens: options.maxTokens || this.config.maxTokens,
             temperature: options.temperature || this.config.temperature,
-            response_format: options.jsonMode ? { type: 'json_object' } : undefined
+            response_format: options.jsonMode ? { type: 'json_object' } : undefined,
           }),
-          signal: AbortSignal.timeout(this.config.timeout)
+          signal: AbortSignal.timeout(this.config.timeout),
         });
 
         if (!response.ok) {
@@ -86,9 +86,9 @@ class OpenAILMProvider extends LLMProvider {
           usage: {
             promptTokens: data.usage?.prompt_tokens || 0,
             completionTokens: data.usage?.completion_tokens || 0,
-            totalTokens: data.usage?.total_tokens || 0
+            totalTokens: data.usage?.total_tokens || 0,
           },
-          finishReason: data.choices[0].finish_reason
+          finishReason: data.choices[0].finish_reason,
         };
       });
     });
@@ -109,14 +109,14 @@ class OpenAILMProvider extends LLMProvider {
         const response = await fetch(`${this.endpoint}/embeddings`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${this.apiKey}`,
-            'Content-Type': 'application/json'
+            Authorization: `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             model: this.config.embeddingModel,
-            input: text
+            input: text,
           }),
-          signal: AbortSignal.timeout(this.config.timeout)
+          signal: AbortSignal.timeout(this.config.timeout),
         });
 
         if (!response.ok) {
@@ -163,8 +163,8 @@ class OpenAILMProvider extends LLMProvider {
         embedding: true,
         streaming: true,
         functionCalling: true,
-        jsonMode: true
-      }
+        jsonMode: true,
+      },
     };
   }
 

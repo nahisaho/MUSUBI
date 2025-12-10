@@ -17,7 +17,7 @@ const GEN_MODE = {
   CREATE: 'create',
   MODIFY: 'modify',
   EXTEND: 'extend',
-  REFACTOR: 'refactor'
+  REFACTOR: 'refactor',
 };
 
 /**
@@ -30,7 +30,7 @@ const LANGUAGE = {
   PYTHON: 'python',
   JSON: 'json',
   MARKDOWN: 'markdown',
-  YAML: 'yaml'
+  YAML: 'yaml',
 };
 
 /**
@@ -134,9 +134,9 @@ describe('{testSubject}', () => {
   {beforeEach}
   
   {testCases}
-});`
+});`,
   },
-  
+
   typescript: {
     interface: `/**
  * {description}
@@ -169,9 +169,9 @@ export class {name} {
  */
 export function {name}({paramNames}): {returnType} {
   {body}
-}`
+}`,
   },
-  
+
   python: {
     class: `"""
 {description}
@@ -210,8 +210,8 @@ class {name}:
     Returns:
         {returnDoc}
     """
-    {body}`
-  }
+    {body}`,
+  },
 };
 
 /**
@@ -225,19 +225,19 @@ class CodeGenerator extends EventEmitter {
    */
   constructor(options = {}) {
     super();
-    
+
     this.templates = { ...TEMPLATES, ...(options.templates || {}) };
     this.addComments = options.addComments ?? true;
     this.addTyping = options.addTyping ?? true;
     this.style = options.style || 'standard';
     this.indentSize = options.indentSize ?? 2;
     this.useTabs = options.useTabs ?? false;
-    
+
     // State
     this.history = [];
     this.generationCounter = 0;
   }
-  
+
   /**
    * Generate code from request
    * @param {GenerationRequest} request - Generation request
@@ -246,13 +246,13 @@ class CodeGenerator extends EventEmitter {
   async generate(request) {
     const id = this.generateId();
     const startTime = Date.now();
-    
+
     this.emit('generation:start', { id, request });
-    
+
     try {
       // Determine language
       const language = request.language || this.detectLanguage(request);
-      
+
       // Select generation strategy
       let code;
       switch (request.mode || GEN_MODE.CREATE) {
@@ -271,10 +271,10 @@ class CodeGenerator extends EventEmitter {
         default:
           code = await this.generateNew(request, language);
       }
-      
+
       // Apply formatting
       code = this.format(code, language);
-      
+
       const result = {
         id,
         success: true,
@@ -284,18 +284,17 @@ class CodeGenerator extends EventEmitter {
         metadata: {
           mode: request.mode || GEN_MODE.CREATE,
           duration: Date.now() - startTime,
-          linesOfCode: code.split('\n').length
+          linesOfCode: code.split('\n').length,
         },
-        warnings: []
+        warnings: [],
       };
-      
+
       // Store in history
       this.history.push(result);
-      
+
       this.emit('generation:complete', { result });
-      
+
       return result;
-      
     } catch (error) {
       const result = {
         id,
@@ -306,24 +305,24 @@ class CodeGenerator extends EventEmitter {
         metadata: {
           mode: request.mode || GEN_MODE.CREATE,
           duration: Date.now() - startTime,
-          error: error.message
+          error: error.message,
         },
-        warnings: [error.message]
+        warnings: [error.message],
       };
-      
+
       this.emit('generation:error', { id, error: error.message });
-      
+
       return result;
     }
   }
-  
+
   /**
    * Generate new code
    * @private
    */
   async generateNew(request, language) {
     const description = request.description.toLowerCase();
-    
+
     // Detect what to generate
     if (description.includes('class')) {
       return this.generateClass(request, language);
@@ -340,66 +339,66 @@ class CodeGenerator extends EventEmitter {
       return this.generateFunction(request, language);
     }
   }
-  
+
   /**
    * Generate modification code
    * @private
    */
   async generateModification(request, language) {
     const { context } = request;
-    
+
     if (!context || !context.existingCode) {
       throw new Error('Modification requires existing code in context');
     }
-    
+
     // Simple modification: add or update based on description
     let modified = context.existingCode;
-    
+
     // Add comments if requested
     if (this.addComments && request.description.includes('document')) {
       modified = this.addDocumentation(modified, language);
     }
-    
+
     return modified;
   }
-  
+
   /**
    * Generate extension code
    * @private
    */
   async generateExtension(request, language) {
     const { context } = request;
-    
+
     if (!context || !context.existingCode) {
       throw new Error('Extension requires existing code in context');
     }
-    
+
     const existing = context.existingCode;
     const extension = await this.generateNew(request, language);
-    
+
     return `${existing}\n\n${extension}`;
   }
-  
+
   /**
    * Generate refactoring
    * @private
    */
   async generateRefactoring(request, language) {
     const { context } = request;
-    
+
     if (!context || !context.existingCode) {
       throw new Error('Refactoring requires existing code in context');
     }
-    
+
     // Simple refactoring: improve structure
     let refactored = context.existingCode;
-    
+
     // Add proper indentation
     refactored = this.format(refactored, language);
-    
+
     return refactored;
   }
-  
+
   /**
    * Generate a class
    * @private
@@ -407,22 +406,20 @@ class CodeGenerator extends EventEmitter {
   generateClass(request, language) {
     const className = this.extractName(request.description, 'Class');
     const template = this.templates[language]?.class || this.templates.javascript.class;
-    
+
     let code = template
       .replace(/{name}/g, className)
       .replace(/{description}/g, request.description)
       .replace(/{properties}/g, this.generateProperties(request, language))
       .replace(/{methods}/g, this.generateMethods(request, language));
-    
+
     if (language === LANGUAGE.TYPESCRIPT) {
-      code = code
-        .replace(/{constructorParams}/g, '')
-        .replace(/{constructorBody}/g, '');
+      code = code.replace(/{constructorParams}/g, '').replace(/{constructorBody}/g, '');
     }
-    
+
     return code;
   }
-  
+
   /**
    * Generate a function
    * @private
@@ -430,12 +427,13 @@ class CodeGenerator extends EventEmitter {
   generateFunction(request, language) {
     const funcName = this.extractName(request.description, 'function');
     const isAsync = request.description.toLowerCase().includes('async');
-    
+
     const templateKey = isAsync ? 'asyncFunction' : 'function';
-    const template = this.templates[language]?.[templateKey] || this.templates.javascript[templateKey];
-    
+    const template =
+      this.templates[language]?.[templateKey] || this.templates.javascript[templateKey];
+
     const params = this.extractParams(request.description);
-    
+
     let code = template
       .replace(/{name}/g, funcName)
       .replace(/{description}/g, request.description)
@@ -446,10 +444,10 @@ class CodeGenerator extends EventEmitter {
       .replace(/{body}/g, '// TODO: Implement')
       .replace(/{argDocs}/g, params.map(p => `${p.name}: ${p.type}`).join('\n        '))
       .replace(/{returnDoc}/g, 'Result');
-    
+
     return code;
   }
-  
+
   /**
    * Generate an interface (TypeScript)
    * @private
@@ -458,16 +456,16 @@ class CodeGenerator extends EventEmitter {
     if (language !== LANGUAGE.TYPESCRIPT) {
       throw new Error('Interfaces are only supported in TypeScript');
     }
-    
+
     const interfaceName = this.extractName(request.description, 'Interface');
     const template = this.templates.typescript.interface;
-    
+
     return template
       .replace(/{name}/g, interfaceName)
       .replace(/{description}/g, request.description)
       .replace(/{properties}/g, '  // TODO: Add properties');
   }
-  
+
   /**
    * Generate test code
    * @private
@@ -476,16 +474,19 @@ class CodeGenerator extends EventEmitter {
     const template = this.templates.javascript.test;
     const testSubject = this.extractName(request.description, 'Subject');
     const fileName = request.filePath ? path.basename(request.filePath) : 'test.test.js';
-    
+
     return template
       .replace(/{filename}/g, fileName)
       .replace(/{testSubject}/g, testSubject)
       .replace(/{imports}/g, testSubject)
       .replace(/{importPath}/g, `./${testSubject.toLowerCase()}`)
-      .replace(/{beforeEach}/g, `let instance;\n  \n  beforeEach(() => {\n    instance = new ${testSubject}();\n  });`)
+      .replace(
+        /{beforeEach}/g,
+        `let instance;\n  \n  beforeEach(() => {\n    instance = new ${testSubject}();\n  });`
+      )
       .replace(/{testCases}/g, this.generateTestCases(testSubject));
   }
-  
+
   /**
    * Generate module code
    * @private
@@ -493,7 +494,7 @@ class CodeGenerator extends EventEmitter {
   generateModule(request, _language) {
     const template = this.templates.javascript.module;
     const fileName = request.filePath ? path.basename(request.filePath) : 'module.js';
-    
+
     return template
       .replace(/{filename}/g, fileName)
       .replace(/{description}/g, request.description)
@@ -501,7 +502,7 @@ class CodeGenerator extends EventEmitter {
       .replace(/{body}/g, '// TODO: Implement module')
       .replace(/{exports}/g, '');
   }
-  
+
   /**
    * Generate class properties
    * @private
@@ -509,14 +510,14 @@ class CodeGenerator extends EventEmitter {
   generateProperties(request, _language) {
     const constraints = request.constraints || {};
     const props = constraints.properties || [];
-    
+
     if (props.length === 0) {
       return 'this.options = options;';
     }
-    
+
     return props.map(p => `this.${p} = options.${p};`).join('\n    ');
   }
-  
+
   /**
    * Generate class methods
    * @private
@@ -524,7 +525,7 @@ class CodeGenerator extends EventEmitter {
   generateMethods(request, _language) {
     const constraints = request.constraints || {};
     const methods = constraints.methods || [];
-    
+
     if (methods.length === 0) {
       return `/**
    * Main method
@@ -533,15 +534,19 @@ class CodeGenerator extends EventEmitter {
     // TODO: Implement
   }`;
     }
-    
-    return methods.map(m => `/**
+
+    return methods
+      .map(
+        m => `/**
    * ${m.description || m.name}
    */
   ${m.name}() {
     // TODO: Implement
-  }`).join('\n  \n  ');
+  }`
+      )
+      .join('\n  \n  ');
   }
-  
+
   /**
    * Generate test cases
    * @private
@@ -559,7 +564,7 @@ class CodeGenerator extends EventEmitter {
     });
   });`;
   }
-  
+
   /**
    * Extract name from description
    * @private
@@ -568,42 +573,44 @@ class CodeGenerator extends EventEmitter {
     // Look for quoted names
     const quotedMatch = description.match(/['"]([^'"]+)['"]/);
     if (quotedMatch) return quotedMatch[1];
-    
+
     // Look for "called X" or "named X"
     const namedMatch = description.match(/(?:called|named)\s+([a-zA-Z_][a-zA-Z0-9_]*)/i);
     if (namedMatch) return namedMatch[1];
-    
+
     // Look for capitalized word after "a" or "an"
     const articleMatch = description.match(/(?:a|an)\s+([A-Z][a-zA-Z0-9_]*)/);
     if (articleMatch) return articleMatch[1];
-    
+
     return defaultName;
   }
-  
+
   /**
    * Extract parameters from description
    * @private
    */
   extractParams(description) {
     const params = [];
-    
+
     // Look for "with parameters X, Y, Z"
     const paramMatch = description.match(/(?:with\s+)?param(?:eter)?s?\s+([^.]+)/i);
     if (paramMatch) {
       const paramList = paramMatch[1].split(/[,\s]+/).filter(p => p && !['and', 'or'].includes(p));
       params.push(...paramList.map(name => ({ name, type: 'any' })));
     }
-    
+
     // Look for "takes X and Y"
     const takesMatch = description.match(/takes\s+([^.]+)/i);
     if (takesMatch && params.length === 0) {
-      const paramList = takesMatch[1].split(/[,\s]+/).filter(p => p && !['and', 'or', 'a', 'an'].includes(p));
+      const paramList = takesMatch[1]
+        .split(/[,\s]+/)
+        .filter(p => p && !['and', 'or', 'a', 'an'].includes(p));
       params.push(...paramList.map(name => ({ name, type: 'any' })));
     }
-    
+
     return params;
   }
-  
+
   /**
    * Detect language from request
    * @private
@@ -618,38 +625,41 @@ class CodeGenerator extends EventEmitter {
         '.json': LANGUAGE.JSON,
         '.md': LANGUAGE.MARKDOWN,
         '.yaml': LANGUAGE.YAML,
-        '.yml': LANGUAGE.YAML
+        '.yml': LANGUAGE.YAML,
       };
       return langMap[ext] || LANGUAGE.JAVASCRIPT;
     }
-    
+
     // Check description for language hints
     const desc = request.description.toLowerCase();
     if (desc.includes('typescript') || desc.includes('ts')) return LANGUAGE.TYPESCRIPT;
     if (desc.includes('python') || desc.includes('py')) return LANGUAGE.PYTHON;
-    
+
     return LANGUAGE.JAVASCRIPT;
   }
-  
+
   /**
    * Format code
    * @private
    */
   format(code, _language) {
     const _indent = this.useTabs ? '\t' : ' '.repeat(this.indentSize);
-    
+
     // Normalize line endings
     code = code.replace(/\r\n/g, '\n');
-    
+
     // Remove trailing whitespace
-    code = code.split('\n').map(line => line.trimEnd()).join('\n');
-    
+    code = code
+      .split('\n')
+      .map(line => line.trimEnd())
+      .join('\n');
+
     // Ensure single newline at end
     code = code.trimEnd() + '\n';
-    
+
     return code;
   }
-  
+
   /**
    * Add documentation to code
    * @private
@@ -665,10 +675,10 @@ class CodeGenerator extends EventEmitter {
         code = '# Auto-documented code\n' + code;
       }
     }
-    
+
     return code;
   }
-  
+
   /**
    * Generate unique ID
    * @private
@@ -676,7 +686,7 @@ class CodeGenerator extends EventEmitter {
   generateId() {
     return `gen-${++this.generationCounter}-${Date.now().toString(36)}`;
   }
-  
+
   /**
    * Get generation history
    * @param {number} [count] - Number of items to return
@@ -688,14 +698,14 @@ class CodeGenerator extends EventEmitter {
     }
     return [...this.history];
   }
-  
+
   /**
    * Clear history
    */
   clearHistory() {
     this.history = [];
   }
-  
+
   /**
    * Get statistics
    * @returns {Object}
@@ -705,13 +715,13 @@ class CodeGenerator extends EventEmitter {
     const byLanguage = {};
     const byMode = {};
     let totalLines = 0;
-    
+
     for (const result of this.history) {
       byLanguage[result.language] = (byLanguage[result.language] || 0) + 1;
       byMode[result.metadata.mode] = (byMode[result.metadata.mode] || 0) + 1;
       totalLines += result.metadata.linesOfCode || 0;
     }
-    
+
     return {
       totalGenerations: this.history.length,
       successful,
@@ -719,10 +729,10 @@ class CodeGenerator extends EventEmitter {
       successRate: this.history.length > 0 ? successful / this.history.length : 0,
       byLanguage,
       byMode,
-      totalLinesGenerated: totalLines
+      totalLinesGenerated: totalLines,
     };
   }
-  
+
   /**
    * Add custom template
    * @param {string} language - Language
@@ -763,5 +773,5 @@ module.exports = {
   generateCode,
   GEN_MODE,
   LANGUAGE,
-  TEMPLATES
+  TEMPLATES,
 };

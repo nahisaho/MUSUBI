@@ -36,7 +36,7 @@ program
   .option('-d, --description <description>', 'Checkpoint description')
   .option('-t, --tags <tags>', 'Comma-separated tags')
   .option('-w, --workspace <dir>', 'Workspace directory')
-  .action(async (options) => {
+  .action(async options => {
     try {
       const manager = getManager(options);
       await manager.initialize();
@@ -72,7 +72,7 @@ program
   .option('-l, --limit <n>', 'Maximum results', parseInt)
   .option('-w, --workspace <dir>', 'Workspace directory')
   .option('--json', 'Output as JSON')
-  .action(async (options) => {
+  .action(async options => {
     try {
       const manager = getManager(options);
       await manager.initialize();
@@ -152,9 +152,12 @@ program
       console.log(chalk.bold('Files:'), checkpoint.stats.filesCount);
       console.log(chalk.bold('Size:'), formatSize(checkpoint.stats.totalSize));
       console.log(chalk.bold('Created:'), new Date(checkpoint.timestamp).toLocaleString());
-      console.log(chalk.bold('Tags:'), checkpoint.tags.length > 0
-        ? checkpoint.tags.map(t => chalk.blue(`#${t}`)).join(' ')
-        : '(none)');
+      console.log(
+        chalk.bold('Tags:'),
+        checkpoint.tags.length > 0
+          ? checkpoint.tags.map(t => chalk.blue(`#${t}`)).join(' ')
+          : '(none)'
+      );
 
       if (Object.keys(checkpoint.context).length > 0) {
         console.log(chalk.bold('Context:'));
@@ -336,7 +339,7 @@ program
   .command('current')
   .description('Show current checkpoint')
   .option('-w, --workspace <dir>', 'Workspace directory')
-  .action(async (options) => {
+  .action(async options => {
     try {
       const manager = getManager(options);
       await manager.initialize();

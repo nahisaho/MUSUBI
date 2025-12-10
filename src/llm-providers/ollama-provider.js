@@ -27,17 +27,17 @@ const OLLAMA_DEFAULTS = {
 const MODEL_PRESETS = {
   'llama3.2': { contextLength: 128000, parameters: '1B/3B' },
   'llama3.1': { contextLength: 128000, parameters: '8B/70B/405B' },
-  'llama3': { contextLength: 8192, parameters: '8B/70B' },
-  'codellama': { contextLength: 16384, parameters: '7B/13B/34B' },
+  llama3: { contextLength: 8192, parameters: '8B/70B' },
+  codellama: { contextLength: 16384, parameters: '7B/13B/34B' },
   'deepseek-coder': { contextLength: 16384, parameters: '1.3B/6.7B/33B' },
   'deepseek-coder-v2': { contextLength: 128000, parameters: '16B/236B' },
-  'mistral': { contextLength: 32768, parameters: '7B' },
-  'mixtral': { contextLength: 32768, parameters: '8x7B' },
-  'phi3': { contextLength: 4096, parameters: '3.8B' },
-  'gemma2': { contextLength: 8192, parameters: '2B/9B/27B' },
+  mistral: { contextLength: 32768, parameters: '7B' },
+  mixtral: { contextLength: 32768, parameters: '8x7B' },
+  phi3: { contextLength: 4096, parameters: '3.8B' },
+  gemma2: { contextLength: 8192, parameters: '2B/9B/27B' },
   'qwen2.5': { contextLength: 128000, parameters: '0.5B-72B' },
   'qwen2.5-coder': { contextLength: 128000, parameters: '1.5B-32B' },
-  'starcoder2': { contextLength: 16384, parameters: '3B/7B/15B' },
+  starcoder2: { contextLength: 16384, parameters: '3B/7B/15B' },
 };
 
 /**
@@ -83,7 +83,7 @@ class OllamaProvider extends LLMProvider {
     try {
       const response = await this._fetch('/api/tags', { method: 'GET' });
       const data = await response.json();
-      this.availableModels = (data.models || []).map((m) => m.name);
+      this.availableModels = (data.models || []).map(m => m.name);
       return this.availableModels;
     } catch (error) {
       this.availableModels = [];
@@ -203,7 +203,7 @@ class OllamaProvider extends LLMProvider {
       if (done) break;
 
       const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split('\n').filter((line) => line.trim());
+      const lines = chunk.split('\n').filter(line => line.trim());
 
       for (const line of lines) {
         try {
@@ -268,7 +268,7 @@ class OllamaProvider extends LLMProvider {
       if (done) break;
 
       const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split('\n').filter((line) => line.trim());
+      const lines = chunk.split('\n').filter(line => line.trim());
 
       for (const line of lines) {
         try {

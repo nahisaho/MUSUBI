@@ -52,19 +52,19 @@ interface FeatureFlag {
 
 function isFeatureEnabled(flag: FeatureFlag, user: User): boolean {
   if (!flag.enabled) return false;
-  
+
   // Check user allowlist
   if (flag.allowedUsers?.includes(user.id)) return true;
-  
+
   // Check role allowlist
   if (flag.allowedRoles?.some(role => user.roles.includes(role))) return true;
-  
+
   // Check percentage rollout
   if (flag.percentage !== undefined) {
     const hash = hashUserId(user.id);
     return hash % 100 < flag.percentage;
   }
-  
+
   return flag.enabled;
 }
 ```
@@ -142,14 +142,14 @@ const currentFlags = flags[process.env.NODE_ENV];
 
 ```typescript
 // Good: Clear, descriptive names
-'enable-new-checkout-v2'
-'show-dark-mode-toggle'
-'use-graphql-api'
+'enable-new-checkout-v2';
+'show-dark-mode-toggle';
+'use-graphql-api';
 
 // Bad: Vague or cryptic
-'flag1'
-'test'
-'temp'
+'flag1';
+'test';
+'temp';
 ```
 
 ### 2. Default to Off
@@ -165,7 +165,7 @@ function getFlag(name: string): boolean {
 ```typescript
 /**
  * Feature Flag: new-payment-provider
- * 
+ *
  * Purpose: Enable new Stripe payment integration
  * Owner: payments-team
  * Created: 2024-01-15
@@ -192,7 +192,7 @@ describe('Checkout', () => {
     setFlag('new-checkout', true);
     // test new checkout
   });
-  
+
   it('works with new checkout disabled', () => {
     setFlag('new-checkout', false);
     // test legacy checkout
@@ -207,11 +207,11 @@ describe('Checkout', () => {
 ```typescript
 class FeatureFlagService {
   private flags: Map<string, FeatureFlag> = new Map();
-  
+
   constructor(private config: FlagConfig) {
     this.loadFlags();
   }
-  
+
   async loadFlags(): Promise<void> {
     // Load from remote config
     const response = await fetch('/api/flags');
@@ -220,13 +220,13 @@ class FeatureFlagService {
       this.flags.set(flag.name, flag);
     });
   }
-  
+
   isEnabled(name: string, context?: FlagContext): boolean {
     const flag = this.flags.get(name);
     if (!flag) return false;
     return evaluateFlag(flag, context);
   }
-  
+
   getAllFlags(): FeatureFlag[] {
     return Array.from(this.flags.values());
   }
@@ -243,7 +243,7 @@ const FeatureFlagContext = createContext<FeatureFlagService>(null);
 
 export function FeatureFlagProvider({ children }) {
   const flagService = useMemo(() => new FeatureFlagService(), []);
-  
+
   return (
     <FeatureFlagContext.Provider value={flagService}>
       {children}
@@ -255,18 +255,18 @@ export function FeatureFlagProvider({ children }) {
 export function useFeatureFlag(name: string): boolean {
   const flagService = useContext(FeatureFlagContext);
   const [enabled, setEnabled] = useState(false);
-  
+
   useEffect(() => {
     setEnabled(flagService.isEnabled(name));
   }, [name, flagService]);
-  
+
   return enabled;
 }
 
 // Component usage
 function MyComponent() {
   const showNewUI = useFeatureFlag('new-ui');
-  
+
   return showNewUI ? <NewUI /> : <LegacyUI />;
 }
 ```
@@ -275,17 +275,18 @@ function MyComponent() {
 
 ## Flag Audit Checklist
 
-| Flag Name | Owner | Created | Status | Cleanup Date |
-|-----------|-------|---------|--------|--------------|
-| new-checkout | @alice | 2024-01 | Active | - |
-| dark-mode | @bob | 2024-02 | Sunset | 2024-04-01 |
-| old-api | @carol | 2023-06 | Remove | Overdue! |
+| Flag Name    | Owner  | Created | Status | Cleanup Date |
+| ------------ | ------ | ------- | ------ | ------------ |
+| new-checkout | @alice | 2024-01 | Active | -            |
+| dark-mode    | @bob   | 2024-02 | Sunset | 2024-04-01   |
+| old-api      | @carol | 2023-06 | Remove | Overdue!     |
 
 ---
 
 ## Anti-Patterns
 
 ### ❌ Too Many Flags
+
 ```typescript
 // Bad: Feature flag soup
 if (flagA && flagB && !flagC && (flagD || flagE)) {
@@ -294,14 +295,17 @@ if (flagA && flagB && !flagC && (flagD || flagE)) {
 ```
 
 ### ❌ Permanent Flags
+
 ```typescript
 // Bad: Flag that's been on for 2 years
-if (flags.newLoginPage) { // Added in 2022
+if (flags.newLoginPage) {
+  // Added in 2022
   // This should just be the code now
 }
 ```
 
 ### ❌ Complex Flag Logic
+
 ```typescript
 // Bad: Flag with side effects
 if (flags.experimentX) {

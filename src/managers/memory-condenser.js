@@ -1,8 +1,8 @@
 /**
  * MUSUBI Memory Condenser
- * 
+ *
  * 長いセッション履歴を圧縮してコンテキストウィンドウ内に収める
- * 
+ *
  * @module src/managers/memory-condenser
  * @see REQ-P0-B004
  * @inspired-by OpenHands openhands/memory/condenser/condenser.py
@@ -12,10 +12,10 @@
  * コンデンサータイプ
  */
 const CondenserType = {
-  LLM: 'llm',           // LLMで要約
-  RECENT: 'recent',     // 最新N件を保持
+  LLM: 'llm', // LLMで要約
+  RECENT: 'recent', // 最新N件を保持
   AMORTIZED: 'amortized', // 分割統治方式
-  NOOP: 'noop',         // 圧縮なし
+  NOOP: 'noop', // 圧縮なし
 };
 
 /**
@@ -60,8 +60,8 @@ class MemoryEvent {
 
   /**
    * 要約イベントを作成
-   * @param {string} summary 
-   * @param {MemoryEvent[]} originalEvents 
+   * @param {string} summary
+   * @param {MemoryEvent[]} originalEvents
    * @returns {MemoryEvent}
    */
   static createSummary(summary, originalEvents) {
@@ -102,9 +102,7 @@ class CondensedView {
       originalCount: stats.originalCount || 0,
       condensedCount: events.length,
       summaryCount: events.filter(e => e.type === MemoryEventType.SUMMARY).length,
-      compressionRatio: stats.originalCount 
-        ? (1 - events.length / stats.originalCount) 
-        : 0,
+      compressionRatio: stats.originalCount ? 1 - events.length / stats.originalCount : 0,
       totalTokens: events.reduce((sum, e) => sum + e.tokens, 0),
     };
   }
@@ -114,12 +112,14 @@ class CondensedView {
    * @returns {string}
    */
   toPrompt() {
-    return this.events.map(e => {
-      if (e.type === MemoryEventType.SUMMARY) {
-        return `[Previous conversation summary]\n${e.content}`;
-      }
-      return e.content;
-    }).join('\n\n');
+    return this.events
+      .map(e => {
+        if (e.type === MemoryEventType.SUMMARY) {
+          return `[Previous conversation summary]\n${e.content}`;
+        }
+        return e.content;
+      })
+      .join('\n\n');
   }
 }
 
@@ -142,7 +142,7 @@ class BaseCondenser {
 
   /**
    * イベントを圧縮
-   * @param {MemoryEvent[]} events 
+   * @param {MemoryEvent[]} events
    * @returns {Promise<CondensedView>}
    */
   async condense(_events) {
@@ -151,7 +151,7 @@ class BaseCondenser {
 
   /**
    * 保持すべきイベントかチェック
-   * @param {MemoryEvent} event 
+   * @param {MemoryEvent} event
    * @returns {boolean}
    */
   shouldPreserve(event) {
@@ -161,9 +161,7 @@ class BaseCondenser {
     }
 
     // パターンマッチング
-    return this.preservePatterns.some(pattern => 
-      event.content.includes(pattern)
-    );
+    return this.preservePatterns.some(pattern => event.content.includes(pattern));
   }
 }
 
@@ -202,7 +200,7 @@ class RecentEventsCondenser extends BaseCondenser {
 
     const firstEvents = events.slice(0, this.keepFirst);
     const recentEvents = events.slice(-this.keepRecent);
-    
+
     // 中間イベントから保持すべきものを抽出
     const middleEvents = events.slice(this.keepFirst, -this.keepRecent);
     const preservedMiddle = middleEvents.filter(e => this.shouldPreserve(e));
@@ -214,12 +212,7 @@ class RecentEventsCondenser extends BaseCondenser {
       middleEvents.filter(e => !this.shouldPreserve(e))
     );
 
-    const condensedEvents = [
-      ...firstEvents,
-      summaryEvent,
-      ...preservedMiddle,
-      ...recentEvents,
-    ];
+    const condensedEvents = [...firstEvents, summaryEvent, ...preservedMiddle, ...recentEvents];
 
     return new CondensedView(condensedEvents, {
       originalCount: events.length,
@@ -247,7 +240,7 @@ class LLMCondenser extends BaseCondenser {
 
   async condense(events) {
     const totalTokens = events.reduce((sum, e) => sum + e.tokens, 0);
-    
+
     if (totalTokens <= this.maxTokens) {
       return new CondensedView(events, {
         originalCount: events.length,
@@ -257,7 +250,7 @@ class LLMCondenser extends BaseCondenser {
     // 最初のイベントは保持
     const preserved = events.slice(0, this.keepFirst);
     let remaining = events.slice(this.keepFirst);
-    
+
     // 重要なイベントを抽出
     const importantEvents = remaining.filter(e => this.shouldPreserve(e));
     const regularEvents = remaining.filter(e => !this.shouldPreserve(e));
@@ -268,16 +261,12 @@ class LLMCondenser extends BaseCondenser {
 
     for (const chunk of chunks) {
       if (chunk.length === 0) continue;
-      
+
       const summaryText = await this.summarizer(chunk);
       summaries.push(MemoryEvent.createSummary(summaryText, chunk));
     }
 
-    const condensedEvents = [
-      ...preserved,
-      ...summaries,
-      ...importantEvents,
-    ];
+    const condensedEvents = [...preserved, ...summaries, ...importantEvents];
 
     return new CondensedView(condensedEvents, {
       originalCount: events.length,
@@ -286,7 +275,7 @@ class LLMCondenser extends BaseCondenser {
 
   /**
    * イベントをチャンク化
-   * @param {MemoryEvent[]} events 
+   * @param {MemoryEvent[]} events
    * @returns {MemoryEvent[][]}
    */
   _chunkEvents(events) {
@@ -299,7 +288,7 @@ class LLMCondenser extends BaseCondenser {
 
   /**
    * デフォルト要約関数（LLM未使用、簡易版）
-   * @param {MemoryEvent[]} events 
+   * @param {MemoryEvent[]} events
    * @returns {Promise<string>}
    */
   async _defaultSummarizer(events) {
@@ -342,19 +331,20 @@ class AmortizedCondenser extends BaseCondenser {
 
     // ユーザーメッセージの位置を特定（境界として使用）
     const userMessageIndices = events
-      .map((e, i) => e.type === MemoryEventType.USER_MESSAGE ? i : -1)
+      .map((e, i) => (e.type === MemoryEventType.USER_MESSAGE ? i : -1))
       .filter(i => i !== -1);
 
     // 最初と最新のユーザーメッセージ周辺は保持
     const preserveStart = userMessageIndices[0] !== undefined ? userMessageIndices[0] : 0;
-    const preserveEnd = userMessageIndices.length > 1 
-      ? userMessageIndices[userMessageIndices.length - 1] 
-      : events.length;
+    const preserveEnd =
+      userMessageIndices.length > 1
+        ? userMessageIndices[userMessageIndices.length - 1]
+        : events.length;
 
     // 圧縮対象を特定
     const toCondense = events.slice(preserveStart + 1, preserveEnd);
     const condensedCount = events.length - this.targetSize;
-    
+
     if (condensedCount <= 0 || toCondense.length === 0) {
       return new CondensedView(events, {
         originalCount: events.length,
@@ -364,7 +354,7 @@ class AmortizedCondenser extends BaseCondenser {
     // 要約を作成
     const summaryText = await this.summarizer(toCondense.slice(0, condensedCount));
     const summaryEvent = MemoryEvent.createSummary(
-      summaryText, 
+      summaryText,
       toCondense.slice(0, condensedCount)
     );
 

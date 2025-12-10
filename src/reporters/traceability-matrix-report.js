@@ -415,11 +415,12 @@ class TraceabilityMatrixReport {
       return '<tr><td colspan="6" style="text-align: center;">No requirements found</td></tr>';
     }
 
-    return forward.map(item => {
-      const req = item.requirement;
-      const reqId = req?.id || req?.file || 'Unknown';
+    return forward
+      .map(item => {
+        const req = item.requirement;
+        const reqId = req?.id || req?.file || 'Unknown';
 
-      return `
+        return `
         <tr data-complete="${item.complete}">
           <td><code>${this.escapeHtml(reqId)}</code></td>
           <td>${this.formatLinks(item.design, 'design')}</td>
@@ -433,7 +434,8 @@ class TraceabilityMatrixReport {
           </td>
         </tr>
       `;
-    }).join('');
+      })
+      .join('');
   }
 
   /**
@@ -444,11 +446,12 @@ class TraceabilityMatrixReport {
       return '<tr><td colspan="6" style="text-align: center;">No tests found</td></tr>';
     }
 
-    return backward.map(item => {
-      const test = item.test;
-      const testId = test?.file || test?.id || 'Unknown';
+    return backward
+      .map(item => {
+        const test = item.test;
+        const testId = test?.file || test?.id || 'Unknown';
 
-      return `
+        return `
         <tr data-complete="${item.complete}">
           <td><code>${this.escapeHtml(path.basename(testId))}</code></td>
           <td>${this.formatLinks(item.code, 'code')}</td>
@@ -462,7 +465,8 @@ class TraceabilityMatrixReport {
           </td>
         </tr>
       `;
-    }).join('');
+      })
+      .join('');
   }
 
   /**
@@ -473,11 +477,13 @@ class TraceabilityMatrixReport {
       return `<span class="badge missing">None</span>`;
     }
 
-    return items.map(item => {
-      const id = item?.id || item?.file || 'Unknown';
-      const displayId = path.basename(id);
-      return `<span class="badge link chain-node ${type}">${this.escapeHtml(displayId)}</span>`;
-    }).join(' ');
+    return items
+      .map(item => {
+        const id = item?.id || item?.file || 'Unknown';
+        const displayId = path.basename(id);
+        return `<span class="badge link chain-node ${type}">${this.escapeHtml(displayId)}</span>`;
+      })
+      .join(' ');
   }
 
   /**
@@ -518,10 +524,12 @@ class TraceabilityMatrixReport {
         <h3 class="collapsible" onclick="toggleCollapsible(this)">${category} (${items.length})</h3>
         <div class="collapsible-content">
           <ul>
-            ${items.map(item => {
-              const id = item?.id || item?.file || 'Unknown';
-              return `<li><code>${this.escapeHtml(id)}</code></li>`;
-            }).join('')}
+            ${items
+              .map(item => {
+                const id = item?.id || item?.file || 'Unknown';
+                return `<li><code>${this.escapeHtml(id)}</code></li>`;
+              })
+              .join('')}
           </ul>
         </div>
       </div>
@@ -669,7 +677,8 @@ Generated: ${data.timestamp}
     const outputDir = path.join(this.workspaceRoot, this.options.outputDir);
     await fs.ensureDir(outputDir);
 
-    const extension = format === ReportFormat.HTML ? '.html' : format === ReportFormat.MARKDOWN ? '.md' : '.json';
+    const extension =
+      format === ReportFormat.HTML ? '.html' : format === ReportFormat.MARKDOWN ? '.md' : '.json';
     const fullPath = path.join(outputDir, filename + extension);
 
     await fs.writeFile(fullPath, report, 'utf8');

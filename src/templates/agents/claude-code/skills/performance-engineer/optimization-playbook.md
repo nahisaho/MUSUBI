@@ -17,29 +17,29 @@ const metrics = {
   responseTime: {
     p50: 'median response',
     p95: '95th percentile',
-    p99: '99th percentile'
+    p99: '99th percentile',
   },
-  
+
   // Throughput
   throughput: {
     rps: 'requests per second',
-    tps: 'transactions per second'
+    tps: 'transactions per second',
   },
-  
+
   // Resources
   resources: {
     cpu: 'CPU utilization %',
     memory: 'Memory usage MB',
     disk: 'Disk I/O ops/sec',
-    network: 'Network bandwidth MB/s'
+    network: 'Network bandwidth MB/s',
   },
-  
+
   // Application
   application: {
     errorRate: 'errors per minute',
     gcTime: 'garbage collection time',
-    activeConnections: 'db/cache connections'
-  }
+    activeConnections: 'db/cache connections',
+  },
 };
 ```
 
@@ -73,14 +73,14 @@ thresholds:
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-export default function() {
+export default function () {
   const res = http.get('https://api.example.com/users');
-  
+
   check(res, {
-    'status is 200': (r) => r.status === 200,
-    'response time < 500ms': (r) => r.timings.duration < 500,
+    'status is 200': r => r.status === 200,
+    'response time < 500ms': r => r.timings.duration < 500,
   });
-  
+
   sleep(1);
 }
 ```
@@ -91,13 +91,13 @@ export default function() {
 
 ### 2.1 Common Bottleneck Patterns
 
-| Pattern | Symptoms | Root Cause |
-|---------|----------|------------|
-| CPU Bound | High CPU, low I/O wait | Computation intensive code |
-| I/O Bound | Low CPU, high I/O wait | Database/file operations |
-| Memory Bound | High memory, GC pauses | Memory leaks, large objects |
-| Network Bound | High latency, low CPU | External API calls |
-| Lock Contention | Thread blocking | Synchronization issues |
+| Pattern         | Symptoms               | Root Cause                  |
+| --------------- | ---------------------- | --------------------------- |
+| CPU Bound       | High CPU, low I/O wait | Computation intensive code  |
+| I/O Bound       | Low CPU, high I/O wait | Database/file operations    |
+| Memory Bound    | High memory, GC pauses | Memory leaks, large objects |
+| Network Bound   | High latency, low CPU  | External API calls          |
+| Lock Contention | Thread blocking        | Synchronization issues      |
 
 ### 2.2 Profiling Checklist
 
@@ -156,7 +156,7 @@ async function getUsers() {
 // ✅ Eager Loading
 async function getUsers() {
   const users = await User.findAll({
-    include: [{ model: Order }]
+    include: [{ model: Order }],
   });
   return users;
 }
@@ -179,8 +179,8 @@ async function processFiles(files) {
 class CacheManager {
   constructor() {
     this.l1 = new Map(); // In-memory (fastest)
-    this.l2 = redis;     // Redis (fast)
-    this.l3 = database;  // Database (source of truth)
+    this.l2 = redis; // Redis (fast)
+    this.l3 = database; // Database (source of truth)
   }
 
   async get(key) {
@@ -211,7 +211,7 @@ class CacheManager {
 
 ```sql
 -- Add composite index
-CREATE INDEX CONCURRENTLY idx_orders_user_status 
+CREATE INDEX CONCURRENTLY idx_orders_user_status
 ON orders (user_id, status, created_at DESC);
 
 -- Partial index for common queries
@@ -224,8 +224,8 @@ WHERE status = 'pending';
 SELECT * FROM orders WHERE YEAR(created_at) = 2024;
 
 -- ✅ After (index-friendly)
-SELECT * FROM orders 
-WHERE created_at >= '2024-01-01' 
+SELECT * FROM orders
+WHERE created_at >= '2024-01-01'
   AND created_at < '2025-01-01';
 ```
 
@@ -239,26 +239,26 @@ WHERE created_at >= '2024-01-01'
 // Compare before/after metrics
 const comparison = {
   before: {
-    p50: 250,   // ms
+    p50: 250, // ms
     p95: 800,
     p99: 1500,
     rps: 100,
-    errorRate: 0.02
+    errorRate: 0.02,
   },
   after: {
-    p50: 80,    // ms
+    p50: 80, // ms
     p95: 200,
     p99: 400,
     rps: 350,
-    errorRate: 0.005
+    errorRate: 0.005,
   },
   improvement: {
     p50: '-68%',
     p95: '-75%',
     p99: '-73%',
     rps: '+250%',
-    errorRate: '-75%'
-  }
+    errorRate: '-75%',
+  },
 };
 ```
 
@@ -282,25 +282,25 @@ performance-test:
 
 ### Response Time Targets
 
-| Tier | p50 | p95 | p99 |
-|------|-----|-----|-----|
-| Fast | <50ms | <100ms | <200ms |
-| Normal | <200ms | <500ms | <1000ms |
+| Tier       | p50    | p95     | p99     |
+| ---------- | ------ | ------- | ------- |
+| Fast       | <50ms  | <100ms  | <200ms  |
+| Normal     | <200ms | <500ms  | <1000ms |
 | Acceptable | <500ms | <2000ms | <5000ms |
 
 ### Memory Guidelines
 
-| App Type | Heap Size | GC Pause Target |
-|----------|-----------|-----------------|
-| API Server | 512MB-2GB | <50ms |
-| Worker | 1GB-4GB | <100ms |
-| Batch | 2GB-8GB | <500ms |
+| App Type   | Heap Size | GC Pause Target |
+| ---------- | --------- | --------------- |
+| API Server | 512MB-2GB | <50ms           |
+| Worker     | 1GB-4GB   | <100ms          |
+| Batch      | 2GB-8GB   | <500ms          |
 
 ### Caching TTL Guidelines
 
-| Data Type | TTL | Strategy |
-|-----------|-----|----------|
-| Static config | 1h-24h | Cache-aside |
-| User session | 15m-30m | Write-through |
-| API response | 1m-5m | Cache-aside |
-| Search results | 30s-5m | Cache-aside |
+| Data Type      | TTL     | Strategy      |
+| -------------- | ------- | ------------- |
+| Static config  | 1h-24h  | Cache-aside   |
+| User session   | 15m-30m | Write-through |
+| API response   | 1m-5m   | Cache-aside   |
+| Search results | 30s-5m  | Cache-aside   |

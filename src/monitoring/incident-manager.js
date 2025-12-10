@@ -1,17 +1,17 @@
 /**
  * Incident Manager - Incident response and management
- * 
+ *
  * Provides incident management capabilities:
  * - Incident lifecycle management
  * - Runbook execution
  * - Post-mortem generation
  * - On-call management
- * 
+ *
  * Part of MUSUBI v5.0.0 - Production Readiness
- * 
+ *
  * @module monitoring/incident-manager
  * @version 1.0.0
- * 
+ *
  * @traceability
  * - Requirement: REQ-P5-002 (Incident Management)
  * - Design: docs/design/tdd-musubi-v5.0.0.md#3.2
@@ -28,7 +28,7 @@ const IncidentSeverity = {
   SEV2: 'sev2', // High - significant impact
   SEV3: 'sev3', // Medium - limited impact
   SEV4: 'sev4', // Low - minimal impact
-  SEV5: 'sev5'  // Informational
+  SEV5: 'sev5', // Informational
 };
 
 /**
@@ -42,7 +42,7 @@ const IncidentStatus = {
   MITIGATING: 'mitigating',
   MONITORING: 'monitoring',
   RESOLVED: 'resolved',
-  CLOSED: 'closed'
+  CLOSED: 'closed',
 };
 
 /**
@@ -53,7 +53,7 @@ const StepStatus = {
   IN_PROGRESS: 'in-progress',
   COMPLETED: 'completed',
   FAILED: 'failed',
-  SKIPPED: 'skipped'
+  SKIPPED: 'skipped',
 };
 
 /**
@@ -66,35 +66,37 @@ class Incident {
     this.description = options.description || '';
     this.severity = options.severity || IncidentSeverity.SEV3;
     this.status = options.status || IncidentStatus.DETECTED;
-    
+
     this.detectedAt = options.detectedAt || new Date();
     this.acknowledgedAt = null;
     this.mitigatedAt = null;
     this.resolvedAt = null;
     this.closedAt = null;
-    
+
     this.affectedServices = options.affectedServices || [];
     this.impactSummary = options.impactSummary || '';
     this.customerImpact = options.customerImpact || {
       affected: 0,
-      percentage: 0
+      percentage: 0,
     };
-    
+
     this.assignee = options.assignee || null;
     this.responders = options.responders || [];
     this.commander = options.commander || null;
-    
-    this.timeline = [{
-      timestamp: this.detectedAt,
-      action: 'detected',
-      description: 'Incident detected',
-      actor: 'system'
-    }];
-    
+
+    this.timeline = [
+      {
+        timestamp: this.detectedAt,
+        action: 'detected',
+        description: 'Incident detected',
+        actor: 'system',
+      },
+    ];
+
     this.rootCause = null;
     this.resolution = null;
     this.postMortem = null;
-    
+
     this.relatedIncidents = options.relatedIncidents || [];
     this.tags = options.tags || [];
     this.metadata = options.metadata || {};
@@ -107,15 +109,15 @@ class Incident {
     if (this.acknowledgedAt) {
       throw new Error('Incident already acknowledged');
     }
-    
+
     this.acknowledgedAt = new Date();
     this.status = IncidentStatus.TRIAGING;
     this.assignee = responder;
-    
+
     if (!this.responders.includes(responder)) {
       this.responders.push(responder);
     }
-    
+
     this._addTimelineEntry('acknowledged', `Acknowledged by ${responder}`, responder);
     return this;
   }
@@ -137,7 +139,11 @@ class Incident {
   setCommander(commander) {
     this.commander = commander;
     this.addResponder(commander, 'commander');
-    this._addTimelineEntry('commander_assigned', `${commander} assigned as incident commander`, commander);
+    this._addTimelineEntry(
+      'commander_assigned',
+      `${commander} assigned as incident commander`,
+      commander
+    );
     return this;
   }
 
@@ -147,9 +153,13 @@ class Incident {
   updateStatus(newStatus, note = '', actor = 'system') {
     const previousStatus = this.status;
     this.status = newStatus;
-    
-    this._addTimelineEntry('status_change', `Status changed from ${previousStatus} to ${newStatus}. ${note}`, actor);
-    
+
+    this._addTimelineEntry(
+      'status_change',
+      `Status changed from ${previousStatus} to ${newStatus}. ${note}`,
+      actor
+    );
+
     // Update timestamps
     if (newStatus === IncidentStatus.MITIGATING && !this.mitigatedAt) {
       // Record when mitigation started
@@ -160,7 +170,7 @@ class Incident {
     if (newStatus === IncidentStatus.CLOSED) {
       this.closedAt = new Date();
     }
-    
+
     return this;
   }
 
@@ -170,7 +180,11 @@ class Incident {
   updateSeverity(newSeverity, reason = '', actor = 'system') {
     const previousSeverity = this.severity;
     this.severity = newSeverity;
-    this._addTimelineEntry('severity_change', `Severity changed from ${previousSeverity} to ${newSeverity}. ${reason}`, actor);
+    this._addTimelineEntry(
+      'severity_change',
+      `Severity changed from ${previousSeverity} to ${newSeverity}. ${reason}`,
+      actor
+    );
     return this;
   }
 
@@ -208,21 +222,17 @@ class Incident {
    */
   getMetrics() {
     const now = new Date();
-    
+
     return {
-      timeToAcknowledge: this.acknowledgedAt 
-        ? (this.acknowledgedAt - this.detectedAt) / 1000 
+      timeToAcknowledge: this.acknowledgedAt
+        ? (this.acknowledgedAt - this.detectedAt) / 1000
         : null,
-      timeToMitigate: this.mitigatedAt 
-        ? (this.mitigatedAt - this.detectedAt) / 1000 
-        : null,
-      timeToResolve: this.resolvedAt 
-        ? (this.resolvedAt - this.detectedAt) / 1000 
-        : null,
-      totalDuration: this.closedAt 
-        ? (this.closedAt - this.detectedAt) / 1000 
+      timeToMitigate: this.mitigatedAt ? (this.mitigatedAt - this.detectedAt) / 1000 : null,
+      timeToResolve: this.resolvedAt ? (this.resolvedAt - this.detectedAt) / 1000 : null,
+      totalDuration: this.closedAt
+        ? (this.closedAt - this.detectedAt) / 1000
         : (now - this.detectedAt) / 1000,
-      isOpen: !this.closedAt
+      isOpen: !this.closedAt,
     };
   }
 
@@ -235,7 +245,7 @@ class Incident {
       timestamp: new Date(),
       action,
       description,
-      actor
+      actor,
     });
   }
 
@@ -270,7 +280,7 @@ class Incident {
       rootCause: this.rootCause,
       resolution: this.resolution,
       tags: this.tags,
-      metrics: this.getMetrics()
+      metrics: this.getMetrics(),
     };
   }
 }
@@ -287,7 +297,7 @@ class Runbook {
     this.category = options.category || 'general';
     this.tags = options.tags || [];
     this.estimatedDuration = options.estimatedDuration || '15 minutes';
-    
+
     this.steps = (options.steps || []).map((step, index) => ({
       id: step.id || `step-${index + 1}`,
       order: step.order || index + 1,
@@ -297,9 +307,9 @@ class Runbook {
       expectedOutput: step.expectedOutput || null,
       onFailure: step.onFailure || 'abort', // abort, continue, retry
       timeout: step.timeout || 300, // seconds
-      requiresConfirmation: step.requiresConfirmation || false
+      requiresConfirmation: step.requiresConfirmation || false,
     }));
-    
+
     this.metadata = options.metadata || {};
   }
 
@@ -313,7 +323,7 @@ class Runbook {
       tags: this.tags,
       estimatedDuration: this.estimatedDuration,
       steps: this.steps,
-      metadata: this.metadata
+      metadata: this.metadata,
     };
   }
 }
@@ -329,16 +339,16 @@ class RunbookExecution {
     this.startedAt = new Date();
     this.completedAt = null;
     this.status = 'running';
-    
+
     this.stepResults = runbook.steps.map(step => ({
       stepId: step.id,
       status: StepStatus.PENDING,
       startedAt: null,
       completedAt: null,
       output: null,
-      error: null
+      error: null,
     }));
-    
+
     this.currentStepIndex = 0;
   }
 
@@ -365,13 +375,13 @@ class RunbookExecution {
       result.output = output;
       this.currentStepIndex++;
     }
-    
+
     // Check if all steps completed
     if (this.currentStepIndex >= this.runbook.steps.length) {
       this.status = 'completed';
       this.completedAt = new Date();
     }
-    
+
     return this;
   }
 
@@ -385,7 +395,7 @@ class RunbookExecution {
       result.completedAt = new Date();
       result.error = error;
     }
-    
+
     // Get step config to determine action
     const step = this.runbook.steps.find(s => s.id === stepId);
     if (step && step.onFailure === 'abort') {
@@ -394,7 +404,7 @@ class RunbookExecution {
     } else if (step && step.onFailure === 'continue') {
       this.currentStepIndex++;
     }
-    
+
     return this;
   }
 
@@ -426,16 +436,15 @@ class RunbookExecution {
    * Get execution progress
    */
   getProgress() {
-    const completed = this.stepResults.filter(r => 
-      r.status === StepStatus.COMPLETED || 
-      r.status === StepStatus.SKIPPED
+    const completed = this.stepResults.filter(
+      r => r.status === StepStatus.COMPLETED || r.status === StepStatus.SKIPPED
     ).length;
-    
+
     return {
       total: this.runbook.steps.length,
       completed,
       percentage: Math.round((completed / this.runbook.steps.length) * 100),
-      currentStep: this.getCurrentStep()
+      currentStep: this.getCurrentStep(),
     };
   }
 
@@ -449,7 +458,7 @@ class RunbookExecution {
       completedAt: this.completedAt,
       status: this.status,
       stepResults: this.stepResults,
-      progress: this.getProgress()
+      progress: this.getProgress(),
     };
   }
 }
@@ -464,30 +473,30 @@ class PostMortem {
     this.title = `Post-Mortem: ${incident.title}`;
     this.createdAt = new Date();
     this.status = 'draft';
-    
+
     // Auto-populate from incident
     this.summary = {
       severity: incident.severity,
       duration: incident.getMetrics().totalDuration,
       affectedServices: incident.affectedServices,
-      customerImpact: incident.customerImpact
+      customerImpact: incident.customerImpact,
     };
-    
+
     this.timeline = incident.timeline;
     this.rootCause = incident.rootCause || 'TBD';
     this.resolution = incident.resolution || 'TBD';
-    
+
     this.detection = {
       method: 'TBD',
-      timeToDetect: incident.getMetrics().timeToAcknowledge
+      timeToDetect: incident.getMetrics().timeToAcknowledge,
     };
-    
+
     this.response = {
       responders: incident.responders,
       commander: incident.commander,
-      timeToMitigate: incident.getMetrics().timeToMitigate
+      timeToMitigate: incident.getMetrics().timeToMitigate,
     };
-    
+
     this.actionItems = [];
     this.lessonsLearned = [];
     this.whatWentWell = [];
@@ -506,7 +515,7 @@ class PostMortem {
       priority: item.priority || 'medium',
       dueDate: item.dueDate || null,
       status: 'open',
-      createdAt: new Date()
+      createdAt: new Date(),
     });
     return this;
   }
@@ -621,7 +630,7 @@ class PostMortem {
       whatWentWell: this.whatWentWell,
       whatWentPoorly: this.whatWentPoorly,
       lessonsLearned: this.lessonsLearned,
-      actionItems: this.actionItems
+      actionItems: this.actionItems,
     };
   }
 }
@@ -636,16 +645,16 @@ class IncidentManager extends EventEmitter {
     this.runbooks = new Map();
     this.executions = new Map();
     this.postMortems = new Map();
-    
+
     this.oncall = {
       primary: options.primaryOncall || null,
       secondary: options.secondaryOncall || null,
-      escalation: options.escalation || []
+      escalation: options.escalation || [],
     };
-    
+
     this.options = {
       autoAcknowledgeTimeout: options.autoAcknowledgeTimeout || 300, // 5 minutes
-      ...options
+      ...options,
     };
   }
 
@@ -656,16 +665,16 @@ class IncidentManager extends EventEmitter {
     const incident = options instanceof Incident ? options : new Incident(options);
     this.incidents.set(incident.id, incident);
     this.emit('incidentCreated', incident);
-    
+
     // Auto-notify on-call
     if (this.oncall.primary) {
       this.emit('notify', {
         type: 'incident',
         incident,
-        recipient: this.oncall.primary
+        recipient: this.oncall.primary,
       });
     }
-    
+
     return incident;
   }
 
@@ -681,7 +690,7 @@ class IncidentManager extends EventEmitter {
    */
   listIncidents(filter = {}) {
     let incidents = [...this.incidents.values()];
-    
+
     if (filter.status) {
       const statuses = Array.isArray(filter.status) ? filter.status : [filter.status];
       incidents = incidents.filter(i => statuses.includes(i.status));
@@ -691,12 +700,11 @@ class IncidentManager extends EventEmitter {
       incidents = incidents.filter(i => severities.includes(i.severity));
     }
     if (filter.open) {
-      incidents = incidents.filter(i => 
-        i.status !== IncidentStatus.RESOLVED && 
-        i.status !== IncidentStatus.CLOSED
+      incidents = incidents.filter(
+        i => i.status !== IncidentStatus.RESOLVED && i.status !== IncidentStatus.CLOSED
       );
     }
-    
+
     return incidents.map(i => i.toJSON());
   }
 
@@ -706,7 +714,7 @@ class IncidentManager extends EventEmitter {
   acknowledgeIncident(incidentId, responder) {
     const incident = this.incidents.get(incidentId);
     if (!incident) throw new Error(`Incident not found: ${incidentId}`);
-    
+
     incident.acknowledge(responder);
     this.emit('incidentAcknowledged', incident);
     return incident;
@@ -718,7 +726,7 @@ class IncidentManager extends EventEmitter {
   updateIncidentStatus(incidentId, newStatus, note = '', actor = 'system') {
     const incident = this.incidents.get(incidentId);
     if (!incident) throw new Error(`Incident not found: ${incidentId}`);
-    
+
     incident.updateStatus(newStatus, note, actor);
     this.emit('incidentStatusChanged', { incident, newStatus });
     return incident;
@@ -730,7 +738,7 @@ class IncidentManager extends EventEmitter {
   resolveIncident(incidentId, resolution, actor = 'system') {
     const incident = this.incidents.get(incidentId);
     if (!incident) throw new Error(`Incident not found: ${incidentId}`);
-    
+
     incident.setResolution(resolution, actor);
     this.emit('incidentResolved', incident);
     return incident;
@@ -758,14 +766,14 @@ class IncidentManager extends EventEmitter {
    */
   listRunbooks(filter = {}) {
     let runbooks = [...this.runbooks.values()];
-    
+
     if (filter.category) {
       runbooks = runbooks.filter(r => r.category === filter.category);
     }
     if (filter.tag) {
       runbooks = runbooks.filter(r => r.tags.includes(filter.tag));
     }
-    
+
     return runbooks.map(r => r.toJSON());
   }
 
@@ -775,16 +783,16 @@ class IncidentManager extends EventEmitter {
   executeRunbook(runbookId, incident = null) {
     const runbook = this.runbooks.get(runbookId);
     if (!runbook) throw new Error(`Runbook not found: ${runbookId}`);
-    
+
     const execution = new RunbookExecution(runbook, incident);
     this.executions.set(execution.id, execution);
     this.emit('runbookExecutionStarted', execution);
-    
+
     // Link to incident if provided
     if (incident) {
       incident.addUpdate(`Runbook "${runbook.name}" execution started`, 'system');
     }
-    
+
     return execution;
   }
 
@@ -801,11 +809,11 @@ class IncidentManager extends EventEmitter {
   createPostMortem(incidentId) {
     const incident = this.incidents.get(incidentId);
     if (!incident) throw new Error(`Incident not found: ${incidentId}`);
-    
+
     const postMortem = new PostMortem(incident);
     this.postMortems.set(postMortem.id, postMortem);
     incident.postMortem = postMortem.id;
-    
+
     this.emit('postMortemCreated', postMortem);
     return postMortem;
   }
@@ -840,10 +848,8 @@ class IncidentManager extends EventEmitter {
   getStatistics(options = {}) {
     const incidents = [...this.incidents.values()];
     const { since } = options;
-    
-    const filtered = since 
-      ? incidents.filter(i => i.detectedAt >= since)
-      : incidents;
+
+    const filtered = since ? incidents.filter(i => i.detectedAt >= since) : incidents;
 
     const metrics = filtered.map(i => i.getMetrics());
     const acknowledged = metrics.filter(m => m.timeToAcknowledge !== null);
@@ -851,15 +857,19 @@ class IncidentManager extends EventEmitter {
 
     return {
       total: filtered.length,
-      open: filtered.filter(i => i.status !== IncidentStatus.CLOSED && i.status !== IncidentStatus.RESOLVED).length,
+      open: filtered.filter(
+        i => i.status !== IncidentStatus.CLOSED && i.status !== IncidentStatus.RESOLVED
+      ).length,
       bySeverity: this._countBy(filtered, 'severity'),
       byStatus: this._countBy(filtered, 'status'),
-      mttr: resolved.length > 0 
-        ? resolved.reduce((sum, m) => sum + m.timeToResolve, 0) / resolved.length 
-        : null,
-      mtta: acknowledged.length > 0 
-        ? acknowledged.reduce((sum, m) => sum + m.timeToAcknowledge, 0) / acknowledged.length 
-        : null
+      mttr:
+        resolved.length > 0
+          ? resolved.reduce((sum, m) => sum + m.timeToResolve, 0) / resolved.length
+          : null,
+      mtta:
+        acknowledged.length > 0
+          ? acknowledged.reduce((sum, m) => sum + m.timeToAcknowledge, 0) / acknowledged.length
+          : null,
     };
   }
 
@@ -889,12 +899,12 @@ module.exports = {
   RunbookExecution,
   PostMortem,
   IncidentManager,
-  
+
   // Constants
   IncidentSeverity,
   IncidentStatus,
   StepStatus,
-  
+
   // Factory
-  createIncidentManager
+  createIncidentManager,
 };

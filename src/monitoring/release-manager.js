@@ -1,17 +1,17 @@
 /**
  * Release Manager - Release coordination and management
- * 
+ *
  * Provides release management capabilities:
  * - Release planning and tracking
  * - Feature flag management
  * - Rollback procedures
  * - Release notes generation
- * 
+ *
  * Part of MUSUBI v5.0.0 - Production Readiness
- * 
+ *
  * @module monitoring/release-manager
  * @version 1.0.0
- * 
+ *
  * @traceability
  * - Requirement: REQ-P5-003 (Release Automation)
  * - Design: docs/design/tdd-musubi-v5.0.0.md#3.3
@@ -32,7 +32,7 @@ const ReleaseState = {
   PRODUCTION: 'production',
   ROLLBACK: 'rollback',
   COMPLETED: 'completed',
-  CANCELLED: 'cancelled'
+  CANCELLED: 'cancelled',
 };
 
 /**
@@ -43,7 +43,7 @@ const ReleaseType = {
   MINOR: 'minor',
   PATCH: 'patch',
   HOTFIX: 'hotfix',
-  CANARY: 'canary'
+  CANARY: 'canary',
 };
 
 /**
@@ -53,7 +53,7 @@ const FeatureFlagStatus = {
   ENABLED: 'enabled',
   DISABLED: 'disabled',
   PERCENTAGE: 'percentage',
-  USER_LIST: 'user-list'
+  USER_LIST: 'user-list',
 };
 
 /**
@@ -71,35 +71,35 @@ class Release {
     this.createdAt = options.createdAt || new Date();
     this.updatedAt = options.updatedAt || new Date();
     this.completedAt = null;
-    
+
     this.features = options.features || [];
     this.bugFixes = options.bugFixes || [];
     this.breakingChanges = options.breakingChanges || [];
     this.dependencies = options.dependencies || [];
-    
+
     this.rolloutStrategy = options.rolloutStrategy || {
       type: 'percentage',
       stages: [
         { percentage: 1, duration: '1h' },
         { percentage: 10, duration: '2h' },
         { percentage: 50, duration: '4h' },
-        { percentage: 100, duration: null }
-      ]
+        { percentage: 100, duration: null },
+      ],
     };
-    
+
     this.rollbackPlan = options.rollbackPlan || {
       automatic: true,
       triggers: ['error_rate > 5%', 'latency_p99 > 2s'],
-      procedure: []
+      procedure: [],
     };
-    
+
     this.metrics = {
       errorsBefore: null,
       errorsAfter: null,
       latencyBefore: null,
-      latencyAfter: null
+      latencyAfter: null,
     };
-    
+
     this.history = [];
     this._addHistory('created', { version: this.version });
   }
@@ -111,13 +111,22 @@ class Release {
     const validTransitions = {
       [ReleaseState.PLANNING]: [ReleaseState.DEVELOPMENT, ReleaseState.CANCELLED],
       [ReleaseState.DEVELOPMENT]: [ReleaseState.TESTING, ReleaseState.CANCELLED],
-      [ReleaseState.TESTING]: [ReleaseState.STAGING, ReleaseState.DEVELOPMENT, ReleaseState.CANCELLED],
-      [ReleaseState.STAGING]: [ReleaseState.CANARY, ReleaseState.PRODUCTION, ReleaseState.TESTING, ReleaseState.CANCELLED],
+      [ReleaseState.TESTING]: [
+        ReleaseState.STAGING,
+        ReleaseState.DEVELOPMENT,
+        ReleaseState.CANCELLED,
+      ],
+      [ReleaseState.STAGING]: [
+        ReleaseState.CANARY,
+        ReleaseState.PRODUCTION,
+        ReleaseState.TESTING,
+        ReleaseState.CANCELLED,
+      ],
       [ReleaseState.CANARY]: [ReleaseState.PRODUCTION, ReleaseState.ROLLBACK],
       [ReleaseState.PRODUCTION]: [ReleaseState.COMPLETED, ReleaseState.ROLLBACK],
       [ReleaseState.ROLLBACK]: [ReleaseState.TESTING, ReleaseState.CANCELLED],
       [ReleaseState.COMPLETED]: [],
-      [ReleaseState.CANCELLED]: []
+      [ReleaseState.CANCELLED]: [],
     };
 
     const allowed = validTransitions[this.state] || [];
@@ -128,15 +137,15 @@ class Release {
     const previousState = this.state;
     this.state = newState;
     this.updatedAt = new Date();
-    
+
     if (newState === ReleaseState.COMPLETED) {
       this.completedAt = new Date();
     }
 
-    this._addHistory('transition', { 
-      from: previousState, 
+    this._addHistory('transition', {
+      from: previousState,
       to: newState,
-      ...metadata 
+      ...metadata,
     });
 
     return this;
@@ -151,7 +160,7 @@ class Release {
       title: feature.title,
       description: feature.description || '',
       jiraId: feature.jiraId || null,
-      breaking: feature.breaking || false
+      breaking: feature.breaking || false,
     });
     this._addHistory('featureAdded', { feature: feature.title });
     return this;
@@ -166,7 +175,7 @@ class Release {
       title: bugFix.title,
       description: bugFix.description || '',
       jiraId: bugFix.jiraId || null,
-      severity: bugFix.severity || 'medium'
+      severity: bugFix.severity || 'medium',
     });
     this._addHistory('bugFixAdded', { bugFix: bugFix.title });
     return this;
@@ -181,7 +190,7 @@ class Release {
       date: this.completedAt || new Date(),
       features: this.features,
       bugFixes: this.bugFixes,
-      breakingChanges: this.breakingChanges
+      breakingChanges: this.breakingChanges,
     };
 
     if (format === 'markdown') {
@@ -247,7 +256,7 @@ class Release {
     this.history.push({
       action,
       timestamp: new Date(),
-      data
+      data,
     });
   }
 
@@ -276,7 +285,7 @@ class Release {
       breakingChanges: this.breakingChanges,
       rolloutStrategy: this.rolloutStrategy,
       rollbackPlan: this.rollbackPlan,
-      history: this.history
+      history: this.history,
     };
   }
 }
@@ -337,19 +346,19 @@ class FeatureFlag {
     switch (this.status) {
       case FeatureFlagStatus.ENABLED:
         return true;
-      
+
       case FeatureFlagStatus.DISABLED:
         return false;
-      
+
       case FeatureFlagStatus.USER_LIST:
         return this.userList.includes(userId);
-      
+
       case FeatureFlagStatus.PERCENTAGE: {
         // Consistent hashing based on userId
         const hash = this._hashString(`${this.key}:${userId}`);
-        return (hash % 100) < this.percentage;
+        return hash % 100 < this.percentage;
       }
-      
+
       default:
         return false;
     }
@@ -363,7 +372,7 @@ class FeatureFlag {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash;
     }
     return Math.abs(hash);
@@ -379,7 +388,7 @@ class FeatureFlag {
       userList: this.userList,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      metadata: this.metadata
+      metadata: this.metadata,
     };
   }
 }
@@ -394,7 +403,7 @@ class ReleaseManager extends EventEmitter {
     this.featureFlags = new Map();
     this.options = {
       autoGenerateNotes: options.autoGenerateNotes !== false,
-      ...options
+      ...options,
     };
   }
 
@@ -432,14 +441,14 @@ class ReleaseManager extends EventEmitter {
    */
   listReleases(filter = {}) {
     let releases = [...this.releases.values()];
-    
+
     if (filter.state) {
       releases = releases.filter(r => r.state === filter.state);
     }
     if (filter.type) {
       releases = releases.filter(r => r.type === filter.type);
     }
-    
+
     return releases.map(r => r.toJSON());
   }
 
@@ -451,7 +460,7 @@ class ReleaseManager extends EventEmitter {
     if (!release) {
       throw new Error(`Release not found: ${releaseId}`);
     }
-    
+
     release.transitionTo(newState, metadata);
     this.emit('releaseTransitioned', { release, newState });
     return release;
@@ -487,7 +496,7 @@ class ReleaseManager extends EventEmitter {
   isFeatureEnabled(flagKey, userId = null) {
     const flag = this.featureFlags.get(flagKey);
     if (!flag) return false;
-    
+
     if (userId) {
       return flag.isEnabledFor(userId);
     }
@@ -542,41 +551,41 @@ class ReleaseManager extends EventEmitter {
           order: 1,
           action: 'notify',
           description: 'Notify team of rollback initiation',
-          command: null
+          command: null,
         },
         {
           order: 2,
           action: 'disable-flags',
           description: 'Disable all new feature flags',
-          command: 'musubi release disable-flags --version ' + release.version
+          command: 'musubi release disable-flags --version ' + release.version,
         },
         {
           order: 3,
           action: 'scale-down',
           description: 'Scale down new deployment',
-          command: 'kubectl scale deployment app-v' + release.version + ' --replicas=0'
+          command: 'kubectl scale deployment app-v' + release.version + ' --replicas=0',
         },
         {
           order: 4,
           action: 'traffic-shift',
           description: 'Shift traffic to previous version',
-          command: 'kubectl rollout undo deployment/app'
+          command: 'kubectl rollout undo deployment/app',
         },
         {
           order: 5,
           action: 'verify',
           description: 'Verify rollback success',
-          command: 'curl -f http://app/health'
+          command: 'curl -f http://app/health',
         },
         {
           order: 6,
           action: 'notify-complete',
           description: 'Notify team of rollback completion',
-          command: null
-        }
+          command: null,
+        },
       ],
       automaticTriggers: release.rollbackPlan.triggers,
-      estimatedDuration: '5-10 minutes'
+      estimatedDuration: '5-10 minutes',
     };
   }
 
@@ -594,7 +603,7 @@ class ReleaseManager extends EventEmitter {
       totalFeatureFlags: flags.length,
       enabledFlags: flags.filter(f => f.status === FeatureFlagStatus.ENABLED).length,
       disabledFlags: flags.filter(f => f.status === FeatureFlagStatus.DISABLED).length,
-      percentageFlags: flags.filter(f => f.status === FeatureFlagStatus.PERCENTAGE).length
+      percentageFlags: flags.filter(f => f.status === FeatureFlagStatus.PERCENTAGE).length,
     };
   }
 
@@ -622,12 +631,12 @@ module.exports = {
   Release,
   FeatureFlag,
   ReleaseManager,
-  
+
   // Constants
   ReleaseState,
   ReleaseType,
   FeatureFlagStatus,
-  
+
   // Factory
-  createReleaseManager
+  createReleaseManager,
 };

@@ -1,7 +1,7 @@
 /**
  * WorkflowExecutor - End-to-end workflow execution engine
  * Sprint 3.5: Advanced Workflows
- * 
+ *
  * Provides comprehensive workflow execution with:
  * - Step-by-step execution with state management
  * - Parallel and sequential step execution
@@ -22,7 +22,7 @@ const StepType = {
   PARALLEL: 'parallel',
   LOOP: 'loop',
   CHECKPOINT: 'checkpoint',
-  HUMAN_REVIEW: 'human-review'
+  HUMAN_REVIEW: 'human-review',
 };
 
 /**
@@ -35,7 +35,7 @@ const ExecutionState = {
   COMPLETED: 'completed',
   FAILED: 'failed',
   CANCELLED: 'cancelled',
-  WAITING_REVIEW: 'waiting-review'
+  WAITING_REVIEW: 'waiting-review',
 };
 
 /**
@@ -47,7 +47,7 @@ const RecoveryStrategy = {
   FALLBACK: 'fallback',
   ROLLBACK: 'rollback',
   ABORT: 'abort',
-  MANUAL: 'manual'
+  MANUAL: 'manual',
 };
 
 /**
@@ -98,7 +98,7 @@ class ExecutionContext {
       name,
       timestamp: new Date().toISOString(),
       variables: new Map(this.variables),
-      currentStep: this.currentStep
+      currentStep: this.currentStep,
     });
   }
 
@@ -138,15 +138,15 @@ class WorkflowDefinition {
 
   validate() {
     const errors = [];
-    
+
     if (!this.id) {
       errors.push('Workflow ID is required');
     }
-    
+
     if (!this.name) {
       errors.push('Workflow name is required');
     }
-    
+
     if (!this.steps || this.steps.length === 0) {
       errors.push('Workflow must have at least one step');
     }
@@ -169,7 +169,7 @@ class WorkflowDefinition {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 }
@@ -185,7 +185,7 @@ class WorkflowExecutor extends EventEmitter {
     this.mcpConnector = options.mcpConnector || null;
     this.executions = new Map();
     this.stepHandlers = new Map();
-    
+
     // Register default step handlers
     this._registerDefaultHandlers();
   }
@@ -197,7 +197,7 @@ class WorkflowExecutor extends EventEmitter {
     // Skill execution handler
     this.stepHandlers.set(StepType.SKILL, async (step, context) => {
       const { skillId, input } = step;
-      
+
       if (!this.skillRegistry) {
         throw new Error('Skill registry not configured');
       }
@@ -209,10 +209,10 @@ class WorkflowExecutor extends EventEmitter {
 
       // Resolve input variables
       const resolvedInput = this._resolveVariables(input, context);
-      
+
       // Execute skill
       const result = await skill.execute(resolvedInput, context);
-      
+
       // Store output in context
       if (step.outputVariable) {
         context.setVariable(step.outputVariable, result);
@@ -224,17 +224,17 @@ class WorkflowExecutor extends EventEmitter {
     // Tool execution handler
     this.stepHandlers.set(StepType.TOOL, async (step, context) => {
       const { toolName, serverName, arguments: args } = step;
-      
+
       if (!this.mcpConnector) {
         throw new Error('MCP connector not configured');
       }
 
       // Resolve arguments
       const resolvedArgs = this._resolveVariables(args, context);
-      
+
       // Call tool
       const result = await this.mcpConnector.callTool(toolName, resolvedArgs, serverName);
-      
+
       if (step.outputVariable) {
         context.setVariable(step.outputVariable, result);
       }
@@ -245,13 +245,13 @@ class WorkflowExecutor extends EventEmitter {
     // Condition handler
     this.stepHandlers.set(StepType.CONDITION, async (step, context) => {
       const { condition, thenSteps, elseSteps } = step;
-      
+
       // Evaluate condition
       const conditionResult = this._evaluateCondition(condition, context);
-      
+
       // Execute appropriate branch
       const stepsToExecute = conditionResult ? thenSteps : elseSteps;
-      
+
       if (stepsToExecute && stepsToExecute.length > 0) {
         for (const subStep of stepsToExecute) {
           await this._executeStep(subStep, context);
@@ -264,22 +264,21 @@ class WorkflowExecutor extends EventEmitter {
     // Parallel execution handler
     this.stepHandlers.set(StepType.PARALLEL, async (step, context) => {
       const { steps, maxConcurrency = 5 } = step;
-      
+
       const results = [];
       const executing = new Set();
-      
+
       for (const subStep of steps) {
         if (executing.size >= maxConcurrency) {
           const completed = await Promise.race([...executing]);
           executing.delete(completed.promise);
           results.push(completed.result);
         }
-        
-        const promise = this._executeStep(subStep, context)
-          .then(result => ({ promise, result }));
+
+        const promise = this._executeStep(subStep, context).then(result => ({ promise, result }));
         executing.add(promise);
       }
-      
+
       // Wait for remaining
       const remaining = await Promise.all([...executing]);
       results.push(...remaining.map(r => r.result));
@@ -294,31 +293,31 @@ class WorkflowExecutor extends EventEmitter {
     // Loop handler
     this.stepHandlers.set(StepType.LOOP, async (step, context) => {
       const { items, itemVariable, indexVariable, steps: loopSteps, maxIterations = 1000 } = step;
-      
+
       // Resolve items
       const resolvedItems = this._resolveVariables(items, context);
-      
+
       if (!Array.isArray(resolvedItems)) {
         throw new Error('Loop items must be an array');
       }
 
       const results = [];
       let iteration = 0;
-      
+
       for (const item of resolvedItems) {
         if (iteration >= maxIterations) {
           this.emit('warning', { message: `Loop reached max iterations: ${maxIterations}` });
           break;
         }
-        
+
         context.setVariable(itemVariable || 'item', item);
         context.setVariable(indexVariable || 'index', iteration);
-        
+
         for (const subStep of loopSteps) {
           const result = await this._executeStep(subStep, context);
           results.push(result);
         }
-        
+
         iteration++;
       }
 
@@ -340,15 +339,15 @@ class WorkflowExecutor extends EventEmitter {
     // Human review handler
     this.stepHandlers.set(StepType.HUMAN_REVIEW, async (step, context) => {
       const { message, options = ['approve', 'reject'] } = step;
-      
+
       context.state = ExecutionState.WAITING_REVIEW;
-      this.emit('review-required', { 
+      this.emit('review-required', {
         stepId: step.id,
         message: this._resolveVariables(message, context),
         options,
-        context
+        context,
       });
-      
+
       // Wait for review (in real implementation, this would wait for external input)
       return { reviewRequested: true, message };
     });
@@ -375,7 +374,7 @@ class WorkflowExecutor extends EventEmitter {
     const context = new ExecutionContext(workflow.id);
     context.state = ExecutionState.RUNNING;
     context.startTime = Date.now();
-    
+
     // Set initial variables
     for (const [key, value] of Object.entries(initialVariables)) {
       context.setVariable(key, value);
@@ -383,10 +382,10 @@ class WorkflowExecutor extends EventEmitter {
 
     // Store execution
     this.executions.set(context.executionId, context);
-    
-    this.emit('execution-started', { 
-      executionId: context.executionId, 
-      workflowId: workflow.id 
+
+    this.emit('execution-started', {
+      executionId: context.executionId,
+      workflowId: workflow.id,
     });
 
     try {
@@ -395,7 +394,7 @@ class WorkflowExecutor extends EventEmitter {
         if (context.state === ExecutionState.CANCELLED) {
           break;
         }
-        
+
         if (context.state === ExecutionState.PAUSED) {
           await this._waitForResume(context);
         }
@@ -405,27 +404,26 @@ class WorkflowExecutor extends EventEmitter {
 
       context.state = ExecutionState.COMPLETED;
       context.endTime = Date.now();
-      
+
       this.emit('execution-completed', {
         executionId: context.executionId,
         duration: context.getDuration(),
-        results: Object.fromEntries(context.stepResults)
+        results: Object.fromEntries(context.stepResults),
       });
-
     } catch (error) {
       context.state = ExecutionState.FAILED;
       context.endTime = Date.now();
       context.errors.push(error);
-      
+
       this.emit('execution-failed', {
         executionId: context.executionId,
         error: error.message,
-        step: context.currentStep
+        step: context.currentStep,
       });
 
       // Apply error handling strategy
       await this._handleExecutionError(error, context, workflow);
-      
+
       throw error;
     }
 
@@ -434,7 +432,7 @@ class WorkflowExecutor extends EventEmitter {
       state: context.state,
       duration: context.getDuration(),
       outputs: this._collectOutputs(context, workflow.outputs),
-      stepResults: Object.fromEntries(context.stepResults)
+      stepResults: Object.fromEntries(context.stepResults),
     };
   }
 
@@ -444,7 +442,7 @@ class WorkflowExecutor extends EventEmitter {
   async _executeStep(step, context, workflow = null) {
     context.currentStep = step.id;
     const startTime = Date.now();
-    
+
     this.emit('step-started', { stepId: step.id, type: step.type });
 
     try {
@@ -466,23 +464,22 @@ class WorkflowExecutor extends EventEmitter {
       // Execute with retry logic
       const result = await this._executeWithRetry(
         () => handler(step, context),
-        step.retry || (workflow?.retryPolicy),
+        step.retry || workflow?.retryPolicy,
         step.id
       );
 
       const duration = Date.now() - startTime;
       const stepResult = new StepResult(step.id, true, result, null, duration);
       context.addStepResult(step.id, stepResult);
-      
+
       this.emit('step-completed', { stepId: step.id, duration, result });
 
       return result;
-
     } catch (error) {
       const duration = Date.now() - startTime;
       const stepResult = new StepResult(step.id, false, null, error.message, duration);
       context.addStepResult(step.id, stepResult);
-      
+
       this.emit('step-failed', { stepId: step.id, error: error.message, duration });
 
       // Apply step-level error handling
@@ -510,15 +507,15 @@ class WorkflowExecutor extends EventEmitter {
         return await fn();
       } catch (error) {
         lastError = error;
-        
+
         if (attempt < maxRetries) {
-          this.emit('step-retry', { 
-            stepId, 
-            attempt: attempt + 1, 
+          this.emit('step-retry', {
+            stepId,
+            attempt: attempt + 1,
             maxRetries,
-            nextRetryMs: currentBackoff
+            nextRetryMs: currentBackoff,
           });
-          
+
           await this._sleep(currentBackoff);
           currentBackoff *= backoffMultiplier;
         }
@@ -582,7 +579,7 @@ class WorkflowExecutor extends EventEmitter {
       executionId: context.executionId,
       error: error.message,
       step: context.currentStep,
-      strategy
+      strategy,
     });
   }
 
@@ -597,24 +594,24 @@ class WorkflowExecutor extends EventEmitter {
         return resolved !== null ? String(resolved) : '';
       });
     }
-    
+
     if (Array.isArray(value)) {
       return value.map(item => this._resolveVariables(item, context));
     }
-    
+
     if (typeof value === 'object' && value !== null) {
       // Check if it's a variable reference
       if (value.$var) {
         return context.getVariable(value.$var, value.default);
       }
-      
+
       const resolved = {};
       for (const [key, val] of Object.entries(value)) {
         resolved[key] = this._resolveVariables(val, context);
       }
       return resolved;
     }
-    
+
     return value;
   }
 
@@ -673,13 +670,13 @@ class WorkflowExecutor extends EventEmitter {
    */
   _collectOutputs(context, outputDefs) {
     const outputs = {};
-    
+
     for (const outputDef of outputDefs) {
       const name = typeof outputDef === 'string' ? outputDef : outputDef.name;
       const source = typeof outputDef === 'string' ? outputDef : outputDef.from;
       outputs[name] = context.getVariable(source);
     }
-    
+
     return outputs;
   }
 
@@ -756,7 +753,7 @@ class WorkflowExecutor extends EventEmitter {
       duration: context.getDuration(),
       stepsCompleted: context.stepResults.size,
       errors: context.errors.map(e => e.message),
-      checkpoints: context.checkpoints.map(cp => cp.name)
+      checkpoints: context.checkpoints.map(cp => cp.name),
     };
   }
 
@@ -775,5 +772,5 @@ module.exports = {
   StepResult,
   StepType,
   ExecutionState,
-  RecoveryStrategy
+  RecoveryStrategy,
 };

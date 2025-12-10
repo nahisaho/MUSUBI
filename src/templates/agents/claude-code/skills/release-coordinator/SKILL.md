@@ -56,11 +56,11 @@ musubi-workflow next monitoring
 
 ### リリースタイプ別フロー
 
-| リリースタイプ | ワークフローアクション |
-|---------------|----------------------|
-| Hotfix | `musubi-workflow init hotfix-xxx` → 高速パス |
-| Patch | 通常フロー（Stage 6→7→8） |
-| Minor/Major | 完全フロー（Stage 0→9） |
+| リリースタイプ | ワークフローアクション                       |
+| -------------- | -------------------------------------------- |
+| Hotfix         | `musubi-workflow init hotfix-xxx` → 高速パス |
+| Patch          | 通常フロー（Stage 6→7→8）                    |
+| Minor/Major    | 完全フロー（Stage 0→9）                      |
 
 ### デプロイ完了チェックリスト
 

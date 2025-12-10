@@ -22,7 +22,7 @@ class PlanEvaluator {
       llmWeight: 0.4,
       historyWeight: 0.3,
       resourceWeight: 0.2,
-      complexityWeight: 0.1
+      complexityWeight: 0.1,
     };
     this.historyStore = options.historyStore || new Map();
     this.metrics = new Map();
@@ -53,7 +53,7 @@ class PlanEvaluator {
     const health = this.calculateHealthScore({
       progress,
       efficiency,
-      failureRate: totalTasks > 0 ? failedTasks.length / totalTasks : 0
+      failureRate: totalTasks > 0 ? failedTasks.length / totalTasks : 0,
     });
 
     const evaluation = {
@@ -64,12 +64,12 @@ class PlanEvaluator {
         completed: completedTasks.length,
         pending: pendingTasks.length,
         failed: failedTasks.length,
-        total: totalTasks
+        total: totalTasks,
       },
       efficiency,
       remaining,
       health,
-      recommendations: this.generateRecommendations({ progress, efficiency, health, failedTasks })
+      recommendations: this.generateRecommendations({ progress, efficiency, health, failedTasks }),
     };
 
     // Store metrics
@@ -98,31 +98,26 @@ class PlanEvaluator {
     const startTime = state.startTime || Date.now();
     const elapsed = Date.now() - startTime;
     const completedTasks = state.completed || [];
-    
+
     // Tasks per minute
-    const tasksPerMinute = elapsed > 0 
-      ? (completedTasks.length / (elapsed / 60000)) 
-      : 0;
+    const tasksPerMinute = elapsed > 0 ? completedTasks.length / (elapsed / 60000) : 0;
 
     // Average task duration
-    const taskDurations = completedTasks
-      .filter(t => t.duration)
-      .map(t => t.duration);
-    const avgDuration = taskDurations.length > 0
-      ? taskDurations.reduce((a, b) => a + b, 0) / taskDurations.length
-      : 0;
+    const taskDurations = completedTasks.filter(t => t.duration).map(t => t.duration);
+    const avgDuration =
+      taskDurations.length > 0
+        ? taskDurations.reduce((a, b) => a + b, 0) / taskDurations.length
+        : 0;
 
     // Retry ratio
     const retryCount = state.retries || 0;
-    const retryRatio = completedTasks.length > 0
-      ? retryCount / completedTasks.length
-      : 0;
+    const retryRatio = completedTasks.length > 0 ? retryCount / completedTasks.length : 0;
 
     return {
       tasksPerMinute: Math.round(tasksPerMinute * 100) / 100,
       avgTaskDuration: Math.round(avgDuration),
       retryRatio: Math.round(retryRatio * 100) / 100,
-      elapsedTime: elapsed
+      elapsedTime: elapsed,
     };
   }
 
@@ -135,7 +130,7 @@ class PlanEvaluator {
   estimateRemaining(plan, currentState) {
     const pendingTasks = currentState.pending || [];
     const efficiency = this.calculateEfficiency(currentState);
-    
+
     // Use average duration to estimate remaining time
     let estimatedTime = 0;
     if (efficiency.avgTaskDuration > 0 && pendingTasks.length > 0) {
@@ -151,7 +146,7 @@ class PlanEvaluator {
       taskCount: pendingTasks.length,
       estimatedTime,
       estimatedTimeFormatted: this.formatDuration(estimatedTime),
-      confidence: Math.round(confidence * 100) / 100
+      confidence: Math.round(confidence * 100) / 100,
     };
   }
 
@@ -164,14 +159,17 @@ class PlanEvaluator {
   compareEfficiency(currentPath, alternativePath) {
     // Estimate current path remaining effort
     const currentRemaining = this.estimatePathEffort(currentPath);
-    
+
     // Estimate alternative path effort
     const alternativeEffort = this.estimatePathEffort(alternativePath);
 
     // Calculate improvement
-    const improvement = currentRemaining.estimatedTime > 0
-      ? ((currentRemaining.estimatedTime - alternativeEffort.estimatedTime) / currentRemaining.estimatedTime) * 100
-      : 0;
+    const improvement =
+      currentRemaining.estimatedTime > 0
+        ? ((currentRemaining.estimatedTime - alternativeEffort.estimatedTime) /
+            currentRemaining.estimatedTime) *
+          100
+        : 0;
 
     // Factor in switching cost
     const switchingCost = this.estimateSwitchingCost(currentPath, alternativePath);
@@ -182,7 +180,7 @@ class PlanEvaluator {
       improvement: Math.round(improvement * 100) / 100,
       switchingCost,
       netBenefit: improvement - switchingCost.percentage,
-      recommendation: this.getPathRecommendation(improvement, switchingCost)
+      recommendation: this.getPathRecommendation(improvement, switchingCost),
     };
   }
 
@@ -195,7 +193,7 @@ class PlanEvaluator {
   estimatePathEffort(path) {
     const tasks = path.tasks || [];
     let totalEstimate = 0;
-    
+
     for (const task of tasks) {
       const historicalData = this.getHistoricalData(task.skill || task.name);
       if (historicalData) {
@@ -209,7 +207,7 @@ class PlanEvaluator {
     return {
       taskCount: tasks.length,
       estimatedTime: totalEstimate,
-      estimatedTimeFormatted: this.formatDuration(totalEstimate)
+      estimatedTimeFormatted: this.formatDuration(totalEstimate),
     };
   }
 
@@ -224,24 +222,25 @@ class PlanEvaluator {
     // Calculate overlap between paths
     const currentTaskIds = new Set((currentPath.tasks || []).map(t => t.id));
     const altTaskIds = new Set((alternativePath.tasks || []).map(t => t.id));
-    
+
     const overlap = [...currentTaskIds].filter(id => altTaskIds.has(id)).length;
     const divergence = altTaskIds.size - overlap;
-    
+
     // Switching cost increases with divergence
     const baseCost = divergence * 5000; // 5s per divergent task
     const contextCost = currentPath.contextSize ? currentPath.contextSize * 1000 : 0;
-    
+
     const totalCost = baseCost + contextCost;
-    const percentage = totalCost > 0 && alternativePath.estimatedTime
-      ? (totalCost / alternativePath.estimatedTime) * 100
-      : 0;
+    const percentage =
+      totalCost > 0 && alternativePath.estimatedTime
+        ? (totalCost / alternativePath.estimatedTime) * 100
+        : 0;
 
     return {
       time: totalCost,
       percentage: Math.round(percentage * 100) / 100,
       overlap,
-      divergence
+      divergence,
     };
   }
 
@@ -254,7 +253,7 @@ class PlanEvaluator {
    */
   getPathRecommendation(improvement, switchingCost) {
     const netBenefit = improvement - switchingCost.percentage;
-    
+
     if (netBenefit > 20) return 'strongly-recommended';
     if (netBenefit > 10) return 'recommended';
     if (netBenefit > 0) return 'marginally-better';
@@ -270,27 +269,23 @@ class PlanEvaluator {
    */
   calculateHealthScore(metrics) {
     const { progress, efficiency, failureRate } = metrics;
-    
+
     // Calculate component scores
     const progressScore = progress / 100;
     const efficiencyScore = Math.min(1, efficiency.tasksPerMinute / 2); // Normalize to 2 tasks/min
     const reliabilityScore = 1 - Math.min(1, failureRate * 5); // 20% failure = 0 score
-    
+
     // Weighted average
-    const overall = (
-      progressScore * 0.3 +
-      efficiencyScore * 0.3 +
-      reliabilityScore * 0.4
-    );
+    const overall = progressScore * 0.3 + efficiencyScore * 0.3 + reliabilityScore * 0.4;
 
     return {
       overall: Math.round(overall * 100) / 100,
       components: {
         progress: Math.round(progressScore * 100) / 100,
         efficiency: Math.round(efficiencyScore * 100) / 100,
-        reliability: Math.round(reliabilityScore * 100) / 100
+        reliability: Math.round(reliabilityScore * 100) / 100,
       },
-      status: this.getHealthStatus(overall)
+      status: this.getHealthStatus(overall),
     };
   }
 
@@ -319,11 +314,15 @@ class PlanEvaluator {
     const { progress: _progress, efficiency, health, failedTasks } = data;
 
     if (health.components?.reliability < 0.5) {
-      recommendations.push('High failure rate detected. Consider reviewing failed task configurations.');
+      recommendations.push(
+        'High failure rate detected. Consider reviewing failed task configurations.'
+      );
     }
 
     if (health.components?.efficiency < 0.3) {
-      recommendations.push('Low efficiency detected. Consider parallelizing tasks or optimizing task parameters.');
+      recommendations.push(
+        'Low efficiency detected. Consider parallelizing tasks or optimizing task parameters.'
+      );
     }
 
     if (failedTasks && failedTasks.length > 2) {
@@ -345,12 +344,12 @@ class PlanEvaluator {
    */
   estimateTaskComplexity(task) {
     let complexity = 1;
-    
+
     if (task.dependencies?.length > 0) complexity += 0.5;
     if (task.parameters && Object.keys(task.parameters).length > 3) complexity += 0.5;
     if (task.skill?.includes('analysis') || task.skill?.includes('generate')) complexity += 1;
     if (task.retryable === false) complexity += 0.5;
-    
+
     return Math.min(5, complexity);
   }
 
@@ -373,7 +372,7 @@ class PlanEvaluator {
     const existing = this.historyStore.get(skillName) || {
       executions: 0,
       successCount: 0,
-      totalDuration: 0
+      totalDuration: 0,
     };
 
     existing.executions++;

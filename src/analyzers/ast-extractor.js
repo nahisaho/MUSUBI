@@ -1,14 +1,14 @@
 /**
  * AST Extractor
- * 
+ *
  * Extracts Abstract Syntax Tree information from source code files.
  * Provides structured analysis of code structure, symbols, and relationships.
- * 
+ *
  * Part of MUSUBI v5.0.0 - Codebase Intelligence
- * 
+ *
  * @module analyzers/ast-extractor
  * @version 1.0.0
- * 
+ *
  * @traceability
  * - Requirement: REQ-P4-002 (AST Extraction and Analysis)
  * - Design: docs/design/tdd-musubi-v5.0.0.md#2.2
@@ -60,43 +60,53 @@ const { EventEmitter } = require('events');
 const PATTERNS = {
   javascript: {
     // Function declarations (removed ^ to match anywhere in line)
-    functionDecl: /(?:^|\n)\s*(?:export\s+)?(?:async\s+)?function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(([^)]*)\)/g,
+    functionDecl:
+      /(?:^|\n)\s*(?:export\s+)?(?:async\s+)?function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(([^)]*)\)/g,
     // Arrow functions with const/let/var
-    arrowFunc: /(?:export\s+)?(?:const|let|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>/g,
+    arrowFunc:
+      /(?:export\s+)?(?:const|let|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>/g,
     // Class declarations
-    classDecl: /(?:^|\n)\s*(?:export\s+)?class\s+([a-zA-Z_$][a-zA-Z0-9_$]*)(?:\s+extends\s+([a-zA-Z_$][a-zA-Z0-9_$]*))?/g,
+    classDecl:
+      /(?:^|\n)\s*(?:export\s+)?class\s+([a-zA-Z_$][a-zA-Z0-9_$]*)(?:\s+extends\s+([a-zA-Z_$][a-zA-Z0-9_$]*))?/g,
     // Class methods
-    methodDecl: /\n\s+(?:static\s+)?(?:async\s+)?(?:get\s+|set\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\([^)]*\)\s*\{/g,
+    methodDecl:
+      /\n\s+(?:static\s+)?(?:async\s+)?(?:get\s+|set\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\([^)]*\)\s*\{/g,
     // Variable declarations
     constDecl: /(?:export\s+)?(?:const|let|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/g,
     // ES6 imports
-    importStmt: /import\s+(?:(\{[^}]+\})|([a-zA-Z_$][a-zA-Z0-9_$]*)(?:\s*,\s*(\{[^}]+\}))?|\*\s+as\s+([a-zA-Z_$][a-zA-Z0-9_$]*))\s+from\s+['"](.*?)['"]/g,
+    importStmt:
+      /import\s+(?:(\{[^}]+\})|([a-zA-Z_$][a-zA-Z0-9_$]*)(?:\s*,\s*(\{[^}]+\}))?|\*\s+as\s+([a-zA-Z_$][a-zA-Z0-9_$]*))\s+from\s+['"](.*?)['"]/g,
     // CommonJS require
-    requireStmt: /(?:const|let|var)\s+(?:(\{[^}]+\})|([a-zA-Z_$][a-zA-Z0-9_$]*))\s*=\s*require\s*\(\s*['"](.*?)['"]\s*\)/g,
+    requireStmt:
+      /(?:const|let|var)\s+(?:(\{[^}]+\})|([a-zA-Z_$][a-zA-Z0-9_$]*))\s*=\s*require\s*\(\s*['"](.*?)['"]\s*\)/g,
     // Exports - capture function/class/const names after export
-    exportStmt: /export\s+(?:default\s+)?(?:(const|let|var|function|class|async\s+function)\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)?/g,
+    exportStmt:
+      /export\s+(?:default\s+)?(?:(const|let|var|function|class|async\s+function)\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)?/g,
     namedExport: /export\s*\{([^}]+)\}/gm,
     // JSDoc comments
     jsdoc: /\/\*\*\s*([\s\S]*?)\s*\*\//g,
     // Single-line comments
-    comment: /\/\/\s*(.+)$/g
+    comment: /\/\/\s*(.+)$/g,
   },
-  
+
   typescript: {
     // Extends JavaScript patterns
     // Interface declarations
-    interfaceDecl: /(?:^|\n)\s*(?:export\s+)?interface\s+([a-zA-Z_$][a-zA-Z0-9_$]*)(?:<[^>]+>)?(?:\s+extends\s+([^{]+))?/g,
+    interfaceDecl:
+      /(?:^|\n)\s*(?:export\s+)?interface\s+([a-zA-Z_$][a-zA-Z0-9_$]*)(?:<[^>]+>)?(?:\s+extends\s+([^{]+))?/g,
     // Type aliases
     typeDecl: /(?:^|\n)\s*(?:export\s+)?type\s+([a-zA-Z_$][a-zA-Z0-9_$]*)(?:<[^>]+>)?\s*=/g,
     // Enum declarations
     enumDecl: /(?:^|\n)\s*(?:export\s+)?(?:const\s+)?enum\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g,
     // Function with types
-    typedFunc: /(?:export\s+)?(?:async\s+)?function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)(?:<[^>]+>)?\s*\(([^)]*)\)\s*:\s*([^{]+)/g
+    typedFunc:
+      /(?:export\s+)?(?:async\s+)?function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)(?:<[^>]+>)?\s*\(([^)]*)\)\s*:\s*([^{]+)/g,
   },
-  
+
   python: {
     // Function definitions
-    functionDef: /(?:^|\n)(?:async\s+)?def\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)(?:\s*->\s*([^\s:]+))?/g,
+    functionDef:
+      /(?:^|\n)(?:async\s+)?def\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)(?:\s*->\s*([^\s:]+))?/g,
     // Class definitions
     classDef: /(?:^|\n)class\s+([a-zA-Z_][a-zA-Z0-9_]*)(?:\s*\(([^)]*)\))?/g,
     // Method definitions (inside class)
@@ -109,8 +119,8 @@ const PATTERNS = {
     // Docstrings
     docstring: /"""([\s\S]*?)"""|'''([\s\S]*?)'''/g,
     // Type hints
-    typeHint: /:\s*([a-zA-Z_][a-zA-Z0-9_[\],\s]*)/g
-  }
+    typeHint: /:\s*([a-zA-Z_][a-zA-Z0-9_[\],\s]*)/g,
+  },
 };
 
 /**
@@ -130,11 +140,11 @@ class ASTExtractor extends EventEmitter {
     this.supportedLanguages = options.supportedLanguages || ['javascript', 'typescript', 'python'];
     this.includeDocstrings = options.includeDocstrings ?? true;
     this.extractComments = options.extractComments ?? false;
-    
+
     // Results cache
     this.cache = new Map();
   }
-  
+
   /**
    * Extract AST from file
    * @param {string} filePath - File path
@@ -143,7 +153,7 @@ class ASTExtractor extends EventEmitter {
   async extractFromFile(filePath) {
     const content = await fs.promises.readFile(filePath, 'utf-8');
     const language = this.detectLanguage(filePath);
-    
+
     if (!this.supportedLanguages.includes(language)) {
       return {
         path: filePath,
@@ -152,13 +162,13 @@ class ASTExtractor extends EventEmitter {
         imports: [],
         exports: [],
         structure: {},
-        metadata: { supported: false }
+        metadata: { supported: false },
       };
     }
-    
+
     return this.extract(content, language, filePath);
   }
-  
+
   /**
    * Extract AST from content
    * @param {string} content - Source code content
@@ -168,7 +178,7 @@ class ASTExtractor extends EventEmitter {
    */
   extract(content, language, filePath = '<source>') {
     this.emit('extract:start', { filePath, language });
-    
+
     const lines = content.split('\n');
     const symbols = [];
     const imports = [];
@@ -176,9 +186,9 @@ class ASTExtractor extends EventEmitter {
     const structure = {
       classes: [],
       functions: [],
-      variables: []
+      variables: [],
     };
-    
+
     try {
       switch (language) {
         case 'javascript':
@@ -192,7 +202,7 @@ class ASTExtractor extends EventEmitter {
           this.extractPython(content, lines, symbols, imports, exports, structure);
           break;
       }
-      
+
       const result = {
         path: filePath,
         language,
@@ -203,13 +213,12 @@ class ASTExtractor extends EventEmitter {
         metadata: {
           lineCount: lines.length,
           symbolCount: symbols.length,
-          extractedAt: new Date().toISOString()
-        }
+          extractedAt: new Date().toISOString(),
+        },
       };
-      
+
       this.emit('extract:complete', result);
       return result;
-      
     } catch (error) {
       this.emit('extract:error', { filePath, error });
       return {
@@ -219,21 +228,21 @@ class ASTExtractor extends EventEmitter {
         imports: [],
         exports: [],
         structure: {},
-        metadata: { error: error.message }
+        metadata: { error: error.message },
       };
     }
   }
-  
+
   /**
    * Extract JavaScript/TypeScript patterns
    * @private
    */
   extractJavaScript(content, lines, symbols, imports, exports, structure) {
     const patterns = PATTERNS.javascript;
-    
+
     // Extract docstrings for association
     const docstrings = this.extractDocstrings(content, 'javascript');
-    
+
     // Functions
     let match;
     const funcPattern = new RegExp(patterns.functionDecl.source, 'g');
@@ -243,7 +252,7 @@ class ASTExtractor extends EventEmitter {
       const isAsync = match[0].includes('async');
       const params = this.parseParams(match[2]);
       const doc = this.findNearestDocstring(docstrings, line);
-      
+
       const symbol = {
         name: match[1],
         type: 'function',
@@ -252,17 +261,17 @@ class ASTExtractor extends EventEmitter {
         params,
         isExported,
         isAsync,
-        docstring: doc
+        docstring: doc,
       };
-      
+
       symbols.push(symbol);
       structure.functions.push(symbol.name);
-      
+
       if (isExported) {
         exports.push(match[1]);
       }
     }
-    
+
     // Arrow functions
     const arrowPattern = new RegExp(patterns.arrowFunc.source, 'g');
     while ((match = arrowPattern.exec(content)) !== null) {
@@ -270,31 +279,31 @@ class ASTExtractor extends EventEmitter {
       const isExported = match[0].includes('export ');
       const isAsync = match[0].includes('async');
       const doc = this.findNearestDocstring(docstrings, line);
-      
+
       const symbol = {
         name: match[1],
         type: 'function',
         line,
         isExported,
         isAsync,
-        docstring: doc
+        docstring: doc,
       };
-      
+
       symbols.push(symbol);
       structure.functions.push(symbol.name);
-      
+
       if (isExported) {
         exports.push(match[1]);
       }
     }
-    
+
     // Classes
     const classPattern = new RegExp(patterns.classDecl.source, 'g');
     while ((match = classPattern.exec(content)) !== null) {
       const line = this.getLineNumber(content, match.index);
       const isExported = match[0].includes('export ');
       const doc = this.findNearestDocstring(docstrings, line);
-      
+
       const classSymbol = {
         name: match[1],
         type: 'class',
@@ -302,38 +311,38 @@ class ASTExtractor extends EventEmitter {
         isExported,
         extends: match[2] || null,
         docstring: doc,
-        methods: []
+        methods: [],
       };
-      
+
       // Extract class methods
       const classEndIndex = this.findClassEnd(content, match.index);
       const classContent = content.slice(match.index, classEndIndex);
       const methodPattern = new RegExp(patterns.methodDecl.source, 'gm');
       let methodMatch;
-      
+
       while ((methodMatch = methodPattern.exec(classContent)) !== null) {
         classSymbol.methods.push(methodMatch[1]);
-        
+
         symbols.push({
           name: `${match[1]}.${methodMatch[1]}`,
           type: 'method',
           line: line + this.getLineNumber(classContent, methodMatch.index) - 1,
-          parentClass: match[1]
+          parentClass: match[1],
         });
       }
-      
+
       symbols.push(classSymbol);
       structure.classes.push({
         name: classSymbol.name,
         extends: classSymbol.extends,
-        methods: classSymbol.methods
+        methods: classSymbol.methods,
       });
-      
+
       if (isExported) {
         exports.push(match[1]);
       }
     }
-    
+
     // Imports (ES6)
     const importPattern = new RegExp(patterns.importStmt.source, 'gm');
     while ((match = importPattern.exec(content)) !== null) {
@@ -342,10 +351,13 @@ class ASTExtractor extends EventEmitter {
       let names = [];
       let isDefault = false;
       let isNamespace = false;
-      
+
       if (match[1]) {
         // Named imports { a, b }
-        names = match[1].replace(/[{}]/g, '').split(',').map(n => n.trim());
+        names = match[1]
+          .replace(/[{}]/g, '')
+          .split(',')
+          .map(n => n.trim());
       }
       if (match[2]) {
         // Default import
@@ -354,43 +366,51 @@ class ASTExtractor extends EventEmitter {
       }
       if (match[3]) {
         // Additional named imports after default
-        names.push(...match[3].replace(/[{}]/g, '').split(',').map(n => n.trim()));
+        names.push(
+          ...match[3]
+            .replace(/[{}]/g, '')
+            .split(',')
+            .map(n => n.trim())
+        );
       }
       if (match[4]) {
         // Namespace import * as X
         names.push(match[4]);
         isNamespace = true;
       }
-      
+
       imports.push({ source, names, isDefault, isNamespace, line });
     }
-    
+
     // CommonJS require
     const requirePattern = new RegExp(patterns.requireStmt.source, 'gm');
     while ((match = requirePattern.exec(content)) !== null) {
       const line = this.getLineNumber(content, match.index);
       const source = match[3];
       let names = [];
-      
+
       if (match[1]) {
         // Destructured require
-        names = match[1].replace(/[{}]/g, '').split(',').map(n => n.trim());
+        names = match[1]
+          .replace(/[{}]/g, '')
+          .split(',')
+          .map(n => n.trim());
       }
       if (match[2]) {
         // Simple require
         names.push(match[2]);
       }
-      
+
       imports.push({ source, names, isDefault: !!match[2], isNamespace: false, line });
     }
-    
+
     // Named exports: export { a, b }
     const namedExportPattern = new RegExp(patterns.namedExport.source, 'gm');
     while ((match = namedExportPattern.exec(content)) !== null) {
       const names = match[1].split(',').map(n => n.trim().split(' as ')[0].trim());
       exports.push(...names);
     }
-    
+
     // Direct exports: export const/let/var/function/class name
     const exportStmtPattern = new RegExp(patterns.exportStmt.source, 'gm');
     while ((match = exportStmtPattern.exec(content)) !== null) {
@@ -400,7 +420,7 @@ class ASTExtractor extends EventEmitter {
       }
     }
   }
-  
+
   /**
    * Extract TypeScript-specific patterns
    * @private
@@ -408,51 +428,51 @@ class ASTExtractor extends EventEmitter {
   extractTypeScript(content, lines, symbols, _structure) {
     const patterns = PATTERNS.typescript;
     let match;
-    
+
     // Interfaces
     const interfacePattern = new RegExp(patterns.interfaceDecl.source, 'gm');
     while ((match = interfacePattern.exec(content)) !== null) {
       const line = this.getLineNumber(content, match.index);
       const isExported = match[0].includes('export');
-      
+
       symbols.push({
         name: match[1],
         type: 'interface',
         line,
         isExported,
-        extends: match[2] ? match[2].split(',').map(s => s.trim()) : []
+        extends: match[2] ? match[2].split(',').map(s => s.trim()) : [],
       });
     }
-    
+
     // Type aliases
     const typePattern = new RegExp(patterns.typeDecl.source, 'gm');
     while ((match = typePattern.exec(content)) !== null) {
       const line = this.getLineNumber(content, match.index);
       const isExported = match[0].includes('export');
-      
+
       symbols.push({
         name: match[1],
         type: 'type',
         line,
-        isExported
+        isExported,
       });
     }
-    
+
     // Enums
     const enumPattern = new RegExp(patterns.enumDecl.source, 'gm');
     while ((match = enumPattern.exec(content)) !== null) {
       const line = this.getLineNumber(content, match.index);
       const isExported = match[0].includes('export');
-      
+
       symbols.push({
         name: match[1],
         type: 'enum',
         line,
-        isExported
+        isExported,
       });
     }
   }
-  
+
   /**
    * Extract Python patterns
    * @private
@@ -460,7 +480,7 @@ class ASTExtractor extends EventEmitter {
   extractPython(content, lines, symbols, imports, exports, structure) {
     const patterns = PATTERNS.python;
     let match;
-    
+
     // Collect decorators for association
     const decorators = [];
     const decoratorPattern = new RegExp(patterns.decorator.source, 'gm');
@@ -468,10 +488,10 @@ class ASTExtractor extends EventEmitter {
       const line = this.getLineNumber(content, match.index);
       decorators.push({ name: match[1], line });
     }
-    
+
     // Extract docstrings
     const docstrings = this.extractDocstrings(content, 'python');
-    
+
     // Functions
     const funcPattern = new RegExp(patterns.functionDef.source, 'gm');
     while ((match = funcPattern.exec(content)) !== null) {
@@ -480,10 +500,8 @@ class ASTExtractor extends EventEmitter {
       const params = this.parseParams(match[2]);
       const returnType = match[3] || null;
       const doc = this.findNearestDocstring(docstrings, line);
-      const funcDecorators = decorators
-        .filter(d => d.line === line - 1)
-        .map(d => d.name);
-      
+      const funcDecorators = decorators.filter(d => d.line === line - 1).map(d => d.name);
+
       const symbol = {
         name: match[1],
         type: 'function',
@@ -493,28 +511,26 @@ class ASTExtractor extends EventEmitter {
         isAsync,
         docstring: doc,
         decorators: funcDecorators,
-        visibility: match[1].startsWith('_') ? 'private' : 'public'
+        visibility: match[1].startsWith('_') ? 'private' : 'public',
       };
-      
+
       symbols.push(symbol);
       structure.functions.push(symbol.name);
-      
+
       // Python uses __all__ for explicit exports, but we mark non-underscore as potentially exported
       if (!match[1].startsWith('_')) {
         exports.push(match[1]);
       }
     }
-    
+
     // Classes
     const classPattern = new RegExp(patterns.classDef.source, 'gm');
     while ((match = classPattern.exec(content)) !== null) {
       const line = this.getLineNumber(content, match.index);
       const doc = this.findNearestDocstring(docstrings, line);
       const baseClasses = match[2] ? match[2].split(',').map(s => s.trim()) : [];
-      const classDecorators = decorators
-        .filter(d => d.line === line - 1)
-        .map(d => d.name);
-      
+      const classDecorators = decorators.filter(d => d.line === line - 1).map(d => d.name);
+
       const classSymbol = {
         name: match[1],
         type: 'class',
@@ -523,40 +539,40 @@ class ASTExtractor extends EventEmitter {
         docstring: doc,
         decorators: classDecorators,
         methods: [],
-        visibility: match[1].startsWith('_') ? 'private' : 'public'
+        visibility: match[1].startsWith('_') ? 'private' : 'public',
       };
-      
+
       // Extract class methods
       const classEndIndex = this.findPythonClassEnd(content, lines, match.index);
       const classContent = content.slice(match.index, classEndIndex);
       const methodPattern = new RegExp(patterns.methodDef.source, 'gm');
       let methodMatch;
-      
+
       while ((methodMatch = methodPattern.exec(classContent)) !== null) {
         const methodName = methodMatch[1];
         classSymbol.methods.push(methodName);
-        
+
         symbols.push({
           name: `${match[1]}.${methodName}`,
           type: 'method',
           line: line + this.getLineNumber(classContent, methodMatch.index) - 1,
           parentClass: match[1],
-          visibility: methodName.startsWith('_') ? 'private' : 'public'
+          visibility: methodName.startsWith('_') ? 'private' : 'public',
         });
       }
-      
+
       symbols.push(classSymbol);
       structure.classes.push({
         name: classSymbol.name,
         extends: classSymbol.extends,
-        methods: classSymbol.methods
+        methods: classSymbol.methods,
       });
-      
+
       if (!match[1].startsWith('_')) {
         exports.push(match[1]);
       }
     }
-    
+
     // Imports
     const importFromPattern = new RegExp(patterns.importFrom.source, 'gm');
     while ((match = importFromPattern.exec(content)) !== null) {
@@ -566,20 +582,20 @@ class ASTExtractor extends EventEmitter {
         const parts = n.trim().split(' as ');
         return parts[0].trim();
       });
-      
+
       imports.push({ source, names, isDefault: false, isNamespace: false, line });
     }
-    
+
     const importModulePattern = new RegExp(patterns.importModule.source, 'gm');
     while ((match = importModulePattern.exec(content)) !== null) {
       const line = this.getLineNumber(content, match.index);
       const source = match[1];
       const alias = match[2] || match[1];
-      
+
       imports.push({ source, names: [alias], isDefault: true, isNamespace: false, line });
     }
   }
-  
+
   /**
    * Extract docstrings from content
    * @private
@@ -587,15 +603,13 @@ class ASTExtractor extends EventEmitter {
   extractDocstrings(content, language) {
     const docstrings = [];
     let match;
-    
+
     if (language === 'javascript' || language === 'typescript') {
       const pattern = PATTERNS.javascript.jsdoc;
       const jsdocPattern = new RegExp(pattern.source, 'gm');
       while ((match = jsdocPattern.exec(content)) !== null) {
         const line = this.getLineNumber(content, match.index);
-        const text = match[1]
-          .replace(/^\s*\*\s?/gm, '')
-          .trim();
+        const text = match[1].replace(/^\s*\*\s?/gm, '').trim();
         docstrings.push({ line, text });
       }
     } else if (language === 'python') {
@@ -607,25 +621,23 @@ class ASTExtractor extends EventEmitter {
         docstrings.push({ line, text });
       }
     }
-    
+
     return docstrings;
   }
-  
+
   /**
    * Find nearest docstring before a line
    * @private
    */
   findNearestDocstring(docstrings, line) {
     if (!this.includeDocstrings) return null;
-    
+
     // Look for docstring within 10 lines before or 2 lines after
     // JSDoc/docstrings can span multiple lines, so we need a wider range
-    const candidates = docstrings.filter(d => 
-      d.line >= line - 10 && d.line <= line + 2
-    );
-    
+    const candidates = docstrings.filter(d => d.line >= line - 10 && d.line <= line + 2);
+
     if (candidates.length === 0) return null;
-    
+
     // Return the closest one that comes before the target line
     const before = candidates.filter(d => d.line <= line);
     if (before.length > 0) {
@@ -633,12 +645,12 @@ class ASTExtractor extends EventEmitter {
       before.sort((a, b) => b.line - a.line);
       return before[0].text;
     }
-    
+
     // Fall back to any candidate
     candidates.sort((a, b) => Math.abs(a.line - line) - Math.abs(b.line - line));
     return candidates[0].text;
   }
-  
+
   /**
    * Get line number from character index
    * @private
@@ -646,14 +658,14 @@ class ASTExtractor extends EventEmitter {
   getLineNumber(content, index) {
     return content.slice(0, index).split('\n').length;
   }
-  
+
   /**
    * Parse function parameters
    * @private
    */
   parseParams(paramsStr) {
     if (!paramsStr || !paramsStr.trim()) return [];
-    
+
     return paramsStr
       .split(',')
       .map(p => p.trim())
@@ -664,7 +676,7 @@ class ASTExtractor extends EventEmitter {
         return name;
       });
   }
-  
+
   /**
    * Find end of JavaScript class
    * @private
@@ -672,7 +684,7 @@ class ASTExtractor extends EventEmitter {
   findClassEnd(content, startIndex) {
     let depth = 0;
     let inClass = false;
-    
+
     for (let i = startIndex; i < content.length; i++) {
       if (content[i] === '{') {
         depth++;
@@ -684,10 +696,10 @@ class ASTExtractor extends EventEmitter {
         }
       }
     }
-    
+
     return content.length;
   }
-  
+
   /**
    * Find end of Python class (by indentation)
    * @private
@@ -696,11 +708,11 @@ class ASTExtractor extends EventEmitter {
     const startLine = this.getLineNumber(content, startIndex);
     const classLine = lines[startLine - 1];
     const classIndent = classLine.match(/^(\s*)/)[1].length;
-    
+
     for (let i = startLine; i < lines.length; i++) {
       const line = lines[i];
       if (line.trim() === '') continue;
-      
+
       const indent = line.match(/^(\s*)/)[1].length;
       if (indent <= classIndent && i > startLine) {
         // Found line with same or less indentation
@@ -711,10 +723,10 @@ class ASTExtractor extends EventEmitter {
         return charIndex;
       }
     }
-    
+
     return content.length;
   }
-  
+
   /**
    * Detect language from file path
    * @param {string} filePath - File path
@@ -729,11 +741,11 @@ class ASTExtractor extends EventEmitter {
       '.jsx': 'javascript',
       '.ts': 'typescript',
       '.tsx': 'typescript',
-      '.py': 'python'
+      '.py': 'python',
     };
     return langMap[ext] || 'unknown';
   }
-  
+
   /**
    * Generate symbol summary for LLM context
    * @param {FileAST} ast - Parsed AST
@@ -744,7 +756,7 @@ class ASTExtractor extends EventEmitter {
     summary += `Language: ${ast.language}\n`;
     summary += `Lines: ${ast.metadata.lineCount}\n`;
     summary += `Symbols: ${ast.metadata.symbolCount}\n\n`;
-    
+
     // Imports
     if (ast.imports.length > 0) {
       summary += `## Dependencies\n\n`;
@@ -753,7 +765,7 @@ class ASTExtractor extends EventEmitter {
       }
       summary += '\n';
     }
-    
+
     // Classes
     const classes = ast.symbols.filter(s => s.type === 'class');
     if (classes.length > 0) {
@@ -764,18 +776,18 @@ class ASTExtractor extends EventEmitter {
           summary += ` extends ${Array.isArray(cls.extends) ? cls.extends.join(', ') : cls.extends}`;
         }
         summary += '\n';
-        
+
         if (cls.docstring) {
           summary += `${cls.docstring}\n`;
         }
-        
+
         if (cls.methods && cls.methods.length > 0) {
           summary += `Methods: ${cls.methods.join(', ')}\n`;
         }
         summary += '\n';
       }
     }
-    
+
     // Functions
     const functions = ast.symbols.filter(s => s.type === 'function');
     if (functions.length > 0) {
@@ -785,23 +797,23 @@ class ASTExtractor extends EventEmitter {
         if (func.isAsync) summary += ' (async)';
         if (func.isExported) summary += ' [exported]';
         summary += '\n';
-        
+
         if (func.docstring) {
           summary += `  ${func.docstring.split('\n')[0]}\n`;
         }
       }
       summary += '\n';
     }
-    
+
     // Exports
     if (ast.exports.length > 0) {
       summary += `## Exports\n\n`;
       summary += ast.exports.join(', ') + '\n';
     }
-    
+
     return summary;
   }
-  
+
   /**
    * Get cache key
    * @param {string} filePath - File path
@@ -811,7 +823,7 @@ class ASTExtractor extends EventEmitter {
   getCacheKey(filePath, mtime) {
     return `ast:${filePath}:${mtime}`;
   }
-  
+
   /**
    * Get from cache
    * @param {string} filePath - File path
@@ -822,7 +834,7 @@ class ASTExtractor extends EventEmitter {
     const key = this.getCacheKey(filePath, mtime);
     return this.cache.get(key) || null;
   }
-  
+
   /**
    * Add to cache
    * @param {string} filePath - File path
@@ -833,7 +845,7 @@ class ASTExtractor extends EventEmitter {
     const key = this.getCacheKey(filePath, mtime);
     this.cache.set(key, ast);
   }
-  
+
   /**
    * Clear cache
    */
@@ -866,5 +878,5 @@ module.exports = {
   ASTExtractor,
   createASTExtractor,
   extractAST,
-  PATTERNS
+  PATTERNS,
 };

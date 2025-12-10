@@ -6,12 +6,7 @@
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const {
-  SkillLoader,
-  Skill,
-  SkillType,
-  AgentType,
-} = require('../../src/managers/skill-loader');
+const { SkillLoader, Skill, SkillType, AgentType } = require('../../src/managers/skill-loader');
 
 describe('Skill', () => {
   describe('constructor', () => {
@@ -230,20 +225,26 @@ Help content.
       // Create global skill
       const globalDir = path.join(tempDir, 'global-skills');
       fs.mkdirSync(globalDir, { recursive: true });
-      fs.writeFileSync(path.join(globalDir, 'test.md'), `---
+      fs.writeFileSync(
+        path.join(globalDir, 'test.md'),
+        `---
 name: test
 priority: 10
 ---
 Global version.
-`);
+`
+      );
 
       // Create repo skill with same name
-      fs.writeFileSync(path.join(skillsDir, 'test.md'), `---
+      fs.writeFileSync(
+        path.join(skillsDir, 'test.md'),
+        `---
 name: test
 priority: 10
 ---
 Repo version.
-`);
+`
+      );
 
       await loader.loadAll();
       const skill = loader.getSkill('test');
@@ -254,22 +255,28 @@ Repo version.
 
   describe('activateByKeywords', () => {
     beforeEach(async () => {
-      fs.writeFileSync(path.join(skillsDir, 'testing.md'), `---
+      fs.writeFileSync(
+        path.join(skillsDir, 'testing.md'),
+        `---
 name: testing
 triggers:
   - test
   - テスト
 ---
 Testing content.
-`);
-      fs.writeFileSync(path.join(skillsDir, 'coding.md'), `---
+`
+      );
+      fs.writeFileSync(
+        path.join(skillsDir, 'coding.md'),
+        `---
 name: coding
 triggers:
   - code
   - implement
 ---
 Coding content.
-`);
+`
+      );
       await loader.loadAll();
     });
 
@@ -339,13 +346,16 @@ Coding content.
 
   describe('getSummary', () => {
     it('should return markdown summary', async () => {
-      fs.writeFileSync(path.join(skillsDir, 'test.md'), `---
+      fs.writeFileSync(
+        path.join(skillsDir, 'test.md'),
+        `---
 name: test
 triggers:
   - keyword
 ---
 Content.
-`);
+`
+      );
       await loader.loadAll();
 
       const summary = loader.getSummary();
@@ -362,7 +372,9 @@ Content.
 
   describe('formatSkillsForPrompt', () => {
     it('should format skills for LLM prompt', async () => {
-      fs.writeFileSync(path.join(skillsDir, 'test.md'), `---
+      fs.writeFileSync(
+        path.join(skillsDir, 'test.md'),
+        `---
 name: test
 triggers:
   - keyword
@@ -370,7 +382,8 @@ triggers:
 # Test Skill
 
 This is important content.
-`);
+`
+      );
       await loader.loadAll();
       const skills = loader.activateByKeywords('keyword');
 

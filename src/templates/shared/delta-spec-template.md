@@ -10,12 +10,12 @@ Use this template for brownfield project change tracking.
 
 ### Delta Types
 
-| Type | Usage | Example |
-|------|-------|---------|
-| `ADDED` | New requirement/component | `[ADDED] REQ-AUTH-005: OAuth2 support` |
+| Type       | Usage                         | Example                                            |
+| ---------- | ----------------------------- | -------------------------------------------------- |
+| `ADDED`    | New requirement/component     | `[ADDED] REQ-AUTH-005: OAuth2 support`             |
 | `MODIFIED` | Changed requirement/component | `[MODIFIED] REQ-AUTH-001: Updated password policy` |
-| `REMOVED` | Deleted requirement/component | `[REMOVED] REQ-LEGACY-001: Deprecated feature` |
-| `RENAMED` | Renamed identifier | `[RENAMED] UserService → AuthenticationService` |
+| `REMOVED`  | Deleted requirement/component | `[REMOVED] REQ-LEGACY-001: Deprecated feature`     |
+| `RENAMED`  | Renamed identifier            | `[RENAMED] UserService → AuthenticationService`    |
 
 ---
 
@@ -43,15 +43,18 @@ Use this template for brownfield project change tracking.
 - {api | database | ui | backend | frontend | security | performance | testing | documentation | infrastructure | configuration}
 
 ## Before State (for MODIFIED/RENAMED/REMOVED)
-
 ```
+
 {Previous specification, code, or configuration}
+
 ```
 
 ## After State (for ADDED/MODIFIED/RENAMED)
 
 ```
+
 {New specification, code, or configuration}
+
 ```
 
 ## Acceptance Criteria
@@ -85,7 +88,7 @@ Use this template for brownfield project change tracking.
 
 ### ADDED Example
 
-```markdown
+````markdown
 # Delta Specification: DELTA-AUTH-001
 
 **Type**: ADDED
@@ -120,6 +123,7 @@ interface OAuthConfig {
 
 function authenticateOAuth(config: OAuthConfig): Promise<Session>;
 ```
+````
 
 ## Acceptance Criteria
 
@@ -127,7 +131,8 @@ function authenticateOAuth(config: OAuthConfig): Promise<Session>;
 - [ ] Session created with correct user data
 - [ ] Existing email accounts are linked
 - [ ] Failed auth shows appropriate error
-```
+
+````
 
 ### MODIFIED Example
 
@@ -158,7 +163,7 @@ Security audit (SEC-2025-042) identified weak password policy as high risk.
 
 ```typescript
 const PASSWORD_MIN_LENGTH = 8;
-```
+````
 
 ## After State
 
@@ -172,7 +177,8 @@ const PASSWORD_MIN_LENGTH = 12;
 - [ ] Existing passwords remain valid
 - [ ] UI displays updated requirements
 - [ ] Tests updated for new policy
-```
+
+````
 
 ### REMOVED Example
 
@@ -204,7 +210,7 @@ Feature unused (0 invocations in 6 months). Maintenance burden not justified.
 ```typescript
 // Deprecated since v2.0.0
 function exportToXML(data: Record[]): string;
-```
+````
 
 ## Acceptance Criteria
 
@@ -212,7 +218,8 @@ function exportToXML(data: Record[]): string;
 - [ ] Code and tests removed
 - [ ] Documentation updated
 - [ ] Changelog documents breaking change
-```
+
+````
 
 ---
 
@@ -230,7 +237,7 @@ musubi-change show DELTA-AUTH-001
 
 # Analyze impact
 musubi-change impact DELTA-AUTH-001
-```
+````
 
 ---
 

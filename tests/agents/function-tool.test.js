@@ -11,7 +11,7 @@ const {
   parseJSDoc,
   paramsToSchema,
   SchemaBuilder,
-  validateArgs
+  validateArgs,
 } = require('../../src/agents/function-tool');
 
 describe('functionTool', () => {
@@ -29,36 +29,30 @@ describe('functionTool', () => {
     });
 
     test('should create tool with custom options', () => {
-      const tool = functionTool(
-        (x) => x * 2,
-        {
-          name: 'double',
-          description: 'Doubles a number',
-          parameters: {
-            type: 'object',
-            properties: { x: { type: 'number' } }
-          }
-        }
-      );
+      const tool = functionTool(x => x * 2, {
+        name: 'double',
+        description: 'Doubles a number',
+        parameters: {
+          type: 'object',
+          properties: { x: { type: 'number' } },
+        },
+      });
 
       expect(tool.name).toBe('double');
       expect(tool.description).toBe('Doubles a number');
     });
 
     test('should execute handler with arguments', async () => {
-      const tool = functionTool(
-        (a, b) => a + b,
-        {
-          name: 'add',
-          parameters: {
-            type: 'object',
-            properties: {
-              a: { type: 'number' },
-              b: { type: 'number' }
-            }
-          }
-        }
-      );
+      const tool = functionTool((a, b) => a + b, {
+        name: 'add',
+        parameters: {
+          type: 'object',
+          properties: {
+            a: { type: 'number' },
+            b: { type: 'number' },
+          },
+        },
+      });
 
       const result = await tool.handler({ a: 3, b: 5 });
       expect(result).toBe(8);
@@ -72,8 +66,8 @@ describe('functionTool', () => {
       const tool = functionTool(fetchData, {
         parameters: {
           type: 'object',
-          properties: { id: { type: 'string' } }
-        }
+          properties: { id: { type: 'string' } },
+        },
       });
 
       const result = await tool.handler({ id: '123' });
@@ -86,7 +80,7 @@ describe('functionTool', () => {
       function calculate(x, y) {
         return x + y;
       }
-      
+
       calculate.__jsdoc = `
         /**
          * Calculate the sum of two numbers
@@ -108,7 +102,9 @@ describe('functionTool', () => {
     test('should infer parameters from function signature', () => {
       function process(input, options, callback) {
         // Parameters are used for inference only
-        void input; void options; void callback;
+        void input;
+        void options;
+        void callback;
         return 'processed';
       }
 
@@ -126,7 +122,7 @@ describe('functionTools', () => {
     const tools = functionTools({
       add: (a, b) => a + b,
       subtract: (a, b) => a - b,
-      multiply: (a, b) => a * b
+      multiply: (a, b) => a * b,
     });
 
     expect(tools).toHaveLength(3);
@@ -136,12 +132,12 @@ describe('functionTools', () => {
   test('should apply per-function options', () => {
     const tools = functionTools(
       {
-        search: (_query) => [],
-        fetch: (_url) => ''
+        search: _query => [],
+        fetch: _url => '',
       },
       {
         search: { description: 'Search for items' },
-        fetch: { description: 'Fetch a URL' }
+        fetch: { description: 'Fetch a URL' },
       }
     );
 
@@ -152,9 +148,9 @@ describe('functionTools', () => {
 
 describe('asTool decorator', () => {
   test('should work as decorator-style wrapper', () => {
-    const greet = asTool({ description: 'Greets a person' })(
-      function(name) { return `Hello, ${name}!`; }
-    );
+    const greet = asTool({ description: 'Greets a person' })(function (name) {
+      return `Hello, ${name}!`;
+    });
 
     expect(greet.description).toBe('Greets a person');
     expect(typeof greet.handler).toBe('function');
@@ -168,7 +164,9 @@ describe('withJSDoc', () => {
        * A documented function
        * @param {string} input - The input
        */
-    `)(function(input) { return input; });
+    `)(function (input) {
+      return input;
+    });
 
     expect(fn.__jsdoc).toContain('documented function');
   });
@@ -205,7 +203,7 @@ describe('parseJSDoc', () => {
       name: 'name',
       type: 'string',
       required: true,
-      description: 'The user name'
+      description: 'The user name',
     });
     expect(parsed.params[1].type).toBe('number');
     expect(parsed.params[2].required).toBe(false);
@@ -222,7 +220,7 @@ describe('parseJSDoc', () => {
     const parsed = parseJSDoc(jsdoc);
     expect(parsed.returns).toEqual({
       type: 'object',
-      description: 'The user object'
+      description: 'The user object',
     });
   });
 
@@ -255,7 +253,7 @@ describe('paramsToSchema', () => {
   test('should convert params to JSON Schema', () => {
     const params = [
       { name: 'query', type: 'string', required: true, description: 'Search query' },
-      { name: 'limit', type: 'number', required: false, description: 'Max results' }
+      { name: 'limit', type: 'number', required: false, description: 'Max results' },
     ];
 
     const schema = paramsToSchema(params);
@@ -263,25 +261,21 @@ describe('paramsToSchema', () => {
     expect(schema.type).toBe('object');
     expect(schema.properties.query).toEqual({
       type: 'string',
-      description: 'Search query'
+      description: 'Search query',
     });
     expect(schema.properties.limit.type).toBe('number');
     expect(schema.required).toEqual(['query']);
   });
 
   test('should handle union types', () => {
-    const params = [
-      { name: 'id', type: 'string|number', required: true, description: 'ID' }
-    ];
+    const params = [{ name: 'id', type: 'string|number', required: true, description: 'ID' }];
 
     const schema = paramsToSchema(params);
     expect(schema.properties.id.anyOf).toBeDefined();
   });
 
   test('should handle array types', () => {
-    const params = [
-      { name: 'items', type: 'string[]', required: true, description: 'Items' }
-    ];
+    const params = [{ name: 'items', type: 'string[]', required: true, description: 'Items' }];
 
     const schema = paramsToSchema(params);
     expect(schema.properties.items.type).toBe('array');
@@ -302,10 +296,7 @@ describe('SchemaBuilder', () => {
   });
 
   test('should build array schema', () => {
-    const schema = SchemaBuilder.array(
-      { type: 'string' },
-      { description: 'List of names' }
-    );
+    const schema = SchemaBuilder.array({ type: 'string' }, { description: 'List of names' });
     expect(schema.type).toBe('array');
     expect(schema.items).toEqual({ type: 'string' });
   });
@@ -314,7 +305,7 @@ describe('SchemaBuilder', () => {
     const schema = SchemaBuilder.object(
       {
         name: { type: 'string' },
-        age: { type: 'integer' }
+        age: { type: 'integer' },
       },
       ['name']
     );
@@ -331,22 +322,25 @@ describe('SchemaBuilder', () => {
   });
 
   test('should build oneOf schema', () => {
-    const schema = SchemaBuilder.oneOf([
-      { type: 'string' },
-      { type: 'number' }
-    ]);
+    const schema = SchemaBuilder.oneOf([{ type: 'string' }, { type: 'number' }]);
     expect(schema.oneOf).toHaveLength(2);
   });
 
   test('should build complex nested schema', () => {
-    const schema = SchemaBuilder.object({
-      user: SchemaBuilder.object({
-        name: SchemaBuilder.string({ description: 'User name' }),
-        email: SchemaBuilder.string({ format: 'email' })
-      }, ['name', 'email']),
-      tags: SchemaBuilder.array(SchemaBuilder.string()),
-      status: SchemaBuilder.enum(['active', 'inactive'])
-    }, ['user']);
+    const schema = SchemaBuilder.object(
+      {
+        user: SchemaBuilder.object(
+          {
+            name: SchemaBuilder.string({ description: 'User name' }),
+            email: SchemaBuilder.string({ format: 'email' }),
+          },
+          ['name', 'email']
+        ),
+        tags: SchemaBuilder.array(SchemaBuilder.string()),
+        status: SchemaBuilder.enum(['active', 'inactive']),
+      },
+      ['user']
+    );
 
     expect(schema.properties.user.type).toBe('object');
     expect(schema.properties.tags.type).toBe('array');
@@ -360,17 +354,14 @@ describe('validateArgs', () => {
     properties: {
       name: { type: 'string' },
       age: { type: 'integer' },
-      active: { type: 'boolean' }
+      active: { type: 'boolean' },
     },
     required: ['name'],
-    additionalProperties: false
+    additionalProperties: false,
   };
 
   test('should validate valid args', () => {
-    const result = validateArgs(
-      { name: 'John', age: 30, active: true },
-      schema
-    );
+    const result = validateArgs({ name: 'John', age: 30, active: true }, schema);
 
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
@@ -384,10 +375,7 @@ describe('validateArgs', () => {
   });
 
   test('should detect type mismatches', () => {
-    const result = validateArgs(
-      { name: 123, age: 'thirty' },
-      schema
-    );
+    const result = validateArgs({ name: 123, age: 'thirty' }, schema);
 
     expect(result.valid).toBe(false);
     expect(result.errors.some(e => e.includes('name'))).toBe(true);
@@ -395,10 +383,7 @@ describe('validateArgs', () => {
   });
 
   test('should detect unknown properties with additionalProperties=false', () => {
-    const result = validateArgs(
-      { name: 'John', unknown: 'value' },
-      schema
-    );
+    const result = validateArgs({ name: 'John', unknown: 'value' }, schema);
 
     expect(result.valid).toBe(false);
     expect(result.errors).toContain('Unknown parameter: unknown');
@@ -408,8 +393,8 @@ describe('validateArgs', () => {
     const enumSchema = {
       type: 'object',
       properties: {
-        color: { type: 'string', enum: ['red', 'green', 'blue'] }
-      }
+        color: { type: 'string', enum: ['red', 'green', 'blue'] },
+      },
     };
 
     const valid = validateArgs({ color: 'red' }, enumSchema);
@@ -429,34 +414,43 @@ describe('validateArgs', () => {
 describe('integration', () => {
   test('should work with AgentLoop', async () => {
     // Create tools using functionTool
-    const tools = functionTools({
-      add: (a, b) => Number(a) + Number(b),
-      multiply: (a, b) => Number(a) * Number(b)
-    }, {
-      add: {
-        description: 'Add two numbers',
-        parameters: SchemaBuilder.object({
-          a: SchemaBuilder.number({ description: 'First number' }),
-          b: SchemaBuilder.number({ description: 'Second number' })
-        }, ['a', 'b'])
+    const tools = functionTools(
+      {
+        add: (a, b) => Number(a) + Number(b),
+        multiply: (a, b) => Number(a) * Number(b),
       },
-      multiply: {
-        description: 'Multiply two numbers',
-        parameters: SchemaBuilder.object({
-          a: SchemaBuilder.number({ description: 'First number' }),
-          b: SchemaBuilder.number({ description: 'Second number' })
-        }, ['a', 'b'])
+      {
+        add: {
+          description: 'Add two numbers',
+          parameters: SchemaBuilder.object(
+            {
+              a: SchemaBuilder.number({ description: 'First number' }),
+              b: SchemaBuilder.number({ description: 'Second number' }),
+            },
+            ['a', 'b']
+          ),
+        },
+        multiply: {
+          description: 'Multiply two numbers',
+          parameters: SchemaBuilder.object(
+            {
+              a: SchemaBuilder.number({ description: 'First number' }),
+              b: SchemaBuilder.number({ description: 'Second number' }),
+            },
+            ['a', 'b']
+          ),
+        },
       }
-    });
+    );
 
     // Verify tools are properly structured
     expect(tools[0].name).toBe('add');
     expect(tools[0].parameters.properties.a.type).toBe('number');
-    
+
     // Execute tool handlers
     const addResult = await tools[0].handler({ a: 3, b: 5 });
     const multiplyResult = await tools[1].handler({ a: 4, b: 7 });
-    
+
     expect(addResult).toBe(8);
     expect(multiplyResult).toBe(28);
   });

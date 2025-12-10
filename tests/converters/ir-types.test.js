@@ -18,13 +18,13 @@ describe('IR Types', () => {
   describe('createEmptyProjectIR', () => {
     test('should create an empty project IR with correct structure', () => {
       const ir = createEmptyProjectIR();
-      
+
       expect(ir).toHaveProperty('metadata');
       expect(ir).toHaveProperty('constitution');
       expect(ir).toHaveProperty('features');
       expect(ir).toHaveProperty('templates');
       expect(ir).toHaveProperty('memories');
-      
+
       expect(ir.metadata.sourceFormat).toBe('musubi');
       expect(ir.features).toEqual([]);
       expect(ir.templates).toEqual([]);
@@ -34,7 +34,7 @@ describe('IR Types', () => {
   describe('createEmptyFeatureIR', () => {
     test('should create a feature IR with given id and name', () => {
       const feature = createEmptyFeatureIR('001-auth', 'Authentication');
-      
+
       expect(feature.id).toBe('001-auth');
       expect(feature.name).toBe('Authentication');
       expect(feature.status).toBe('draft');
@@ -55,7 +55,8 @@ describe('IR Types', () => {
     });
 
     test('should detect state-driven pattern', () => {
-      const statement = 'WHILE the system is in maintenance mode, the system SHALL reject all requests.';
+      const statement =
+        'WHILE the system is in maintenance mode, the system SHALL reject all requests.';
       expect(detectEARSPattern(statement)).toBe('state-driven');
     });
 
@@ -65,7 +66,8 @@ describe('IR Types', () => {
     });
 
     test('should detect complex pattern', () => {
-      const statement = 'WHILE the user is logged in, WHEN they click save, the system SHALL persist changes.';
+      const statement =
+        'WHILE the user is logged in, WHEN they click save, the system SHALL persist changes.';
       expect(detectEARSPattern(statement)).toBe('complex');
     });
   });
@@ -74,7 +76,7 @@ describe('IR Types', () => {
     test('should parse event-driven statement', () => {
       const statement = 'WHEN the user submits the form, the system SHALL validate the data.';
       const result = parseEARSStatement(statement, 'event-driven');
-      
+
       expect(result.trigger).toBe('the user submits the form');
       expect(result.action).toBe('validate the data');
     });
@@ -82,7 +84,7 @@ describe('IR Types', () => {
     test('should parse state-driven statement', () => {
       const statement = 'WHILE in edit mode, the system SHALL auto-save every minute.';
       const result = parseEARSStatement(statement, 'state-driven');
-      
+
       expect(result.condition).toBe('in edit mode');
       expect(result.action).toBe('auto-save every minute');
     });
@@ -90,7 +92,7 @@ describe('IR Types', () => {
     test('should parse optional statement', () => {
       const statement = 'WHERE debugging is enabled, the system SHALL log all API calls.';
       const result = parseEARSStatement(statement, 'optional');
-      
+
       expect(result.condition).toBe('debugging is enabled');
       expect(result.action).toBe('log all API calls');
     });
@@ -100,7 +102,7 @@ describe('IR Types', () => {
     test('should create requirement from EARS statement', () => {
       const statement = 'WHEN the user logs in, the system SHALL create a session.';
       const req = createRequirementFromEARS('REQ-001', statement);
-      
+
       expect(req.id).toBe('REQ-001');
       expect(req.pattern).toBe('event-driven');
       expect(req.statement).toBe(statement);
@@ -119,12 +121,12 @@ describe('IR Types', () => {
         benefit: 'access personalized content',
         priority: 'P1',
         acceptanceCriteria: [
-          { id: 'AC1', description: 'Valid credentials succeed', testable: true }
+          { id: 'AC1', description: 'Valid credentials succeed', testable: true },
         ],
       };
-      
+
       const req = userScenarioToRequirement(userScenario, 'REQ-001');
-      
+
       expect(req.id).toBe('REQ-001');
       expect(req.pattern).toBe('event-driven');
       expect(req.priority).toBe('P1');
@@ -144,14 +146,15 @@ describe('IR Types', () => {
         priority: 'P1',
         trigger: 'the registered user logs in',
         action: 'access personalized content',
-        statement: 'WHEN the registered user logs in, the system SHALL access personalized content.',
+        statement:
+          'WHEN the registered user logs in, the system SHALL access personalized content.',
         acceptanceCriteria: [
-          { id: 'AC1', description: 'Valid credentials succeed', testable: true }
+          { id: 'AC1', description: 'Valid credentials succeed', testable: true },
         ],
       };
-      
+
       const story = requirementToUserScenario(requirement, 'US1');
-      
+
       expect(story.id).toBe('US1');
       expect(story.title).toBe('User Login');
       expect(story.priority).toBe('P1');

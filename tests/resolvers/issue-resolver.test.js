@@ -6,7 +6,14 @@
 
 'use strict';
 
-const { IssueResolver, IssueInfo, IssueType, ResolverResult, ResolverStatus, ImpactAnalysis } = require('../../src/resolvers/issue-resolver');
+const {
+  IssueResolver,
+  IssueInfo,
+  IssueType,
+  ResolverResult,
+  ResolverStatus,
+  ImpactAnalysis,
+} = require('../../src/resolvers/issue-resolver');
 
 describe('IssueResolver', () => {
   let resolver;

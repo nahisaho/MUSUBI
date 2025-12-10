@@ -45,10 +45,10 @@ class AIComparator {
     const description = options.description || 'Compare visual appearance';
 
     // Check if files exist
-    if (!await fs.pathExists(expectedPath)) {
+    if (!(await fs.pathExists(expectedPath))) {
       throw new Error(`Expected screenshot not found: ${expectedPath}`);
     }
-    if (!await fs.pathExists(actualPath)) {
+    if (!(await fs.pathExists(actualPath))) {
       throw new Error(`Actual screenshot not found: ${actualPath}`);
     }
 
@@ -64,7 +64,7 @@ class AIComparator {
 
       // Call Vision API
       const result = await this.callVisionAPI(expectedBase64, actualBase64, description);
-      
+
       return {
         passed: result.similarity >= threshold * 100,
         similarity: result.similarity,
@@ -101,7 +101,7 @@ class AIComparator {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`,
+        Authorization: `Bearer ${this.apiKey}`,
       },
       body: JSON.stringify({
         model: this.model,
@@ -193,7 +193,7 @@ class AIComparator {
     // Calculate size difference
     const sizeDiff = Math.abs(expectedStat.size - actualStat.size);
     const maxSize = Math.max(expectedStat.size, actualStat.size);
-    const sizeRatio = 1 - (sizeDiff / maxSize);
+    const sizeRatio = 1 - sizeDiff / maxSize;
 
     // Simple heuristic: if sizes are similar, likely similar images
     // This is a rough approximation and should be replaced with actual image comparison
@@ -202,9 +202,10 @@ class AIComparator {
     return {
       passed: similarity >= threshold * 100,
       similarity,
-      differences: similarity < threshold * 100 
-        ? [`File size differs by ${sizeDiff} bytes (${((1 - sizeRatio) * 100).toFixed(1)}%)`]
-        : [],
+      differences:
+        similarity < threshold * 100
+          ? [`File size differs by ${sizeDiff} bytes (${((1 - sizeRatio) * 100).toFixed(1)}%)`]
+          : [],
       details: {
         method: 'fallback-size-comparison',
         expectedSize: expectedStat.size,

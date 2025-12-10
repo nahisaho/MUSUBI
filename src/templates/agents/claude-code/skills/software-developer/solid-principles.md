@@ -11,27 +11,30 @@ SOLID is an acronym for five design principles that make software designs more u
 > **A class should have only one reason to change.**
 
 ### Definition
+
 A class should have only one job or responsibility. If a class has multiple responsibilities, changes to one responsibility may affect the other.
 
 ### Bad Example ❌
+
 ```typescript
 class UserService {
   createUser(data: UserData): User {
     // Create user
     const user = this.repository.create(data);
-    
+
     // Send welcome email (second responsibility!)
     this.emailService.send(user.email, 'Welcome!');
-    
+
     // Log activity (third responsibility!)
     this.logger.log(`User created: ${user.id}`);
-    
+
     return user;
   }
 }
 ```
 
 ### Good Example ✅
+
 ```typescript
 class UserService {
   createUser(data: UserData): User {
@@ -48,6 +51,7 @@ class UserEventHandler {
 ```
 
 ### Checklist
+
 - [ ] Does the class have only one reason to change?
 - [ ] Can you describe the class responsibility in one sentence without "and"?
 - [ ] Are all methods related to the same responsibility?
@@ -59,9 +63,11 @@ class UserEventHandler {
 > **Software entities should be open for extension but closed for modification.**
 
 ### Definition
+
 You should be able to extend a class's behavior without modifying its existing code.
 
 ### Bad Example ❌
+
 ```typescript
 class PaymentProcessor {
   processPayment(type: string, amount: number): void {
@@ -77,6 +83,7 @@ class PaymentProcessor {
 ```
 
 ### Good Example ✅
+
 ```typescript
 interface PaymentMethod {
   process(amount: number): PaymentResult;
@@ -108,6 +115,7 @@ class PaymentProcessor {
 ```
 
 ### Checklist
+
 - [ ] Can new features be added without modifying existing code?
 - [ ] Are extension points (interfaces, abstract classes) defined?
 - [ ] Does adding a new case require only adding new code?
@@ -119,21 +127,26 @@ class PaymentProcessor {
 > **Subtypes must be substitutable for their base types.**
 
 ### Definition
+
 Objects of a superclass should be replaceable with objects of its subclasses without affecting program correctness.
 
 ### Bad Example ❌
+
 ```typescript
 class Rectangle {
-  constructor(public width: number, public height: number) {}
-  
+  constructor(
+    public width: number,
+    public height: number
+  ) {}
+
   setWidth(width: number): void {
     this.width = width;
   }
-  
+
   setHeight(height: number): void {
     this.height = height;
   }
-  
+
   area(): number {
     return this.width * this.height;
   }
@@ -144,7 +157,7 @@ class Square extends Rectangle {
     this.width = width;
     this.height = width; // Violates LSP!
   }
-  
+
   setHeight(height: number): void {
     this.width = height;
     this.height = height; // Violates LSP!
@@ -160,14 +173,18 @@ function testRectangle(rect: Rectangle): void {
 ```
 
 ### Good Example ✅
+
 ```typescript
 interface Shape {
   area(): number;
 }
 
 class Rectangle implements Shape {
-  constructor(public width: number, public height: number) {}
-  
+  constructor(
+    public width: number,
+    public height: number
+  ) {}
+
   area(): number {
     return this.width * this.height;
   }
@@ -175,7 +192,7 @@ class Rectangle implements Shape {
 
 class Square implements Shape {
   constructor(public side: number) {}
-  
+
   area(): number {
     return this.side * this.side;
   }
@@ -183,6 +200,7 @@ class Square implements Shape {
 ```
 
 ### Checklist
+
 - [ ] Can subclass be used anywhere parent is expected?
 - [ ] Do subclasses honor the parent's contract?
 - [ ] Are there any overridden methods that change expected behavior?
@@ -194,9 +212,11 @@ class Square implements Shape {
 > **Clients should not be forced to depend on interfaces they do not use.**
 
 ### Definition
+
 Many specific interfaces are better than one general-purpose interface. Don't force classes to implement methods they don't need.
 
 ### Bad Example ❌
+
 ```typescript
 interface Worker {
   work(): void;
@@ -205,19 +225,32 @@ interface Worker {
 }
 
 class HumanWorker implements Worker {
-  work(): void { /* ... */ }
-  eat(): void { /* ... */ }
-  sleep(): void { /* ... */ }
+  work(): void {
+    /* ... */
+  }
+  eat(): void {
+    /* ... */
+  }
+  sleep(): void {
+    /* ... */
+  }
 }
 
 class RobotWorker implements Worker {
-  work(): void { /* ... */ }
-  eat(): void { throw new Error('Robots don\'t eat!'); } // Forced to implement!
-  sleep(): void { throw new Error('Robots don\'t sleep!'); } // Forced to implement!
+  work(): void {
+    /* ... */
+  }
+  eat(): void {
+    throw new Error("Robots don't eat!");
+  } // Forced to implement!
+  sleep(): void {
+    throw new Error("Robots don't sleep!");
+  } // Forced to implement!
 }
 ```
 
 ### Good Example ✅
+
 ```typescript
 interface Workable {
   work(): void;
@@ -232,18 +265,27 @@ interface Sleepable {
 }
 
 class HumanWorker implements Workable, Eatable, Sleepable {
-  work(): void { /* ... */ }
-  eat(): void { /* ... */ }
-  sleep(): void { /* ... */ }
+  work(): void {
+    /* ... */
+  }
+  eat(): void {
+    /* ... */
+  }
+  sleep(): void {
+    /* ... */
+  }
 }
 
 class RobotWorker implements Workable {
-  work(): void { /* ... */ }
+  work(): void {
+    /* ... */
+  }
   // No need to implement eat or sleep!
 }
 ```
 
 ### Checklist
+
 - [ ] Are interfaces focused and cohesive?
 - [ ] Do implementing classes use all interface methods?
 - [ ] Can large interfaces be split into smaller ones?
@@ -255,9 +297,11 @@ class RobotWorker implements Workable {
 > **High-level modules should not depend on low-level modules. Both should depend on abstractions.**
 
 ### Definition
+
 Depend on abstractions (interfaces), not concrete implementations. This allows for flexibility and easier testing.
 
 ### Bad Example ❌
+
 ```typescript
 class MySQLDatabase {
   query(sql: string): any[] {
@@ -267,7 +311,7 @@ class MySQLDatabase {
 
 class UserRepository {
   private database = new MySQLDatabase(); // Tight coupling!
-  
+
   findById(id: string): User {
     return this.database.query(`SELECT * FROM users WHERE id = '${id}'`);
   }
@@ -275,6 +319,7 @@ class UserRepository {
 ```
 
 ### Good Example ✅
+
 ```typescript
 interface Database {
   query(sql: string): any[];
@@ -294,7 +339,7 @@ class PostgreSQLDatabase implements Database {
 
 class UserRepository {
   constructor(private database: Database) {} // Injected!
-  
+
   findById(id: string): User {
     return this.database.query(`SELECT * FROM users WHERE id = '${id}'`);
   }
@@ -309,6 +354,7 @@ const repository = new UserRepository(new MockDatabase());
 ```
 
 ### Checklist
+
 - [ ] Do high-level modules depend on abstractions?
 - [ ] Are dependencies injected rather than created internally?
 - [ ] Can implementations be swapped without code changes?
@@ -317,13 +363,13 @@ const repository = new UserRepository(new MockDatabase());
 
 ## SOLID Summary Table
 
-| Principle | Acronym | Key Idea |
-|-----------|---------|----------|
-| Single Responsibility | S | One class, one job |
-| Open/Closed | O | Extend, don't modify |
-| Liskov Substitution | L | Subtypes are replaceable |
-| Interface Segregation | I | Small, focused interfaces |
-| Dependency Inversion | D | Depend on abstractions |
+| Principle             | Acronym | Key Idea                  |
+| --------------------- | ------- | ------------------------- |
+| Single Responsibility | S       | One class, one job        |
+| Open/Closed           | O       | Extend, don't modify      |
+| Liskov Substitution   | L       | Subtypes are replaceable  |
+| Interface Segregation | I       | Small, focused interfaces |
+| Dependency Inversion  | D       | Depend on abstractions    |
 
 ---
 
@@ -331,13 +377,13 @@ const repository = new UserRepository(new MockDatabase());
 
 ### Constitutional Alignment
 
-| Principle | Constitutional Article |
-|-----------|----------------------|
-| SRP | Article VII: Simplicity Gate |
-| OCP | Article I: Library-First (extensible libraries) |
-| LSP | Article III: Test-First (substitutable mocks) |
-| ISP | Article VIII: Anti-Abstraction (focused interfaces) |
-| DIP | Article IX: Integration-First (testable dependencies) |
+| Principle | Constitutional Article                                |
+| --------- | ----------------------------------------------------- |
+| SRP       | Article VII: Simplicity Gate                          |
+| OCP       | Article I: Library-First (extensible libraries)       |
+| LSP       | Article III: Test-First (substitutable mocks)         |
+| ISP       | Article VIII: Anti-Abstraction (focused interfaces)   |
+| DIP       | Article IX: Integration-First (testable dependencies) |
 
 ### When to Apply
 

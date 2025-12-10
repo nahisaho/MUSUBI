@@ -10,7 +10,7 @@ const {
   HumanInLoopPattern,
   GateType,
   GateResult,
-  createHumanInLoopPattern
+  createHumanInLoopPattern,
 } = require('../../src/orchestration');
 
 describe('HumanInLoopPattern', () => {
@@ -20,39 +20,39 @@ describe('HumanInLoopPattern', () => {
 
   beforeEach(() => {
     humanGateResponse = { approved: true };
-    
-    engine = new OrchestrationEngine({ 
+
+    engine = new OrchestrationEngine({
       enableHumanValidation: true,
       humanGate: {
-        request: async () => humanGateResponse
-      }
+        request: async () => humanGateResponse,
+      },
     });
 
     pattern = createHumanInLoopPattern({ timeout: 1000 });
     engine.registerPattern(PatternType.HUMAN_IN_LOOP, pattern);
 
     // Register test skills
-    engine.registerSkill('generate', async (input) => ({
+    engine.registerSkill('generate', async input => ({
       generated: true,
       content: `Generated content for: ${input.topic || 'default'}`,
-      needsReview: true
+      needsReview: true,
     }));
 
-    engine.registerSkill('process', async (input) => ({
+    engine.registerSkill('process', async input => ({
       processed: true,
       input: input.content || input.topic,
-      result: 'Processed successfully'
+      result: 'Processed successfully',
     }));
 
-    engine.registerSkill('deploy', async (input) => ({
+    engine.registerSkill('deploy', async input => ({
       deployed: true,
       target: input.target || 'production',
-      status: 'success'
+      status: 'success',
     }));
 
-    engine.registerSkill('analyze', async (_input) => ({
+    engine.registerSkill('analyze', async _input => ({
       analyzed: true,
-      metrics: { quality: 0.9, coverage: 0.85 }
+      metrics: { quality: 0.9, coverage: 0.85 },
     }));
   });
 
@@ -73,7 +73,7 @@ describe('HumanInLoopPattern', () => {
       const p = createHumanInLoopPattern({
         timeout: 60000,
         autoApproveOnTimeout: true,
-        collectFeedback: true
+        collectFeedback: true,
       });
       expect(p.options.timeout).toBe(60000);
       expect(p.options.autoApproveOnTimeout).toBe(true);
@@ -92,7 +92,7 @@ describe('HumanInLoopPattern', () => {
     test('should fail without workflow', () => {
       const context = new ExecutionContext({
         task: 'Test task',
-        input: {}
+        input: {},
       });
 
       const result = pattern.validate(context, engine);
@@ -104,8 +104,8 @@ describe('HumanInLoopPattern', () => {
       const context = new ExecutionContext({
         task: 'Test task',
         input: {
-          workflow: []
-        }
+          workflow: [],
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -116,12 +116,8 @@ describe('HumanInLoopPattern', () => {
       const context = new ExecutionContext({
         task: 'Test task',
         input: {
-          workflow: [
-            { skill: 'generate' },
-            { gate: GateType.APPROVAL },
-            { skill: 'deploy' }
-          ]
-        }
+          workflow: [{ skill: 'generate' }, { gate: GateType.APPROVAL }, { skill: 'deploy' }],
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -132,10 +128,8 @@ describe('HumanInLoopPattern', () => {
       const context = new ExecutionContext({
         task: 'Test task',
         input: {
-          workflow: [
-            { invalid: 'step' }
-          ]
-        }
+          workflow: [{ invalid: 'step' }],
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -146,10 +140,8 @@ describe('HumanInLoopPattern', () => {
       const context = new ExecutionContext({
         task: 'Test task',
         input: {
-          workflow: [
-            { skill: 'unknown_skill' }
-          ]
-        }
+          workflow: [{ skill: 'unknown_skill' }],
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -161,10 +153,8 @@ describe('HumanInLoopPattern', () => {
       const context = new ExecutionContext({
         task: 'Test task',
         input: {
-          workflow: [
-            { gate: 'invalid_gate' }
-          ]
-        }
+          workflow: [{ gate: 'invalid_gate' }],
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -193,14 +183,10 @@ describe('HumanInLoopPattern', () => {
   describe('Simple Workflow Execution', () => {
     test('should execute skill-only workflow', async () => {
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'generate' },
-            { skill: 'process' }
-          ],
-          initialInput: { topic: 'test' }
-        }
+          workflow: [{ skill: 'generate' }, { skill: 'process' }],
+          initialInput: { topic: 'test' },
+        },
       });
 
       expect(context.output.results.length).toBe(2);
@@ -211,20 +197,16 @@ describe('HumanInLoopPattern', () => {
 
     test('should pass output between steps', async () => {
       const outputs = [];
-      engine.registerSkill('tracker', async (input) => {
+      engine.registerSkill('tracker', async input => {
         outputs.push(input);
         return { tracked: true, value: input.value || 0 };
       });
 
       await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'generate' },
-            { skill: 'tracker' }
-          ],
-          initialInput: { topic: 'test' }
-        }
+          workflow: [{ skill: 'generate' }, { skill: 'tracker' }],
+          initialInput: { topic: 'test' },
+        },
       });
 
       expect(outputs.length).toBeGreaterThan(0);
@@ -238,15 +220,10 @@ describe('HumanInLoopPattern', () => {
       humanGateResponse = { approved: true };
 
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'generate' },
-            { gate: GateType.APPROVAL },
-            { skill: 'deploy' }
-          ],
-          initialInput: { topic: 'test' }
-        }
+          workflow: [{ skill: 'generate' }, { gate: GateType.APPROVAL }, { skill: 'deploy' }],
+          initialInput: { topic: 'test' },
+        },
       });
 
       expect(context.output.results.length).toBe(3);
@@ -257,15 +234,10 @@ describe('HumanInLoopPattern', () => {
       humanGateResponse = { approved: false };
 
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'generate' },
-            { gate: GateType.APPROVAL },
-            { skill: 'deploy' }
-          ],
-          initialInput: { topic: 'test' }
-        }
+          workflow: [{ skill: 'generate' }, { gate: GateType.APPROVAL }, { skill: 'deploy' }],
+          initialInput: { topic: 'test' },
+        },
       });
 
       expect(context.output.aborted).toBe(true);
@@ -274,18 +246,14 @@ describe('HumanInLoopPattern', () => {
 
     test('should emit gate events', async () => {
       const events = [];
-      engine.on('humanInLoopGateReached', (data) => events.push(data));
+      engine.on('humanInLoopGateReached', data => events.push(data));
       humanGateResponse = { approved: true };
 
       await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'generate' },
-            { gate: GateType.APPROVAL }
-          ],
-          initialInput: {}
-        }
+          workflow: [{ skill: 'generate' }, { gate: GateType.APPROVAL }],
+          initialInput: {},
+        },
       });
 
       expect(events.length).toBeGreaterThan(0);
@@ -294,41 +262,36 @@ describe('HumanInLoopPattern', () => {
 
   describe('Review Gates', () => {
     test('should handle review with feedback', async () => {
-      humanGateResponse = { 
-        approved: true, 
-        feedback: 'Looks good!' 
+      humanGateResponse = {
+        approved: true,
+        feedback: 'Looks good!',
       };
 
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
           workflow: [
             { skill: 'generate' },
-            { gate: GateType.REVIEW, prompt: 'Please review the generated content' }
+            { gate: GateType.REVIEW, prompt: 'Please review the generated content' },
           ],
-          initialInput: { topic: 'Review test' }
-        }
+          initialInput: { topic: 'Review test' },
+        },
       });
 
       expect(context.output.results[1].result.feedback).toBe('Looks good!');
     });
 
     test('should handle needs-changes result', async () => {
-      humanGateResponse = { 
-        approved: false, 
+      humanGateResponse = {
+        approved: false,
         needsChanges: true,
-        feedback: 'Please revise section 2' 
+        feedback: 'Please revise section 2',
       };
 
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'generate' },
-            { gate: GateType.REVIEW }
-          ],
-          initialInput: {}
-        }
+          workflow: [{ skill: 'generate' }, { gate: GateType.REVIEW }],
+          initialInput: {},
+        },
       });
 
       expect(context.output.results[1].result.result).toBe(GateResult.NEEDS_CHANGES);
@@ -340,15 +303,14 @@ describe('HumanInLoopPattern', () => {
       humanGateResponse = { confirmed: true };
 
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
           workflow: [
             { skill: 'analyze' },
             { gate: GateType.CONFIRMATION, prompt: 'Confirm deployment?' },
-            { skill: 'deploy' }
+            { skill: 'deploy' },
           ],
-          initialInput: {}
-        }
+          initialInput: {},
+        },
       });
 
       expect(context.output.results[1].result.result).toBe(GateResult.APPROVED);
@@ -360,22 +322,18 @@ describe('HumanInLoopPattern', () => {
     test('should handle timeout with auto-approve', async () => {
       const autoApprovePattern = createHumanInLoopPattern({
         timeout: 50,
-        autoApproveOnTimeout: true
+        autoApproveOnTimeout: true,
       });
       engine.registerPattern(PatternType.HUMAN_IN_LOOP, autoApprovePattern);
-      
+
       // Gate that never resolves - override humanGate for this test
       engine.humanGate = { request: () => new Promise(() => {}) };
 
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'generate' },
-            { gate: GateType.APPROVAL }
-          ],
-          initialInput: {}
-        }
+          workflow: [{ skill: 'generate' }, { gate: GateType.APPROVAL }],
+          initialInput: {},
+        },
       });
 
       expect(context.output.results[1].result.result).toBe(GateResult.APPROVED);
@@ -384,22 +342,18 @@ describe('HumanInLoopPattern', () => {
     test('should handle timeout with rejection', async () => {
       const rejectOnTimeoutPattern = createHumanInLoopPattern({
         timeout: 50,
-        autoApproveOnTimeout: false
+        autoApproveOnTimeout: false,
       });
       engine.registerPattern(PatternType.HUMAN_IN_LOOP, rejectOnTimeoutPattern);
-      
+
       // Gate that never resolves
       engine.humanGate = { request: () => new Promise(() => {}) };
 
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'generate' },
-            { gate: GateType.APPROVAL }
-          ],
-          initialInput: {}
-        }
+          workflow: [{ skill: 'generate' }, { gate: GateType.APPROVAL }],
+          initialInput: {},
+        },
       });
 
       expect(context.output.results[1].result.result).toBe(GateResult.TIMEOUT);
@@ -411,17 +365,16 @@ describe('HumanInLoopPattern', () => {
       humanGateResponse = { approved: true };
 
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
           workflow: [
             { skill: 'generate' },
             { gate: GateType.REVIEW },
             { skill: 'process' },
             { gate: GateType.APPROVAL },
-            { skill: 'deploy' }
+            { skill: 'deploy' },
           ],
-          initialInput: { topic: 'Multi-gate workflow' }
-        }
+          initialInput: { topic: 'Multi-gate workflow' },
+        },
       });
 
       expect(context.output.results.length).toBe(5);
@@ -435,20 +388,19 @@ describe('HumanInLoopPattern', () => {
         request: async () => {
           callCount++;
           return { approved: callCount <= 1 }; // First approved, rest rejected
-        }
+        },
       };
 
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
           workflow: [
             { skill: 'generate' },
             { gate: GateType.APPROVAL },
             { skill: 'process' },
-            { gate: GateType.APPROVAL }
+            { gate: GateType.APPROVAL },
           ],
-          initialInput: {}
-        }
+          initialInput: {},
+        },
       });
 
       expect(context.output.summary.gateSteps).toBeGreaterThan(0);
@@ -464,13 +416,10 @@ describe('HumanInLoopPattern', () => {
 
     test('should handle skill errors', async () => {
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'failing' }
-          ],
-          initialInput: {}
-        }
+          workflow: [{ skill: 'failing' }],
+          initialInput: {},
+        },
       });
 
       expect(context.output.results[0].status).toBe(ExecutionStatus.FAILED);
@@ -481,14 +430,10 @@ describe('HumanInLoopPattern', () => {
       humanGateResponse = { approved: true };
 
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'failing', continueOnError: true },
-            { skill: 'generate' }
-          ],
-          initialInput: {}
-        }
+          workflow: [{ skill: 'failing', continueOnError: true }, { skill: 'generate' }],
+          initialInput: {},
+        },
       });
 
       expect(context.output.results.length).toBe(2);
@@ -496,16 +441,13 @@ describe('HumanInLoopPattern', () => {
 
     test('should emit step failure events', async () => {
       const events = [];
-      engine.on('humanInLoopStepFailed', (data) => events.push(data));
+      engine.on('humanInLoopStepFailed', data => events.push(data));
 
       await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'failing' }
-          ],
-          initialInput: {}
-        }
+          workflow: [{ skill: 'failing' }],
+          initialInput: {},
+        },
       });
 
       expect(events.length).toBeGreaterThan(0);
@@ -517,15 +459,10 @@ describe('HumanInLoopPattern', () => {
       humanGateResponse = { approved: true };
 
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'generate' },
-            { gate: GateType.APPROVAL },
-            { skill: 'deploy' }
-          ],
-          initialInput: {}
-        }
+          workflow: [{ skill: 'generate' }, { gate: GateType.APPROVAL }, { skill: 'deploy' }],
+          initialInput: {},
+        },
       });
 
       expect(context.output.summary.totalSteps).toBe(3);
@@ -539,14 +476,10 @@ describe('HumanInLoopPattern', () => {
       humanGateResponse = { approved: false };
 
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'generate' },
-            { gate: GateType.APPROVAL }
-          ],
-          initialInput: {}
-        }
+          workflow: [{ skill: 'generate' }, { gate: GateType.APPROVAL }],
+          initialInput: {},
+        },
       });
 
       expect(context.output.summary.rejectedGates).toBe(1);
@@ -557,22 +490,18 @@ describe('HumanInLoopPattern', () => {
   describe('Events', () => {
     test('should emit lifecycle events', async () => {
       const events = [];
-      engine.on('humanInLoopStarted', (data) => events.push({ type: 'started', data }));
-      engine.on('humanInLoopStepStarted', (data) => events.push({ type: 'stepStarted', data }));
-      engine.on('humanInLoopStepCompleted', (data) => events.push({ type: 'stepCompleted', data }));
-      engine.on('humanInLoopCompleted', (data) => events.push({ type: 'completed', data }));
-      
+      engine.on('humanInLoopStarted', data => events.push({ type: 'started', data }));
+      engine.on('humanInLoopStepStarted', data => events.push({ type: 'stepStarted', data }));
+      engine.on('humanInLoopStepCompleted', data => events.push({ type: 'stepCompleted', data }));
+      engine.on('humanInLoopCompleted', data => events.push({ type: 'completed', data }));
+
       humanGateResponse = { approved: true };
 
       await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'generate' },
-            { gate: GateType.APPROVAL }
-          ],
-          initialInput: {}
-        }
+          workflow: [{ skill: 'generate' }, { gate: GateType.APPROVAL }],
+          initialInput: {},
+        },
       });
 
       expect(events.some(e => e.type === 'started')).toBe(true);
@@ -583,19 +512,14 @@ describe('HumanInLoopPattern', () => {
 
     test('should emit abort event on rejection', async () => {
       const events = [];
-      engine.on('humanInLoopAborted', (data) => events.push(data));
+      engine.on('humanInLoopAborted', data => events.push(data));
       humanGateResponse = { approved: false };
 
       await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'generate' },
-            { gate: GateType.APPROVAL },
-            { skill: 'deploy' }
-          ],
-          initialInput: {}
-        }
+          workflow: [{ skill: 'generate' }, { gate: GateType.APPROVAL }, { skill: 'deploy' }],
+          initialInput: {},
+        },
       });
 
       expect(events.length).toBe(1);
@@ -608,14 +532,10 @@ describe('HumanInLoopPattern', () => {
       humanGateResponse = { approved: true };
 
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'generate' },
-            { gate: GateType.APPROVAL }
-          ],
-          initialInput: { topic: 'Integration test' }
-        }
+          workflow: [{ skill: 'generate' }, { gate: GateType.APPROVAL }],
+          initialInput: { topic: 'Integration test' },
+        },
       });
 
       expect(context).toBeDefined();
@@ -627,15 +547,10 @@ describe('HumanInLoopPattern', () => {
       humanGateResponse = { approved: true };
 
       const context = await engine.execute(PatternType.HUMAN_IN_LOOP, {
-        
         input: {
-          workflow: [
-            { skill: 'generate' },
-            { gate: GateType.APPROVAL },
-            { skill: 'process' }
-          ],
-          initialInput: { topic: 'Output test' }
-        }
+          workflow: [{ skill: 'generate' }, { gate: GateType.APPROVAL }, { skill: 'process' }],
+          initialInput: { topic: 'Output test' },
+        },
       });
 
       expect(context.output.finalOutput).toBeDefined();

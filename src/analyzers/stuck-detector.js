@@ -1,8 +1,8 @@
 /**
  * MUSUBI Stuck Detector
- * 
+ *
  * AIエージェントのスタック状態（無限ループ、繰り返しエラー）を検出
- * 
+ *
  * @module src/analyzers/stuck-detector
  * @see REQ-P0-B001
  * @inspired-by OpenHands openhands/controller/stuck.py
@@ -52,7 +52,7 @@ const Severity = {
 
 /**
  * イベントのハッシュを生成
- * @param {Object} event 
+ * @param {Object} event
  * @returns {string}
  */
 function hashEvent(event) {
@@ -131,7 +131,7 @@ class StuckDetector {
     this.maxMonologueSteps = options.maxMonologueSteps || 10;
     this.maxContextErrors = options.maxContextErrors || 3;
     this.maxStageOscillations = options.maxStageOscillations || 3;
-    
+
     this.history = [];
     this.stuckAnalysis = null;
   }
@@ -252,11 +252,11 @@ class StuckDetector {
 
     const lastN = this.history.slice(-this.maxRepeatErrors);
     const allErrors = lastN.every(e => e.type === EventType.ERROR);
-    
+
     if (allErrors) {
       const firstHash = lastN[0].hash;
       const sameError = lastN.every(e => e.hash === firstHash);
-      
+
       if (sameError) {
         return new StuckAnalysis({
           loopType: LoopType.ERROR_LOOP,
@@ -282,10 +282,11 @@ class StuckDetector {
     }
 
     const lastN = this.history.slice(-this.maxMonologueSteps);
-    const allMessages = lastN.every(e => 
-      e.type === EventType.MESSAGE && 
-      !e.content.includes('```') &&  // コードブロックなし
-      e.content.length < 500  // 短いメッセージ
+    const allMessages = lastN.every(
+      e =>
+        e.type === EventType.MESSAGE &&
+        !e.content.includes('```') && // コードブロックなし
+        e.content.length < 500 // 短いメッセージ
     );
 
     if (allMessages) {
@@ -320,11 +321,12 @@ class StuckDetector {
     ];
 
     const lastN = this.history.slice(-this.maxContextErrors);
-    const allContextErrors = lastN.every(e => 
-      e.type === EventType.ERROR &&
-      contextErrorPatterns.some(pattern => 
-        e.content.toLowerCase().includes(pattern.toLowerCase())
-      )
+    const allContextErrors = lastN.every(
+      e =>
+        e.type === EventType.ERROR &&
+        contextErrorPatterns.some(pattern =>
+          e.content.toLowerCase().includes(pattern.toLowerCase())
+        )
     );
 
     if (allContextErrors) {
@@ -353,7 +355,7 @@ class StuckDetector {
 
     const lastN = this.history.slice(-minEvents);
     const stages = lastN.map(e => e.stage);
-    
+
     // 2つのステージ間を往復しているかチェック
     const uniqueStages = [...new Set(stages)];
     if (uniqueStages.length !== 2) {
@@ -383,7 +385,7 @@ class StuckDetector {
 
   /**
    * 代替アプローチを提案
-   * @param {string} loopType 
+   * @param {string} loopType
    * @returns {string[]}
    */
   _suggestAlternatives(loopType) {

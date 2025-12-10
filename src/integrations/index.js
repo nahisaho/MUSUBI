@@ -13,17 +13,17 @@ const toolDiscovery = require('./tool-discovery');
 module.exports = {
   // Multi-Platform Support
   ...platforms,
-  
+
   // CI/CD Integration
   ...cicd,
-  
+
   // Documentation Generator
   ...documentation,
-  
+
   // Example Projects & Launch
   ...examples,
-  
+
   // MCP Integration (Sprint 3.4)
   ...mcpConnector,
-  ...toolDiscovery
+  ...toolDiscovery,
 };

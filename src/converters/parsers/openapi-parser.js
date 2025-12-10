@@ -1,6 +1,6 @@
 /**
  * OpenAPI Parser
- * 
+ *
  * Convert OpenAPI/Swagger specifications to MUSUBI requirements
  */
 
@@ -18,47 +18,47 @@ const { createEmptyProjectIR, createEmptyFeatureIR } = require('../ir/types');
  */
 async function parseOpenAPISpec(specPath) {
   const content = await fs.readFile(specPath, 'utf-8');
-  
+
   let spec;
   if (specPath.endsWith('.yaml') || specPath.endsWith('.yml')) {
     spec = yaml.load(content);
   } else {
     spec = JSON.parse(content);
   }
-  
+
   // Detect OpenAPI version
   const version = spec.openapi || spec.swagger;
   if (!version) {
     throw new Error('Not a valid OpenAPI/Swagger specification');
   }
-  
+
   const ir = createEmptyProjectIR();
   ir.metadata.name = spec.info?.title || 'API Project';
   ir.metadata.description = spec.info?.description || '';
   ir.metadata.version = spec.info?.version || '1.0.0';
   ir.metadata.sourceFormat = 'openapi';
-  
+
   // Group paths by tags
   const tagGroups = groupPathsByTag(spec.paths, spec.tags);
-  
+
   // Convert each tag group to a feature
   for (const [tag, endpoints] of Object.entries(tagGroups)) {
     const feature = await createFeatureFromEndpoints(tag, endpoints, spec);
     ir.features.push(feature);
   }
-  
+
   // If no tags, create a single feature
   if (ir.features.length === 0) {
     const feature = await createFeatureFromEndpoints('api', spec.paths, spec);
     ir.features.push(feature);
   }
-  
+
   // Add security requirements
   if (spec.security || spec.securityDefinitions || spec.components?.securitySchemes) {
     const securityFeature = createSecurityFeature(spec);
     ir.features.push(securityFeature);
   }
-  
+
   return ir;
 }
 
@@ -70,12 +70,12 @@ async function parseOpenAPISpec(specPath) {
  */
 function groupPathsByTag(paths, _tags = []) {
   const groups = {};
-  
+
   for (const [pathUrl, pathItem] of Object.entries(paths || {})) {
     for (const [method, operation] of Object.entries(pathItem)) {
       if (['get', 'post', 'put', 'patch', 'delete', 'head', 'options'].includes(method)) {
         const operationTags = operation.tags || ['default'];
-        
+
         for (const tag of operationTags) {
           if (!groups[tag]) {
             groups[tag] = {};
@@ -88,7 +88,7 @@ function groupPathsByTag(paths, _tags = []) {
       }
     }
   }
-  
+
   return groups;
 }
 
@@ -102,13 +102,13 @@ function groupPathsByTag(paths, _tags = []) {
 async function createFeatureFromEndpoints(tag, endpoints, spec) {
   const featureId = tag.toLowerCase().replace(/\s+/g, '-');
   const feature = createEmptyFeatureIR(featureId, tag);
-  
+
   feature.specification.description = getTagDescription(spec.tags, tag);
   feature.design = [];
   feature.tests = [];
-  
+
   let reqIndex = 1;
-  
+
   for (const [pathUrl, pathItem] of Object.entries(endpoints)) {
     for (const [method, operation] of Object.entries(pathItem)) {
       if (['get', 'post', 'put', 'patch', 'delete', 'head', 'options'].includes(method)) {
@@ -121,7 +121,7 @@ async function createFeatureFromEndpoints(tag, endpoints, spec) {
         );
         feature.specification.requirements.push(requirement);
         reqIndex++;
-        
+
         // Create design decision for each operation
         const decision = createDesignFromOperation(
           `ADR-${featureId.toUpperCase()}-${String(feature.design.length + 1).padStart(3, '0')}`,
@@ -130,14 +130,14 @@ async function createFeatureFromEndpoints(tag, endpoints, spec) {
           operation
         );
         feature.design.push(decision);
-        
+
         // Create test case
         const testCase = createTestFromOperation(method, pathUrl, operation);
         feature.tests.push(testCase);
       }
     }
   }
-  
+
   return feature;
 }
 
@@ -161,18 +161,19 @@ function getTagDescription(tags, tagName) {
  * @returns {Object} Requirement object
  */
 function createRequirementFromOperation(id, method, path, operation) {
-  const methodVerb = {
-    get: 'retrieves',
-    post: 'creates',
-    put: 'updates',
-    patch: 'partially updates',
-    delete: 'deletes',
-    head: 'checks',
-    options: 'returns options for',
-  }[method.toLowerCase()] || method;
-  
+  const methodVerb =
+    {
+      get: 'retrieves',
+      post: 'creates',
+      put: 'updates',
+      patch: 'partially updates',
+      delete: 'deletes',
+      head: 'checks',
+      options: 'returns options for',
+    }[method.toLowerCase()] || method;
+
   const summary = operation.summary || operation.operationId || `${method.toUpperCase()} ${path}`;
-  
+
   // Generate EARS pattern based on method
   let earsStatement;
   if (operation.security?.length > 0) {
@@ -182,7 +183,7 @@ function createRequirementFromOperation(id, method, path, operation) {
     // Ubiquitous
     earsStatement = `The system shall provide a ${method.toUpperCase()} ${path} endpoint that ${methodVerb} ${getResourceFromPath(path)}.`;
   }
-  
+
   return {
     id,
     type: 'functional',
@@ -222,26 +223,34 @@ function getResourceFromPath(path) {
  */
 function generateAcceptanceCriteria(method, path, operation) {
   const criteria = [];
-  
+
   // Add response status criteria
   for (const [status, response] of Object.entries(operation.responses || {})) {
     if (status === '200' || status === '201') {
-      criteria.push(`Given valid request, When ${method.toUpperCase()} ${path}, Then return ${status} with ${response.description || 'success response'}`);
+      criteria.push(
+        `Given valid request, When ${method.toUpperCase()} ${path}, Then return ${status} with ${response.description || 'success response'}`
+      );
     } else if (status.startsWith('4')) {
-      criteria.push(`Given invalid request, When ${method.toUpperCase()} ${path}, Then return ${status} with error details`);
+      criteria.push(
+        `Given invalid request, When ${method.toUpperCase()} ${path}, Then return ${status} with error details`
+      );
     }
   }
-  
+
   // Add parameter validation criteria
   if (operation.parameters?.some(p => p.required)) {
-    criteria.push(`Given missing required parameters, When ${method.toUpperCase()} ${path}, Then return 400 Bad Request`);
+    criteria.push(
+      `Given missing required parameters, When ${method.toUpperCase()} ${path}, Then return 400 Bad Request`
+    );
   }
-  
+
   // Add security criteria
   if (operation.security?.length > 0) {
-    criteria.push(`Given unauthenticated request, When ${method.toUpperCase()} ${path}, Then return 401 Unauthorized`);
+    criteria.push(
+      `Given unauthenticated request, When ${method.toUpperCase()} ${path}, Then return 401 Unauthorized`
+    );
   }
-  
+
   return criteria;
 }
 
@@ -293,16 +302,24 @@ function createTestFromOperation(method, path, operation) {
         status: Object.keys(operation.responses || {})[0] || '200',
         description: operation.responses?.['200']?.description || 'Should succeed',
       },
-      ...(operation.responses?.['400'] ? [{
-        name: 'Invalid request',
-        status: '400',
-        description: operation.responses['400'].description,
-      }] : []),
-      ...(operation.security?.length > 0 ? [{
-        name: 'Unauthorized',
-        status: '401',
-        description: 'Should reject unauthenticated request',
-      }] : []),
+      ...(operation.responses?.['400']
+        ? [
+            {
+              name: 'Invalid request',
+              status: '400',
+              description: operation.responses['400'].description,
+            },
+          ]
+        : []),
+      ...(operation.security?.length > 0
+        ? [
+            {
+              name: 'Unauthorized',
+              status: '401',
+              description: 'Should reject unauthenticated request',
+            },
+          ]
+        : []),
     ],
   };
 }
@@ -315,9 +332,9 @@ function createTestFromOperation(method, path, operation) {
 function createSecurityFeature(spec) {
   const feature = createEmptyFeatureIR('security', 'Security');
   feature.specification.description = 'API Security Requirements';
-  
+
   const schemes = spec.components?.securitySchemes || spec.securityDefinitions || {};
-  
+
   let reqIndex = 1;
   for (const [name, scheme] of Object.entries(schemes)) {
     const requirement = {
@@ -337,7 +354,7 @@ function createSecurityFeature(spec) {
     feature.specification.requirements.push(requirement);
     reqIndex++;
   }
-  
+
   return feature;
 }
 

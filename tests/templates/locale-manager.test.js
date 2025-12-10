@@ -4,7 +4,11 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const { LocaleManager, SUPPORTED_LOCALES, LOCALE_NAMES } = require('../../src/templates/locale-manager');
+const {
+  LocaleManager,
+  SUPPORTED_LOCALES,
+  LOCALE_NAMES,
+} = require('../../src/templates/locale-manager');
 
 describe('LocaleManager', () => {
   let localeManager;
@@ -51,7 +55,7 @@ describe('LocaleManager', () => {
 
   beforeEach(() => {
     localeManager = new LocaleManager(testProjectPath, {
-      defaultLocale: 'en'
+      defaultLocale: 'en',
     });
   });
 
@@ -65,7 +69,7 @@ describe('LocaleManager', () => {
     test('should accept custom options', () => {
       const manager = new LocaleManager('/some/path', {
         defaultLocale: 'ja',
-        fallbackLocale: 'en'
+        fallbackLocale: 'en',
       });
       expect(manager.defaultLocale).toBe('ja');
       expect(manager.fallbackLocale).toBe('en');
@@ -162,12 +166,12 @@ describe('LocaleManager', () => {
   describe('listTemplates', () => {
     test('should list all templates with their available locales', async () => {
       const templates = await localeManager.listTemplates();
-      
+
       expect(templates.requirements).toBeDefined();
       expect(templates.requirements).toContain('en');
       expect(templates.requirements).toContain('ja');
       expect(templates.requirements).toContain('zh');
-      
+
       expect(templates.design).toBeDefined();
       expect(templates.design).toContain('en');
     });
@@ -207,12 +211,12 @@ describe('LocaleManager', () => {
     test('should create a new localized template', async () => {
       const content = '# 요구사항\n\n한국어 템플릿.';
       const filePath = await localeManager.createLocalizedTemplate('requirements', 'ko', content);
-      
+
       expect(filePath).toMatch(/requirements\.ko\.md$/);
-      
+
       const savedContent = await fs.readFile(filePath, 'utf-8');
       expect(savedContent).toBe(content);
-      
+
       // Cleanup
       await fs.remove(filePath);
     });
@@ -222,11 +226,11 @@ describe('LocaleManager', () => {
     test('should extract translatable sections', () => {
       const content = '# Header\n\nSome text.\n\n```code\nignored\n```\n\n## Another Header';
       const metadata = localeManager.getTranslationMetadata(content, 'ja');
-      
+
       expect(metadata.locale).toBe('ja');
       expect(metadata.localeName).toBe('日本語');
       expect(metadata.translatableSections).toBeGreaterThan(0);
-      
+
       const headers = metadata.sections.filter(s => s.type === 'header');
       expect(headers.length).toBe(2);
     });
@@ -234,7 +238,7 @@ describe('LocaleManager', () => {
     test('should ignore code blocks', () => {
       const content = '```javascript\nconst x = 1;\n```';
       const metadata = localeManager.getTranslationMetadata(content, 'ja');
-      
+
       // Code blocks should not be in translatable sections
       const codeSection = metadata.sections.find(s => s.content.includes('const x'));
       expect(codeSection).toBeUndefined();
@@ -275,7 +279,7 @@ describe('LocaleManager', () => {
     test('should work with actual steering templates', async () => {
       const realManager = new LocaleManager(process.cwd());
       const locales = realManager.getSupportedLocales();
-      
+
       expect(locales).toContain('en');
       expect(locales).toContain('ja');
     });
@@ -283,7 +287,7 @@ describe('LocaleManager', () => {
     test('should list real project templates', async () => {
       const realManager = new LocaleManager(process.cwd());
       const templates = await realManager.listTemplates();
-      
+
       // Should find at least some templates
       const templateNames = Object.keys(templates);
       expect(templateNames.length).toBeGreaterThanOrEqual(0);
@@ -292,27 +296,21 @@ describe('LocaleManager', () => {
 
   describe('edge cases', () => {
     test('should handle empty template file', async () => {
-      await fs.writeFile(
-        path.join(testTemplatesPath, 'empty.md'),
-        ''
-      );
-      
+      await fs.writeFile(path.join(testTemplatesPath, 'empty.md'), '');
+
       const template = await localeManager.getTemplate('empty');
       expect(template).toBe('');
-      
+
       // Cleanup
       await fs.remove(path.join(testTemplatesPath, 'empty.md'));
     });
 
     test('should handle template with only whitespace', async () => {
-      await fs.writeFile(
-        path.join(testTemplatesPath, 'whitespace.md'),
-        '   \n\n   '
-      );
-      
+      await fs.writeFile(path.join(testTemplatesPath, 'whitespace.md'), '   \n\n   ');
+
       const template = await localeManager.getTemplate('whitespace');
       expect(template.trim()).toBe('');
-      
+
       // Cleanup
       await fs.remove(path.join(testTemplatesPath, 'whitespace.md'));
     });

@@ -10,7 +10,7 @@ const {
   GroupChatPattern,
   DiscussionMode,
   ConsensusType,
-  createGroupChatPattern
+  createGroupChatPattern,
 } = require('../../src/orchestration');
 
 describe('GroupChatPattern', () => {
@@ -18,38 +18,38 @@ describe('GroupChatPattern', () => {
   let pattern;
 
   beforeEach(() => {
-    engine = new OrchestrationEngine({ 
-      enableHumanValidation: false 
+    engine = new OrchestrationEngine({
+      enableHumanValidation: false,
     });
     pattern = createGroupChatPattern();
     engine.registerPattern(PatternType.GROUP_CHAT, pattern);
 
     // Register test skills (participants)
-    engine.registerSkill('analyst', async (input) => ({
+    engine.registerSkill('analyst', async input => ({
       role: 'analyst',
       decision: 'approve',
       opinion: `Analysis: ${input.topic || 'general'}`,
-      confidence: 0.8
+      confidence: 0.8,
     }));
 
-    engine.registerSkill('reviewer', async (input) => ({
+    engine.registerSkill('reviewer', async input => ({
       role: 'reviewer',
       decision: 'approve',
       opinion: `Review: ${input.topic || 'general'}`,
-      confidence: 0.9
+      confidence: 0.9,
     }));
 
-    engine.registerSkill('designer', async (input) => ({
+    engine.registerSkill('designer', async input => ({
       role: 'designer',
       decision: 'approve',
       opinion: `Design: ${input.topic || 'general'}`,
-      confidence: 0.7
+      confidence: 0.7,
     }));
 
-    engine.registerSkill('moderator', async (_input) => ({
+    engine.registerSkill('moderator', async _input => ({
       role: 'moderator',
       summary: 'Moderated discussion',
-      consensus: true
+      consensus: true,
     }));
   });
 
@@ -70,7 +70,7 @@ describe('GroupChatPattern', () => {
       const p = createGroupChatPattern({
         maxRounds: 5,
         convergenceThreshold: 0.8,
-        mode: DiscussionMode.ROUND_ROBIN
+        mode: DiscussionMode.ROUND_ROBIN,
       });
       expect(p.options.maxRounds).toBe(5);
       expect(p.options.convergenceThreshold).toBe(0.8);
@@ -88,7 +88,7 @@ describe('GroupChatPattern', () => {
     test('should fail without participants', () => {
       const context = new ExecutionContext({
         task: 'Test task',
-        input: {}
+        input: {},
       });
 
       const result = pattern.validate(context, engine);
@@ -100,8 +100,8 @@ describe('GroupChatPattern', () => {
       const context = new ExecutionContext({
         task: 'Test task',
         input: {
-          participants: []
-        }
+          participants: [],
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -114,8 +114,8 @@ describe('GroupChatPattern', () => {
         task: 'Test task',
         input: {
           participants: ['analyst'],
-          topic: 'Test'
-        }
+          topic: 'Test',
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -127,8 +127,8 @@ describe('GroupChatPattern', () => {
         task: 'Test task',
         input: {
           participants: ['analyst', 'reviewer'],
-          topic: 'Test discussion'
-        }
+          topic: 'Test discussion',
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -140,8 +140,8 @@ describe('GroupChatPattern', () => {
         task: 'Test task',
         input: {
           participants: ['analyst', 'unknown_skill'],
-          topic: 'Test'
-        }
+          topic: 'Test',
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -155,8 +155,8 @@ describe('GroupChatPattern', () => {
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer'],
-          topic: 'Test topic'
-        }
+          topic: 'Test topic',
+        },
       });
 
       expect(context.output.transcript).toBeDefined();
@@ -167,8 +167,8 @@ describe('GroupChatPattern', () => {
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer', 'designer'],
-          topic: 'Multi-participant discussion'
-        }
+          topic: 'Multi-participant discussion',
+        },
       });
 
       // Check transcript for participants
@@ -185,16 +185,16 @@ describe('GroupChatPattern', () => {
 
     test('should emit events during discussion', async () => {
       const events = [];
-      engine.on('groupChatStarted', (data) => events.push({ type: 'started', data }));
-      engine.on('groupChatRoundStarted', (data) => events.push({ type: 'roundStarted', data }));
-      engine.on('groupChatResponse', (data) => events.push({ type: 'response', data }));
-      engine.on('groupChatCompleted', (data) => events.push({ type: 'completed', data }));
+      engine.on('groupChatStarted', data => events.push({ type: 'started', data }));
+      engine.on('groupChatRoundStarted', data => events.push({ type: 'roundStarted', data }));
+      engine.on('groupChatResponse', data => events.push({ type: 'response', data }));
+      engine.on('groupChatCompleted', data => events.push({ type: 'completed', data }));
 
       await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer'],
-          topic: 'Event test'
-        }
+          topic: 'Event test',
+        },
       });
 
       expect(events.some(e => e.type === 'started')).toBe(true);
@@ -206,15 +206,15 @@ describe('GroupChatPattern', () => {
   describe('Discussion Mode', () => {
     test('should support round-robin mode', async () => {
       const roundRobinPattern = createGroupChatPattern({
-        mode: DiscussionMode.ROUND_ROBIN
+        mode: DiscussionMode.ROUND_ROBIN,
       });
       engine.registerPattern(PatternType.GROUP_CHAT, roundRobinPattern);
 
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer'],
-          topic: 'Round robin test'
-        }
+          topic: 'Round robin test',
+        },
       });
 
       expect(context.output.transcript.length).toBeGreaterThan(0);
@@ -222,15 +222,15 @@ describe('GroupChatPattern', () => {
 
     test('should support open-floor mode', async () => {
       const openFloorPattern = createGroupChatPattern({
-        mode: DiscussionMode.OPEN_FLOOR
+        mode: DiscussionMode.OPEN_FLOOR,
       });
       engine.registerPattern(PatternType.GROUP_CHAT, openFloorPattern);
 
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer', 'designer'],
-          topic: 'Open floor test'
-        }
+          topic: 'Open floor test',
+        },
       });
 
       expect(context.output.transcript.length).toBeGreaterThan(0);
@@ -239,15 +239,15 @@ describe('GroupChatPattern', () => {
     test('should support moderated mode', async () => {
       const moderatedPattern = createGroupChatPattern({
         mode: DiscussionMode.MODERATED,
-        moderator: 'moderator'
+        moderator: 'moderator',
       });
       engine.registerPattern(PatternType.GROUP_CHAT, moderatedPattern);
 
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer'],
-          topic: 'Moderated test'
-        }
+          topic: 'Moderated test',
+        },
       });
 
       expect(context.output.transcript.length).toBeGreaterThan(0);
@@ -259,8 +259,8 @@ describe('GroupChatPattern', () => {
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer'],
-          topic: 'Consensus test'
-        }
+          topic: 'Consensus test',
+        },
       });
 
       expect(context.output.consensusReached).toBeDefined();
@@ -270,8 +270,8 @@ describe('GroupChatPattern', () => {
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer'],
-          topic: 'Consensus tracking'
-        }
+          topic: 'Consensus tracking',
+        },
       });
 
       expect(context.output.summary).toBeDefined();
@@ -280,15 +280,15 @@ describe('GroupChatPattern', () => {
 
     test('should support majority consensus type', async () => {
       const majorityPattern = createGroupChatPattern({
-        consensusType: ConsensusType.MAJORITY
+        consensusType: ConsensusType.MAJORITY,
       });
       engine.registerPattern(PatternType.GROUP_CHAT, majorityPattern);
 
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer', 'designer'],
-          topic: 'Majority consensus'
-        }
+          topic: 'Majority consensus',
+        },
       });
 
       expect(context.output.consensusReached).toBeDefined();
@@ -296,15 +296,15 @@ describe('GroupChatPattern', () => {
 
     test('should support unanimous consensus type', async () => {
       const unanimousPattern = createGroupChatPattern({
-        consensusType: ConsensusType.UNANIMOUS
+        consensusType: ConsensusType.UNANIMOUS,
       });
       engine.registerPattern(PatternType.GROUP_CHAT, unanimousPattern);
 
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer'],
-          topic: 'Unanimous consensus'
-        }
+          topic: 'Unanimous consensus',
+        },
       });
 
       expect(context.output.summary).toBeDefined();
@@ -314,15 +314,15 @@ describe('GroupChatPattern', () => {
   describe('Discussion Rounds', () => {
     test('should limit discussion rounds', async () => {
       const limitedPattern = createGroupChatPattern({
-        maxRounds: 2
+        maxRounds: 2,
       });
       engine.registerPattern(PatternType.GROUP_CHAT, limitedPattern);
 
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer'],
-          topic: 'Limited rounds'
-        }
+          topic: 'Limited rounds',
+        },
       });
 
       expect(context.output.rounds).toBeLessThanOrEqual(2);
@@ -332,8 +332,8 @@ describe('GroupChatPattern', () => {
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer'],
-          topic: 'Round tracking'
-        }
+          topic: 'Round tracking',
+        },
       });
 
       expect(context.output.summary.totalRounds).toBeGreaterThan(0);
@@ -341,21 +341,21 @@ describe('GroupChatPattern', () => {
 
     test('should provide context from previous rounds', async () => {
       const contributions = [];
-      engine.registerSkill('contextAware', async (input) => {
+      engine.registerSkill('contextAware', async input => {
         contributions.push(input);
         return {
           role: 'contextAware',
           decision: 'approve',
           opinion: 'Aware of context',
-          hasPreviousContext: !!input.previousResponses && input.previousResponses.length > 0
+          hasPreviousContext: !!input.previousResponses && input.previousResponses.length > 0,
         };
       });
 
       await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'contextAware'],
-          topic: 'Context awareness'
-        }
+          topic: 'Context awareness',
+        },
       });
 
       // Later contributions should have previous context
@@ -374,8 +374,8 @@ describe('GroupChatPattern', () => {
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'failing'],
-          topic: 'Error handling'
-        }
+          topic: 'Error handling',
+        },
       });
 
       // Should complete despite one participant failing
@@ -387,8 +387,8 @@ describe('GroupChatPattern', () => {
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'failing'],
-          topic: 'Track failures'
-        }
+          topic: 'Track failures',
+        },
       });
 
       // Check for failed responses in transcript
@@ -407,8 +407,8 @@ describe('GroupChatPattern', () => {
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'failing', 'reviewer'],
-          topic: 'Continue on error'
-        }
+          topic: 'Continue on error',
+        },
       });
 
       // Check for successful responses
@@ -429,8 +429,8 @@ describe('GroupChatPattern', () => {
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer'],
-          topic: 'Statistics'
-        }
+          topic: 'Statistics',
+        },
       });
 
       expect(context.output.summary).toBeDefined();
@@ -442,8 +442,8 @@ describe('GroupChatPattern', () => {
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer'],
-          topic: 'Success rate'
-        }
+          topic: 'Success rate',
+        },
       });
 
       expect(context.output.summary.successRate).toBeDefined();
@@ -455,8 +455,8 @@ describe('GroupChatPattern', () => {
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer'],
-          topic: 'Integration test'
-        }
+          topic: 'Integration test',
+        },
       });
 
       expect(context.output).toBeDefined();
@@ -470,9 +470,9 @@ describe('GroupChatPattern', () => {
           topic: 'Complex Topic: Architecture Review',
           initialContext: {
             project: 'musubi',
-            phase: 'design'
-          }
-        }
+            phase: 'design',
+          },
+        },
       });
 
       expect(context.output).toBeDefined();
@@ -483,8 +483,8 @@ describe('GroupChatPattern', () => {
       const context = await engine.execute(PatternType.GROUP_CHAT, {
         input: {
           participants: ['analyst', 'reviewer'],
-          topic: 'Final decision test'
-        }
+          topic: 'Final decision test',
+        },
       });
 
       // All skills return decision: 'approve', so consensus should be reached

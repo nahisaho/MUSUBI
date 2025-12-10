@@ -13,7 +13,7 @@ const {
   ValidationType,
   Severity,
   ArtifactType,
-  createAdvancedValidator
+  createAdvancedValidator,
 } = require('../../src/steering/advanced-validation');
 
 describe('Advanced Validation', () => {
@@ -33,7 +33,7 @@ describe('Advanced Validation', () => {
         severity: Severity.WARNING,
         message: 'Gap found',
         artifact: 'REQ-001',
-        suggestion: 'Add implementation'
+        suggestion: 'Add implementation',
       });
 
       expect(issue.type).toBe(ValidationType.GAP);
@@ -55,7 +55,7 @@ describe('Advanced Validation', () => {
   describe('ArtifactReference', () => {
     test('should create artifact reference', () => {
       const ref = new ArtifactReference(ArtifactType.REQUIREMENT, 'REQ-001', {
-        name: 'User Authentication'
+        name: 'User Authentication',
       });
 
       expect(ref.type).toBe(ArtifactType.REQUIREMENT);
@@ -81,7 +81,7 @@ describe('Advanced Validation', () => {
     test('should convert to JSON', () => {
       const ref = new ArtifactReference(ArtifactType.TEST, 'TEST-001');
       ref.addDependency({ id: 'IMPL-001' });
-      
+
       const json = ref.toJSON();
       expect(json.dependencies).toContain('IMPL-001');
     });
@@ -102,18 +102,21 @@ describe('Advanced Validation', () => {
     test('should check artifacts with rules', () => {
       checker.addRule({
         name: 'no-empty-names',
-        check: (artifacts) => {
+        check: artifacts => {
           return artifacts
             .filter(a => !a.name)
-            .map(a => new ValidationIssue({
-              message: `Artifact ${a.id} has no name`
-            }));
-        }
+            .map(
+              a =>
+                new ValidationIssue({
+                  message: `Artifact ${a.id} has no name`,
+                })
+            );
+        },
       });
 
       const result = checker.check([
         { id: 'A', name: 'Named' },
-        { id: 'B', name: '' }
+        { id: 'B', name: '' },
       ]);
 
       expect(result.issues).toHaveLength(1);
@@ -123,7 +126,9 @@ describe('Advanced Validation', () => {
     test('should handle rule errors', () => {
       checker.addRule({
         name: 'failing-rule',
-        check: () => { throw new Error('Rule failed'); }
+        check: () => {
+          throw new Error('Rule failed');
+        },
       });
 
       const result = checker.check([{ id: 'A' }]);
@@ -137,7 +142,7 @@ describe('Advanced Validation', () => {
 
       const result = checker.check([
         { id: 'A', name: 'User-Auth' },
-        { id: 'B', name: 'user_auth' }
+        { id: 'B', name: 'user_auth' },
       ]);
 
       expect(result.issues.length).toBeGreaterThan(0);
@@ -149,7 +154,7 @@ describe('Advanced Validation', () => {
 
       const result = checker.check([
         { id: 'A', type: 'doc', version: '1.0.0' },
-        { id: 'B', type: 'doc', version: '2.0.0' }
+        { id: 'B', type: 'doc', version: '2.0.0' },
       ]);
 
       expect(result.issues.length).toBeGreaterThan(0);
@@ -169,9 +174,7 @@ describe('Advanced Validation', () => {
     });
 
     test('should detect gaps', () => {
-      const artifacts = [
-        { id: 'REQ-001', type: ArtifactType.REQUIREMENT, name: 'Auth' }
-      ];
+      const artifacts = [{ id: 'REQ-001', type: ArtifactType.REQUIREMENT, name: 'Auth' }];
 
       const result = detector.detectGaps(artifacts);
 
@@ -186,7 +189,7 @@ describe('Advanced Validation', () => {
       const artifacts = [
         { id: 'REQ-001', type: ArtifactType.REQUIREMENT, name: 'Auth' },
         { id: 'DES-001', type: ArtifactType.DESIGN, name: 'Auth Design' },
-        { id: 'TEST-001', type: ArtifactType.TEST, name: 'Auth Test' }
+        { id: 'TEST-001', type: ArtifactType.TEST, name: 'Auth Test' },
       ];
 
       const result = detector.detectGaps(artifacts);
@@ -198,7 +201,7 @@ describe('Advanced Validation', () => {
 
       const artifacts = [
         { id: 'REQ-001', type: ArtifactType.REQUIREMENT, name: 'Auth' },
-        { id: 'DES-001', type: ArtifactType.DESIGN, name: 'Auth Design' }
+        { id: 'DES-001', type: ArtifactType.DESIGN, name: 'Auth Design' },
       ];
 
       const result = detector.detectGaps(artifacts);
@@ -234,7 +237,7 @@ describe('Advanced Validation', () => {
       const result = checker.checkArtifact({
         id: 'REQ-001',
         type: ArtifactType.REQUIREMENT,
-        name: 'Auth'
+        name: 'Auth',
         // missing description
       });
 
@@ -249,7 +252,7 @@ describe('Advanced Validation', () => {
         id: 'STEER-001',
         type: ArtifactType.STEERING,
         name: 'Structure',
-        content: '## Overview\nContent here'
+        content: '## Overview\nContent here',
         // missing Purpose section
       });
 
@@ -261,7 +264,7 @@ describe('Advanced Validation', () => {
 
       const result = checker.checkAll([
         { id: 'A', type: ArtifactType.REQUIREMENT, name: 'Complete' },
-        { id: 'B', type: ArtifactType.REQUIREMENT, name: '' }
+        { id: 'B', type: ArtifactType.REQUIREMENT, name: '' },
       ]);
 
       expect(result.completeness).toBe(50);
@@ -366,10 +369,12 @@ describe('Advanced Validation', () => {
     test('should validate references', () => {
       validator.registerReference('REQ-001', {});
 
-      const artifacts = [{
-        id: 'IMPL-001',
-        content: 'Implements REQ-001 and REQ-002'
-      }];
+      const artifacts = [
+        {
+          id: 'IMPL-001',
+          content: 'Implements REQ-001 and REQ-002',
+        },
+      ];
 
       const result = validator.validate(artifacts);
       expect(result.valid).toBe(false);
@@ -380,10 +385,12 @@ describe('Advanced Validation', () => {
       validator.registerReference('REQ-001', {});
       validator.registerReference('DES-001', {});
 
-      const artifacts = [{
-        id: 'IMPL-001',
-        content: 'Implements REQ-001 with DES-001'
-      }];
+      const artifacts = [
+        {
+          id: 'IMPL-001',
+          content: 'Implements REQ-001 with DES-001',
+        },
+      ];
 
       const result = validator.validate(artifacts);
       expect(result.valid).toBe(true);
@@ -402,15 +409,25 @@ describe('Advanced Validation', () => {
         type: ArtifactType.REQUIREMENT,
         id: 'REQ-001',
         name: 'Auth',
-        description: 'User authentication'
+        description: 'User authentication',
       });
 
       expect(validator.getArtifact('REQ-001')).toBeDefined();
     });
 
     test('should get all artifacts', () => {
-      validator.registerArtifact({ type: ArtifactType.REQUIREMENT, id: 'A', name: 'A', description: 'A' });
-      validator.registerArtifact({ type: ArtifactType.DESIGN, id: 'B', name: 'B', description: 'B' });
+      validator.registerArtifact({
+        type: ArtifactType.REQUIREMENT,
+        id: 'A',
+        name: 'A',
+        description: 'A',
+      });
+      validator.registerArtifact({
+        type: ArtifactType.DESIGN,
+        id: 'B',
+        name: 'B',
+        description: 'B',
+      });
 
       expect(validator.getAllArtifacts()).toHaveLength(2);
     });
@@ -421,8 +438,13 @@ describe('Advanced Validation', () => {
     });
 
     test('should validate consistency', () => {
-      validator.registerArtifact({ type: ArtifactType.REQUIREMENT, id: 'A', name: 'Auth', description: 'Auth' });
-      
+      validator.registerArtifact({
+        type: ArtifactType.REQUIREMENT,
+        id: 'A',
+        name: 'Auth',
+        description: 'Auth',
+      });
+
       const result = validator.validateConsistency();
       expect(result.rulesChecked).toBeGreaterThan(0);
     });
@@ -432,7 +454,7 @@ describe('Advanced Validation', () => {
         type: ArtifactType.REQUIREMENT,
         id: 'REQ-001',
         name: 'Auth',
-        description: 'Auth'
+        description: 'Auth',
       });
 
       const result = validator.validateGaps();
@@ -443,7 +465,7 @@ describe('Advanced Validation', () => {
       validator.registerArtifact({
         type: ArtifactType.REQUIREMENT,
         id: 'REQ-001',
-        name: 'Auth'
+        name: 'Auth',
         // missing description
       });
 
@@ -452,7 +474,12 @@ describe('Advanced Validation', () => {
     });
 
     test('should validate dependencies', () => {
-      validator.registerArtifact({ type: ArtifactType.REQUIREMENT, id: 'A', name: 'A', description: 'A' });
+      validator.registerArtifact({
+        type: ArtifactType.REQUIREMENT,
+        id: 'A',
+        name: 'A',
+        description: 'A',
+      });
       validator.addLink('A', 'B'); // B doesn't exist
 
       const result = validator.validateDependencies();
@@ -467,7 +494,7 @@ describe('Advanced Validation', () => {
         type: ArtifactType.IMPLEMENTATION,
         id: 'IMPL-001',
         name: 'Auth',
-        description: 'Auth implementation'
+        description: 'Auth implementation',
       });
 
       const result = validator.validateReferences();
@@ -480,7 +507,7 @@ describe('Advanced Validation', () => {
         type: ArtifactType.REQUIREMENT,
         id: 'REQ-001',
         name: 'Auth',
-        description: 'Authentication'
+        description: 'Authentication',
       });
 
       const result = validator.validateAll();
@@ -489,7 +516,12 @@ describe('Advanced Validation', () => {
     });
 
     test('should record validation history', () => {
-      validator.registerArtifact({ type: ArtifactType.REQUIREMENT, id: 'A', name: 'A', description: 'A' });
+      validator.registerArtifact({
+        type: ArtifactType.REQUIREMENT,
+        id: 'A',
+        name: 'A',
+        description: 'A',
+      });
       validator.validateConsistency();
       validator.validateGaps();
 
@@ -500,13 +532,18 @@ describe('Advanced Validation', () => {
       expect(consistencyHistory.length).toBe(1);
     });
 
-    test('should emit events', (done) => {
-      validator.on('artifact:registered', (artifact) => {
+    test('should emit events', done => {
+      validator.on('artifact:registered', artifact => {
         expect(artifact.id).toBe('A');
         done();
       });
 
-      validator.registerArtifact({ type: ArtifactType.REQUIREMENT, id: 'A', name: 'A', description: 'A' });
+      validator.registerArtifact({
+        type: ArtifactType.REQUIREMENT,
+        id: 'A',
+        name: 'A',
+        description: 'A',
+      });
     });
 
     test('should generate report', () => {
@@ -514,7 +551,7 @@ describe('Advanced Validation', () => {
         type: ArtifactType.REQUIREMENT,
         id: 'REQ-001',
         name: 'Auth',
-        description: 'Authentication'
+        description: 'Authentication',
       });
 
       const report = validator.generateReport();

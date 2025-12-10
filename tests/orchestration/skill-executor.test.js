@@ -8,7 +8,7 @@ const {
   ExecutionResult,
   ExecutionContext,
   ExecutionStatus,
-  IOValidator
+  IOValidator,
 } = require('../../src/orchestration/skill-executor');
 
 // Mock SkillRegistry
@@ -20,10 +20,10 @@ const createMockRegistry = () => ({
   getSkillEntry(id) {
     const skill = this.skills.get(id);
     if (!skill) return null;
-    return { 
-      metadata: skill, 
+    return {
+      metadata: skill,
       handler: skill.handler,
-      health: { isHealthy: () => true } 
+      health: { isHealthy: () => true },
     };
   },
   hasSkill(id) {
@@ -34,7 +34,7 @@ const createMockRegistry = () => ({
   },
   recordExecution(_skillId, _success, _duration) {
     // Mock implementation
-  }
+  },
 });
 
 describe('SkillExecutor', () => {
@@ -44,27 +44,27 @@ describe('SkillExecutor', () => {
   beforeEach(() => {
     mockRegistry = createMockRegistry();
     executor = new SkillExecutor(mockRegistry, {
-      defaultTimeout: 5000
+      defaultTimeout: 5000,
     });
 
     // Add test skills
     mockRegistry.addSkill({
       id: 'sync-skill',
       name: 'Sync Skill',
-      handler: (input) => ({ result: input.value * 2 }),
+      handler: input => ({ result: input.value * 2 }),
       inputs: [],
-      outputs: []
+      outputs: [],
     });
 
     mockRegistry.addSkill({
       id: 'async-skill',
       name: 'Async Skill',
-      handler: async (input) => {
+      handler: async input => {
         await new Promise(r => setTimeout(r, 50));
         return { result: input.text.toUpperCase() };
       },
       inputs: [],
-      outputs: []
+      outputs: [],
     });
 
     mockRegistry.addSkill({
@@ -74,7 +74,7 @@ describe('SkillExecutor', () => {
         throw new Error('Intentional error');
       },
       inputs: [],
-      outputs: []
+      outputs: [],
     });
   });
 
@@ -98,14 +98,15 @@ describe('SkillExecutor', () => {
     });
 
     test('should throw for non-existent skill', async () => {
-      await expect(executor.execute('non-existent', {}))
-        .rejects.toThrow("Skill 'non-existent' not found");
+      await expect(executor.execute('non-existent', {})).rejects.toThrow(
+        "Skill 'non-existent' not found"
+      );
     });
 
     test('should emit execution events', async () => {
       const startListener = jest.fn();
       const completeListener = jest.fn();
-      
+
       executor.on('execution-started', startListener);
       executor.on('execution-completed', completeListener);
 
@@ -137,12 +138,16 @@ describe('SkillExecutor', () => {
         name: 'P0 Skill',
         inputs: [],
         outputs: [],
-        handler: () => ({ priority: 'P0' })
+        handler: () => ({ priority: 'P0' }),
       });
 
-      const result = await executor.execute('p0-skill', {}, { 
-        priority: 'P0' 
-      });
+      const result = await executor.execute(
+        'p0-skill',
+        {},
+        {
+          priority: 'P0',
+        }
+      );
       expect(result.success).toBe(true);
     });
 
@@ -150,9 +155,13 @@ describe('SkillExecutor', () => {
       const listener = jest.fn();
       executor.on('execution-started', listener);
 
-      await executor.execute('sync-skill', { value: 1 }, { 
-        priority: 'P1' 
-      });
+      await executor.execute(
+        'sync-skill',
+        { value: 1 },
+        {
+          priority: 'P1',
+        }
+      );
 
       expect(listener).toHaveBeenCalled();
     });
@@ -169,7 +178,7 @@ describe('SkillExecutor', () => {
         handler: async () => {
           await new Promise(r => setTimeout(r, 10000));
           return { done: true };
-        }
+        },
       });
     });
 
@@ -196,7 +205,7 @@ describe('SkillExecutor', () => {
             throw new Error('Temporary failure');
           }
           return { success: true };
-        }
+        },
       });
     });
 
@@ -214,7 +223,9 @@ describe('SkillExecutor', () => {
         inputs: [],
         outputs: [],
         retryPolicy: { maxRetries: 2, baseDelay: 10 },
-        handler: () => { throw new Error('Always fails'); }
+        handler: () => {
+          throw new Error('Always fails');
+        },
       });
 
       const result = await executor.execute('always-fail', {});
@@ -229,7 +240,7 @@ describe('ExecutionResult', () => {
     const result = new ExecutionResult({
       skillId: 'test-skill',
       status: ExecutionStatus.COMPLETED,
-      output: { data: 'test' }
+      output: { data: 'test' },
     });
 
     expect(result.skillId).toBe('test-skill');
@@ -240,7 +251,7 @@ describe('ExecutionResult', () => {
   test('should track failed status', () => {
     const result = new ExecutionResult({
       skillId: 'test-skill',
-      status: ExecutionStatus.FAILED
+      status: ExecutionStatus.FAILED,
     });
 
     expect(result.success).toBe(false);
@@ -251,7 +262,7 @@ describe('ExecutionContext', () => {
   test('should create execution context', () => {
     const context = new ExecutionContext({
       skillId: 'test-skill',
-      input: { value: 42 }
+      input: { value: 42 },
     });
 
     expect(context.skillId).toBe('test-skill');
@@ -261,11 +272,11 @@ describe('ExecutionContext', () => {
 
   test('should manage variables', () => {
     const context = new ExecutionContext({
-      variables: { key: 'value' }
+      variables: { key: 'value' },
     });
 
     expect(context.getVariable('key')).toBe('value');
-    
+
     context.setVariable('newKey', 'newValue');
     expect(context.getVariable('newKey')).toBe('newValue');
   });

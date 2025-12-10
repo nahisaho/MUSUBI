@@ -65,7 +65,7 @@ paths:
           $ref: '#/components/responses/InternalError'
       security:
         - bearerAuth: []
-    
+
     post:
       tags:
         - Users
@@ -272,7 +272,7 @@ components:
       schema:
         type: string
         format: uuid
-    
+
     PageParam:
       name: page
       in: query
@@ -281,7 +281,7 @@ components:
         type: integer
         minimum: 1
         default: 1
-    
+
     LimitParam:
       name: limit
       in: query
@@ -302,7 +302,7 @@ components:
           example:
             code: VALIDATION_ERROR
             message: Invalid request data
-    
+
     Unauthorized:
       description: Unauthorized
       content:
@@ -312,7 +312,7 @@ components:
           example:
             code: UNAUTHORIZED
             message: Authentication required
-    
+
     NotFound:
       description: Resource not found
       content:
@@ -322,7 +322,7 @@ components:
           example:
             code: NOT_FOUND
             message: Resource not found
-    
+
     InternalError:
       description: Internal server error
       content:
@@ -338,7 +338,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-    
+
     apiKey:
       type: apiKey
       in: header
@@ -353,11 +353,13 @@ security:
 ## OpenAPI Checklist
 
 ### Info
+
 - [ ] Title and description
 - [ ] Version number
 - [ ] Contact information
 
 ### Paths
+
 - [ ] All endpoints documented
 - [ ] HTTP methods specified
 - [ ] Parameters defined
@@ -365,12 +367,14 @@ security:
 - [ ] Response codes listed
 
 ### Components
+
 - [ ] Schemas for all models
 - [ ] Reusable parameters
 - [ ] Common responses
 - [ ] Security schemes
 
 ### Examples
+
 - [ ] Request examples
 - [ ] Response examples
 - [ ] Error examples

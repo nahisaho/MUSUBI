@@ -62,29 +62,20 @@ resources:
 ```yaml
 # task-definition.json
 {
-  "family": "my-api",
-  "networkMode": "awsvpc",
-  "requiresCompatibilities": ["FARGATE"],
-  "cpu": "256",
-  "memory": "512",
-  "containerDefinitions": [
-    {
-      "name": "api",
-      "image": "my-api:latest",
-      "portMappings": [
-        {
-          "containerPort": 3000,
-          "protocol": "tcp"
-        }
-      ],
-      "environment": [
-        {
-          "name": "DATABASE_URL",
-          "value": "postgres://..."
-        }
-      ]
-    }
-  ]
+  'family': 'my-api',
+  'networkMode': 'awsvpc',
+  'requiresCompatibilities': ['FARGATE'],
+  'cpu': '256',
+  'memory': '512',
+  'containerDefinitions':
+    [
+      {
+        'name': 'api',
+        'image': 'my-api:latest',
+        'portMappings': [{ 'containerPort': 3000, 'protocol': 'tcp' }],
+        'environment': [{ 'name': 'DATABASE_URL', 'value': 'postgres://...' }],
+      },
+    ],
 }
 ```
 
@@ -124,7 +115,7 @@ Resources:
     Properties:
       CidrBlock: 10.0.0.0/16
       EnableDnsHostnames: true
-      
+
   PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -132,7 +123,7 @@ Resources:
       CidrBlock: 10.0.1.0/24
       AvailabilityZone: !Select [0, !GetAZs '']
       MapPublicIpOnLaunch: true
-      
+
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -149,10 +140,7 @@ Resources:
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": [
-        "dynamodb:GetItem",
-        "dynamodb:PutItem"
-      ],
+      "Action": ["dynamodb:GetItem", "dynamodb:PutItem"],
       "Resource": "arn:aws:dynamodb:*:*:table/users",
       "Condition": {
         "StringEquals": {
@@ -195,45 +183,50 @@ Resources:
 
 ### Compute Savings
 
-| Option | Savings | Use Case |
-|--------|---------|----------|
+| Option             | Savings   | Use Case              |
+| ------------------ | --------- | --------------------- |
 | Reserved Instances | Up to 72% | Predictable workloads |
-| Savings Plans | Up to 72% | Flexible compute |
-| Spot Instances | Up to 90% | Fault-tolerant |
+| Savings Plans      | Up to 72% | Flexible compute      |
+| Spot Instances     | Up to 90% | Fault-tolerant        |
 
 ### Storage Tiers
 
-| Tier | Cost | Access |
-|------|------|--------|
-| S3 Standard | $$$ | Frequent |
-| S3 IA | $$ | Infrequent |
-| S3 Glacier | $ | Archive |
+| Tier        | Cost | Access     |
+| ----------- | ---- | ---------- |
+| S3 Standard | $$$  | Frequent   |
+| S3 IA       | $$   | Infrequent |
+| S3 Glacier  | $    | Archive    |
 
 ---
 
 ## Well-Architected Checklist
 
 ### Operational Excellence
+
 - [ ] Infrastructure as code
 - [ ] Automated deployments
 - [ ] Monitoring and alerting
 
 ### Security
+
 - [ ] Least privilege IAM
 - [ ] Encryption at rest and in transit
 - [ ] VPC isolation
 
 ### Reliability
+
 - [ ] Multi-AZ deployment
 - [ ] Auto-scaling configured
 - [ ] Disaster recovery plan
 
 ### Performance
+
 - [ ] Right-sized resources
 - [ ] Caching implemented
 - [ ] CDN for static content
 
 ### Cost Optimization
+
 - [ ] Reserved/spot usage
 - [ ] Resource tagging
 - [ ] Cost monitoring

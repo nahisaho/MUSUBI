@@ -1,895 +1,952 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MUSUBI - SDD Dashboard</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MUSUBI - SDD Dashboard</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --secondary: #0ea5e9;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --error: #ef4444;
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      .app {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      header {
+        background: var(--bg-card);
+        border-bottom: 1px solid var(--border);
+        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      .logo-icon {
+        font-size: 2rem;
+      }
+
+      .connection-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--error);
+      }
+
+      .status-dot.connected {
+        background: var(--success);
+      }
 
-    :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --secondary: #0ea5e9;
-      --success: #22c55e;
-      --warning: #f59e0b;
-      --error: #ef4444;
-      --bg: #0f172a;
-      --bg-card: #1e293b;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: #334155;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    .app {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    header {
-      background: var(--bg-card);
-      border-bottom: 1px solid var(--border);
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    .logo-icon {
-      font-size: 2rem;
-    }
-
-    .connection-status {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.875rem;
-      color: var(--text-muted);
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--error);
-    }
-
-    .status-dot.connected {
-      background: var(--success);
-    }
-
-    main {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 280px 1fr 320px;
-      gap: 1px;
-      background: var(--border);
-    }
-
-    .sidebar {
-      background: var(--bg-card);
-      padding: 1.5rem;
-      overflow-y: auto;
-    }
-
-    .sidebar h2 {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      margin-bottom: 1rem;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem 1rem;
-      border-radius: 0.5rem;
-      color: var(--text-muted);
-      text-decoration: none;
-      margin-bottom: 0.25rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .nav-item:hover {
-      background: rgba(99, 102, 241, 0.1);
-      color: var(--text);
-    }
-
-    .nav-item.active {
-      background: var(--primary);
-      color: white;
-    }
-
-    .content {
-      background: var(--bg);
-      padding: 2rem;
-      overflow-y: auto;
-    }
-
-    .panel {
-      background: var(--bg-card);
-      padding: 1.5rem;
-      overflow-y: auto;
-    }
-
-    .panel h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .card h3 {
-      font-size: 1.125rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      padding: 1.25rem;
-    }
-
-    .stat-card .label {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      margin-bottom: 0.5rem;
-    }
-
-    .stat-card .value {
-      font-size: 2rem;
-      font-weight: 700;
-    }
-
-    .stat-card .change {
-      font-size: 0.875rem;
-      color: var(--success);
-      margin-top: 0.25rem;
-    }
-
-    .workflow-stage {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem;
-      background: rgba(99, 102, 241, 0.1);
-      border-radius: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .workflow-stage.completed {
-      background: rgba(34, 197, 94, 0.1);
-    }
-
-    .workflow-stage.active {
-      background: rgba(14, 165, 233, 0.2);
-      border: 1px solid var(--secondary);
-    }
-
-    .stage-number {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .workflow-stage.completed .stage-number {
-      background: var(--success);
-      color: white;
-    }
-
-    .workflow-stage.active .stage-number {
-      background: var(--secondary);
-      color: white;
-    }
-
-    .progress-bar {
-      height: 8px;
-      background: var(--border);
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 1rem;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
-      border-radius: 4px;
-      transition: width 0.3s ease;
-    }
-
-    .requirements-list {
-      list-style: none;
-    }
-
-    .requirement-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      padding: 0.75rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .requirement-item:last-child {
-      border-bottom: none;
-    }
-
-    .req-id {
-      font-family: monospace;
-      font-size: 0.75rem;
-      background: var(--primary);
-      color: white;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
-    }
-
-    .req-title {
-      flex: 1;
-      font-size: 0.875rem;
-    }
-
-    .req-status {
-      font-size: 0.75rem;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
-    }
-
-    .req-status.implemented {
-      background: rgba(34, 197, 94, 0.2);
-      color: var(--success);
-    }
-
-    .req-status.designed {
-      background: rgba(14, 165, 233, 0.2);
-      color: var(--secondary);
-    }
-
-    .req-status.unlinked {
-      background: rgba(148, 163, 184, 0.2);
-      color: var(--text-muted);
-    }
-
-    .constitution-article {
-      padding: 1rem;
-      background: rgba(99, 102, 241, 0.05);
-      border-left: 3px solid var(--primary);
-      margin-bottom: 0.75rem;
-      border-radius: 0 0.5rem 0.5rem 0;
-    }
-
-    .article-number {
-      font-size: 0.75rem;
-      color: var(--primary);
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-
-    .loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-      color: var(--text-muted);
-    }
-
-    .loading-spinner {
-      width: 24px;
-      height: 24px;
-      border: 2px solid var(--border);
-      border-top-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-right: 0.75rem;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 3rem;
-      color: var(--text-muted);
-    }
-
-    .empty-state h4 {
-      font-size: 1.25rem;
-      margin-bottom: 0.5rem;
-      color: var(--text);
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.625rem 1rem;
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-dark);
-    }
-
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
-
-    .btn-outline:hover {
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    footer {
-      background: var(--bg-card);
-      border-top: 1px solid var(--border);
-      padding: 1rem 2rem;
-      text-align: center;
-      font-size: 0.875rem;
-      color: var(--text-muted);
-    }
-
-    #traceability-graph {
-      width: 100%;
-      height: 400px;
-      background: var(--bg);
-      border-radius: 0.5rem;
-      border: 1px solid var(--border);
-    }
-
-    /* Modal styles */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-overlay.active {
-      display: flex;
-    }
-
-    .modal {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      padding: 1.5rem;
-      width: 100%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .modal h2 {
-      font-size: 1.25rem;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .form-group {
-      margin-bottom: 1rem;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 500;
-      margin-bottom: 0.5rem;
-      color: var(--text-muted);
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      padding: 0.625rem;
-      border: 1px solid var(--border);
-      border-radius: 0.5rem;
-      background: var(--bg);
-      color: var(--text);
-      font-size: 0.875rem;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-
-    .form-group textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 0.75rem;
-      justify-content: flex-end;
-      margin-top: 1.5rem;
-    }
-
-    @media (max-width: 1200px) {
       main {
-        grid-template-columns: 1fr;
+        flex: 1;
+        display: grid;
+        grid-template-columns: 280px 1fr 320px;
+        gap: 1px;
+        background: var(--border);
       }
-      
-      .sidebar, .panel {
+
+      .sidebar {
+        background: var(--bg-card);
+        padding: 1.5rem;
+        overflow-y: auto;
+      }
+
+      .sidebar h2 {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        margin-bottom: 0.25rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .nav-item:hover {
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--text);
+      }
+
+      .nav-item.active {
+        background: var(--primary);
+        color: white;
+      }
+
+      .content {
+        background: var(--bg);
+        padding: 2rem;
+        overflow-y: auto;
+      }
+
+      .panel {
+        background: var(--bg-card);
+        padding: 1.5rem;
+        overflow-y: auto;
+      }
+
+      .panel h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .card h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+      }
+
+      .stat-card .label {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-card .value {
+        font-size: 2rem;
+        font-weight: 700;
+      }
+
+      .stat-card .change {
+        font-size: 0.875rem;
+        color: var(--success);
+        margin-top: 0.25rem;
+      }
+
+      .workflow-stage {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: rgba(99, 102, 241, 0.1);
+        border-radius: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .workflow-stage.completed {
+        background: rgba(34, 197, 94, 0.1);
+      }
+
+      .workflow-stage.active {
+        background: rgba(14, 165, 233, 0.2);
+        border: 1px solid var(--secondary);
+      }
+
+      .stage-number {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .workflow-stage.completed .stage-number {
+        background: var(--success);
+        color: white;
+      }
+
+      .workflow-stage.active .stage-number {
+        background: var(--secondary);
+        color: white;
+      }
+
+      .progress-bar {
+        height: 8px;
+        background: var(--border);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 1rem;
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+
+      .requirements-list {
+        list-style: none;
+      }
+
+      .requirement-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .requirement-item:last-child {
+        border-bottom: none;
+      }
+
+      .req-id {
+        font-family: monospace;
+        font-size: 0.75rem;
+        background: var(--primary);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+      }
+
+      .req-title {
+        flex: 1;
+        font-size: 0.875rem;
+      }
+
+      .req-status {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+      }
+
+      .req-status.implemented {
+        background: rgba(34, 197, 94, 0.2);
+        color: var(--success);
+      }
+
+      .req-status.designed {
+        background: rgba(14, 165, 233, 0.2);
+        color: var(--secondary);
+      }
+
+      .req-status.unlinked {
+        background: rgba(148, 163, 184, 0.2);
+        color: var(--text-muted);
+      }
+
+      .constitution-article {
+        padding: 1rem;
+        background: rgba(99, 102, 241, 0.05);
+        border-left: 3px solid var(--primary);
+        margin-bottom: 0.75rem;
+        border-radius: 0 0.5rem 0.5rem 0;
+      }
+
+      .article-number {
+        font-size: 0.75rem;
+        color: var(--primary);
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+
+      .loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        color: var(--text-muted);
+      }
+
+      .loading-spinner {
+        width: 24px;
+        height: 24px;
+        border: 2px solid var(--border);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 0.75rem;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+      }
+
+      .empty-state h4 {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-dark);
+      }
+
+      .btn-outline {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+      }
+
+      .btn-outline:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      footer {
+        background: var(--bg-card);
+        border-top: 1px solid var(--border);
+        padding: 1rem 2rem;
+        text-align: center;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+      }
+
+      #traceability-graph {
+        width: 100%;
+        height: 400px;
+        background: var(--bg);
+        border-radius: 0.5rem;
+        border: 1px solid var(--border);
+      }
+
+      /* Modal styles */
+      .modal-overlay {
         display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
       }
-    }
 
-    /* Replanning Styles */
-    .replan-status {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1rem;
-      border-radius: 0.5rem;
-      margin-bottom: 1rem;
-    }
+      .modal-overlay.active {
+        display: flex;
+      }
 
-    .replan-status.idle {
-      background: rgba(148, 163, 184, 0.1);
-      border: 1px solid var(--text-muted);
-    }
+      .modal {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        width: 100%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
 
-    .replan-status.monitoring {
-      background: rgba(14, 165, 233, 0.1);
-      border: 1px solid var(--secondary);
-    }
+      .modal h2 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
 
-    .replan-status.replanning {
-      background: rgba(245, 158, 11, 0.1);
-      border: 1px solid var(--warning);
-    }
+      .form-group {
+        margin-bottom: 1rem;
+      }
 
-    .replan-status.optimizing {
-      background: rgba(99, 102, 241, 0.1);
-      border: 1px solid var(--primary);
-    }
+      .form-group label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: var(--text-muted);
+      }
 
-    .status-indicator {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 0.625rem;
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 0.875rem;
+      }
 
-    .status-indicator.idle { background: var(--text-muted); animation: none; }
-    .status-indicator.monitoring { background: var(--secondary); }
-    .status-indicator.replanning { background: var(--warning); }
-    .status-indicator.optimizing { background: var(--primary); }
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
+      .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
 
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
+      .modal-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+      }
 
-    @keyframes slideOut {
-      from { transform: translateX(0); opacity: 1; }
-      to { transform: translateX(100%); opacity: 0; }
-    }
+      @media (max-width: 1200px) {
+        main {
+          grid-template-columns: 1fr;
+        }
 
-    .goal-progress {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
+        .sidebar,
+        .panel {
+          display: none;
+        }
+      }
 
-    .goal-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem;
-      background: rgba(99, 102, 241, 0.05);
-      border-radius: 0.5rem;
-    }
+      /* Replanning Styles */
+      .replan-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+      }
 
-    .goal-progress-bar {
-      flex: 1;
-      height: 8px;
-      background: var(--border);
-      border-radius: 4px;
-      overflow: hidden;
-    }
+      .replan-status.idle {
+        background: rgba(148, 163, 184, 0.1);
+        border: 1px solid var(--text-muted);
+      }
 
-    .goal-progress-fill {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.3s ease;
-    }
+      .replan-status.monitoring {
+        background: rgba(14, 165, 233, 0.1);
+        border: 1px solid var(--secondary);
+      }
 
-    .goal-progress-fill.low { background: var(--error); }
-    .goal-progress-fill.medium { background: var(--warning); }
-    .goal-progress-fill.high { background: var(--success); }
+      .replan-status.replanning {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid var(--warning);
+      }
 
-    .optimization-card {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      padding: 1rem;
-      background: rgba(99, 102, 241, 0.1);
-      border-radius: 0.5rem;
-      margin-bottom: 0.75rem;
-    }
+      .replan-status.optimizing {
+        background: rgba(99, 102, 241, 0.1);
+        border: 1px solid var(--primary);
+      }
 
-    .optimization-suggestion {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.5rem;
-      padding: 0.5rem;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 0.25rem;
-    }
+      .status-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
 
-    .history-timeline {
-      position: relative;
-      padding-left: 1.5rem;
-    }
+      .status-indicator.idle {
+        background: var(--text-muted);
+        animation: none;
+      }
+      .status-indicator.monitoring {
+        background: var(--secondary);
+      }
+      .status-indicator.replanning {
+        background: var(--warning);
+      }
+      .status-indicator.optimizing {
+        background: var(--primary);
+      }
 
-    .history-timeline::before {
-      content: '';
-      position: absolute;
-      left: 0.5rem;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: var(--border);
-    }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
 
-    .history-item {
-      position: relative;
-      padding: 0.75rem;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 0.5rem;
-      margin-bottom: 0.75rem;
-    }
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
 
-    .history-item::before {
-      content: '';
-      position: absolute;
-      left: -1.25rem;
-      top: 1rem;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--primary);
-    }
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
 
-    .history-item.success::before { background: var(--success); }
-    .history-item.warning::before { background: var(--warning); }
-    .history-item.error::before { background: var(--error); }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <header>
-      <div class="logo">
-        <span class="logo-icon">🔮</span>
-        MUSUBI
-      </div>
-      <div class="connection-status">
-        <span class="status-dot" id="statusDot"></span>
-        <span id="statusText">Connecting...</span>
-      </div>
-    </header>
+      .goal-progress {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
 
-    <main>
-      <aside class="sidebar">
-        <h2>Navigation</h2>
-        <div class="nav-item active" data-view="dashboard">
-          📊 Dashboard
+      .goal-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: rgba(99, 102, 241, 0.05);
+        border-radius: 0.5rem;
+      }
+
+      .goal-progress-bar {
+        flex: 1;
+        height: 8px;
+        background: var(--border);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .goal-progress-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+
+      .goal-progress-fill.low {
+        background: var(--error);
+      }
+      .goal-progress-fill.medium {
+        background: var(--warning);
+      }
+      .goal-progress-fill.high {
+        background: var(--success);
+      }
+
+      .optimization-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: rgba(99, 102, 241, 0.1);
+        border-radius: 0.5rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .optimization-suggestion {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 0.25rem;
+      }
+
+      .history-timeline {
+        position: relative;
+        padding-left: 1.5rem;
+      }
+
+      .history-timeline::before {
+        content: '';
+        position: absolute;
+        left: 0.5rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--border);
+      }
+
+      .history-item {
+        position: relative;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 0.5rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .history-item::before {
+        content: '';
+        position: absolute;
+        left: -1.25rem;
+        top: 1rem;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--primary);
+      }
+
+      .history-item.success::before {
+        background: var(--success);
+      }
+      .history-item.warning::before {
+        background: var(--warning);
+      }
+      .history-item.error::before {
+        background: var(--error);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <div class="logo">
+          <span class="logo-icon">🔮</span>
+          MUSUBI
         </div>
-        <div class="nav-item" data-view="workflow">
-          🔄 Workflow
+        <div class="connection-status">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Connecting...</span>
         </div>
-        <div class="nav-item" data-view="requirements">
-          📋 Requirements
-        </div>
-        <div class="nav-item" data-view="traceability">
-          🔗 Traceability
-        </div>
-        <div class="nav-item" data-view="replanning">
-          🔄 Replanning
-        </div>
-        <div class="nav-item" data-view="constitution">
-          📜 Constitution
-        </div>
-      </aside>
+      </header>
 
-      <section class="content" id="mainContent">
-        <div class="loading">
-          <div class="loading-spinner"></div>
-          Loading project data...
-        </div>
-      </section>
+      <main>
+        <aside class="sidebar">
+          <h2>Navigation</h2>
+          <div class="nav-item active" data-view="dashboard">📊 Dashboard</div>
+          <div class="nav-item" data-view="workflow">🔄 Workflow</div>
+          <div class="nav-item" data-view="requirements">📋 Requirements</div>
+          <div class="nav-item" data-view="traceability">🔗 Traceability</div>
+          <div class="nav-item" data-view="replanning">🔄 Replanning</div>
+          <div class="nav-item" data-view="constitution">📜 Constitution</div>
+        </aside>
 
-      <aside class="panel">
-        <h3>📌 Quick Actions</h3>
-        <div style="margin-bottom: 1rem;">
-          <button class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;" onclick="openModal('requirementModal')">
-            ➕ New Requirement
-          </button>
-          <button class="btn btn-outline" style="width: 100%; margin-bottom: 0.5rem;" onclick="runQuickAction('validate')">
-            🔍 Validate Project
-          </button>
-          <button class="btn btn-outline" style="width: 100%;" onclick="runQuickAction('export-report')">
-            📤 Export Report
-          </button>
-        </div>
-
-        <h3>📈 Coverage</h3>
-        <div id="coverageStats">
+        <section class="content" id="mainContent">
           <div class="loading">
             <div class="loading-spinner"></div>
+            Loading project data...
           </div>
-        </div>
-      </aside>
-    </main>
+        </section>
 
-    <!-- New Requirement Modal -->
-    <div class="modal-overlay" id="requirementModal">
-      <div class="modal">
-        <h2>📝 New Requirement</h2>
-        <form id="requirementForm" onsubmit="submitRequirement(event)">
-          <div class="form-group">
-            <label for="reqId">Requirement ID</label>
-            <input type="text" id="reqId" placeholder="REQ-001" required pattern="REQ-\d{3}" title="Format: REQ-001">
+        <aside class="panel">
+          <h3>📌 Quick Actions</h3>
+          <div style="margin-bottom: 1rem">
+            <button
+              class="btn btn-primary"
+              style="width: 100%; margin-bottom: 0.5rem"
+              onclick="openModal('requirementModal')"
+            >
+              ➕ New Requirement
+            </button>
+            <button
+              class="btn btn-outline"
+              style="width: 100%; margin-bottom: 0.5rem"
+              onclick="runQuickAction('validate')"
+            >
+              🔍 Validate Project
+            </button>
+            <button
+              class="btn btn-outline"
+              style="width: 100%"
+              onclick="runQuickAction('export-report')"
+            >
+              📤 Export Report
+            </button>
           </div>
-          <div class="form-group">
-            <label for="reqTitle">Title</label>
-            <input type="text" id="reqTitle" placeholder="User can login with email" required>
+
+          <h3>📈 Coverage</h3>
+          <div id="coverageStats">
+            <div class="loading">
+              <div class="loading-spinner"></div>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="reqType">Type</label>
-            <select id="reqType">
-              <option value="functional">Functional</option>
-              <option value="non-functional">Non-Functional</option>
-              <option value="constraint">Constraint</option>
-              <option value="interface">Interface</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="reqPriority">Priority</label>
-            <select id="reqPriority">
-              <option value="must">Must</option>
-              <option value="should">Should</option>
-              <option value="could">Could</option>
-              <option value="wont">Won't</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="reqDescription">Description (EARS Format)</label>
-            <textarea id="reqDescription" placeholder="When [trigger], the system shall [action]..." required></textarea>
-          </div>
-          <div class="form-group">
-            <label for="reqFeature">Feature</label>
-            <input type="text" id="reqFeature" placeholder="authentication" required>
-          </div>
-          <div class="modal-actions">
-            <button type="button" class="btn btn-outline" onclick="closeModal('requirementModal')">Cancel</button>
-            <button type="submit" class="btn btn-primary">Create Requirement</button>
-          </div>
-        </form>
+        </aside>
+      </main>
+
+      <!-- New Requirement Modal -->
+      <div class="modal-overlay" id="requirementModal">
+        <div class="modal">
+          <h2>📝 New Requirement</h2>
+          <form id="requirementForm" onsubmit="submitRequirement(event)">
+            <div class="form-group">
+              <label for="reqId">Requirement ID</label>
+              <input
+                type="text"
+                id="reqId"
+                placeholder="REQ-001"
+                required
+                pattern="REQ-\d{3}"
+                title="Format: REQ-001"
+              />
+            </div>
+            <div class="form-group">
+              <label for="reqTitle">Title</label>
+              <input type="text" id="reqTitle" placeholder="User can login with email" required />
+            </div>
+            <div class="form-group">
+              <label for="reqType">Type</label>
+              <select id="reqType">
+                <option value="functional">Functional</option>
+                <option value="non-functional">Non-Functional</option>
+                <option value="constraint">Constraint</option>
+                <option value="interface">Interface</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="reqPriority">Priority</label>
+              <select id="reqPriority">
+                <option value="must">Must</option>
+                <option value="should">Should</option>
+                <option value="could">Could</option>
+                <option value="wont">Won't</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="reqDescription">Description (EARS Format)</label>
+              <textarea
+                id="reqDescription"
+                placeholder="When [trigger], the system shall [action]..."
+                required
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="reqFeature">Feature</label>
+              <input type="text" id="reqFeature" placeholder="authentication" required />
+            </div>
+            <div class="modal-actions">
+              <button
+                type="button"
+                class="btn btn-outline"
+                onclick="closeModal('requirementModal')"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">Create Requirement</button>
+            </div>
+          </form>
+        </div>
       </div>
+
+      <footer>MUSUBI SDD - Specification Driven Development Dashboard</footer>
     </div>
 
-    <footer>
-      MUSUBI SDD - Specification Driven Development Dashboard
-    </footer>
-  </div>
+    <script>
+      // State
+      let project = null;
+      let ws = null;
+      let currentView = 'dashboard';
 
-  <script>
-    // State
-    let project = null;
-    let ws = null;
-    let currentView = 'dashboard';
+      // Modal functions
+      function openModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+      }
 
-    // Modal functions
-    function openModal(modalId) {
-      document.getElementById(modalId).classList.add('active');
-    }
+      function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+      }
 
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.remove('active');
-    }
+      async function submitRequirement(event) {
+        event.preventDefault();
 
-    async function submitRequirement(event) {
-      event.preventDefault();
-      
-      const requirement = {
-        id: document.getElementById('reqId').value,
-        title: document.getElementById('reqTitle').value,
-        type: document.getElementById('reqType').value,
-        priority: document.getElementById('reqPriority').value,
-        description: document.getElementById('reqDescription').value,
-        feature: document.getElementById('reqFeature').value,
-      };
+        const requirement = {
+          id: document.getElementById('reqId').value,
+          title: document.getElementById('reqTitle').value,
+          type: document.getElementById('reqType').value,
+          priority: document.getElementById('reqPriority').value,
+          description: document.getElementById('reqDescription').value,
+          feature: document.getElementById('reqFeature').value,
+        };
 
-      try {
-        const response = await fetch('/api/requirements', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requirement)
-        });
+        try {
+          const response = await fetch('/api/requirements', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requirement),
+          });
 
-        const result = await response.json();
-        
-        if (result.success) {
-          showToast('✅ Requirement created successfully', 'success');
-          closeModal('requirementModal');
-          document.getElementById('requirementForm').reset();
-          loadProject(); // Refresh project data
-        } else {
-          showToast(`❌ ${result.error || 'Failed to create requirement'}`, 'error');
+          const result = await response.json();
+
+          if (result.success) {
+            showToast('✅ Requirement created successfully', 'success');
+            closeModal('requirementModal');
+            document.getElementById('requirementForm').reset();
+            loadProject(); // Refresh project data
+          } else {
+            showToast(`❌ ${result.error || 'Failed to create requirement'}`, 'error');
+          }
+        } catch (error) {
+          showToast(`❌ Error: ${error.message}`, 'error');
         }
-      } catch (error) {
-        showToast(`❌ Error: ${error.message}`, 'error');
       }
-    }
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
-      connectWebSocket();
-      loadProject();
-      setupNavigation();
-    });
+      // Initialize
+      document.addEventListener('DOMContentLoaded', () => {
+        connectWebSocket();
+        loadProject();
+        setupNavigation();
+      });
 
-    // WebSocket connection
-    function connectWebSocket() {
-      const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-      ws = new WebSocket(`${protocol}//${location.host}`);
+      // WebSocket connection
+      function connectWebSocket() {
+        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        ws = new WebSocket(`${protocol}//${location.host}`);
 
-      ws.onopen = () => {
-        document.getElementById('statusDot').classList.add('connected');
-        document.getElementById('statusText').textContent = 'Connected';
-      };
+        ws.onopen = () => {
+          document.getElementById('statusDot').classList.add('connected');
+          document.getElementById('statusText').textContent = 'Connected';
+        };
 
-      ws.onclose = () => {
-        document.getElementById('statusDot').classList.remove('connected');
-        document.getElementById('statusText').textContent = 'Disconnected';
-        setTimeout(connectWebSocket, 3000);
-      };
+        ws.onclose = () => {
+          document.getElementById('statusDot').classList.remove('connected');
+          document.getElementById('statusText').textContent = 'Disconnected';
+          setTimeout(connectWebSocket, 3000);
+        };
 
-      ws.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        handleWebSocketMessage(message);
-      };
-    }
-
-    function handleWebSocketMessage(message) {
-      switch (message.type) {
-        case 'project:init':
-        case 'file:changed':
-        case 'file:added':
-        case 'file:removed':
-          project = message.data.project || message.data;
-          renderCurrentView();
-          loadCoverage();
-          break;
-        case 'replanning:state':
-          handleReplanningStateUpdate(message.data);
-          break;
-        case 'replanning:event':
-          handleReplanningEvent(message.data);
-          break;
+        ws.onmessage = event => {
+          const message = JSON.parse(event.data);
+          handleWebSocketMessage(message);
+        };
       }
-    }
 
-    // Replanning real-time handlers
-    function handleReplanningStateUpdate(state) {
-      // Update replanning panel if visible
-      const replanPanel = document.querySelector('.replan-status');
-      if (replanPanel) {
-        const statusText = replanPanel.querySelector('.status-text');
-        if (statusText) {
-          statusText.textContent = state.status.charAt(0).toUpperCase() + state.status.slice(1);
+      function handleWebSocketMessage(message) {
+        switch (message.type) {
+          case 'project:init':
+          case 'file:changed':
+          case 'file:added':
+          case 'file:removed':
+            project = message.data.project || message.data;
+            renderCurrentView();
+            loadCoverage();
+            break;
+          case 'replanning:state':
+            handleReplanningStateUpdate(message.data);
+            break;
+          case 'replanning:event':
+            handleReplanningEvent(message.data);
+            break;
         }
-        // Update status indicator class
-        replanPanel.className = 'replan-status ' + state.status;
       }
-      // Show toast notification for status changes
-      if (state.status === 'replanning') {
-        showToast('Replanning in progress...', 'warning');
-      } else if (state.status === 'optimizing') {
-        showToast('Optimizing execution path...', 'info');
-      }
-      // Refresh replanning view if active
-      if (currentView === 'replanning') {
-        renderReplanningView();
-      }
-    }
 
-    function handleReplanningEvent(event) {
-      // Show notification for replan events
-      const message = event.success 
-        ? `Replan completed: ${event.reason || 'Optimization applied'}`
-        : `Replan failed: ${event.error || 'Unknown error'}`;
-      showToast(message, event.success ? 'success' : 'error');
-      // Refresh replanning view if active
-      if (currentView === 'replanning') {
-        renderReplanningView();
+      // Replanning real-time handlers
+      function handleReplanningStateUpdate(state) {
+        // Update replanning panel if visible
+        const replanPanel = document.querySelector('.replan-status');
+        if (replanPanel) {
+          const statusText = replanPanel.querySelector('.status-text');
+          if (statusText) {
+            statusText.textContent = state.status.charAt(0).toUpperCase() + state.status.slice(1);
+          }
+          // Update status indicator class
+          replanPanel.className = 'replan-status ' + state.status;
+        }
+        // Show toast notification for status changes
+        if (state.status === 'replanning') {
+          showToast('Replanning in progress...', 'warning');
+        } else if (state.status === 'optimizing') {
+          showToast('Optimizing execution path...', 'info');
+        }
+        // Refresh replanning view if active
+        if (currentView === 'replanning') {
+          renderReplanningView();
+        }
       }
-    }
 
-    function showToast(message, type = 'info') {
-      const toast = document.createElement('div');
-      toast.className = `toast toast-${type}`;
-      toast.textContent = message;
-      toast.style.cssText = `
+      function handleReplanningEvent(event) {
+        // Show notification for replan events
+        const message = event.success
+          ? `Replan completed: ${event.reason || 'Optimization applied'}`
+          : `Replan failed: ${event.error || 'Unknown error'}`;
+        showToast(message, event.success ? 'success' : 'error');
+        // Refresh replanning view if active
+        if (currentView === 'replanning') {
+          renderReplanningView();
+        }
+      }
+
+      function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        toast.style.cssText = `
         position: fixed;
         bottom: 20px;
         right: 20px;
@@ -901,161 +958,164 @@
         animation: slideIn 0.3s ease;
         background: ${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--error)' : type === 'warning' ? 'var(--warning)' : 'var(--secondary)'};
       `;
-      document.body.appendChild(toast);
-      setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
-
-    // API calls
-    async function loadProject() {
-      try {
-        const response = await fetch('/api/project');
-        project = await response.json();
-        renderCurrentView();
-      } catch (error) {
-        console.error('Failed to load project:', error);
+        document.body.appendChild(toast);
+        setTimeout(() => {
+          toast.style.animation = 'slideOut 0.3s ease';
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
       }
-    }
 
-    async function loadCoverage() {
-      try {
-        const response = await fetch('/api/coverage');
-        const coverage = await response.json();
-        renderCoverage(coverage);
-      } catch (error) {
-        console.error('Failed to load coverage:', error);
+      // API calls
+      async function loadProject() {
+        try {
+          const response = await fetch('/api/project');
+          project = await response.json();
+          renderCurrentView();
+        } catch (error) {
+          console.error('Failed to load project:', error);
+        }
       }
-    }
 
-    async function loadTraceability() {
-      try {
-        const response = await fetch('/api/traceability');
-        return await response.json();
-      } catch (error) {
-        console.error('Failed to load traceability:', error);
-        return { requirements: [], traces: [] };
+      async function loadCoverage() {
+        try {
+          const response = await fetch('/api/coverage');
+          const coverage = await response.json();
+          renderCoverage(coverage);
+        } catch (error) {
+          console.error('Failed to load coverage:', error);
+        }
       }
-    }
 
-    async function loadConstitution() {
-      try {
-        const response = await fetch('/api/constitution');
-        return await response.json();
-      } catch (error) {
-        console.error('Failed to load constitution:', error);
-        return null;
+      async function loadTraceability() {
+        try {
+          const response = await fetch('/api/traceability');
+          return await response.json();
+        } catch (error) {
+          console.error('Failed to load traceability:', error);
+          return { requirements: [], traces: [] };
+        }
       }
-    }
 
-    async function loadWorkflow() {
-      try {
-        const response = await fetch('/api/workflow');
-        return await response.json();
-      } catch (error) {
-        console.error('Failed to load workflow:', error);
-        return null;
+      async function loadConstitution() {
+        try {
+          const response = await fetch('/api/constitution');
+          return await response.json();
+        } catch (error) {
+          console.error('Failed to load constitution:', error);
+          return null;
+        }
       }
-    }
 
-    async function loadReplanning() {
-      try {
-        const response = await fetch('/api/replanning/summary');
-        return await response.json();
-      } catch (error) {
-        console.error('Failed to load replanning:', error);
-        return null;
+      async function loadWorkflow() {
+        try {
+          const response = await fetch('/api/workflow');
+          return await response.json();
+        } catch (error) {
+          console.error('Failed to load workflow:', error);
+          return null;
+        }
       }
-    }
 
-    async function loadReplanningGoals() {
-      try {
-        const response = await fetch('/api/replanning/goals');
-        return await response.json();
-      } catch (error) {
-        console.error('Failed to load replanning goals:', error);
-        return { goals: [], overallProgress: 0 };
+      async function loadReplanning() {
+        try {
+          const response = await fetch('/api/replanning/summary');
+          return await response.json();
+        } catch (error) {
+          console.error('Failed to load replanning:', error);
+          return null;
+        }
       }
-    }
 
-    async function loadReplanningHistory() {
-      try {
-        const response = await fetch('/api/replanning/history?limit=10');
-        return await response.json();
-      } catch (error) {
-        console.error('Failed to load replanning history:', error);
-        return [];
+      async function loadReplanningGoals() {
+        try {
+          const response = await fetch('/api/replanning/goals');
+          return await response.json();
+        } catch (error) {
+          console.error('Failed to load replanning goals:', error);
+          return { goals: [], overallProgress: 0 };
+        }
       }
-    }
 
-    async function loadReplanningOptimization() {
-      try {
-        const response = await fetch('/api/replanning/optimization');
-        return await response.json();
-      } catch (error) {
-        console.error('Failed to load optimization:', error);
-        return { status: 'idle', suggestions: [] };
+      async function loadReplanningHistory() {
+        try {
+          const response = await fetch('/api/replanning/history?limit=10');
+          return await response.json();
+        } catch (error) {
+          console.error('Failed to load replanning history:', error);
+          return [];
+        }
       }
-    }
 
-    // Navigation
-    function setupNavigation() {
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', () => {
-          const view = item.dataset.view;
-          setActiveView(view);
+      async function loadReplanningOptimization() {
+        try {
+          const response = await fetch('/api/replanning/optimization');
+          return await response.json();
+        } catch (error) {
+          console.error('Failed to load optimization:', error);
+          return { status: 'idle', suggestions: [] };
+        }
+      }
+
+      // Navigation
+      function setupNavigation() {
+        document.querySelectorAll('.nav-item').forEach(item => {
+          item.addEventListener('click', () => {
+            const view = item.dataset.view;
+            setActiveView(view);
+          });
         });
-      });
-    }
-
-    function setActiveView(view) {
-      currentView = view;
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.toggle('active', item.dataset.view === view);
-      });
-      renderCurrentView();
-    }
-
-    // Render functions
-    function renderCurrentView() {
-      const content = document.getElementById('mainContent');
-      
-      switch (currentView) {
-        case 'dashboard':
-          renderDashboard(content);
-          break;
-        case 'workflow':
-          renderWorkflow(content);
-          break;
-        case 'requirements':
-          renderRequirements(content);
-          break;
-        case 'traceability':
-          renderTraceability(content);
-          break;
-        case 'replanning':
-          renderReplanning(content);
-          break;
-        case 'constitution':
-          renderConstitution(content);
-          break;
-      }
-    }
-
-    function renderDashboard(container) {
-      if (!project) {
-        container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading...</div>';
-        return;
       }
 
-      const specs = project.specs || [];
-      const totalReqs = specs.reduce((sum, s) => sum + (s.requirements?.length || 0), 0);
-      const totalTasks = specs.reduce((sum, s) => sum + (s.tasks?.length || 0), 0);
-      const completedTasks = specs.reduce((sum, s) => 
-        sum + (s.tasks?.filter(t => t.completed)?.length || 0), 0);
+      function setActiveView(view) {
+        currentView = view;
+        document.querySelectorAll('.nav-item').forEach(item => {
+          item.classList.toggle('active', item.dataset.view === view);
+        });
+        renderCurrentView();
+      }
 
-      container.innerHTML = `
+      // Render functions
+      function renderCurrentView() {
+        const content = document.getElementById('mainContent');
+
+        switch (currentView) {
+          case 'dashboard':
+            renderDashboard(content);
+            break;
+          case 'workflow':
+            renderWorkflow(content);
+            break;
+          case 'requirements':
+            renderRequirements(content);
+            break;
+          case 'traceability':
+            renderTraceability(content);
+            break;
+          case 'replanning':
+            renderReplanning(content);
+            break;
+          case 'constitution':
+            renderConstitution(content);
+            break;
+        }
+      }
+
+      function renderDashboard(container) {
+        if (!project) {
+          container.innerHTML =
+            '<div class="loading"><div class="loading-spinner"></div>Loading...</div>';
+          return;
+        }
+
+        const specs = project.specs || [];
+        const totalReqs = specs.reduce((sum, s) => sum + (s.requirements?.length || 0), 0);
+        const totalTasks = specs.reduce((sum, s) => sum + (s.tasks?.length || 0), 0);
+        const completedTasks = specs.reduce(
+          (sum, s) => sum + (s.tasks?.filter(t => t.completed)?.length || 0),
+          0
+        );
+
+        container.innerHTML = `
         <h2 style="margin-bottom: 1.5rem;">📊 Project Dashboard</h2>
         
         <div class="stats-grid">
@@ -1074,7 +1134,7 @@
           <div class="stat-card">
             <div class="label">Tasks</div>
             <div class="value">${completedTasks}/${totalTasks}</div>
-            <div class="change">${totalTasks > 0 ? Math.round(completedTasks/totalTasks*100) : 0}% complete</div>
+            <div class="change">${totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}% complete</div>
           </div>
         </div>
 
@@ -1084,204 +1144,255 @@
             ${project.hasSteering ? '✅ Steering configured' : '⚠️ No steering directory'}
             ${project.hasSpecs ? ' • ✅ Specs available' : ' • ⚠️ No specs yet'}
           </p>
-          ${project.constitution ? `
+          ${
+            project.constitution
+              ? `
             <p style="color: var(--success);">
               📜 Constitution: ${project.constitution.articles?.length || 0} articles
             </p>
-          ` : ''}
+          `
+              : ''
+          }
         </div>
 
-        ${specs.length > 0 ? `
+        ${
+          specs.length > 0
+            ? `
           <div class="card">
             <h3>📁 Recent Specifications</h3>
             <ul class="requirements-list">
-              ${specs.slice(0, 5).map(spec => `
+              ${specs
+                .slice(0, 5)
+                .map(
+                  spec => `
                 <li class="requirement-item">
                   <span class="req-id">${spec.id}</span>
                   <span class="req-title">${spec.title || spec.id}</span>
                   <span class="req-status designed">${spec.requirements?.length || 0} reqs</span>
                 </li>
-              `).join('')}
+              `
+                )
+                .join('')}
             </ul>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
       `;
-    }
+      }
 
-    async function renderWorkflow(container) {
-      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading workflow...</div>';
-      
-      const workflow = await loadWorkflow();
-      
-      if (!workflow || !workflow.stages) {
-        container.innerHTML = `
+      async function renderWorkflow(container) {
+        container.innerHTML =
+          '<div class="loading"><div class="loading-spinner"></div>Loading workflow...</div>';
+
+        const workflow = await loadWorkflow();
+
+        if (!workflow || !workflow.stages) {
+          container.innerHTML = `
           <h2 style="margin-bottom: 1.5rem;">🔄 Workflow</h2>
           <div class="empty-state">
             <h4>No workflow defined</h4>
             <p>Create a workflow configuration in steering/rules/workflow.md</p>
           </div>
         `;
-        return;
-      }
+          return;
+        }
 
-      container.innerHTML = `
+        container.innerHTML = `
         <h2 style="margin-bottom: 1.5rem;">🔄 Workflow</h2>
         
         <div class="card">
           <h3>SDD Stages</h3>
-          ${workflow.stages.map((stage, i) => `
+          ${workflow.stages
+            .map(
+              (stage, i) => `
             <div class="workflow-stage ${stage.status}">
               <span class="stage-number">${i + 1}</span>
               <span>${stage.name}</span>
             </div>
-          `).join('')}
+          `
+            )
+            .join('')}
         </div>
       `;
-    }
-
-    async function renderRequirements(container) {
-      if (!project || !project.specs) {
-        container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading...</div>';
-        return;
       }
 
-      const allReqs = project.specs.flatMap(spec => 
-        (spec.requirements || []).map(req => ({
-          ...req,
-          specId: spec.id
-        }))
-      );
+      async function renderRequirements(container) {
+        if (!project || !project.specs) {
+          container.innerHTML =
+            '<div class="loading"><div class="loading-spinner"></div>Loading...</div>';
+          return;
+        }
 
-      container.innerHTML = `
+        const allReqs = project.specs.flatMap(spec =>
+          (spec.requirements || []).map(req => ({
+            ...req,
+            specId: spec.id,
+          }))
+        );
+
+        container.innerHTML = `
         <h2 style="margin-bottom: 1.5rem;">📋 Requirements</h2>
         
-        ${allReqs.length > 0 ? `
+        ${
+          allReqs.length > 0
+            ? `
           <div class="card">
             <h3>All Requirements (${allReqs.length})</h3>
             <ul class="requirements-list">
-              ${allReqs.map(req => `
+              ${allReqs
+                .map(
+                  req => `
                 <li class="requirement-item">
                   <span class="req-id">${req.id}</span>
                   <span class="req-title" title="${req.body || ''}">${req.body?.substring(0, 80) || req.id}...</span>
                   <span class="req-status designed">${req.pattern}</span>
                 </li>
-              `).join('')}
+              `
+                )
+                .join('')}
             </ul>
           </div>
-        ` : `
+        `
+            : `
           <div class="empty-state">
             <h4>No Requirements</h4>
             <p>Create requirements using musubi-requirements command</p>
           </div>
-        `}
+        `
+        }
       `;
-    }
+      }
 
-    async function renderTraceability(container) {
-      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading traceability...</div>';
-      
-      const matrix = await loadTraceability();
-      
-      container.innerHTML = `
+      async function renderTraceability(container) {
+        container.innerHTML =
+          '<div class="loading"><div class="loading-spinner"></div>Loading traceability...</div>';
+
+        const matrix = await loadTraceability();
+
+        container.innerHTML = `
         <h2 style="margin-bottom: 1.5rem;">🔗 Traceability Matrix</h2>
         
         <div class="card">
           <h3>Requirements → Implementation</h3>
-          ${matrix.requirements?.length > 0 ? `
+          ${
+            matrix.requirements?.length > 0
+              ? `
             <ul class="requirements-list">
-              ${matrix.requirements.map(req => `
+              ${matrix.requirements
+                .map(
+                  req => `
                 <li class="requirement-item">
                   <span class="req-id">${req.id}</span>
                   <span class="req-title">${req.specTitle || ''}</span>
                   <span class="req-status ${req.status || 'unlinked'}">${req.status || 'unlinked'}</span>
                 </li>
-              `).join('')}
+              `
+                )
+                .join('')}
             </ul>
-          ` : `
+          `
+              : `
             <div class="empty-state">
               <p>No requirements to trace</p>
             </div>
-          `}
+          `
+          }
         </div>
 
         <div class="card">
           <h3>📊 Trace Links (${matrix.traces?.length || 0})</h3>
-          ${matrix.traces?.length > 0 ? `
+          ${
+            matrix.traces?.length > 0
+              ? `
             <ul class="requirements-list">
-              ${matrix.traces.slice(0, 10).map(trace => `
+              ${matrix.traces
+                .slice(0, 10)
+                .map(
+                  trace => `
                 <li class="requirement-item">
                   <span class="req-id">${trace.from}</span>
                   <span style="color: var(--text-muted);">→</span>
                   <span class="req-id" style="background: var(--secondary);">${trace.to}</span>
                   <span class="req-title">${trace.type}</span>
                 </li>
-              `).join('')}
+              `
+                )
+                .join('')}
             </ul>
-          ` : '<p style="color: var(--text-muted); padding: 1rem;">No trace links found</p>'}
+          `
+              : '<p style="color: var(--text-muted); padding: 1rem;">No trace links found</p>'
+          }
         </div>
       `;
-    }
+      }
 
-    async function renderConstitution(container) {
-      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading constitution...</div>';
-      
-      const constitution = await loadConstitution();
-      
-      if (!constitution || !constitution.articles) {
-        container.innerHTML = `
+      async function renderConstitution(container) {
+        container.innerHTML =
+          '<div class="loading"><div class="loading-spinner"></div>Loading constitution...</div>';
+
+        const constitution = await loadConstitution();
+
+        if (!constitution || !constitution.articles) {
+          container.innerHTML = `
           <h2 style="margin-bottom: 1.5rem;">📜 Constitution</h2>
           <div class="empty-state">
             <h4>No Constitution</h4>
             <p>Create a constitution in steering/rules/constitution.md</p>
           </div>
         `;
-        return;
-      }
+          return;
+        }
 
-      container.innerHTML = `
+        container.innerHTML = `
         <h2 style="margin-bottom: 1.5rem;">📜 Constitution</h2>
         
         <div class="card">
           <h3>Articles (${constitution.articles.length})</h3>
-          ${constitution.articles.map(article => `
+          ${constitution.articles
+            .map(
+              article => `
             <div class="constitution-article">
               <div class="article-number">Article ${article.number}</div>
               <div>${article.title}</div>
             </div>
-          `).join('')}
+          `
+            )
+            .join('')}
         </div>
       `;
-    }
+      }
 
-    async function renderReplanning(container) {
-      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading replanning state...</div>';
-      
-      const [summary, goals, history, optimization] = await Promise.all([
-        loadReplanning(),
-        loadReplanningGoals(),
-        loadReplanningHistory(),
-        loadReplanningOptimization()
-      ]);
+      async function renderReplanning(container) {
+        container.innerHTML =
+          '<div class="loading"><div class="loading-spinner"></div>Loading replanning state...</div>';
 
-      const statusLabels = {
-        idle: 'Idle',
-        monitoring: 'Monitoring',
-        evaluating: 'Evaluating',
-        replanning: 'Replanning',
-        optimizing: 'Optimizing'
-      };
+        const [summary, goals, history, optimization] = await Promise.all([
+          loadReplanning(),
+          loadReplanningGoals(),
+          loadReplanningHistory(),
+          loadReplanningOptimization(),
+        ]);
 
-      const statusIcons = {
-        idle: '⏸️',
-        monitoring: '👁️',
-        evaluating: '🔍',
-        replanning: '🔄',
-        optimizing: '⚡'
-      };
+        const statusLabels = {
+          idle: 'Idle',
+          monitoring: 'Monitoring',
+          evaluating: 'Evaluating',
+          replanning: 'Replanning',
+          optimizing: 'Optimizing',
+        };
 
-      const status = summary?.status || 'idle';
-      
-      container.innerHTML = `
+        const statusIcons = {
+          idle: '⏸️',
+          monitoring: '👁️',
+          evaluating: '🔍',
+          replanning: '🔄',
+          optimizing: '⚡',
+        };
+
+        const status = summary?.status || 'idle';
+
+        container.innerHTML = `
         <h2 style="margin-bottom: 1.5rem;">🔄 Replanning Engine</h2>
         
         <!-- Status Card -->
@@ -1316,10 +1427,14 @@
           <div class="card">
             <h3>🎯 Goal Progress</h3>
             <div class="goal-progress">
-              ${goals.goals?.length > 0 ? goals.goals.slice(0, 5).map(goal => {
-                const progress = goal.progress || 0;
-                const level = progress < 33 ? 'low' : progress < 66 ? 'medium' : 'high';
-                return `
+              ${
+                goals.goals?.length > 0
+                  ? goals.goals
+                      .slice(0, 5)
+                      .map(goal => {
+                        const progress = goal.progress || 0;
+                        const level = progress < 33 ? 'low' : progress < 66 ? 'medium' : 'high';
+                        return `
                   <div class="goal-item">
                     <span style="flex-shrink: 0; width: 80px; font-size: 0.875rem;">${goal.id || 'Goal'}</span>
                     <div class="goal-progress-bar">
@@ -1328,14 +1443,19 @@
                     <span style="flex-shrink: 0; width: 40px; text-align: right; font-size: 0.875rem;">${progress}%</span>
                   </div>
                 `;
-              }).join('') : `
+                      })
+                      .join('')
+                  : `
                 <div style="color: var(--text-muted); padding: 1rem; text-align: center;">
                   <p>No goals registered</p>
                   <p style="font-size: 0.875rem; margin-top: 0.5rem;">Use <code>npx musubi-orchestrate goal register</code></p>
                 </div>
-              `}
+              `
+              }
             </div>
-            ${goals.goals?.length > 0 ? `
+            ${
+              goals.goals?.length > 0
+                ? `
               <div class="progress-bar" style="margin-top: 1rem;">
                 <div class="progress-bar-fill" style="width: ${goals.overallProgress || 0}%"></div>
               </div>
@@ -1343,7 +1463,9 @@
                 <span>Active: ${summary?.goalProgress?.active || 0}</span>
                 <span>Completed: ${summary?.goalProgress?.completed || 0}</span>
               </div>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
 
           <!-- Path Optimization -->
@@ -1354,24 +1476,37 @@
                 <span class="status-indicator ${optimization.status || 'idle'}"></span>
                 <span style="font-weight: 500;">${optimization.status === 'active' ? 'Optimization Active' : 'Awaiting Optimization'}</span>
               </div>
-              ${optimization.potentialSavings ? `
+              ${
+                optimization.potentialSavings
+                  ? `
                 <div style="color: var(--success); font-size: 0.875rem;">
                   💡 Potential savings: ${optimization.potentialSavings}%
                 </div>
-              ` : ''}
+              `
+                  : ''
+              }
             </div>
             
             <h4 style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">Suggestions</h4>
-            ${optimization.suggestions?.length > 0 ? optimization.suggestions.slice(0, 3).map(sug => `
+            ${
+              optimization.suggestions?.length > 0
+                ? optimization.suggestions
+                    .slice(0, 3)
+                    .map(
+                      sug => `
               <div class="optimization-suggestion">
                 <span>💡</span>
                 <span style="font-size: 0.875rem;">${sug.description || sug}</span>
               </div>
-            `).join('') : `
+            `
+                    )
+                    .join('')
+                : `
               <div style="color: var(--text-muted); padding: 0.5rem; text-align: center; font-size: 0.875rem;">
                 No optimization suggestions
               </div>
-            `}
+            `
+            }
             <div style="margin-top: 1rem;">
               <code style="font-size: 0.75rem; color: var(--text-muted);">npx musubi-orchestrate optimize run</code>
             </div>
@@ -1381,13 +1516,23 @@
         <!-- Replan History -->
         <div class="card" style="margin-top: 1rem;">
           <h3>📜 Recent Replan History</h3>
-          ${history?.length > 0 ? `
+          ${
+            history?.length > 0
+              ? `
             <div class="history-timeline">
-              ${history.slice(0, 8).map(event => {
-                const eventClass = event.success === false ? 'error' : 
-                                   event.trigger === 'warning' ? 'warning' : 'success';
-                const time = event.timestamp ? new Date(event.timestamp).toLocaleString('ja-JP') : 'Unknown';
-                return `
+              ${history
+                .slice(0, 8)
+                .map(event => {
+                  const eventClass =
+                    event.success === false
+                      ? 'error'
+                      : event.trigger === 'warning'
+                        ? 'warning'
+                        : 'success';
+                  const time = event.timestamp
+                    ? new Date(event.timestamp).toLocaleString('ja-JP')
+                    : 'Unknown';
+                  return `
                   <div class="history-item ${eventClass}">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
                       <span style="font-weight: 500;">${event.trigger || event.type || 'Replan'}</span>
@@ -1396,21 +1541,28 @@
                     <div style="font-size: 0.875rem; color: var(--text-muted);">
                       ${event.reason || event.description || 'Plan adjusted'}
                     </div>
-                    ${event.confidence ? `
+                    ${
+                      event.confidence
+                        ? `
                       <div style="font-size: 0.75rem; color: var(--primary); margin-top: 0.25rem;">
                         Confidence: ${Math.round(event.confidence * 100)}%
                       </div>
-                    ` : ''}
+                    `
+                        : ''
+                    }
                   </div>
                 `;
-              }).join('')}
+                })
+                .join('')}
             </div>
-          ` : `
+          `
+              : `
             <div style="color: var(--text-muted); padding: 1rem; text-align: center;">
               <p>No replan history yet</p>
               <p style="font-size: 0.875rem; margin-top: 0.5rem;">Replanning events will appear here</p>
             </div>
-          `}
+          `
+          }
         </div>
 
         <!-- CLI Commands Reference -->
@@ -1436,12 +1588,12 @@
           </div>
         </div>
       `;
-    }
+      }
 
-    function renderCoverage(coverage) {
-      const container = document.getElementById('coverageStats');
-      
-      container.innerHTML = `
+      function renderCoverage(coverage) {
+        const container = document.getElementById('coverageStats');
+
+        container.innerHTML = `
         <div style="margin-bottom: 1rem;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
             <span>Total</span>
@@ -1460,64 +1612,66 @@
           </div>
         </div>
       `;
-    }
-
-    // Quick Actions
-    async function runQuickAction(action) {
-      const button = event.target;
-      const originalText = button.innerHTML;
-      button.disabled = true;
-      button.innerHTML = '⏳ Processing...';
-
-      try {
-        const response = await fetch(`/api/actions/${action}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const result = await response.json();
-
-        if (action === 'validate') {
-          if (result.success) {
-            showToast('✅ Validation passed', 'success');
-          } else {
-            showToast('⚠️ Validation completed with issues', 'warning');
-          }
-          // Show output in console and optionally in a modal
-          if (result.output) {
-            console.log('Validation output:', result.output);
-          }
-          if (result.errors) {
-            console.log('Validation errors:', result.errors);
-          }
-        } else if (result.success) {
-          if (action === 'export-report') {
-            showToast('📤 Report exported', 'success');
-            if (result.report) {
-              // Download report as JSON
-              const blob = new Blob([JSON.stringify(result.report, null, 2)], { type: 'application/json' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'musubi-report.json';
-              a.click();
-              URL.revokeObjectURL(url);
-            }
-          } else if (action === 'new-requirement') {
-            showToast('📝 Requirements wizard started in terminal', 'info');
-          }
-        } else {
-          showToast(`❌ ${result.error || 'Action failed'}`, 'error');
-        }
-      } catch (error) {
-        showToast(`❌ Error: ${error.message}`, 'error');
-      } finally {
-        button.disabled = false;
-        button.innerHTML = originalText;
       }
-    }
 
-    // Initial load
-    loadCoverage();
-  </script>
-</body>
+      // Quick Actions
+      async function runQuickAction(action) {
+        const button = event.target;
+        const originalText = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '⏳ Processing...';
+
+        try {
+          const response = await fetch(`/api/actions/${action}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          });
+          const result = await response.json();
+
+          if (action === 'validate') {
+            if (result.success) {
+              showToast('✅ Validation passed', 'success');
+            } else {
+              showToast('⚠️ Validation completed with issues', 'warning');
+            }
+            // Show output in console and optionally in a modal
+            if (result.output) {
+              console.log('Validation output:', result.output);
+            }
+            if (result.errors) {
+              console.log('Validation errors:', result.errors);
+            }
+          } else if (result.success) {
+            if (action === 'export-report') {
+              showToast('📤 Report exported', 'success');
+              if (result.report) {
+                // Download report as JSON
+                const blob = new Blob([JSON.stringify(result.report, null, 2)], {
+                  type: 'application/json',
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'musubi-report.json';
+                a.click();
+                URL.revokeObjectURL(url);
+              }
+            } else if (action === 'new-requirement') {
+              showToast('📝 Requirements wizard started in terminal', 'info');
+            }
+          } else {
+            showToast(`❌ ${result.error || 'Action failed'}`, 'error');
+          }
+        } catch (error) {
+          showToast(`❌ Error: ${error.message}`, 'error');
+        } finally {
+          button.disabled = false;
+          button.innerHTML = originalText;
+        }
+      }
+
+      // Initial load
+      loadCoverage();
+    </script>
+  </body>
 </html>

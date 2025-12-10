@@ -41,7 +41,7 @@ const RuleType = {
 const defaultConfig = {
   // Strictness level: 'strict', 'standard', 'relaxed'
   strictness: 'standard',
-  
+
   // Minimum coverage thresholds
   thresholds: {
     design: 80,
@@ -50,7 +50,7 @@ const defaultConfig = {
     tests: 80,
     overall: 80,
   },
-  
+
   // Rules to enforce
   rules: {
     [RuleType.REQUIREMENT_HAS_DESIGN]: { enabled: true, severity: Severity.WARNING },
@@ -64,7 +64,7 @@ const defaultConfig = {
     [RuleType.MINIMUM_COVERAGE]: { enabled: true, severity: Severity.ERROR },
     [RuleType.BIDIRECTIONAL_LINKS]: { enabled: false, severity: Severity.INFO },
   },
-  
+
   // Paths configuration
   paths: {
     requirements: 'docs/requirements',
@@ -73,13 +73,9 @@ const defaultConfig = {
     code: 'src',
     tests: 'tests',
   },
-  
+
   // File patterns to exclude
-  exclude: [
-    '**/node_modules/**',
-    '**/.git/**',
-    '**/coverage/**',
-  ],
+  exclude: ['**/node_modules/**', '**/.git/**', '**/coverage/**'],
 };
 
 /**
@@ -196,14 +192,14 @@ class TraceabilityValidator {
       await this.runRules(result, coverage, gaps);
 
       // Update summary
-      result.summary.total = result.violations.length + result.warnings.length + result.infos.length;
+      result.summary.total =
+        result.violations.length + result.warnings.length + result.infos.length;
       result.summary.errors = result.violations.length;
       result.summary.warnings = result.warnings.length;
       result.summary.infos = result.infos.length;
 
       // Determine overall validity
       result.valid = result.violations.length === 0;
-
     } catch (error) {
       result.valid = false;
       result.violations.push({

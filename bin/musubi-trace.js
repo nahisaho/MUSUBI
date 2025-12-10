@@ -778,14 +778,18 @@ program
       const result = await validator.validate();
 
       if (options.format === 'json') {
-        const output = JSON.stringify({
-          passed: result.valid,
-          coverage: result.coverage,
-          gaps: result.gaps,
-          violations: result.violations,
-          warnings: result.warnings,
-          timestamp: new Date().toISOString(),
-        }, null, 2);
+        const output = JSON.stringify(
+          {
+            passed: result.valid,
+            coverage: result.coverage,
+            gaps: result.gaps,
+            violations: result.violations,
+            warnings: result.warnings,
+            timestamp: new Date().toISOString(),
+          },
+          null,
+          2
+        );
 
         if (options.output) {
           const fs = require('fs-extra');
@@ -917,14 +921,17 @@ program
           console.log(output);
         }
       } else if (options.format === 'html') {
-        const { TraceabilityMatrixReport, ReportFormat } = require('../src/reporters/traceability-matrix-report.js');
+        const {
+          TraceabilityMatrixReport,
+          ReportFormat,
+        } = require('../src/reporters/traceability-matrix-report.js');
         const reporter = new TraceabilityMatrixReport(process.cwd(), {
           theme: options.theme,
           interactive: true,
         });
-        
+
         const html = await reporter.generate(result, ReportFormat.HTML);
-        
+
         if (options.output) {
           const fs = require('fs-extra');
           await fs.writeFile(options.output, html, 'utf-8');
@@ -935,15 +942,26 @@ program
       } else {
         // Text format
         console.log(chalk.bold('📊 Forward Traceability (Requirements → Tests)'));
-        console.log(chalk.dim(`   Complete: ${result.completeness.forwardComplete}/${result.completeness.forwardTotal} (${result.completeness.forwardPercentage}%)`));
+        console.log(
+          chalk.dim(
+            `   Complete: ${result.completeness.forwardComplete}/${result.completeness.forwardTotal} (${result.completeness.forwardPercentage}%)`
+          )
+        );
         console.log();
 
         console.log(chalk.bold('🔙 Backward Traceability (Tests → Requirements)'));
-        console.log(chalk.dim(`   Complete: ${result.completeness.backwardComplete}/${result.completeness.backwardTotal} (${result.completeness.backwardPercentage}%)`));
+        console.log(
+          chalk.dim(
+            `   Complete: ${result.completeness.backwardComplete}/${result.completeness.backwardTotal} (${result.completeness.backwardPercentage}%)`
+          )
+        );
         console.log();
 
         // Show orphaned items
-        const totalOrphaned = Object.values(result.orphaned).reduce((sum, arr) => sum + arr.length, 0);
+        const totalOrphaned = Object.values(result.orphaned).reduce(
+          (sum, arr) => sum + arr.length,
+          0
+        );
         if (totalOrphaned > 0) {
           console.log(chalk.yellow.bold(`⚠️ Orphaned Items (${totalOrphaned}):`));
           ['requirements', 'design', 'tasks', 'code', 'tests'].forEach(cat => {
@@ -977,11 +995,14 @@ program
     try {
       console.log(chalk.bold('\n📊 Generating HTML Traceability Report\n'));
 
-      const { TraceabilityMatrixReport, ReportFormat } = require('../src/reporters/traceability-matrix-report.js');
+      const {
+        TraceabilityMatrixReport,
+        ReportFormat,
+      } = require('../src/reporters/traceability-matrix-report.js');
       const analyzer = new TraceabilityAnalyzer(process.cwd());
-      
+
       const traceabilityData = await analyzer.analyzeBidirectional();
-      
+
       const reporter = new TraceabilityMatrixReport(process.cwd(), {
         theme: options.theme,
         interactive: options.interactive !== false,
@@ -996,9 +1017,17 @@ program
       console.log(chalk.green(`✓ HTML report generated: ${options.output}`));
       console.log();
       console.log(chalk.dim('Summary:'));
-      console.log(chalk.dim(`  Forward coverage: ${traceabilityData.completeness.forwardPercentage}%`));
-      console.log(chalk.dim(`  Backward coverage: ${traceabilityData.completeness.backwardPercentage}%`));
-      console.log(chalk.dim(`  Orphaned items: ${Object.values(traceabilityData.orphaned).reduce((s, a) => s + a.length, 0)}`));
+      console.log(
+        chalk.dim(`  Forward coverage: ${traceabilityData.completeness.forwardPercentage}%`)
+      );
+      console.log(
+        chalk.dim(`  Backward coverage: ${traceabilityData.completeness.backwardPercentage}%`)
+      );
+      console.log(
+        chalk.dim(
+          `  Orphaned items: ${Object.values(traceabilityData.orphaned).reduce((s, a) => s + a.length, 0)}`
+        )
+      );
       console.log();
 
       process.exit(0);

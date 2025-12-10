@@ -43,7 +43,7 @@ class ScreenshotCapture {
 
     const timestamp = Date.now();
     this.counter++;
-    
+
     const name = options.name || `screenshot-${this.counter}`;
     const extension = options.type || 'png';
     const filename = `${timestamp}-${name}.${extension}`;
@@ -88,7 +88,7 @@ class ScreenshotCapture {
 
     const timestamp = Date.now();
     this.counter++;
-    
+
     const name = options.name || `element-${this.counter}`;
     const extension = options.type || 'png';
     const filename = `${timestamp}-${name}.${extension}`;

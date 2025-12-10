@@ -5,7 +5,11 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const { ImpactAnalyzer, ImpactLevel, ImpactCategory } = require('../../src/analyzers/impact-analyzer.js');
+const {
+  ImpactAnalyzer,
+  ImpactLevel,
+  ImpactCategory,
+} = require('../../src/analyzers/impact-analyzer.js');
 
 describe('ImpactAnalyzer', () => {
   let analyzer;
@@ -14,7 +18,7 @@ describe('ImpactAnalyzer', () => {
   beforeAll(async () => {
     testDir = path.join(__dirname, '../test-output/impact-analyzer');
     await fs.ensureDir(testDir);
-    
+
     // Create test file structure
     await fs.ensureDir(path.join(testDir, 'src'));
     await fs.ensureDir(path.join(testDir, 'tests'));
@@ -93,7 +97,7 @@ describe('ImpactAnalyzer', () => {
         id: 'DELTA-TEST-001',
         type: 'ADDED',
         target: 'new-feature',
-        description: 'Adding new feature'
+        description: 'Adding new feature',
       };
 
       const report = await analyzer.analyzeImpact(delta);
@@ -114,7 +118,7 @@ describe('ImpactAnalyzer', () => {
         target: 'auth',
         description: 'Modifying auth module',
         before: { version: '1.0' },
-        after: { version: '2.0' }
+        after: { version: '2.0' },
       };
 
       const report = await analyzer.analyzeImpact(delta);
@@ -130,7 +134,7 @@ describe('ImpactAnalyzer', () => {
         id: 'DELTA-TEST-003',
         type: 'REMOVED',
         target: 'AuthModule',
-        description: 'Removing deprecated module'
+        description: 'Removing deprecated module',
       };
 
       const report = await analyzer.analyzeImpact(delta);
@@ -148,7 +152,7 @@ describe('ImpactAnalyzer', () => {
         target: 'auth',
         before: 'auth',
         after: 'authentication',
-        description: 'Renaming auth to authentication'
+        description: 'Renaming auth to authentication',
       };
 
       const report = await analyzer.analyzeImpact(delta);
@@ -163,7 +167,7 @@ describe('ImpactAnalyzer', () => {
         type: 'MODIFIED',
         target: 'user-service',
         description: 'Modifying user service',
-        impactedAreas: ['authentication', 'user-management']
+        impactedAreas: ['authentication', 'user-management'],
       };
 
       const report = await analyzer.analyzeImpact(delta);
@@ -263,17 +267,19 @@ describe('ImpactAnalyzer', () => {
         summary: {
           totalAffected: 15,
           byLevel: { critical: 0, high: 0, medium: 0, low: 0, info: 0 },
-          byCategory: { tests: 0 }
+          byCategory: { tests: 0 },
         },
         dependencyChain: [],
-        recommendations: []
+        recommendations: [],
       };
 
       analyzer.generateRecommendations(report);
 
-      expect(report.recommendations.some(r => 
-        r.message.includes('splitting') || r.message.includes('smaller')
-      )).toBe(true);
+      expect(
+        report.recommendations.some(
+          r => r.message.includes('splitting') || r.message.includes('smaller')
+        )
+      ).toBe(true);
     });
 
     it('should add warnings for critical impacts', () => {
@@ -281,17 +287,15 @@ describe('ImpactAnalyzer', () => {
         summary: {
           totalAffected: 5,
           byLevel: { critical: 2, high: 0, medium: 0, low: 0, info: 0 },
-          byCategory: { tests: 0 }
+          byCategory: { tests: 0 },
         },
         dependencyChain: [],
-        recommendations: []
+        recommendations: [],
       };
 
       analyzer.generateRecommendations(report);
 
-      expect(report.recommendations.some(r => 
-        r.priority === 'critical'
-      )).toBe(true);
+      expect(report.recommendations.some(r => r.priority === 'critical')).toBe(true);
     });
   });
 
@@ -300,9 +304,9 @@ describe('ImpactAnalyzer', () => {
       const report = {
         summary: {
           byLevel: { critical: 1, high: 0, medium: 0, low: 0, info: 0 },
-          byCategory: { code: 0, tests: 0 }
+          byCategory: { code: 0, tests: 0 },
         },
-        risks: []
+        risks: [],
       };
 
       analyzer.identifyRisks(report);
@@ -314,16 +318,14 @@ describe('ImpactAnalyzer', () => {
       const report = {
         summary: {
           byLevel: { critical: 0, high: 0, medium: 0, low: 0, info: 0 },
-          byCategory: { code: 10, tests: 2 }
+          byCategory: { code: 10, tests: 2 },
         },
-        risks: []
+        risks: [],
       };
 
       analyzer.identifyRisks(report);
 
-      expect(report.risks.some(r => 
-        r.description.includes('test coverage')
-      )).toBe(true);
+      expect(report.risks.some(r => r.description.includes('test coverage'))).toBe(true);
     });
   });
 
@@ -336,13 +338,20 @@ describe('ImpactAnalyzer', () => {
         timestamp: new Date().toISOString(),
         summary: {
           totalAffected: 5,
-          byCategory: { code: 3, tests: 2, documentation: 0, configuration: 0, requirements: 0, design: 0 },
-          byLevel: { critical: 0, high: 1, medium: 2, low: 1, info: 1 }
+          byCategory: {
+            code: 3,
+            tests: 2,
+            documentation: 0,
+            configuration: 0,
+            requirements: 0,
+            design: 0,
+          },
+          byLevel: { critical: 0, high: 1, medium: 2, low: 1, info: 1 },
         },
         affectedItems: [],
         dependencyChain: [],
         recommendations: [{ priority: 'info', message: 'Test recommendation' }],
-        risks: [{ level: 'medium', description: 'Test risk', mitigation: 'Fix it' }]
+        risks: [{ level: 'medium', description: 'Test risk', mitigation: 'Fix it' }],
       };
 
       const summary = analyzer.generateSummary(report);

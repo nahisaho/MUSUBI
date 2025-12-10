@@ -29,19 +29,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Lint
         run: npm run lint
-        
+
       - name: Type check
         run: npm run typecheck
 
@@ -61,21 +61,21 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Run tests
         run: npm test -- --coverage
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/test
-          
+
       - name: Upload coverage
         uses: codecov/codecov-action@v3
 
@@ -83,10 +83,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Run security audit
         run: npm audit --audit-level=high
-        
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
@@ -104,17 +104,17 @@ jobs:
       image-tag: ${{ steps.meta.outputs.tags }}
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        
+
       - name: Log in to Container registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -123,7 +123,7 @@ jobs:
           tags: |
             type=sha
             type=ref,event=branch
-            
+
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -169,8 +169,8 @@ stages:
   - deploy
 
 variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
-  DOCKER_TLS_CERTDIR: "/certs"
+  PIP_CACHE_DIR: '$CI_PROJECT_DIR/.pip-cache'
+  DOCKER_TLS_CERTDIR: '/certs'
 
 .python-setup:
   image: python:3.11
@@ -282,35 +282,35 @@ stages:
           - task: UseDotNet@2
             inputs:
               version: $(dotnetVersion)
-              
+
           - task: DotNetCoreCLI@2
             displayName: 'Restore'
             inputs:
               command: restore
-              
+
           - task: DotNetCoreCLI@2
             displayName: 'Build'
             inputs:
               command: build
               arguments: '--configuration $(buildConfiguration) --no-restore'
-              
+
           - task: DotNetCoreCLI@2
             displayName: 'Test'
             inputs:
               command: test
               arguments: '--configuration $(buildConfiguration) --collect:"XPlat Code Coverage"'
-              
+
           - task: PublishCodeCoverageResults@2
             inputs:
               codeCoverageTool: 'Cobertura'
               summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
-              
+
           - task: DotNetCoreCLI@2
             displayName: 'Publish'
             inputs:
               command: publish
               arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-              
+
           - task: PublishBuildArtifacts@1
             inputs:
               pathToPublish: '$(Build.ArtifactStagingDirectory)'
@@ -425,18 +425,21 @@ CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "
 ## Best Practices Checklist
 
 ### Pipeline Security
+
 - [ ] Secrets in vault/variables (not in code)
 - [ ] Minimal permissions for CI/CD
 - [ ] Scan for vulnerabilities
 - [ ] Sign artifacts/images
 
 ### Quality Gates
+
 - [ ] Unit tests pass
 - [ ] Code coverage threshold
 - [ ] Linting passes
 - [ ] Security scan passes
 
 ### Deployment
+
 - [ ] Environment-specific configs
 - [ ] Rollback capability
 - [ ] Health checks

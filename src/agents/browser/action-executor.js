@@ -76,7 +76,7 @@ class ActionExecutor {
    */
   async executeNavigate(action, page, timeout) {
     await page.goto(action.url, { timeout, waitUntil: 'domcontentloaded' });
-    
+
     return {
       success: true,
       type: 'navigate',
@@ -93,7 +93,7 @@ class ActionExecutor {
    */
   async executeClick(action, page, timeout) {
     const selectors = action.selector.split(',').map(s => s.trim());
-    
+
     // Try each selector until one works
     for (const selector of selectors) {
       try {
@@ -110,7 +110,7 @@ class ActionExecutor {
 
     // If none worked, try with the original selector and let it fail
     await page.click(action.selector, { timeout });
-    
+
     return {
       success: true,
       type: 'click',
@@ -127,7 +127,7 @@ class ActionExecutor {
    */
   async executeFill(action, page, timeout) {
     const selectors = action.selector.split(',').map(s => s.trim());
-    
+
     // Try each selector until one works
     for (const selector of selectors) {
       try {
@@ -144,7 +144,7 @@ class ActionExecutor {
 
     // If none worked, try with the original selector
     await page.fill(action.selector, action.value, { timeout });
-    
+
     return {
       success: true,
       type: 'fill',
@@ -161,7 +161,7 @@ class ActionExecutor {
    */
   async executeSelect(action, page, timeout) {
     const selectors = action.selector.split(',').map(s => s.trim());
-    
+
     for (const selector of selectors) {
       try {
         await page.selectOption(selector, action.value, { timeout });
@@ -176,7 +176,7 @@ class ActionExecutor {
     }
 
     await page.selectOption(action.selector, action.value, { timeout });
-    
+
     return {
       success: true,
       type: 'select',
@@ -191,7 +191,7 @@ class ActionExecutor {
    */
   async executeWait(action) {
     await new Promise(resolve => setTimeout(resolve, action.delay));
-    
+
     return {
       success: true,
       type: 'wait',
@@ -207,12 +207,12 @@ class ActionExecutor {
    */
   async executeScreenshot(action, context) {
     const { page, screenshot } = context;
-    
+
     const path = await screenshot.capture(page, {
       name: action.name,
       fullPage: action.fullPage,
     });
-    
+
     return {
       success: true,
       type: 'screenshot',
@@ -229,9 +229,9 @@ class ActionExecutor {
    */
   async executeAssert(action, page, timeout) {
     const locator = page.locator(action.selector);
-    
+
     await locator.waitFor({ state: 'visible', timeout });
-    
+
     let text = null;
     if (action.expectedText) {
       text = await locator.textContent();
@@ -243,7 +243,7 @@ class ActionExecutor {
         };
       }
     }
-    
+
     return {
       success: true,
       type: 'assert',

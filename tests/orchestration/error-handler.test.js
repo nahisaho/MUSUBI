@@ -12,7 +12,7 @@ const {
   WorkflowError,
   ErrorSeverity,
   ErrorCategory,
-  CircuitState
+  CircuitState,
 } = require('../../src/orchestration/error-handler');
 
 // Suppress console output during tests
@@ -35,7 +35,7 @@ afterAll(() => {
 describe('WorkflowError', () => {
   test('should create error with default values', () => {
     const error = new WorkflowError('Test error');
-    
+
     expect(error.message).toBe('Test error');
     expect(error.code).toBe('WORKFLOW_ERROR');
     expect(error.category).toBe(ErrorCategory.UNKNOWN);
@@ -51,9 +51,9 @@ describe('WorkflowError', () => {
       severity: ErrorSeverity.HIGH,
       retryable: true,
       context: { key: 'value' },
-      suggestions: ['Try again']
+      suggestions: ['Try again'],
     });
-    
+
     expect(error.code).toBe('CUSTOM_ERROR');
     expect(error.category).toBe(ErrorCategory.NETWORK);
     expect(error.severity).toBe(ErrorSeverity.HIGH);
@@ -65,11 +65,11 @@ describe('WorkflowError', () => {
   test('should serialize to JSON', () => {
     const error = new WorkflowError('JSON error', {
       code: 'JSON_ERR',
-      category: ErrorCategory.VALIDATION
+      category: ErrorCategory.VALIDATION,
     });
-    
+
     const json = error.toJSON();
-    
+
     expect(json.name).toBe('WorkflowError');
     expect(json.message).toBe('JSON error');
     expect(json.code).toBe('JSON_ERR');
@@ -89,7 +89,7 @@ describe('ErrorClassifier', () => {
     test('should classify network errors', () => {
       const error = new Error('ECONNREFUSED connection failed');
       const classification = classifier.classify(error);
-      
+
       expect(classification.category).toBe(ErrorCategory.NETWORK);
       expect(classification.retryable).toBe(true);
     });
@@ -97,7 +97,7 @@ describe('ErrorClassifier', () => {
     test('should classify timeout errors', () => {
       const error = new Error('Request timeout exceeded');
       const classification = classifier.classify(error);
-      
+
       expect(classification.category).toBe(ErrorCategory.TIMEOUT);
       expect(classification.retryable).toBe(true);
     });
@@ -105,7 +105,7 @@ describe('ErrorClassifier', () => {
     test('should classify rate limit errors', () => {
       const error = new Error('Rate limit exceeded - 429');
       const classification = classifier.classify(error);
-      
+
       expect(classification.category).toBe(ErrorCategory.RATE_LIMIT);
       expect(classification.retryable).toBe(true);
     });
@@ -113,7 +113,7 @@ describe('ErrorClassifier', () => {
     test('should classify authentication errors', () => {
       const error = new Error('401 Unauthorized - invalid token');
       const classification = classifier.classify(error);
-      
+
       expect(classification.category).toBe(ErrorCategory.AUTHENTICATION);
       expect(classification.retryable).toBe(false);
     });
@@ -121,7 +121,7 @@ describe('ErrorClassifier', () => {
     test('should classify authorization errors', () => {
       const error = new Error('403 Forbidden - access denied');
       const classification = classifier.classify(error);
-      
+
       expect(classification.category).toBe(ErrorCategory.AUTHORIZATION);
       expect(classification.retryable).toBe(false);
     });
@@ -129,7 +129,7 @@ describe('ErrorClassifier', () => {
     test('should classify not found errors', () => {
       const error = new Error('Resource not found - 404');
       const classification = classifier.classify(error);
-      
+
       expect(classification.category).toBe(ErrorCategory.RESOURCE_NOT_FOUND);
       expect(classification.retryable).toBe(false);
     });
@@ -137,7 +137,7 @@ describe('ErrorClassifier', () => {
     test('should classify validation errors', () => {
       const error = new Error('Validation failed: required field missing');
       const classification = classifier.classify(error);
-      
+
       expect(classification.category).toBe(ErrorCategory.VALIDATION);
       expect(classification.severity).toBe(ErrorSeverity.LOW);
     });
@@ -145,14 +145,14 @@ describe('ErrorClassifier', () => {
     test('should classify conflict errors', () => {
       const error = new Error('409 Conflict - resource already exists');
       const classification = classifier.classify(error);
-      
+
       expect(classification.category).toBe(ErrorCategory.CONFLICT);
     });
 
     test('should classify configuration errors', () => {
       const error = new Error('Service not configured properly');
       const classification = classifier.classify(error);
-      
+
       expect(classification.category).toBe(ErrorCategory.CONFIGURATION);
       expect(classification.severity).toBe(ErrorSeverity.HIGH);
     });
@@ -160,7 +160,7 @@ describe('ErrorClassifier', () => {
     test('should return unknown for unrecognized errors', () => {
       const error = new Error('xyz123abc random gibberish xyz789');
       const classification = classifier.classify(error);
-      
+
       expect(classification.category).toBe(ErrorCategory.UNKNOWN);
     });
   });
@@ -169,7 +169,7 @@ describe('ErrorClassifier', () => {
     test('should enhance plain error to WorkflowError', () => {
       const plainError = new Error('Network connection failed');
       const enhanced = classifier.enhance(plainError);
-      
+
       expect(enhanced).toBeInstanceOf(WorkflowError);
       expect(enhanced.category).toBe(ErrorCategory.NETWORK);
       expect(enhanced.cause).toBe(plainError);
@@ -177,10 +177,10 @@ describe('ErrorClassifier', () => {
 
     test('should return WorkflowError unchanged', () => {
       const workflowError = new WorkflowError('Already enhanced', {
-        category: ErrorCategory.INTERNAL
+        category: ErrorCategory.INTERNAL,
       });
       const result = classifier.enhance(workflowError);
-      
+
       expect(result).toBe(workflowError);
     });
   });
@@ -191,12 +191,12 @@ describe('ErrorClassifier', () => {
         category: 'custom-category',
         severity: ErrorSeverity.CRITICAL,
         retryable: false,
-        patterns: [/CUSTOM_ERR/i]
+        patterns: [/CUSTOM_ERR/i],
       });
 
       const error = new Error('CUSTOM_ERR: Something custom happened');
       const classification = classifier.classify(error);
-      
+
       expect(classification.category).toBe('custom-category');
       expect(classification.severity).toBe(ErrorSeverity.CRITICAL);
     });
@@ -211,7 +211,7 @@ describe('CircuitBreaker', () => {
       name: 'test-service',
       failureThreshold: 3,
       successThreshold: 2,
-      timeout: 100
+      timeout: 100,
     });
   });
 
@@ -225,7 +225,9 @@ describe('CircuitBreaker', () => {
   });
 
   test('should open after reaching failure threshold', async () => {
-    const failingFn = async () => { throw new Error('fail'); };
+    const failingFn = async () => {
+      throw new Error('fail');
+    };
 
     for (let i = 0; i < 3; i++) {
       try {
@@ -264,9 +266,9 @@ describe('CircuitBreaker', () => {
       failureThreshold: 3,
       successThreshold: 2,
       timeout: 100,
-      halfOpenMaxCalls: 5
+      halfOpenMaxCalls: 5,
     });
-    
+
     breaker.state = CircuitState.HALF_OPEN;
     breaker.halfOpenCalls = 0;
 
@@ -278,14 +280,16 @@ describe('CircuitBreaker', () => {
 
   test('should emit state-change event', async () => {
     let stateChange = null;
-    breaker.on('state-change', (event) => {
+    breaker.on('state-change', event => {
       stateChange = event;
     });
 
     // Trigger failures to open circuit
     for (let i = 0; i < 3; i++) {
       try {
-        await breaker.execute(async () => { throw new Error('fail'); });
+        await breaker.execute(async () => {
+          throw new Error('fail');
+        });
       } catch (e) {
         // Expected
       }
@@ -314,18 +318,18 @@ describe('ErrorAggregator', () => {
 
   test('should add and track errors', () => {
     const error = new WorkflowError('Test error', { category: ErrorCategory.NETWORK });
-    
+
     aggregator.add(error, { step: 'step1' });
-    
+
     const stats = aggregator.getStats();
     expect(stats.totalErrors).toBe(1);
   });
 
   test('should enhance plain errors', () => {
     const plainError = new Error('Connection timeout');
-    
+
     aggregator.add(plainError);
-    
+
     const stats = aggregator.getStats();
     expect(stats.byCategory[ErrorCategory.TIMEOUT]).toBe(1);
   });
@@ -334,7 +338,7 @@ describe('ErrorAggregator', () => {
     aggregator.add(new WorkflowError('Error 1', { category: ErrorCategory.NETWORK }));
     aggregator.add(new WorkflowError('Error 2', { category: ErrorCategory.NETWORK }));
     aggregator.add(new WorkflowError('Error 3', { category: ErrorCategory.TIMEOUT }));
-    
+
     const stats = aggregator.getStats();
     expect(stats.byCategory[ErrorCategory.NETWORK]).toBe(2);
     expect(stats.byCategory[ErrorCategory.TIMEOUT]).toBe(1);
@@ -344,7 +348,7 @@ describe('ErrorAggregator', () => {
     aggregator.add(new WorkflowError('Error 1', { severity: ErrorSeverity.HIGH }));
     aggregator.add(new WorkflowError('Error 2', { severity: ErrorSeverity.HIGH }));
     aggregator.add(new WorkflowError('Error 3', { severity: ErrorSeverity.CRITICAL }));
-    
+
     const stats = aggregator.getStats();
     expect(stats.bySeverity[ErrorSeverity.HIGH]).toBe(2);
     expect(stats.criticalCount).toBe(1);
@@ -352,11 +356,11 @@ describe('ErrorAggregator', () => {
 
   test('should limit stored errors', () => {
     const agg = new ErrorAggregator({ maxErrors: 5 });
-    
+
     for (let i = 0; i < 10; i++) {
       agg.add(new WorkflowError(`Error ${i}`));
     }
-    
+
     const stats = agg.getStats();
     expect(stats.totalErrors).toBe(5);
     expect(stats.recentErrors[0].error.message).toBe('Error 5');
@@ -365,7 +369,7 @@ describe('ErrorAggregator', () => {
   test('should get errors by category', () => {
     aggregator.add(new WorkflowError('Network 1', { category: ErrorCategory.NETWORK }));
     aggregator.add(new WorkflowError('Auth 1', { category: ErrorCategory.AUTHENTICATION }));
-    
+
     const networkErrors = aggregator.getByCategory(ErrorCategory.NETWORK);
     expect(networkErrors).toHaveLength(1);
     expect(networkErrors[0].error.message).toBe('Network 1');
@@ -374,27 +378,33 @@ describe('ErrorAggregator', () => {
   test('should get retryable errors', () => {
     aggregator.add(new WorkflowError('Retryable', { retryable: true }));
     aggregator.add(new WorkflowError('Not retryable', { retryable: false }));
-    
+
     const retryable = aggregator.getRetryable();
     expect(retryable).toHaveLength(1);
   });
 
   test('should generate report with recommendations', () => {
-    aggregator.add(new WorkflowError('Critical!', { 
-      severity: ErrorSeverity.CRITICAL 
-    }));
-    aggregator.add(new WorkflowError('Auth fail', { 
-      category: ErrorCategory.AUTHENTICATION 
-    }));
-    
+    aggregator.add(
+      new WorkflowError('Critical!', {
+        severity: ErrorSeverity.CRITICAL,
+      })
+    );
+    aggregator.add(
+      new WorkflowError('Auth fail', {
+        category: ErrorCategory.AUTHENTICATION,
+      })
+    );
+
     for (let i = 0; i < 6; i++) {
-      aggregator.add(new WorkflowError('Network', { 
-        category: ErrorCategory.NETWORK 
-      }));
+      aggregator.add(
+        new WorkflowError('Network', {
+          category: ErrorCategory.NETWORK,
+        })
+      );
     }
-    
+
     const report = aggregator.generateReport();
-    
+
     expect(report.summary.critical).toBe(1);
     expect(report.recommendations.length).toBeGreaterThan(0);
     expect(report.recommendations.some(r => r.message.includes('critical'))).toBe(true);
@@ -405,9 +415,9 @@ describe('ErrorAggregator', () => {
   test('should clear all errors', () => {
     aggregator.add(new WorkflowError('Error 1'));
     aggregator.add(new WorkflowError('Error 2'));
-    
+
     aggregator.clear();
-    
+
     const stats = aggregator.getStats();
     expect(stats.totalErrors).toBe(0);
   });
@@ -421,23 +431,19 @@ describe('GracefulDegradation', () => {
   });
 
   test('should return primary result when successful', async () => {
-    const result = await degradation.execute(
-      'test-service',
-      async () => 'primary-result'
-    );
-    
+    const result = await degradation.execute('test-service', async () => 'primary-result');
+
     expect(result.result).toBe('primary-result');
     expect(result.degraded).toBe(false);
   });
 
   test('should use fallback when primary fails', async () => {
     degradation.registerFallback('test-service', async () => 'fallback-result');
-    
-    const result = await degradation.execute(
-      'test-service',
-      async () => { throw new Error('Primary failed'); }
-    );
-    
+
+    const result = await degradation.execute('test-service', async () => {
+      throw new Error('Primary failed');
+    });
+
     expect(result.result).toBe('fallback-result');
     expect(result.degraded).toBe(true);
     expect(result.source).toBe('fallback');
@@ -445,16 +451,15 @@ describe('GracefulDegradation', () => {
 
   test('should use cached result when available', async () => {
     degradation.registerFallback('test-service', async () => 'fallback', { ttl: 5000 });
-    
+
     // First call succeeds
     await degradation.execute('test-service', async () => 'cached-value');
-    
+
     // Second call fails but uses cache
-    const result = await degradation.execute(
-      'test-service',
-      async () => { throw new Error('Failed'); }
-    );
-    
+    const result = await degradation.execute('test-service', async () => {
+      throw new Error('Failed');
+    });
+
     expect(result.result).toBe('cached-value');
     expect(result.source).toBe('cache');
   });
@@ -463,7 +468,7 @@ describe('GracefulDegradation', () => {
     degradation.registerFallback('test-service', async () => {
       throw new Error('Fallback also failed');
     });
-    
+
     await expect(
       degradation.execute('test-service', async () => {
         throw new Error('Primary failed');
@@ -474,9 +479,11 @@ describe('GracefulDegradation', () => {
   test('should track degraded services', async () => {
     degradation.registerFallback('service-a', async () => 'fallback');
     degradation.registerFallback('service-b', async () => 'fallback');
-    
-    await degradation.execute('service-a', async () => { throw new Error(); });
-    
+
+    await degradation.execute('service-a', async () => {
+      throw new Error();
+    });
+
     expect(degradation.isDegraded('service-a')).toBe(true);
     expect(degradation.isDegraded('service-b')).toBe(false);
     expect(degradation.getDegradedServices()).toContain('service-a');
@@ -484,11 +491,13 @@ describe('GracefulDegradation', () => {
 
   test('should recover when service starts working', async () => {
     degradation.registerFallback('test-service', async () => 'fallback');
-    
+
     // Fail first
-    await degradation.execute('test-service', async () => { throw new Error(); });
+    await degradation.execute('test-service', async () => {
+      throw new Error();
+    });
     expect(degradation.isDegraded('test-service')).toBe(true);
-    
+
     // Succeed
     await degradation.execute('test-service', async () => 'success');
     expect(degradation.isDegraded('test-service')).toBe(false);
@@ -506,9 +515,9 @@ describe('ErrorHandler', () => {
 
   test('should handle and classify errors', () => {
     const error = new Error('Connection timeout');
-    
+
     const result = handler.handle(error, { step: 'step1' });
-    
+
     expect(result.handled).toBe(true);
     expect(result.error.category).toBe(ErrorCategory.TIMEOUT);
   });
@@ -520,28 +529,28 @@ describe('ErrorHandler', () => {
     });
 
     handler.handle(new Error('Test error'));
-    
+
     expect(emittedError).not.toBeNull();
   });
 
   test('should provide suggestions based on category', () => {
     const networkError = new Error('ECONNREFUSED');
     const result = handler.handle(networkError);
-    
+
     expect(result.suggestions.some(s => s.includes('connectivity'))).toBe(true);
   });
 
   test('should manage circuit breakers', () => {
     const breaker1 = handler.getCircuitBreaker('service-1');
     const breaker2 = handler.getCircuitBreaker('service-1');
-    
+
     expect(breaker1).toBe(breaker2); // Same instance
     expect(breaker1.name).toBe('service-1');
   });
 
   test('should execute with retry', async () => {
     let attempts = 0;
-    
+
     const result = await handler.executeWithRetry(
       async () => {
         attempts++;
@@ -553,14 +562,14 @@ describe('ErrorHandler', () => {
       },
       { maxRetries: 3, backoffMs: 10 }
     );
-    
+
     expect(result).toBe('success');
     expect(attempts).toBe(2);
   });
 
   test('should emit retry events', async () => {
     const retryEvents = [];
-    handler.on('retry', (event) => retryEvents.push(event));
+    handler.on('retry', event => retryEvents.push(event));
 
     let attempts = 0;
     await handler.executeWithRetry(
@@ -573,14 +582,16 @@ describe('ErrorHandler', () => {
       },
       { maxRetries: 3, backoffMs: 10 }
     );
-    
+
     expect(retryEvents).toHaveLength(2);
   });
 
   test('should throw after max retries exceeded', async () => {
     await expect(
       handler.executeWithRetry(
-        async () => { throw new Error('Always fails timeout'); },
+        async () => {
+          throw new Error('Always fails timeout');
+        },
         { maxRetries: 2, backoffMs: 10 }
       )
     ).rejects.toThrow('Always fails');
@@ -590,12 +601,12 @@ describe('ErrorHandler', () => {
     // Add some errors
     handler.handle(new Error('Network error 1'));
     handler.handle(new Error('401 Unauthorized'));
-    
+
     // Create a circuit breaker
     handler.getCircuitBreaker('test-service');
-    
+
     const report = handler.getReport();
-    
+
     expect(report.summary).toBeDefined();
     expect(report.breakdown).toBeDefined();
     expect(report.circuitBreakers['test-service']).toBeDefined();

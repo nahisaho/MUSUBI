@@ -23,7 +23,7 @@ describe('Spec Kit Parser', () => {
     await fs.ensureDir(FIXTURES_PATH);
     await fs.ensureDir(path.join(FIXTURES_PATH, '.specify', 'memory'));
     await fs.ensureDir(path.join(FIXTURES_PATH, '.specify', 'specs', '001-auth'));
-    
+
     // Create constitution.md
     await fs.writeFile(
       path.join(FIXTURES_PATH, '.specify', 'memory', 'constitution.md'),
@@ -55,7 +55,7 @@ Keep documentation up to date with code changes.
 - Breaking changes need approval
 `
     );
-    
+
     // Create spec.md with User Scenarios
     await fs.writeFile(
       path.join(FIXTURES_PATH, '.specify', 'specs', '001-auth', 'spec.md'),
@@ -88,7 +88,7 @@ As a user, I want to reset my password so that I can regain access if I forget i
 - Password reset emails are sent within 5 minutes
 `
     );
-    
+
     // Create tasks.md (Spec Kit format)
     await fs.writeFile(
       path.join(FIXTURES_PATH, '.specify', 'specs', '001-auth', 'tasks.md'),
@@ -115,7 +115,7 @@ As a user, I want to reset my password so that I can regain access if I forget i
   describe('parseSpeckitProject', () => {
     test('should parse a complete Spec Kit project', async () => {
       const ir = await parseSpeckitProject(FIXTURES_PATH);
-      
+
       expect(ir).toBeDefined();
       expect(ir.metadata.sourceFormat).toBe('speckit');
       expect(ir.features).toHaveLength(1);
@@ -131,9 +131,9 @@ As a user, I want to reset my password so that I can regain access if I forget i
     test('should parse constitution with core principles', async () => {
       const specifyPath = path.join(FIXTURES_PATH, '.specify');
       const constitution = await parseConstitution(specifyPath);
-      
+
       expect(constitution.corePrinciples.length).toBeGreaterThanOrEqual(1);
-      
+
       // Should map to MUSUBI articles
       expect(constitution.articles.length).toBe(9); // All 9 MUSUBI articles
     });
@@ -141,7 +141,7 @@ As a user, I want to reset my password so that I can regain access if I forget i
     test('should parse governance section', async () => {
       const specifyPath = path.join(FIXTURES_PATH, '.specify');
       const constitution = await parseConstitution(specifyPath);
-      
+
       expect(constitution.governance.version).toBe('1.0');
       expect(constitution.governance.rules.length).toBeGreaterThanOrEqual(1);
     });
@@ -151,14 +151,14 @@ As a user, I want to reset my password so that I can regain access if I forget i
     test('should parse spec.md with user scenarios', async () => {
       const specPath = path.join(FIXTURES_PATH, '.specify', 'specs', '001-auth', 'spec.md');
       const spec = await parseSpecification(specPath);
-      
+
       expect(spec.title).toBe('Authentication');
       expect(spec.userScenarios.length).toBeGreaterThanOrEqual(1);
-      
+
       const loginScenario = spec.userScenarios[0];
       expect(loginScenario.actor).toBe('registered user');
       expect(loginScenario.priority).toBe('P1');
-      
+
       // Should also convert to EARS requirements
       expect(spec.requirements.length).toBeGreaterThanOrEqual(1);
       expect(spec.requirements[0].pattern).toBe('event-driven');
@@ -169,20 +169,20 @@ As a user, I want to reset my password so that I can regain access if I forget i
     test('should parse Spec Kit task format', async () => {
       const tasksPath = path.join(FIXTURES_PATH, '.specify', 'specs', '001-auth', 'tasks.md');
       const tasks = await parseTasks(tasksPath);
-      
+
       expect(tasks.length).toBeGreaterThanOrEqual(4);
-      
+
       const task1 = tasks.find(t => t.id === 'T001');
       expect(task1).toBeDefined();
       expect(task1.parallel).toBe(true);
       expect(task1.userStory).toBe('US1');
       expect(task1.filePath).toBe('src/components/Login.tsx');
       expect(task1.phase).toBe(1);
-      
+
       const task2 = tasks.find(t => t.id === 'T002');
       expect(task2).toBeDefined();
       expect(task2.completed).toBe(true);
-      
+
       const task4 = tasks.find(t => t.id === 'T004');
       expect(task4).toBeDefined();
       expect(task4.phase).toBe(2);
@@ -204,9 +204,9 @@ As a user, I want to login so that I can access my dashboard.
 
 As a new user, I want to create an account so that I can join the platform.
 `;
-      
+
       const scenarios = parseUserScenarios(content);
-      
+
       expect(scenarios).toHaveLength(2);
       expect(scenarios[0].actor).toBe('user');
       expect(scenarios[0].action).toBe('login');

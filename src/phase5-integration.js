@@ -1,19 +1,54 @@
 /**
  * Phase 5 Integration Module
  * Advanced Features統合エンジン
- * 
+ *
  * @module phase5-integration
  */
 
 const EventEmitter = require('events');
 
 // Phase 5 modules
-const { SteeringAutoUpdate, createSteeringAutoUpdate, TRIGGER, STEERING_TYPE } = require('./steering/steering-auto-update');
-const { SteeringValidator, createSteeringValidator, SEVERITY, RULE_TYPE } = require('./steering/steering-validator');
-const { TemplateConstraints, ThinkingChecklist, createTemplateConstraints, createThinkingChecklist, CONSTRAINT_TYPE, UNCERTAINTY, MARKER_TYPE } = require('./templates/template-constraints');
-const { QualityDashboard, createQualityDashboard, METRIC_CATEGORY, HEALTH_STATUS, CONSTITUTIONAL_ARTICLES } = require('./monitoring/quality-dashboard');
-const { AdvancedValidation, createAdvancedValidation, VALIDATION_TYPE, ARTIFACT_TYPE, GAP_SEVERITY } = require('./validators/advanced-validation');
-const { CodeGraphAutoUpdate, createCodeGraphAutoUpdate, TRIGGER: CODEGRAPH_TRIGGER, TARGET: CODEGRAPH_TARGET } = require('./analyzers/codegraph-auto-update');
+const {
+  SteeringAutoUpdate,
+  createSteeringAutoUpdate,
+  TRIGGER,
+  STEERING_TYPE,
+} = require('./steering/steering-auto-update');
+const {
+  SteeringValidator,
+  createSteeringValidator,
+  SEVERITY,
+  RULE_TYPE,
+} = require('./steering/steering-validator');
+const {
+  TemplateConstraints,
+  ThinkingChecklist,
+  createTemplateConstraints,
+  createThinkingChecklist,
+  CONSTRAINT_TYPE,
+  UNCERTAINTY,
+  MARKER_TYPE,
+} = require('./templates/template-constraints');
+const {
+  QualityDashboard,
+  createQualityDashboard,
+  METRIC_CATEGORY,
+  HEALTH_STATUS,
+  CONSTITUTIONAL_ARTICLES,
+} = require('./monitoring/quality-dashboard');
+const {
+  AdvancedValidation,
+  createAdvancedValidation,
+  VALIDATION_TYPE,
+  ARTIFACT_TYPE,
+  GAP_SEVERITY,
+} = require('./validators/advanced-validation');
+const {
+  CodeGraphAutoUpdate,
+  createCodeGraphAutoUpdate,
+  TRIGGER: CODEGRAPH_TRIGGER,
+  TARGET: CODEGRAPH_TARGET,
+} = require('./analyzers/codegraph-auto-update');
 
 /**
  * Phase 5 integration status
@@ -23,7 +58,7 @@ const INTEGRATION_STATUS = {
   READY: 'ready',
   RUNNING: 'running',
   STOPPED: 'stopped',
-  ERROR: 'error'
+  ERROR: 'error',
 };
 
 /**
@@ -69,12 +104,12 @@ class Phase5Integration extends EventEmitter {
    */
   setupEventHandlers() {
     // When steering is updated, validate it
-    this.steeringAutoUpdate.on('update-applied', (update) => {
+    this.steeringAutoUpdate.on('update-applied', update => {
       this.emit('steering-updated', update);
     });
 
     // When quality is collected, check thresholds
-    this.qualityDashboard.on('collected', (snapshot) => {
+    this.qualityDashboard.on('collected', snapshot => {
       const health = this.qualityDashboard.getHealthSummary();
       if (health.status === HEALTH_STATUS.CRITICAL || health.status === HEALTH_STATUS.FAILING) {
         this.emit('health-alert', { status: health.status, snapshot });
@@ -82,26 +117,26 @@ class Phase5Integration extends EventEmitter {
     });
 
     // When validation finds issues, emit alerts
-    this.advancedValidation.on('validated', (result) => {
+    this.advancedValidation.on('validated', result => {
       if (!result.valid) {
         this.emit('validation-alert', result);
       }
     });
 
     // When gaps are detected, emit alerts
-    this.advancedValidation.on('gaps-detected', (result) => {
+    this.advancedValidation.on('gaps-detected', result => {
       if (result.criticalGaps > 0) {
         this.emit('gap-alert', result);
       }
     });
 
     // When codegraph is updated, emit events
-    this.codeGraphAutoUpdate.on('update-complete', (result) => {
+    this.codeGraphAutoUpdate.on('update-complete', result => {
       this.emit('codegraph-updated', result);
     });
 
     // When codegraph has errors, emit alerts
-    this.codeGraphAutoUpdate.on('update-error', (error) => {
+    this.codeGraphAutoUpdate.on('update-error', error => {
       this.emit('codegraph-error', error);
     });
   }
@@ -119,7 +154,7 @@ class Phase5Integration extends EventEmitter {
       qualityDashboard: this.qualityDashboard,
       advancedValidation: this.advancedValidation,
       thinkingChecklist: this.thinkingChecklist,
-      codeGraphAutoUpdate: this.codeGraphAutoUpdate
+      codeGraphAutoUpdate: this.codeGraphAutoUpdate,
     };
     return components[name] || null;
   }
@@ -153,7 +188,7 @@ class Phase5Integration extends EventEmitter {
         metrics,
         validation,
         overallScore,
-        recommendations: this.generateRecommendations(health, validation)
+        recommendations: this.generateRecommendations(health, validation),
       };
 
       this.status = INTEGRATION_STATUS.READY;
@@ -172,8 +207,9 @@ class Phase5Integration extends EventEmitter {
    */
   calculateOverallScore(metrics, validation) {
     const healthScore = metrics.health?.overall ?? 0;
-    const validationScore = validation.valid ? 100 : 
-      Math.max(0, 100 - (validation.criticalIssues * 20) - (validation.totalIssues * 5));
+    const validationScore = validation.valid
+      ? 100
+      : Math.max(0, 100 - validation.criticalIssues * 20 - validation.totalIssues * 5);
 
     return Math.round((healthScore + validationScore) / 2);
   }
@@ -190,7 +226,7 @@ class Phase5Integration extends EventEmitter {
         type: 'coverage',
         priority: 'high',
         message: 'Increase test coverage to improve project health',
-        currentScore: health.breakdown.coverage.score
+        currentScore: health.breakdown.coverage.score,
       });
     }
 
@@ -199,7 +235,7 @@ class Phase5Integration extends EventEmitter {
         type: 'constitutional',
         priority: 'high',
         message: 'Review constitutional compliance for all articles',
-        currentScore: health.breakdown.constitutional.score
+        currentScore: health.breakdown.constitutional.score,
       });
     }
 
@@ -209,7 +245,7 @@ class Phase5Integration extends EventEmitter {
         type: 'gaps',
         priority: validation.gaps.criticalGaps > 0 ? 'critical' : 'medium',
         message: `Address ${validation.gaps.gapCount} specification gaps`,
-        details: validation.gaps.gaps.slice(0, 5)
+        details: validation.gaps.gaps.slice(0, 5),
       });
     }
 
@@ -218,7 +254,7 @@ class Phase5Integration extends EventEmitter {
         type: 'traceability',
         priority: 'medium',
         message: 'Improve traceability coverage between artifacts',
-        currentCoverage: validation.traceability.coverage
+        currentCoverage: validation.traceability.coverage,
       });
     }
 
@@ -238,13 +274,14 @@ class Phase5Integration extends EventEmitter {
     }
 
     const overallValid = Object.values(results).every(r => r.valid);
-    const avgScore = Object.values(results).reduce((sum, r) => sum + r.score, 0) / Object.keys(results).length;
+    const avgScore =
+      Object.values(results).reduce((sum, r) => sum + r.score, 0) / Object.keys(results).length;
 
     return {
       valid: overallValid,
       files: results,
       avgScore: Math.round(avgScore),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -268,26 +305,26 @@ class Phase5Integration extends EventEmitter {
       components: {
         steeringAutoUpdate: {
           rules: this.steeringAutoUpdate.rules?.length ?? 0,
-          history: this.steeringAutoUpdate.updateHistory?.length ?? 0
+          history: this.steeringAutoUpdate.updateHistory?.length ?? 0,
         },
         steeringValidator: {
           rules: this.steeringValidator.rules?.size ?? 0,
-          history: this.steeringValidator.history?.length ?? 0
+          history: this.steeringValidator.history?.length ?? 0,
         },
         templateConstraints: {
           templates: Object.keys(this.templateConstraints.templates).length,
-          history: this.templateConstraints.validationHistory?.length ?? 0
+          history: this.templateConstraints.validationHistory?.length ?? 0,
         },
         qualityDashboard: {
           metrics: this.qualityDashboard.metrics?.size ?? 0,
-          history: this.qualityDashboard.history?.length ?? 0
+          history: this.qualityDashboard.history?.length ?? 0,
         },
         advancedValidation: {
           artifacts: this.advancedValidation.artifacts?.size ?? 0,
-          links: this.advancedValidation.countLinks?.() ?? 0
-        }
+          links: this.advancedValidation.countLinks?.() ?? 0,
+        },
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -342,7 +379,7 @@ class Phase5Integration extends EventEmitter {
     this.qualityDashboard.clear();
     this.advancedValidation.clear();
     this.thinkingChecklist.reset();
-    
+
     this.status = INTEGRATION_STATUS.READY;
     this.emit('reset');
   }
@@ -420,5 +457,5 @@ module.exports = {
   CodeGraphAutoUpdate,
   createCodeGraphAutoUpdate,
   CODEGRAPH_TRIGGER,
-  CODEGRAPH_TARGET
+  CODEGRAPH_TARGET,
 };

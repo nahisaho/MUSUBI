@@ -1,9 +1,9 @@
 /**
  * @fileoverview Input Guardrail for validating agent inputs
- * 
+ *
  * InputGuardrail validates and sanitizes inputs before they reach agents.
  * Inspired by OpenAI Agents SDK guardrails pattern.
- * 
+ *
  * @module orchestration/guardrails/input-guardrail
  * @version 3.9.0
  */
@@ -51,7 +51,7 @@ class InputGuardrail extends BaseGuardrail {
       failFast: config.failFast,
       severity: config.severity,
       tripwireEnabled: config.tripwireEnabled,
-      options: config.options
+      options: config.options,
     });
 
     // Load rules from config, rule set, or default
@@ -79,9 +79,8 @@ class InputGuardrail extends BaseGuardrail {
    * @returns {InputGuardrail} this for chaining
    */
   addFieldRules(fieldName, rulesOrBuilder) {
-    const fieldRules = rulesOrBuilder instanceof RuleBuilder 
-      ? rulesOrBuilder.build() 
-      : rulesOrBuilder;
+    const fieldRules =
+      rulesOrBuilder instanceof RuleBuilder ? rulesOrBuilder.build() : rulesOrBuilder;
     this.fieldRules.set(fieldName, fieldRules);
     return this;
   }
@@ -106,25 +105,33 @@ class InputGuardrail extends BaseGuardrail {
       try {
         const customResult = await this.customValidator(sanitizedInput, context);
         if (customResult === false || (customResult && customResult.passed === false)) {
-          violations.push(this.createViolation(
-            'CUSTOM_VALIDATION_FAILED',
-            customResult.message || 'Custom validation failed',
-            'error',
-            { custom: true }
-          ));
+          violations.push(
+            this.createViolation(
+              'CUSTOM_VALIDATION_FAILED',
+              customResult.message || 'Custom validation failed',
+              'error',
+              { custom: true }
+            )
+          );
         }
       } catch (error) {
-        violations.push(this.createViolation(
-          'CUSTOM_VALIDATOR_ERROR',
-          `Custom validator error: ${error.message}`,
-          'error',
-          { error: error.message }
-        ));
+        violations.push(
+          this.createViolation(
+            'CUSTOM_VALIDATOR_ERROR',
+            `Custom validator error: ${error.message}`,
+            'error',
+            { error: error.message }
+          )
+        );
       }
     }
 
     // Check if input is structured (object) and has field rules
-    if (typeof sanitizedInput === 'object' && sanitizedInput !== null && !Array.isArray(sanitizedInput)) {
+    if (
+      typeof sanitizedInput === 'object' &&
+      sanitizedInput !== null &&
+      !Array.isArray(sanitizedInput)
+    ) {
       // Validate each field with field-specific rules
       for (const [fieldName, fieldRules] of this.fieldRules) {
         const fieldValue = sanitizedInput[fieldName];
@@ -147,12 +154,14 @@ class InputGuardrail extends BaseGuardrail {
     return this.createResult(
       passed,
       violations,
-      passed ? 'Input validation passed' : `Input validation failed with ${violations.length} violation(s)`,
+      passed
+        ? 'Input validation passed'
+        : `Input validation failed with ${violations.length} violation(s)`,
       0,
       {
         sanitized: this.sanitize,
         originalInput: input,
-        sanitizedInput: this.sanitize ? sanitizedInput : undefined
+        sanitizedInput: this.sanitize ? sanitizedInput : undefined,
       }
     );
   }
@@ -171,7 +180,7 @@ class InputGuardrail extends BaseGuardrail {
     for (const rule of rulesToApply) {
       try {
         const result = await Promise.resolve(rule.check(value));
-        
+
         let passed = result;
         let additionalContext = {};
 
@@ -182,24 +191,28 @@ class InputGuardrail extends BaseGuardrail {
         }
 
         if (!passed) {
-          violations.push(this.createViolation(
-            rule.id.toUpperCase(),
-            `${fieldName}: ${rule.message}`,
-            rule.severity || this.defaultSeverity,
-            { field: fieldName, rule: rule.id, ...additionalContext }
-          ));
+          violations.push(
+            this.createViolation(
+              rule.id.toUpperCase(),
+              `${fieldName}: ${rule.message}`,
+              rule.severity || this.defaultSeverity,
+              { field: fieldName, rule: rule.id, ...additionalContext }
+            )
+          );
 
           if (this.failFast) {
             break;
           }
         }
       } catch (error) {
-        violations.push(this.createViolation(
-          'RULE_ERROR',
-          `Rule '${rule.id}' execution error: ${error.message}`,
-          'error',
-          { field: fieldName, rule: rule.id, error: error.message }
-        ));
+        violations.push(
+          this.createViolation(
+            'RULE_ERROR',
+            `Rule '${rule.id}' execution error: ${error.message}`,
+            'error',
+            { field: fieldName, rule: rule.id, error: error.message }
+          )
+        );
       }
     }
 
@@ -216,18 +229,18 @@ class InputGuardrail extends BaseGuardrail {
     if (typeof input === 'string') {
       return input;
     }
-    
+
     if (typeof input === 'object' && input !== null) {
       // For structured input, extract 'message', 'content', or 'text' fields
       if (input.message) return input.message;
       if (input.content) return input.content;
       if (input.text) return input.text;
       if (input.input) return input.input;
-      
+
       // If no known field, stringify the object
       return JSON.stringify(input);
     }
-    
+
     return String(input);
   }
 
@@ -327,7 +340,7 @@ class InputGuardrail extends BaseGuardrail {
       rulesCount: this.rules.length,
       fieldRulesCount: this.fieldRules.size,
       sanitize: this.sanitize,
-      rules: this.rules.map(r => ({ id: r.id, type: r.type, severity: r.severity }))
+      rules: this.rules.map(r => ({ id: r.id, type: r.type, severity: r.severity })),
     };
   }
 }
@@ -344,14 +357,14 @@ function createInputGuardrail(preset = 'userInput', overrides = {}) {
       name: 'SecurityGuardrail',
       description: 'Security-focused input validation',
       ruleSet: 'security',
-      tripwireEnabled: true
+      tripwireEnabled: true,
     },
     userInput: {
       name: 'UserInputGuardrail',
       description: 'Validates user input',
       ruleSet: 'userInput',
       sanitize: true,
-      sanitizeOptions: { trimWhitespace: true }
+      sanitizeOptions: { trimWhitespace: true },
     },
     strict: {
       name: 'StrictInputGuardrail',
@@ -359,20 +372,20 @@ function createInputGuardrail(preset = 'userInput', overrides = {}) {
       ruleSet: 'strictContent',
       sanitize: true,
       tripwireEnabled: true,
-      failFast: true
+      failFast: true,
     },
     minimal: {
       name: 'MinimalInputGuardrail',
       description: 'Minimal validation',
-      rules: rules().required().build()
-    }
+      rules: rules().required().build(),
+    },
   };
 
-  const config = { ...presets[preset] || presets.userInput, ...overrides };
+  const config = { ...(presets[preset] || presets.userInput), ...overrides };
   return new InputGuardrail(config);
 }
 
 module.exports = {
   InputGuardrail,
-  createInputGuardrail
+  createInputGuardrail,
 };

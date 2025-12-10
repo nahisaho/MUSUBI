@@ -38,7 +38,7 @@ describe('MemoryEvent', () => {
         new MemoryEvent({ content: 'event2' }),
       ];
       const summary = MemoryEvent.createSummary('Summary text', original);
-      
+
       expect(summary.type).toBe(MemoryEventType.SUMMARY);
       expect(summary.content).toBe('Summary text');
       expect(summary.metadata.summarizedCount).toBe(2);
@@ -59,12 +59,9 @@ describe('MemoryEvent', () => {
 describe('CondensedView', () => {
   describe('constructor', () => {
     it('should calculate stats', () => {
-      const events = [
-        new MemoryEvent({ content: 'a' }),
-        new MemoryEvent({ content: 'b' }),
-      ];
+      const events = [new MemoryEvent({ content: 'a' }), new MemoryEvent({ content: 'b' })];
       const view = new CondensedView(events, { originalCount: 5 });
-      
+
       expect(view.stats.originalCount).toBe(5);
       expect(view.stats.condensedCount).toBe(2);
       expect(view.stats.compressionRatio).toBe(0.6);
@@ -79,7 +76,7 @@ describe('CondensedView', () => {
       ];
       const view = new CondensedView(events);
       const prompt = view.toPrompt();
-      
+
       expect(prompt).toContain('Hello');
       expect(prompt).toContain('Hi there');
     });
@@ -91,7 +88,7 @@ describe('CondensedView', () => {
       ];
       const view = new CondensedView(events);
       const prompt = view.toPrompt();
-      
+
       expect(prompt).toContain('[Previous conversation summary]');
     });
   });
@@ -100,11 +97,8 @@ describe('CondensedView', () => {
 describe('NoopCondenser', () => {
   it('should return events unchanged', async () => {
     const condenser = new NoopCondenser();
-    const events = [
-      new MemoryEvent({ content: 'a' }),
-      new MemoryEvent({ content: 'b' }),
-    ];
-    
+    const events = [new MemoryEvent({ content: 'a' }), new MemoryEvent({ content: 'b' })];
+
     const result = await condenser.condense(events);
     expect(result.events).toHaveLength(2);
     expect(result.stats.compressionRatio).toBe(0);
@@ -127,7 +121,7 @@ describe('RecentEventsCondenser', () => {
       new MemoryEvent({ content: 'b' }),
       new MemoryEvent({ content: 'c' }),
     ];
-    
+
     const result = await condenser.condense(events);
     expect(result.events).toHaveLength(3);
   });
@@ -137,9 +131,9 @@ describe('RecentEventsCondenser', () => {
     for (let i = 0; i < 10; i++) {
       events.push(new MemoryEvent({ content: `event${i}` }));
     }
-    
+
     const result = await condenser.condense(events);
-    
+
     // First 2 + summary + recent 3
     expect(result.events[0].content).toBe('event0');
     expect(result.events[1].content).toBe('event1');
@@ -158,10 +152,10 @@ describe('RecentEventsCondenser', () => {
       new MemoryEvent({ content: 'recent2' }),
       new MemoryEvent({ content: 'recent3' }),
     ];
-    
+
     const result = await condenser.condense(events);
     const contents = result.events.map(e => e.content);
-    
+
     expect(contents).toContain('DECISION: important choice');
   });
 });
@@ -176,7 +170,7 @@ describe('LLMCondenser', () => {
       maxTokens: 100,
       keepFirst: 1,
       chunkSize: 3,
-      summarizer: async (events) => {
+      summarizer: async events => {
         summarizerCalled = true;
         return `Summary of ${events.length} events`;
       },
@@ -188,7 +182,7 @@ describe('LLMCondenser', () => {
       new MemoryEvent({ content: 'a', tokens: 10 }),
       new MemoryEvent({ content: 'b', tokens: 10 }),
     ];
-    
+
     const result = await condenser.condense(events);
     expect(result.events).toHaveLength(2);
     expect(summarizerCalled).toBe(false);
@@ -199,7 +193,7 @@ describe('LLMCondenser', () => {
     for (let i = 0; i < 10; i++) {
       events.push(new MemoryEvent({ content: `event${i}`, tokens: 20 }));
     }
-    
+
     const result = await condenser.condense(events);
     expect(summarizerCalled).toBe(true);
     expect(result.events.some(e => e.type === MemoryEventType.SUMMARY)).toBe(true);
@@ -214,7 +208,7 @@ describe('LLMCondenser', () => {
       new MemoryEvent({ content: 'regular3', tokens: 20 }),
       new MemoryEvent({ content: 'regular4', tokens: 20 }),
     ];
-    
+
     const result = await condenser.condense(events);
     const contents = result.events.map(e => e.content);
     expect(contents).toContain('REQ-001 requirement');
@@ -232,11 +226,8 @@ describe('AmortizedCondenser', () => {
   });
 
   it('should not condense if under max size', async () => {
-    const events = [
-      new MemoryEvent({ content: 'a' }),
-      new MemoryEvent({ content: 'b' }),
-    ];
-    
+    const events = [new MemoryEvent({ content: 'a' }), new MemoryEvent({ content: 'b' })];
+
     const result = await condenser.condense(events);
     expect(result.events).toHaveLength(2);
   });
@@ -250,7 +241,7 @@ describe('AmortizedCondenser', () => {
       new MemoryEvent({ content: 'action4' }),
       new MemoryEvent({ type: MemoryEventType.USER_MESSAGE, content: 'user2' }),
     ];
-    
+
     const result = await condenser.condense(events);
     expect(result.events.length).toBeLessThan(events.length);
     expect(result.events.some(e => e.type === MemoryEventType.SUMMARY)).toBe(true);

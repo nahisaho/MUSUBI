@@ -316,7 +316,7 @@ class SecurityAnalysisResult {
    */
   exceedsThreshold(threshold) {
     const thresholdSeverity = RISK_SEVERITY[threshold] || 2;
-    return this.risks.some((risk) => risk.getSeverity() >= thresholdSeverity);
+    return this.risks.some(risk => risk.getSeverity() >= thresholdSeverity);
   }
 
   /**
@@ -324,7 +324,7 @@ class SecurityAnalysisResult {
    * @param {string} level
    */
   getRisksByLevel(level) {
-    return this.risks.filter((risk) => risk.level === level);
+    return this.risks.filter(risk => risk.level === level);
   }
 
   /**
@@ -332,14 +332,14 @@ class SecurityAnalysisResult {
    * @param {string} category
    */
   getRisksByCategory(category) {
-    return this.risks.filter((risk) => risk.category === category);
+    return this.risks.filter(risk => risk.category === category);
   }
 
   /**
    * Check if action should be blocked
    */
   shouldBlock() {
-    return this.risks.some((risk) => risk.level === RiskLevel.CRITICAL);
+    return this.risks.some(risk => risk.level === RiskLevel.CRITICAL);
   }
 
   /**
@@ -375,7 +375,7 @@ class SecurityAnalysisResult {
 
   toJSON() {
     return {
-      risks: this.risks.map((r) => r.toJSON()),
+      risks: this.risks.map(r => r.toJSON()),
       summary: this.getSummary(),
       timestamp: this.timestamp.toISOString(),
     };
@@ -527,7 +527,7 @@ class SecurityAnalyzer {
    * @param {string} command
    */
   isAllowedCommand(command) {
-    return this.options.allowedCommands.some((allowed) => command.includes(allowed));
+    return this.options.allowedCommands.some(allowed => command.includes(allowed));
   }
 
   /**
@@ -535,7 +535,7 @@ class SecurityAnalyzer {
    * @param {string} filePath
    */
   shouldIgnorePath(filePath) {
-    return this.options.ignorePaths.some((pattern) => {
+    return this.options.ignorePaths.some(pattern => {
       if (pattern.includes('*')) {
         const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
         return regex.test(filePath);
@@ -590,7 +590,7 @@ class SecurityAnalyzer {
     if (result.shouldBlock()) {
       return {
         allowed: false,
-        reason: `Critical security risk detected: ${result.risks.find((r) => r.level === RiskLevel.CRITICAL).name}`,
+        reason: `Critical security risk detected: ${result.risks.find(r => r.level === RiskLevel.CRITICAL).name}`,
         result,
       };
     }
@@ -605,7 +605,10 @@ class SecurityAnalyzer {
 
     return {
       allowed: true,
-      reason: result.risks.length > 0 ? `${result.risks.length} low-level risks detected but within threshold` : 'No security risks detected',
+      reason:
+        result.risks.length > 0
+          ? `${result.risks.length} low-level risks detected but within threshold`
+          : 'No security risks detected',
       result,
     };
   }
@@ -632,7 +635,12 @@ class SecurityAnalyzer {
    * @returns {string}
    */
   generateReport(result) {
-    const lines = ['# Security Analysis Report', '', `Generated: ${result.timestamp.toISOString()}`, ''];
+    const lines = [
+      '# Security Analysis Report',
+      '',
+      `Generated: ${result.timestamp.toISOString()}`,
+      '',
+    ];
 
     const summary = result.getSummary();
 

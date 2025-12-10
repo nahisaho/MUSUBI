@@ -30,17 +30,14 @@ Provides automated issue analysis and resolution planning:
 - **Impact Analysis**: Estimate scope, effort, and risk
 
 **Usage Example**:
+
 ```javascript
-const { 
-  IssueResolver, 
-  IssueInfo, 
-  IssueType 
-} = require('musubi/src/resolvers/issue-resolver');
+const { IssueResolver, IssueInfo, IssueType } = require('musubi/src/resolvers/issue-resolver');
 
 // Create resolver
 const resolver = new IssueResolver({
   projectRoot: process.cwd(),
-  autoCreateBranch: false
+  autoCreateBranch: false,
 });
 
 // Create issue info from GitHub API data
@@ -62,7 +59,7 @@ The login button doesn't work on mobile devices.
 3. Nothing happens
   `,
   labels: ['bug', 'mobile'],
-  assignees: ['developer1']
+  assignees: ['developer1'],
 });
 
 // Get issue type
@@ -71,8 +68,8 @@ console.log(issue.type); // 'bug'
 // Resolve the issue
 const result = await resolver.resolve(issue);
 
-console.log(result.branchName);     // 'fix/42-login-button-not-responding'
-console.log(result.requirements);   // ['Fix touch event handling', ...]
+console.log(result.branchName); // 'fix/42-login-button-not-responding'
+console.log(result.requirements); // ['Fix touch event handling', ...]
 console.log(result.impactAnalysis); // { scope: 'medium', effort: 'small', ... }
 ```
 
@@ -87,7 +84,7 @@ const issue = new IssueInfo({
   number: issueNumber,
   title: issueTitle,
   body: issueBody,
-  labels: issueLabels
+  labels: issueLabels,
 });
 
 // Automatic type detection
@@ -97,6 +94,7 @@ const type = issue.type; // 'bug' | 'feature' | 'documentation' | 'refactor' | '
 ### Step 2: Requirement Extraction
 
 The resolver automatically extracts requirements from:
+
 - **Checkboxes**: `- [ ] Requirement text`
 - **Keywords**: Lines containing "should", "must", "needs to"
 
@@ -110,7 +108,7 @@ const requirements = resolver.extractRequirements(issue);
 Semantic branch names based on issue type:
 
 | Issue Type    | Branch Prefix |
-|---------------|---------------|
+| ------------- | ------------- |
 | Bug           | `fix/`        |
 | Feature       | `feat/`       |
 | Documentation | `docs/`       |
@@ -198,12 +196,12 @@ The ImpactAnalysis class provides:
 
 ```javascript
 const impact = new ImpactAnalysis({
-  scope: 'medium',        // 'small' | 'medium' | 'large'
-  effort: 'small',        // 'trivial' | 'small' | 'medium' | 'large' | 'epic'
-  risk: 'low',            // 'low' | 'medium' | 'high' | 'critical'
+  scope: 'medium', // 'small' | 'medium' | 'large'
+  effort: 'small', // 'trivial' | 'small' | 'medium' | 'large' | 'epic'
+  risk: 'low', // 'low' | 'medium' | 'high' | 'critical'
   affectedAreas: ['components/LoginButton', 'utils/touchHandler'],
   dependencies: ['react-native-gesture-handler'],
-  breakingChanges: false
+  breakingChanges: false,
 });
 
 console.log(impact.toMarkdown());
@@ -223,26 +221,31 @@ console.log(impact.toMarkdown());
 **Status**: ✅ Completed
 
 ### Branch
+
 `fix/42-login-button-not-responding`
 
 ### Requirements Extracted
+
 1. Fix touch event handling
 2. Add loading indicator
 3. Add error handling
 
 ### Impact Analysis
-| Aspect | Value |
-|--------|-------|
-| Scope | Medium |
-| Effort | Small |
-| Risk | Low |
-| Breaking Changes | No |
+
+| Aspect           | Value  |
+| ---------------- | ------ |
+| Scope            | Medium |
+| Effort           | Small  |
+| Risk             | Low    |
+| Breaking Changes | No     |
 
 ### Affected Areas
+
 - `components/LoginButton`
 - `utils/touchHandler`
 
 ### SDD Workflow
+
 1. ✅ Requirements documented
 2. ⬜ Design review pending
 3. ⬜ Task breakdown pending

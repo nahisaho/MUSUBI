@@ -2,7 +2,7 @@
  * @fileoverview Tool Discovery Service
  * @description Dynamic MCP tool detection and management
  * @version 3.11.0
- * 
+ *
  * Features:
  * - Automatic tool discovery from MCP servers
  * - Tool categorization and tagging
@@ -31,7 +31,7 @@ const ToolCategory = {
   API: 'api',
   AI: 'ai',
   UTILITY: 'utility',
-  UNKNOWN: 'unknown'
+  UNKNOWN: 'unknown',
 };
 
 /**
@@ -42,7 +42,7 @@ const CapabilityScore = {
   HIGH_MATCH: 0.8,
   MEDIUM_MATCH: 0.6,
   LOW_MATCH: 0.4,
-  NO_MATCH: 0.0
+  NO_MATCH: 0.0,
 };
 
 /**
@@ -60,7 +60,7 @@ const CATEGORY_KEYWORDS = {
   [ToolCategory.DATABASE]: ['database', 'db', 'sql', 'query', 'migrate', 'schema'],
   [ToolCategory.API]: ['api', 'rest', 'http', 'request', 'endpoint', 'graphql'],
   [ToolCategory.AI]: ['ai', 'ml', 'llm', 'generate', 'embed', 'inference', 'model'],
-  [ToolCategory.UTILITY]: ['util', 'helper', 'convert', 'format', 'validate', 'transform']
+  [ToolCategory.UTILITY]: ['util', 'helper', 'convert', 'format', 'validate', 'transform'],
 };
 
 /**
@@ -90,13 +90,13 @@ class DiscoveredTool {
   recordUsage(latency, success = true) {
     this.usageCount++;
     this.lastUsed = new Date();
-    
+
     // Update running average latency
     this.averageLatency = (this.averageLatency * (this.usageCount - 1) + latency) / this.usageCount;
-    
+
     // Update error rate
     if (!success) {
-      this.errorRate = ((this.errorRate * (this.usageCount - 1)) + 1) / this.usageCount;
+      this.errorRate = (this.errorRate * (this.usageCount - 1) + 1) / this.usageCount;
     } else {
       this.errorRate = (this.errorRate * (this.usageCount - 1)) / this.usageCount;
     }
@@ -123,7 +123,7 @@ class DiscoveredTool {
       lastUsed: this.lastUsed,
       averageLatency: this.averageLatency,
       reliability: this.getReliabilityScore(),
-      discoveredAt: this.discoveredAt
+      discoveredAt: this.discoveredAt,
     };
   }
 }
@@ -138,9 +138,9 @@ class ToolDiscovery extends EventEmitter {
       autoDiscovery: true,
       refreshInterval: 300000, // 5 minutes
       enableAnalytics: true,
-      ...options
+      ...options,
     };
-    
+
     this.tools = new Map();
     this.toolsByCategory = new Map();
     this.toolsByServer = new Map();
@@ -180,12 +180,12 @@ class ToolDiscovery extends EventEmitter {
     const discovered = new DiscoveredTool(tool, {
       category,
       tags,
-      capabilities
+      capabilities,
     });
 
     // Index the tool
     this.tools.set(tool.name, discovered);
-    
+
     // Index by category
     if (!this.toolsByCategory.has(category)) {
       this.toolsByCategory.set(category, new Set());
@@ -208,7 +208,7 @@ class ToolDiscovery extends EventEmitter {
    */
   _detectCategory(tool) {
     const text = `${tool.name} ${tool.description}`.toLowerCase();
-    
+
     let bestCategory = ToolCategory.UNKNOWN;
     let bestScore = 0;
 
@@ -245,7 +245,17 @@ class ToolDiscovery extends EventEmitter {
     }
 
     // Extract common action verbs
-    const actionVerbs = ['read', 'write', 'create', 'update', 'delete', 'list', 'search', 'analyze', 'generate'];
+    const actionVerbs = [
+      'read',
+      'write',
+      'create',
+      'update',
+      'delete',
+      'list',
+      'search',
+      'analyze',
+      'generate',
+    ];
     for (const verb of actionVerbs) {
       if (text.includes(verb)) {
         tags.add(verb);
@@ -272,7 +282,7 @@ class ToolDiscovery extends EventEmitter {
     // Analyze input parameters
     if (schema.properties) {
       const propNames = Object.keys(schema.properties);
-      
+
       if (propNames.some(p => p.includes('file') || p.includes('path'))) {
         capabilities.push('file-operations');
       }
@@ -325,14 +335,12 @@ class ToolDiscovery extends EventEmitter {
 
     // Filter by tags
     if (criteria.tags && criteria.tags.length > 0) {
-      results = results.filter(t => 
-        criteria.tags.some(tag => t.tags.includes(tag))
-      );
+      results = results.filter(t => criteria.tags.some(tag => t.tags.includes(tag)));
     }
 
     // Filter by capabilities
     if (criteria.capabilities && criteria.capabilities.length > 0) {
-      results = results.filter(t => 
+      results = results.filter(t =>
         criteria.capabilities.some(cap => t.capabilities.includes(cap))
       );
     }
@@ -407,7 +415,7 @@ class ToolDiscovery extends EventEmitter {
       }
 
       // Apply reliability factor
-      score *= (0.5 + 0.5 * tool.getReliabilityScore());
+      score *= 0.5 + 0.5 * tool.getReliabilityScore();
 
       // Normalize score to 0-1
       score = Math.min(1.0, score);
@@ -446,10 +454,10 @@ class ToolDiscovery extends EventEmitter {
 
       // Match by skill description/purpose
       if (skill.description || skill.purpose) {
-        const taskMatch = this.matchToolsToTask(
-          skill.description || skill.purpose,
-          { limit: 3, minScore: 0.4 }
-        );
+        const taskMatch = this.matchToolsToTask(skill.description || skill.purpose, {
+          limit: 3,
+          minScore: 0.4,
+        });
         for (const { tool } of taskMatch) {
           if (!matchedTools.includes(tool.name)) {
             matchedTools.push(tool.name);
@@ -471,9 +479,7 @@ class ToolDiscovery extends EventEmitter {
    */
   getToolsForSkill(skillName) {
     const toolNames = this.skillToolMappings.get(skillName) || [];
-    return toolNames
-      .map(name => this.tools.get(name))
-      .filter(Boolean);
+    return toolNames.map(name => this.tools.get(name)).filter(Boolean);
   }
 
   /**
@@ -496,7 +502,7 @@ class ToolDiscovery extends EventEmitter {
    */
   getAnalytics() {
     const tools = Array.from(this.tools.values());
-    
+
     const byCategory = {};
     for (const [category, toolNames] of this.toolsByCategory) {
       byCategory[category] = toolNames.size;
@@ -524,7 +530,7 @@ class ToolDiscovery extends EventEmitter {
       byServer,
       topUsed,
       leastReliable,
-      totalUsage: tools.reduce((sum, t) => sum + t.usageCount, 0)
+      totalUsage: tools.reduce((sum, t) => sum + t.usageCount, 0),
     };
   }
 
@@ -575,7 +581,7 @@ class ToolDiscovery extends EventEmitter {
       exportedAt: new Date().toISOString(),
       tools: Array.from(this.tools.values()).map(t => t.toJSON()),
       categories: Object.values(ToolCategory),
-      analytics: this.getAnalytics()
+      analytics: this.getAnalytics(),
     };
   }
 }
@@ -585,5 +591,5 @@ module.exports = {
   DiscoveredTool,
   ToolCategory,
   CapabilityScore,
-  CATEGORY_KEYWORDS
+  CATEGORY_KEYWORDS,
 };

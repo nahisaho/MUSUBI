@@ -47,7 +47,7 @@ class PlanMonitor extends EventEmitter {
       startTime: Date.now(),
       taskResults: [],
       failureCount: 0,
-      lastUpdate: Date.now()
+      lastUpdate: Date.now(),
     };
 
     this.watchedContexts.set(contextId, watchContext);
@@ -70,7 +70,7 @@ class PlanMonitor extends EventEmitter {
   unwatch(contextId) {
     this.watchedContexts.delete(contextId);
     this.failureCounts.delete(contextId);
-    
+
     // Clear timeout
     const timeout = this.timeouts.get(contextId);
     if (timeout) {
@@ -110,7 +110,7 @@ class PlanMonitor extends EventEmitter {
 
     // Check for triggers based on result
     const trigger = this.checkTriggers(contextId, result, context);
-    
+
     if (trigger) {
       this.emit('trigger', trigger);
       return trigger;
@@ -143,8 +143,8 @@ class PlanMonitor extends EventEmitter {
       data: {
         changes,
         previousContext: { ...context },
-        reason: 'Context or requirements changed'
-      }
+        reason: 'Context or requirements changed',
+      },
     };
 
     // Update context with changes
@@ -169,8 +169,8 @@ class PlanMonitor extends EventEmitter {
       timestamp: Date.now(),
       data: {
         reason,
-        context: context || null
-      }
+        context: context || null,
+      },
     };
 
     this.emit('trigger', trigger);
@@ -188,7 +188,7 @@ class PlanMonitor extends EventEmitter {
   checkTriggers(contextId, result, context) {
     const enabledTriggers = this.config.triggers?.enabled || [
       ReplanTrigger.TASK_FAILED,
-      ReplanTrigger.TIMEOUT
+      ReplanTrigger.TIMEOUT,
     ];
 
     // Check for task failure
@@ -197,7 +197,7 @@ class PlanMonitor extends EventEmitter {
       this.failureCounts.set(contextId, failureCount);
 
       const threshold = this.config.triggers?.failureThreshold || 2;
-      
+
       if (failureCount >= threshold) {
         return {
           type: ReplanTrigger.TASK_FAILED,
@@ -208,8 +208,8 @@ class PlanMonitor extends EventEmitter {
             error: result.error,
             failureCount,
             threshold,
-            context: this.sanitizeContext(context)
-          }
+            context: this.sanitizeContext(context),
+          },
         };
       }
     }
@@ -223,15 +223,17 @@ class PlanMonitor extends EventEmitter {
         data: {
           taskId: result.taskId,
           elapsed: Date.now() - context.startTime,
-          context: this.sanitizeContext(context)
-        }
+          context: this.sanitizeContext(context),
+        },
       };
     }
 
     // Check for goal unreachable (based on error analysis)
-    if (result.status === 'failed' && 
-        enabledTriggers.includes(ReplanTrigger.GOAL_UNREACHABLE) &&
-        this.isGoalUnreachable(result)) {
+    if (
+      result.status === 'failed' &&
+      enabledTriggers.includes(ReplanTrigger.GOAL_UNREACHABLE) &&
+      this.isGoalUnreachable(result)
+    ) {
       return {
         type: ReplanTrigger.GOAL_UNREACHABLE,
         contextId,
@@ -240,8 +242,8 @@ class PlanMonitor extends EventEmitter {
           taskId: result.taskId,
           error: result.error,
           reason: 'Goal determined to be unreachable',
-          context: this.sanitizeContext(context)
-        }
+          context: this.sanitizeContext(context),
+        },
       };
     }
 
@@ -264,7 +266,7 @@ class PlanMonitor extends EventEmitter {
       /access denied/i,
       /unauthorized/i,
       /impossible/i,
-      /cannot be completed/i
+      /cannot be completed/i,
     ];
 
     const errorMessage = result.error.message || String(result.error);
@@ -288,8 +290,8 @@ class PlanMonitor extends EventEmitter {
           data: {
             reason: 'Overall task timeout exceeded',
             elapsed: Date.now() - context.startTime,
-            context: this.sanitizeContext(context)
-          }
+            context: this.sanitizeContext(context),
+          },
         };
         this.emit('trigger', trigger);
       }
@@ -327,11 +329,13 @@ class PlanMonitor extends EventEmitter {
       lastUpdate: context.lastUpdate,
       failureCount: context.failureCount,
       taskResultCount: context.taskResults?.length || 0,
-      plan: context.plan ? {
-        id: context.plan.id,
-        version: context.plan.version,
-        taskCount: context.plan.tasks?.length
-      } : null
+      plan: context.plan
+        ? {
+            id: context.plan.id,
+            version: context.plan.version,
+            taskCount: context.plan.tasks?.length,
+          }
+        : null,
     };
   }
 
@@ -347,14 +351,14 @@ class PlanMonitor extends EventEmitter {
         startTime: context.startTime,
         lastUpdate: context.lastUpdate,
         failureCount: this.failureCounts.get(contextId) || 0,
-        taskResultCount: context.taskResults?.length || 0
+        taskResultCount: context.taskResults?.length || 0,
       });
     }
 
     return {
       isWatching: this.isWatching,
       activeContexts: this.watchedContexts.size,
-      contexts
+      contexts,
     };
   }
 

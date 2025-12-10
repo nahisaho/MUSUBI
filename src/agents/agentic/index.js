@@ -12,7 +12,7 @@ const {
   generateCode,
   GEN_MODE,
   LANGUAGE,
-  TEMPLATES
+  TEMPLATES,
 } = require('./code-generator');
 
 const {
@@ -21,7 +21,7 @@ const {
   reviewCode,
   SEVERITY,
   CATEGORY,
-  DEFAULT_RULES
+  DEFAULT_RULES,
 } = require('./code-reviewer');
 
 module.exports = {
@@ -32,12 +32,12 @@ module.exports = {
   GEN_MODE,
   LANGUAGE,
   TEMPLATES,
-  
+
   // Code Reviewer
   CodeReviewer,
   createCodeReviewer,
   reviewCode,
   SEVERITY,
   CATEGORY,
-  DEFAULT_RULES
+  DEFAULT_RULES,
 };

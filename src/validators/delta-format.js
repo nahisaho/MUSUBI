@@ -1,7 +1,7 @@
 /**
  * Delta Format Validator
  * Validates delta specification format compliance
- * 
+ *
  * @module validators/delta-format
  */
 
@@ -15,21 +15,21 @@ const { DeltaType } = require('../managers/delta-spec');
 const ValidationRules = {
   // ID format: PREFIX-IDENTIFIER (e.g., DELTA-AUTH-001, CHG-UI-002)
   ID_PATTERN: /^[A-Z]+-[A-Z0-9]+-\d{3}$/,
-  
+
   // Delta marker in markdown: [TYPE] ID: Description
   MARKER_PATTERN: /^\[([A-Z]+)\]\s+([A-Z]+-[A-Z0-9]+-\d{3}):\s+(.+)$/,
-  
+
   // Requirement reference: REQ-xxx-nnn
   REQ_PATTERN: /REQ-[A-Z]+-\d{3}/g,
-  
+
   // Valid statuses
   VALID_STATUSES: ['proposed', 'approved', 'rejected', 'implemented', 'archived'],
-  
+
   // Maximum description length
   MAX_DESCRIPTION_LENGTH: 200,
-  
+
   // Required sections in delta markdown
-  REQUIRED_SECTIONS: ['Description']
+  REQUIRED_SECTIONS: ['Description'],
 };
 
 class DeltaFormatValidator {
@@ -61,7 +61,7 @@ class DeltaFormatValidator {
       valid: this.errors.length === 0,
       errors: this.errors,
       warnings: this.warnings,
-      delta
+      delta,
     };
   }
 
@@ -73,7 +73,7 @@ class DeltaFormatValidator {
     if (!id) {
       this.errors.push({
         rule: 'required-id',
-        message: 'Delta ID is required'
+        message: 'Delta ID is required',
       });
       return;
     }
@@ -82,7 +82,7 @@ class DeltaFormatValidator {
       this.errors.push({
         rule: 'id-format',
         message: `Invalid ID format: "${id}". Expected: PREFIX-IDENTIFIER-NNN (e.g., DELTA-AUTH-001)`,
-        value: id
+        value: id,
       });
     }
   }
@@ -95,7 +95,7 @@ class DeltaFormatValidator {
     if (!type) {
       this.errors.push({
         rule: 'required-type',
-        message: 'Delta type is required'
+        message: 'Delta type is required',
       });
       return;
     }
@@ -104,7 +104,7 @@ class DeltaFormatValidator {
       this.errors.push({
         rule: 'invalid-type',
         message: `Invalid delta type: "${type}". Must be one of: ${Object.values(DeltaType).join(', ')}`,
-        value: type
+        value: type,
       });
     }
   }
@@ -117,7 +117,7 @@ class DeltaFormatValidator {
     if (!target) {
       this.errors.push({
         rule: 'required-target',
-        message: 'Target is required'
+        message: 'Target is required',
       });
       return;
     }
@@ -127,7 +127,7 @@ class DeltaFormatValidator {
       this.warnings.push({
         rule: 'target-format',
         message: `Target "${target}" doesn't match requirement ID format (REQ-XXX-NNN) or path format`,
-        value: target
+        value: target,
       });
     }
   }
@@ -140,7 +140,7 @@ class DeltaFormatValidator {
     if (!description) {
       this.errors.push({
         rule: 'required-description',
-        message: 'Description is required'
+        message: 'Description is required',
       });
       return;
     }
@@ -149,21 +149,19 @@ class DeltaFormatValidator {
       this.warnings.push({
         rule: 'description-length',
         message: `Description exceeds ${ValidationRules.MAX_DESCRIPTION_LENGTH} characters`,
-        value: description.length
+        value: description.length,
       });
     }
 
     // Check for vague language
     const vagueTerms = ['should', 'might', 'could', 'maybe', 'possibly'];
-    const foundVague = vagueTerms.filter(term => 
-      description.toLowerCase().includes(term)
-    );
-    
+    const foundVague = vagueTerms.filter(term => description.toLowerCase().includes(term));
+
     if (foundVague.length > 0) {
       this.warnings.push({
         rule: 'vague-language',
         message: `Description contains vague terms: ${foundVague.join(', ')}. Use definitive language.`,
-        value: foundVague
+        value: foundVague,
       });
     }
   }
@@ -176,7 +174,7 @@ class DeltaFormatValidator {
     if (!status) {
       this.warnings.push({
         rule: 'missing-status',
-        message: 'Status not specified, defaulting to "proposed"'
+        message: 'Status not specified, defaulting to "proposed"',
       });
       return;
     }
@@ -185,7 +183,7 @@ class DeltaFormatValidator {
       this.errors.push({
         rule: 'invalid-status',
         message: `Invalid status: "${status}". Must be one of: ${ValidationRules.VALID_STATUSES.join(', ')}`,
-        value: status
+        value: status,
       });
     }
   }
@@ -202,13 +200,13 @@ class DeltaFormatValidator {
         if (before) {
           this.warnings.push({
             rule: 'added-has-before',
-            message: 'ADDED delta should not have a "before" state'
+            message: 'ADDED delta should not have a "before" state',
           });
         }
         if (!after && this.strict) {
           this.errors.push({
             rule: 'added-missing-after',
-            message: 'ADDED delta should specify the new state in "after"'
+            message: 'ADDED delta should specify the new state in "after"',
           });
         }
         break;
@@ -217,13 +215,13 @@ class DeltaFormatValidator {
         if (!before) {
           this.warnings.push({
             rule: 'modified-missing-before',
-            message: 'MODIFIED delta should have a "before" state for comparison'
+            message: 'MODIFIED delta should have a "before" state for comparison',
           });
         }
         if (!after) {
           this.warnings.push({
             rule: 'modified-missing-after',
-            message: 'MODIFIED delta should have an "after" state'
+            message: 'MODIFIED delta should have an "after" state',
           });
         }
         break;
@@ -232,13 +230,13 @@ class DeltaFormatValidator {
         if (!before && this.strict) {
           this.warnings.push({
             rule: 'removed-missing-before',
-            message: 'REMOVED delta should document the removed state in "before"'
+            message: 'REMOVED delta should document the removed state in "before"',
           });
         }
         if (after) {
           this.warnings.push({
             rule: 'removed-has-after',
-            message: 'REMOVED delta should not have an "after" state'
+            message: 'REMOVED delta should not have an "after" state',
           });
         }
         break;
@@ -247,13 +245,13 @@ class DeltaFormatValidator {
         if (!before) {
           this.errors.push({
             rule: 'renamed-missing-before',
-            message: 'RENAMED delta requires "before" state (original name)'
+            message: 'RENAMED delta requires "before" state (original name)',
           });
         }
         if (!after) {
           this.errors.push({
             rule: 'renamed-missing-after',
-            message: 'RENAMED delta requires "after" state (new name)'
+            message: 'RENAMED delta requires "after" state (new name)',
           });
         }
         break;
@@ -268,27 +266,33 @@ class DeltaFormatValidator {
     if (!impactedAreas || impactedAreas.length === 0) {
       this.warnings.push({
         rule: 'missing-impact',
-        message: 'Impacted areas should be specified for change tracking'
+        message: 'Impacted areas should be specified for change tracking',
       });
       return;
     }
 
     // Known impact categories
     const knownCategories = [
-      'api', 'database', 'ui', 'backend', 'frontend',
-      'security', 'performance', 'testing', 'documentation',
-      'infrastructure', 'configuration'
+      'api',
+      'database',
+      'ui',
+      'backend',
+      'frontend',
+      'security',
+      'performance',
+      'testing',
+      'documentation',
+      'infrastructure',
+      'configuration',
     ];
 
-    const unknown = impactedAreas.filter(area => 
-      !knownCategories.includes(area.toLowerCase())
-    );
+    const unknown = impactedAreas.filter(area => !knownCategories.includes(area.toLowerCase()));
 
     if (unknown.length > 0 && this.strict) {
       this.warnings.push({
         rule: 'unknown-impact-area',
         message: `Unknown impact areas: ${unknown.join(', ')}. Consider using: ${knownCategories.join(', ')}`,
-        value: unknown
+        value: unknown,
       });
     }
   }
@@ -303,7 +307,7 @@ class DeltaFormatValidator {
         this.errors.push({
           rule: 'invalid-created-timestamp',
           message: 'Invalid createdAt timestamp format',
-          value: delta.createdAt
+          value: delta.createdAt,
         });
       }
     }
@@ -313,14 +317,14 @@ class DeltaFormatValidator {
         this.errors.push({
           rule: 'invalid-updated-timestamp',
           message: 'Invalid updatedAt timestamp format',
-          value: delta.updatedAt
+          value: delta.updatedAt,
         });
       }
 
       if (delta.createdAt && new Date(delta.updatedAt) < new Date(delta.createdAt)) {
         this.warnings.push({
           rule: 'timestamp-order',
-          message: 'updatedAt is before createdAt'
+          message: 'updatedAt is before createdAt',
         });
       }
     }
@@ -342,12 +346,12 @@ class DeltaFormatValidator {
       const match = line.match(ValidationRules.MARKER_PATTERN);
       if (match) {
         const [, type, id, description] = match;
-        
+
         const delta = {
           type,
           id,
           description,
-          line: index + 1
+          line: index + 1,
         };
 
         // Validate each found delta marker
@@ -364,12 +368,12 @@ class DeltaFormatValidator {
     // Check for duplicate IDs
     const ids = deltas.map(d => d.id);
     const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
-    
+
     if (duplicates.length > 0) {
       this.errors.push({
         rule: 'duplicate-id',
         message: `Duplicate delta IDs found: ${[...new Set(duplicates)].join(', ')}`,
-        value: duplicates
+        value: duplicates,
       });
     }
 
@@ -377,7 +381,7 @@ class DeltaFormatValidator {
       valid: this.errors.length === 0,
       errors: this.errors,
       warnings: this.warnings,
-      deltas
+      deltas,
     };
   }
 
@@ -391,7 +395,7 @@ class DeltaFormatValidator {
       return {
         valid: false,
         errors: [{ rule: 'file-not-found', message: `File not found: ${filePath}` }],
-        warnings: []
+        warnings: [],
       };
     }
 
@@ -406,7 +410,7 @@ class DeltaFormatValidator {
         return {
           valid: false,
           errors: [{ rule: 'invalid-json', message: `Invalid JSON: ${e.message}` }],
-          warnings: []
+          warnings: [],
         };
       }
     } else if (ext === '.md') {
@@ -415,7 +419,7 @@ class DeltaFormatValidator {
       return {
         valid: false,
         errors: [{ rule: 'unsupported-format', message: `Unsupported file format: ${ext}` }],
-        warnings: []
+        warnings: [],
       };
     }
   }
@@ -430,7 +434,7 @@ class DeltaFormatValidator {
       return {
         valid: true,
         results: [],
-        summary: { total: 0, valid: 0, invalid: 0 }
+        summary: { total: 0, valid: 0, invalid: 0 },
       };
     }
 
@@ -446,7 +450,7 @@ class DeltaFormatValidator {
           const result = this.validateFile(jsonPath);
           result.id = entry.name;
           results.push(result);
-          
+
           if (result.valid) {
             validCount++;
           } else {
@@ -462,13 +466,13 @@ class DeltaFormatValidator {
       summary: {
         total: results.length,
         valid: validCount,
-        invalid: invalidCount
-      }
+        invalid: invalidCount,
+      },
     };
   }
 }
 
 module.exports = {
   DeltaFormatValidator,
-  ValidationRules
+  ValidationRules,
 };

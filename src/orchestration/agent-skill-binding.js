@@ -1,7 +1,7 @@
 /**
  * Agent-Skill Binding - Dynamic capability-based skill assignment
  * Sprint 3.3: Skill System Architecture
- * 
+ *
  * Features:
  * - Agent capability scoring
  * - Dynamic skill-agent matching
@@ -19,7 +19,7 @@ const AgentStatus = {
   AVAILABLE: 'available',
   BUSY: 'busy',
   OFFLINE: 'offline',
-  MAINTENANCE: 'maintenance'
+  MAINTENANCE: 'maintenance',
 };
 
 /**
@@ -40,22 +40,22 @@ class AgentDefinition {
 
   validate() {
     const errors = [];
-    
+
     if (!this.id) {
       errors.push('Agent ID is required');
     }
-    
+
     if (!this.name) {
       errors.push('Agent name is required');
     }
-    
+
     if (!Array.isArray(this.capabilities)) {
       errors.push('Capabilities must be an array');
     }
-    
+
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -69,7 +69,7 @@ class AgentDefinition {
       maxConcurrentTasks: this.maxConcurrentTasks,
       priority: this.priority,
       tags: this.tags,
-      metadata: this.metadata
+      metadata: this.metadata,
     };
   }
 }
@@ -93,16 +93,12 @@ class BindingRecord {
   updateStats(success, executionTime) {
     this.executionCount++;
     const successWeight = success ? 1 : 0;
-    this.successRate = (
-      (this.successRate * (this.executionCount - 1) + successWeight) / 
-      this.executionCount
-    );
-    this.averageExecutionTime = (
-      (this.averageExecutionTime * (this.executionCount - 1) + executionTime) / 
-      this.executionCount
-    );
+    this.successRate =
+      (this.successRate * (this.executionCount - 1) + successWeight) / this.executionCount;
+    this.averageExecutionTime =
+      (this.averageExecutionTime * (this.executionCount - 1) + executionTime) / this.executionCount;
     this.lastExecutedAt = new Date().toISOString();
-    
+
     // Update affinity based on performance
     this.affinity = this._calculateAffinity();
   }
@@ -111,10 +107,10 @@ class BindingRecord {
     // Affinity increases with success rate and execution count
     const successFactor = this.successRate * 50;
     const experienceFactor = Math.min(this.executionCount / 10, 30);
-    const recencyFactor = this.lastExecutedAt 
+    const recencyFactor = this.lastExecutedAt
       ? Math.max(0, 20 - (Date.now() - new Date(this.lastExecutedAt).getTime()) / 86400000)
       : 0;
-    
+
     return Math.round(successFactor + experienceFactor + recencyFactor);
   }
 
@@ -127,7 +123,7 @@ class BindingRecord {
       executionCount: this.executionCount,
       successRate: this.successRate,
       averageExecutionTime: this.averageExecutionTime,
-      lastExecutedAt: this.lastExecutedAt
+      lastExecutedAt: this.lastExecutedAt,
     };
   }
 }
@@ -215,13 +211,13 @@ class AgentSkillBinding extends EventEmitter {
     this.agentLoad = new Map();
     this.bindings = new Map(); // Map<agentId, Map<skillId, BindingRecord>>
     this.matcher = new CapabilityMatcher();
-    
+
     // Options
     this.options = {
       autoBinding: options.autoBinding !== false,
       minMatchScore: options.minMatchScore || 50,
       enableLoadBalancing: options.enableLoadBalancing !== false,
-      affinityWeight: options.affinityWeight || 0.3
+      affinityWeight: options.affinityWeight || 0.3,
     };
 
     // Listen to skill registry events
@@ -238,9 +234,7 @@ class AgentSkillBinding extends EventEmitter {
    * Register an agent
    */
   registerAgent(agentDef) {
-    const agent = agentDef instanceof AgentDefinition 
-      ? agentDef 
-      : new AgentDefinition(agentDef);
+    const agent = agentDef instanceof AgentDefinition ? agentDef : new AgentDefinition(agentDef);
 
     const validation = agent.validate();
     if (!validation.valid) {
@@ -262,7 +256,7 @@ class AgentSkillBinding extends EventEmitter {
     }
 
     this.emit('agent-registered', { agentId: agent.id, agent });
-    
+
     return agent;
   }
 
@@ -280,7 +274,7 @@ class AgentSkillBinding extends EventEmitter {
     this.bindings.delete(agentId);
 
     this.emit('agent-unregistered', { agentId });
-    
+
     return true;
   }
 
@@ -348,19 +342,19 @@ class AgentSkillBinding extends EventEmitter {
 
     // Check permissions
     if (skill.permissions && skill.permissions.length > 0) {
-      const hasPermission = skill.permissions.every(
-        p => agent.permissions.includes(p)
-      );
+      const hasPermission = skill.permissions.every(p => agent.permissions.includes(p));
       if (!hasPermission) {
         throw new Error(`Agent '${agentId}' lacks required permissions for skill '${skillId}'`);
       }
     }
 
     // Calculate score
-    const score = options.score || this.matcher.calculateScore(
-      agent.capabilities,
-      skill.tags // Use tags as capability requirements
-    );
+    const score =
+      options.score ||
+      this.matcher.calculateScore(
+        agent.capabilities,
+        skill.tags // Use tags as capability requirements
+      );
 
     const record = new BindingRecord(agentId, skillId, { score });
     this.bindings.get(agentId).set(skillId, record);
@@ -427,9 +421,7 @@ class AgentSkillBinding extends EventEmitter {
 
       // Check permissions
       if (skill.permissions && skill.permissions.length > 0) {
-        const hasPermission = skill.permissions.every(
-          p => agent.permissions.includes(p)
-        );
+        const hasPermission = skill.permissions.every(p => agent.permissions.includes(p));
         if (!hasPermission) {
           continue;
         }
@@ -454,7 +446,7 @@ class AgentSkillBinding extends EventEmitter {
           agent,
           binding,
           finalScore,
-          load
+          load,
         });
       }
     }
@@ -487,7 +479,7 @@ class AgentSkillBinding extends EventEmitter {
           agent,
           score,
           status: this.agentStatus.get(agentId),
-          load: this.agentLoad.get(agentId) || 0
+          load: this.agentLoad.get(agentId) || 0,
         });
       }
     }
@@ -516,7 +508,7 @@ class AgentSkillBinding extends EventEmitter {
     }
 
     this.emit('agent-acquired', { agentId, currentLoad: load + 1 });
-    
+
     return true;
   }
 
@@ -541,7 +533,7 @@ class AgentSkillBinding extends EventEmitter {
     }
 
     this.emit('agent-released', { agentId, currentLoad: load - 1 });
-    
+
     return true;
   }
 
@@ -578,7 +570,7 @@ class AgentSkillBinding extends EventEmitter {
       [AgentStatus.AVAILABLE]: 0,
       [AgentStatus.BUSY]: 0,
       [AgentStatus.OFFLINE]: 0,
-      [AgentStatus.MAINTENANCE]: 0
+      [AgentStatus.MAINTENANCE]: 0,
     };
 
     let totalBindings = 0;
@@ -586,8 +578,8 @@ class AgentSkillBinding extends EventEmitter {
 
     for (const [agentId, status] of this.agentStatus) {
       statusCounts[status]++;
-      totalBindings += (this.bindings.get(agentId)?.size || 0);
-      totalLoad += (this.agentLoad.get(agentId) || 0);
+      totalBindings += this.bindings.get(agentId)?.size || 0;
+      totalLoad += this.agentLoad.get(agentId) || 0;
     }
 
     return {
@@ -595,7 +587,7 @@ class AgentSkillBinding extends EventEmitter {
       statusCounts,
       totalBindings,
       totalLoad,
-      averageLoad: this.agents.size > 0 ? totalLoad / this.agents.size : 0
+      averageLoad: this.agents.size > 0 ? totalLoad / this.agents.size : 0,
     };
   }
 
@@ -651,5 +643,5 @@ module.exports = {
   AgentDefinition,
   BindingRecord,
   CapabilityMatcher,
-  AgentStatus
+  AgentStatus,
 };

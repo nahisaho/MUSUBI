@@ -80,17 +80,17 @@ with mlflow.start_run():
     # Log parameters
     mlflow.log_param("learning_rate", 0.01)
     mlflow.log_param("epochs", 100)
-    
+
     # Train model
     model = train_model(X_train, y_train)
-    
+
     # Log metrics
     mlflow.log_metric("accuracy", accuracy)
     mlflow.log_metric("f1_score", f1)
-    
+
     # Log model
     mlflow.sklearn.log_model(model, "model")
-    
+
     # Log artifacts
     mlflow.log_artifact("feature_importance.png")
 ```
@@ -137,18 +137,18 @@ model:
   name: fraud-detector
   version: 2.1.0
   framework: scikit-learn
-  
+
 training:
   date: 2024-01-15
   dataset_version: v1.2
   metrics:
     accuracy: 0.95
     f1_score: 0.92
-    
+
 requirements:
   - scikit-learn==1.3.0
   - pandas==2.0.0
-  
+
 schema:
   input:
     - name: amount
@@ -182,7 +182,7 @@ async def predict(features: dict):
     df = pd.DataFrame([features])
     prediction = model.predict(df)
     probability = model.predict_proba(df)
-    
+
     return {
         "prediction": int(prediction[0]),
         "confidence": float(probability[0].max())
@@ -195,12 +195,12 @@ async def health():
 
 ### Deployment Strategies
 
-| Strategy | Description | Use Case |
-|----------|-------------|----------|
-| Shadow | Run parallel to existing | Validate new model |
-| Canary | Gradual traffic shift | Safe rollout |
-| Blue-Green | Full switch | Quick rollback |
-| A/B Test | Split traffic | Compare models |
+| Strategy   | Description              | Use Case           |
+| ---------- | ------------------------ | ------------------ |
+| Shadow     | Run parallel to existing | Validate new model |
+| Canary     | Gradual traffic shift    | Safe rollout       |
+| Blue-Green | Full switch              | Quick rollback     |
+| A/B Test   | Split traffic            | Compare models     |
 
 ---
 
@@ -232,20 +232,20 @@ from scipy import stats
 def detect_drift(reference_data, current_data, threshold=0.05):
     """Detect distribution drift using KS test."""
     drifted_features = []
-    
+
     for column in reference_data.columns:
         statistic, p_value = stats.ks_2samp(
             reference_data[column],
             current_data[column]
         )
-        
+
         if p_value < threshold:
             drifted_features.append({
                 "feature": column,
                 "p_value": p_value,
                 "statistic": statistic
             })
-    
+
     return drifted_features
 ```
 
@@ -295,24 +295,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      
+
       - name: Install dependencies
         run: pip install -r requirements.txt
-      
+
       - name: Pull data
         run: dvc pull
-      
+
       - name: Train model
         run: python train.py
-      
+
       - name: Evaluate model
         run: python evaluate.py
-      
+
       - name: Register model
         if: github.ref == 'refs/heads/main'
         run: python register_model.py

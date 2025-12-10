@@ -1,6 +1,6 @@
 /**
  * Steering Auto-Update Module
- * 
+ *
  * Automatically updates steering files based on agent work:
  * - Detects project changes
  * - Updates structure.md, tech.md, product.md
@@ -21,7 +21,7 @@ const SteeringFileType = {
   PRODUCT: 'product',
   PROJECT: 'project',
   RULES: 'rules',
-  CUSTOM: 'custom'
+  CUSTOM: 'custom',
 };
 
 /**
@@ -34,7 +34,7 @@ const UpdateTrigger = {
   DEPENDENCY_ADDED: 'dependency-added',
   DEPENDENCY_REMOVED: 'dependency-removed',
   CONFIG_CHANGED: 'config-changed',
-  MANUAL: 'manual'
+  MANUAL: 'manual',
 };
 
 /**
@@ -43,25 +43,16 @@ const UpdateTrigger = {
 class ChangeDetector {
   constructor(options = {}) {
     this.patterns = options.patterns || {
-      structure: [
-        /^src\//,
-        /^lib\//,
-        /^packages\//,
-        /^components\//
-      ],
+      structure: [/^src\//, /^lib\//, /^packages\//, /^components\//],
       tech: [
         /package\.json$/,
         /requirements\.txt$/,
         /Gemfile$/,
         /go\.mod$/,
         /Cargo\.toml$/,
-        /\.config\.(js|ts|json)$/
+        /\.config\.(js|ts|json)$/,
       ],
-      product: [
-        /README\.md$/,
-        /docs\//,
-        /\.env\.example$/
-      ]
+      product: [/README\.md$/, /docs\//, /\.env\.example$/],
     };
   }
 
@@ -95,7 +86,7 @@ class ChangeDetector {
       deletedFiles: [],
       addedDependencies: [],
       removedDependencies: [],
-      affectedSteering: []
+      affectedSteering: [],
     };
 
     for (const change of changes) {
@@ -108,11 +99,7 @@ class ChangeDetector {
       }
     }
 
-    const allFiles = [
-      ...analysis.addedFiles,
-      ...analysis.modifiedFiles,
-      ...analysis.deletedFiles
-    ];
+    const allFiles = [...analysis.addedFiles, ...analysis.modifiedFiles, ...analysis.deletedFiles];
 
     analysis.affectedSteering = this.detectAffectedSteering(allFiles);
 
@@ -149,7 +136,7 @@ class SteeringUpdater {
       updates.push({
         section: 'directories',
         action: 'add',
-        content: [...newDirs].map(d => `- \`${d}/\` - [TODO: Add description]`)
+        content: [...newDirs].map(d => `- \`${d}/\` - [TODO: Add description]`),
       });
     }
 
@@ -166,7 +153,7 @@ class SteeringUpdater {
       updates.push({
         section: 'directories',
         action: 'review',
-        content: [...removedDirs].map(d => `- \`${d}/\` may need removal or update`)
+        content: [...removedDirs].map(d => `- \`${d}/\` may need removal or update`),
       });
     }
 
@@ -188,8 +175,8 @@ class SteeringUpdater {
         action: 'sync',
         content: {
           runtime: Object.keys(deps),
-          development: Object.keys(devDeps)
-        }
+          development: Object.keys(devDeps),
+        },
       });
 
       // Detect framework
@@ -206,7 +193,7 @@ class SteeringUpdater {
         updates.push({
           section: 'frameworks',
           action: 'update',
-          content: frameworks
+          content: frameworks,
         });
       }
     }
@@ -227,7 +214,7 @@ class SteeringUpdater {
         updates.push({
           section: 'name',
           action: 'sync',
-          content: titleMatch[1]
+          content: titleMatch[1],
         });
       }
 
@@ -237,7 +224,7 @@ class SteeringUpdater {
         updates.push({
           section: 'description',
           action: 'sync',
-          content: descMatch[1].trim()
+          content: descMatch[1].trim(),
         });
       }
     }
@@ -257,7 +244,7 @@ class SteeringUpdater {
         section: update.section,
         action: update.action,
         applied: !this.dryRun,
-        content: update.content
+        content: update.content,
       });
     }
 
@@ -283,7 +270,7 @@ class ProjectYmlSync {
       description: '',
       tech_stack: [],
       features: [],
-      agents: []
+      agents: [],
     };
 
     // Simple YAML-like parsing
@@ -293,14 +280,14 @@ class ProjectYmlSync {
 
     for (const line of lines) {
       const trimmed = line.trim();
-      
+
       if (trimmed.startsWith('#') || trimmed === '') continue;
 
       const keyMatch = line.match(/^(\w+):\s*(.*)$/);
       if (keyMatch) {
         currentKey = keyMatch[1];
         const value = keyMatch[2].trim();
-        
+
         if (value && !value.startsWith('-')) {
           data[currentKey] = value;
           _inList = false;
@@ -374,20 +361,20 @@ class ProjectYmlSync {
     const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
 
     const techMapping = {
-      'react': 'React',
-      'vue': 'Vue.js',
-      'angular': 'Angular',
-      'next': 'Next.js',
-      'express': 'Express',
-      'fastify': 'Fastify',
-      'typescript': 'TypeScript',
-      'jest': 'Jest',
-      'mocha': 'Mocha',
-      'webpack': 'Webpack',
-      'vite': 'Vite',
-      'tailwindcss': 'Tailwind CSS',
-      'prisma': 'Prisma',
-      'mongoose': 'Mongoose'
+      react: 'React',
+      vue: 'Vue.js',
+      angular: 'Angular',
+      next: 'Next.js',
+      express: 'Express',
+      fastify: 'Fastify',
+      typescript: 'TypeScript',
+      jest: 'Jest',
+      mocha: 'Mocha',
+      webpack: 'Webpack',
+      vite: 'Vite',
+      tailwindcss: 'Tailwind CSS',
+      prisma: 'Prisma',
+      mongoose: 'Mongoose',
     };
 
     for (const [dep, tech] of Object.entries(techMapping)) {
@@ -418,17 +405,17 @@ class CustomSteeringRules {
     // Parse custom rules from markdown format
     const rules = [];
     const rulePattern = /## Rule: (.+)\n([\s\S]*?)(?=## Rule:|$)/g;
-    
+
     let match;
     while ((match = rulePattern.exec(content)) !== null) {
       const name = match[1].trim();
       const body = match[2].trim();
-      
+
       const rule = {
         name,
         pattern: null,
         action: 'warn',
-        message: ''
+        message: '',
       };
 
       // Parse pattern
@@ -476,7 +463,7 @@ class CustomSteeringRules {
             rule: name,
             file: change.path,
             action: rule.action,
-            message: rule.message
+            message: rule.message,
           });
         }
       }
@@ -495,18 +482,18 @@ class SteeringAutoUpdater extends EventEmitter {
     this.projectRoot = options.projectRoot || process.cwd();
     this.steeringDir = options.steeringDir || 'steering';
     this.dryRun = options.dryRun || false;
-    
+
     this.detector = new ChangeDetector(options.detectorOptions);
     this.updater = new SteeringUpdater({
       steeringDir: this.steeringDir,
       dryRun: this.dryRun,
-      backup: options.backup
+      backup: options.backup,
     });
     this.projectSync = new ProjectYmlSync({
-      path: path.join(this.steeringDir, 'project.yml')
+      path: path.join(this.steeringDir, 'project.yml'),
     });
     this.customRules = new CustomSteeringRules({
-      rulesDir: path.join(this.steeringDir, 'custom')
+      rulesDir: path.join(this.steeringDir, 'custom'),
     });
 
     this.updateHistory = [];
@@ -517,13 +504,13 @@ class SteeringAutoUpdater extends EventEmitter {
    */
   analyze(changes, context = {}) {
     const analysis = this.detector.analyzeChanges(changes);
-    
+
     const suggestions = {
       structure: [],
       tech: [],
       product: [],
       project: [],
-      custom: []
+      custom: [],
     };
 
     // Generate structure updates
@@ -547,9 +534,9 @@ class SteeringAutoUpdater extends EventEmitter {
     return {
       analysis,
       suggestions,
-      affectedFiles: analysis.affectedSteering.map(type => 
+      affectedFiles: analysis.affectedSteering.map(type =>
         path.join(this.steeringDir, `${type}.md`)
-      )
+      ),
     };
   }
 
@@ -560,7 +547,7 @@ class SteeringAutoUpdater extends EventEmitter {
     const results = {
       applied: [],
       skipped: [],
-      errors: []
+      errors: [],
     };
 
     for (const [type, updates] of Object.entries(suggestions)) {
@@ -575,7 +562,7 @@ class SteeringAutoUpdater extends EventEmitter {
       } catch (error) {
         results.errors.push({
           type,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -583,7 +570,7 @@ class SteeringAutoUpdater extends EventEmitter {
     // Record in history
     this.updateHistory.push({
       timestamp: new Date(),
-      results
+      results,
     });
 
     return results;
@@ -594,10 +581,10 @@ class SteeringAutoUpdater extends EventEmitter {
    */
   syncProjectYml(projectData, packageJson) {
     const updated = this.projectSync.syncWithPackageJson(projectData, packageJson);
-    
+
     this.emit('projectSynced', {
       before: projectData,
-      after: updated
+      after: updated,
     });
 
     return updated;
@@ -632,16 +619,16 @@ class SteeringAutoUpdater extends EventEmitter {
           type: 'missing',
           file,
           severity: 'error',
-          message: `Required steering file ${file} is missing`
+          message: `Required steering file ${file} is missing`,
         });
       }
     }
 
     // Check for empty sections (would require file content)
-    
+
     return {
       valid: issues.filter(i => i.severity === 'error').length === 0,
-      issues
+      issues,
     };
   }
 }
@@ -660,11 +647,11 @@ module.exports = {
   ProjectYmlSync,
   CustomSteeringRules,
   SteeringAutoUpdater,
-  
+
   // Constants
   SteeringFileType,
   UpdateTrigger,
-  
+
   // Factory
-  createSteeringAutoUpdater
+  createSteeringAutoUpdater,
 };

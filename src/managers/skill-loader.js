@@ -1,8 +1,8 @@
 /**
  * MUSUBI Skill Loader
- * 
+ *
  * キーワードトリガー型スキルのロードと活性化
- * 
+ *
  * @module src/managers/skill-loader
  * @see REQ-P0-B002
  * @inspired-by OpenHands openhands/microagent/microagent.py
@@ -59,7 +59,7 @@ class Skill {
 
   /**
    * メッセージがこのスキルをトリガーするか判定
-   * @param {string} message 
+   * @param {string} message
    * @returns {boolean}
    */
   matchesTrigger(message) {
@@ -87,7 +87,7 @@ class Skill {
 
   /**
    * エージェントがこのスキルを使用可能か判定
-   * @param {string} agentType 
+   * @param {string} agentType
    * @returns {boolean}
    */
   isAvailableFor(agentType) {
@@ -126,7 +126,7 @@ class SkillLoader {
     this.globalDir = options.globalDir || path.join(__dirname, '../../steering/templates/skills');
     this.userDir = options.userDir || path.join(os.homedir(), '.musubi/skills');
     this.repoDir = options.repoDir || path.join(this.projectRoot, '.musubi/skills');
-    
+
     this.loadedSkills = new Map();
     this.initialized = false;
   }
@@ -153,9 +153,9 @@ class SkillLoader {
 
   /**
    * ディレクトリからスキルをロード
-   * @param {string} dir 
-   * @param {string} defaultType 
-   * @param {number} basePriority 
+   * @param {string} dir
+   * @param {string} defaultType
+   * @param {number} basePriority
    */
   async _loadFromDirectory(dir, defaultType, basePriority) {
     if (!fs.existsSync(dir)) {
@@ -183,9 +183,9 @@ class SkillLoader {
 
   /**
    * スキルファイルをパース
-   * @param {string} filePath 
-   * @param {string} defaultType 
-   * @param {number} basePriority 
+   * @param {string} filePath
+   * @param {string} defaultType
+   * @param {number} basePriority
    * @returns {Skill|null}
    */
   async parseSkill(filePath, defaultType = SkillType.GLOBAL, basePriority = 0) {
@@ -215,7 +215,7 @@ class SkillLoader {
 
   /**
    * Frontmatterをパース
-   * @param {string} content 
+   * @param {string} content
    * @returns {{ frontmatter: Object, body: string }}
    */
   _parseFrontmatter(content) {
@@ -280,7 +280,7 @@ class SkillLoader {
 
   /**
    * 値をパース
-   * @param {string} value 
+   * @param {string} value
    * @returns {any}
    */
   _parseValue(value) {
@@ -296,7 +296,10 @@ class SkillLoader {
     if (value.toLowerCase() === 'false') return false;
     // 配列（インライン）
     if (value.startsWith('[') && value.endsWith(']')) {
-      return value.slice(1, -1).split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
+      return value
+        .slice(1, -1)
+        .split(',')
+        .map(v => v.trim().replace(/^["']|["']$/g, ''));
     }
     // 文字列
     return value.replace(/^["']|["']$/g, '');
@@ -336,7 +339,7 @@ class SkillLoader {
 
   /**
    * 名前でスキルを取得
-   * @param {string} name 
+   * @param {string} name
    * @returns {Skill|undefined}
    */
   getSkill(name) {
@@ -353,7 +356,7 @@ class SkillLoader {
 
   /**
    * スキルタイプでフィルタリング
-   * @param {string} type 
+   * @param {string} type
    * @returns {Skill[]}
    */
   getSkillsByType(type) {
@@ -365,8 +368,7 @@ class SkillLoader {
    * @returns {boolean}
    */
   hasRepoSkills() {
-    return fs.existsSync(this.repoDir) && 
-           fs.readdirSync(this.repoDir).some(f => f.endsWith('.md'));
+    return fs.existsSync(this.repoDir) && fs.readdirSync(this.repoDir).some(f => f.endsWith('.md'));
   }
 
   /**
@@ -385,9 +387,10 @@ class SkillLoader {
 
     const sortedSkills = this.getSkills().sort((a, b) => b.priority - a.priority);
     for (const skill of sortedSkills) {
-      const triggers = skill.triggers.length > 3 
-        ? skill.triggers.slice(0, 3).join(', ') + '...'
-        : skill.triggers.join(', ');
+      const triggers =
+        skill.triggers.length > 3
+          ? skill.triggers.slice(0, 3).join(', ') + '...'
+          : skill.triggers.join(', ');
       md += `| ${skill.name} | ${skill.type} | ${skill.priority} | ${triggers} | ${skill.agent} |\n`;
     }
 
@@ -396,7 +399,7 @@ class SkillLoader {
 
   /**
    * 活性化されたスキルをプロンプトに変換
-   * @param {Skill[]} skills 
+   * @param {Skill[]} skills
    * @returns {string}
    */
   formatSkillsForPrompt(skills) {

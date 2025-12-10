@@ -13,7 +13,7 @@ const {
   createProjectTemplate,
   createProjectCatalog,
   createLaunchChecklist,
-  createReleaseManager
+  createReleaseManager,
 } = require('../../src/integrations/examples');
 
 describe('Example Projects & Launch', () => {
@@ -56,7 +56,7 @@ describe('Example Projects & Launch', () => {
         name: 'Test Project',
         description: 'A test project',
         type: ProjectType.API_SERVER,
-        framework: FrameworkPreset.EXPRESS
+        framework: FrameworkPreset.EXPRESS,
       });
     });
 
@@ -89,7 +89,7 @@ describe('Example Projects & Launch', () => {
     it('should generate package.json', () => {
       template.addDependency('express', '^4.18.0');
       const pkg = template.generatePackageJson();
-      
+
       expect(pkg.name).toBe('test-project');
       expect(pkg.dependencies['musubi-sdd']).toBeDefined();
       expect(pkg.dependencies.express).toBe('^4.18.0');
@@ -217,7 +217,7 @@ describe('Example Projects & Launch', () => {
         id: 'custom',
         category: LaunchCategory.CODE_QUALITY,
         title: 'Custom check',
-        required: false
+        required: false,
       });
       expect(checklist.items.length).toBe(initialCount + 1);
     });
@@ -292,7 +292,7 @@ describe('Example Projects & Launch', () => {
     beforeEach(() => {
       manager = new ReleaseManager({
         version: '1.0.0',
-        projectName: 'Test Project'
+        projectName: 'Test Project',
       });
     });
 
@@ -315,8 +315,8 @@ describe('Example Projects & Launch', () => {
       expect(newVersion).toBe('2.0.0');
     });
 
-    it('should emit versionBumped event', (done) => {
-      manager.on('versionBumped', (data) => {
+    it('should emit versionBumped event', done => {
+      manager.on('versionBumped', data => {
         expect(data.version).toBe('1.0.1');
         expect(data.type).toBe('patch');
         done();
@@ -334,8 +334,8 @@ describe('Example Projects & Launch', () => {
           fixes: ['Bug fix'],
           deprecated: ['Old API'],
           removed: ['Legacy code'],
-          security: ['Security patch']
-        }
+          security: ['Security patch'],
+        },
       ];
 
       const changelog = manager.generateChangelog(releases);
@@ -356,7 +356,7 @@ describe('Example Projects & Launch', () => {
         highlights: ['Major feature'],
         features: ['New feature'],
         breaking: ['API change'],
-        migration: 'Update your imports'
+        migration: 'Update your imports',
       };
 
       const notes = manager.generateReleaseNotes(release);
@@ -383,8 +383,8 @@ describe('Example Projects & Launch', () => {
       expect(files.has('package.json')).toBe(true);
     });
 
-    it('should emit projectCreated event', (done) => {
-      manager.on('projectCreated', (data) => {
+    it('should emit projectCreated event', done => {
+      manager.on('projectCreated', data => {
         expect(data.template).toBe('musubi-api-example');
         expect(data.files.length).toBeGreaterThan(0);
         done();

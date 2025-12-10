@@ -196,9 +196,7 @@ class CheckpointManager extends EventEmitter {
 
     // Filter by tags
     if (options.tags && options.tags.length > 0) {
-      checkpoints = checkpoints.filter(cp =>
-        options.tags.some(tag => cp.tags.includes(tag))
-      );
+      checkpoints = checkpoints.filter(cp => options.tags.some(tag => cp.tags.includes(tag)));
     }
 
     // Filter by state
@@ -489,7 +487,7 @@ class CheckpointManager extends EventEmitter {
    */
   async _getFileList(checkpointId) {
     const filesDir = path.join(this.storageDir, checkpointId, 'files');
-    if (!await fs.pathExists(filesDir)) {
+    if (!(await fs.pathExists(filesDir))) {
       return [];
     }
     return this._getFilesInDir(filesDir);
@@ -501,7 +499,7 @@ class CheckpointManager extends EventEmitter {
    */
   async _getFileHash(checkpointId, file) {
     const filePath = path.join(this.storageDir, checkpointId, 'files', file);
-    if (!await fs.pathExists(filePath)) {
+    if (!(await fs.pathExists(filePath))) {
       return null;
     }
 
@@ -517,9 +515,7 @@ class CheckpointManager extends EventEmitter {
     const checkpoints = this.list();
 
     // Keep archived checkpoints separate
-    const activeCheckpoints = checkpoints.filter(
-      cp => cp.state !== CheckpointState.ARCHIVED
-    );
+    const activeCheckpoints = checkpoints.filter(cp => cp.state !== CheckpointState.ARCHIVED);
 
     if (activeCheckpoints.length > this.config.maxCheckpoints) {
       const toDelete = activeCheckpoints.slice(this.config.maxCheckpoints);

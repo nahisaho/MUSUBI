@@ -6,7 +6,14 @@
 
 'use strict';
 
-const { SecurityAnalyzer, SecurityRisk, SecurityAnalysisResult, RiskLevel, SECURITY_PATTERNS, RISK_SEVERITY } = require('../../src/analyzers/security-analyzer');
+const {
+  SecurityAnalyzer,
+  SecurityRisk,
+  SecurityAnalysisResult,
+  RiskLevel,
+  SECURITY_PATTERNS,
+  RISK_SEVERITY,
+} = require('../../src/analyzers/security-analyzer');
 
 describe('SecurityAnalyzer', () => {
   let analyzer;
@@ -39,37 +46,37 @@ describe('SecurityAnalyzer', () => {
       const content = 'const apiKey = "sk-abc123def456ghi789jkl012mno345pqr678stu901vwx234";';
       const result = analyzer.analyzeContent(content);
       expect(result.risks.length).toBeGreaterThan(0);
-      expect(result.risks.some((r) => r.category === 'secrets')).toBe(true);
+      expect(result.risks.some(r => r.category === 'secrets')).toBe(true);
     });
 
     test('should detect password patterns', () => {
       const content = 'password = "supersecretpassword123"';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.name.includes('Password'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('Password'))).toBe(true);
     });
 
     test('should detect private keys', () => {
       const content = '-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA...';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.level === RiskLevel.CRITICAL)).toBe(true);
+      expect(result.risks.some(r => r.level === RiskLevel.CRITICAL)).toBe(true);
     });
 
     test('should detect GitHub tokens', () => {
       const content = 'const token = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.name.includes('GitHub'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('GitHub'))).toBe(true);
     });
 
     test('should detect OpenAI API keys', () => {
       const content = 'OPENAI_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.name.includes('OpenAI'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('OpenAI'))).toBe(true);
     });
 
     test('should detect AWS access keys', () => {
       const content = 'aws_access_key_id = AKIAIOSFODNN7EXAMPLE';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.name.includes('AWS'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('AWS'))).toBe(true);
     });
   });
 
@@ -77,31 +84,31 @@ describe('SecurityAnalyzer', () => {
     test('should detect rm -rf /', () => {
       const content = 'exec("rm -rf /")';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.level === RiskLevel.CRITICAL)).toBe(true);
+      expect(result.risks.some(r => r.level === RiskLevel.CRITICAL)).toBe(true);
     });
 
     test('should detect rm -rf ~', () => {
       const content = 'rm -rf ~';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.category === 'dangerousCommands')).toBe(true);
+      expect(result.risks.some(r => r.category === 'dangerousCommands')).toBe(true);
     });
 
     test('should detect chmod 777', () => {
       const content = 'chmod 777 /var/www/html';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.name.includes('Chmod 777'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('Chmod 777'))).toBe(true);
     });
 
     test('should detect curl pipe to bash', () => {
       const content = 'curl https://example.com/script.sh | bash';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.name.includes('Curl Pipe'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('Curl Pipe'))).toBe(true);
     });
 
     test('should detect mkfs commands', () => {
       const content = 'mkfs.ext4 /dev/sda1';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.level === RiskLevel.CRITICAL)).toBe(true);
+      expect(result.risks.some(r => r.level === RiskLevel.CRITICAL)).toBe(true);
     });
   });
 
@@ -109,31 +116,31 @@ describe('SecurityAnalyzer', () => {
     test('should detect eval usage', () => {
       const content = 'eval(userInput)';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.name.includes('Eval'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('Eval'))).toBe(true);
     });
 
     test('should detect innerHTML assignment', () => {
       const content = 'element.innerHTML = userContent;';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.name.includes('innerHTML'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('innerHTML'))).toBe(true);
     });
 
     test('should detect document.write', () => {
       const content = 'document.write(data);';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.name.includes('Document Write'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('Document Write'))).toBe(true);
     });
 
     test('should detect dangerouslySetInnerHTML', () => {
       const content = '<div dangerouslySetInnerHTML={{__html: content}} />';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.name.includes('React Dangerous'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('React Dangerous'))).toBe(true);
     });
 
     test('should detect SQL injection patterns', () => {
       const content = 'sql = "SELECT * FROM users WHERE id = " + userId;';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.name.includes('SQL Injection'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('SQL Injection'))).toBe(true);
     });
   });
 
@@ -141,25 +148,25 @@ describe('SecurityAnalyzer', () => {
     test('should detect insecure HTTP URLs', () => {
       const content = 'const url = "http://api.example.com/data";';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.name.includes('Insecure HTTP'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('Insecure HTTP'))).toBe(true);
     });
 
     test('should allow localhost HTTP', () => {
       const content = 'const url = "http://localhost:3000";';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.filter((r) => r.name.includes('Insecure HTTP')).length).toBe(0);
+      expect(result.risks.filter(r => r.name.includes('Insecure HTTP')).length).toBe(0);
     });
 
     test('should detect binding to all interfaces', () => {
       const content = 'server.listen(3000, "0.0.0.0:8080");';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.name.includes('Binding'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('Binding'))).toBe(true);
     });
 
     test('should detect disabled TLS verification', () => {
       const content = 'process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.name.includes('TLS'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('TLS'))).toBe(true);
     });
   });
 
@@ -180,7 +187,7 @@ describe('SecurityAnalyzer', () => {
         command: 'rm -rf /tmp/*',
       };
       const result = analyzer.analyzeAction(action);
-      expect(result.risks.some((r) => r.category === 'dangerousCommands')).toBe(true);
+      expect(result.risks.some(r => r.category === 'dangerousCommands')).toBe(true);
     });
 
     test('should analyze action code', () => {
@@ -189,7 +196,7 @@ describe('SecurityAnalyzer', () => {
         code: 'eval(req.body.code)',
       };
       const result = analyzer.analyzeAction(action);
-      expect(result.risks.some((r) => r.name.includes('Eval'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('Eval'))).toBe(true);
     });
   });
 
@@ -218,7 +225,7 @@ describe('SecurityAnalyzer', () => {
         { path: 'src/config.js', content: 'password = "prodpassword123"' },
       ];
       const result = customAnalyzer.analyzeFiles(files);
-      expect(result.risks.every((r) => !r.file.includes('test/'))).toBe(true);
+      expect(result.risks.every(r => !r.file.includes('test/'))).toBe(true);
     });
   });
 
@@ -271,7 +278,7 @@ describe('SecurityAnalyzer', () => {
       analyzer.addCustomPatterns(['CUSTOM_SECRET_\\w+'], RiskLevel.HIGH);
       const content = 'const key = CUSTOM_SECRET_12345';
       const result = analyzer.analyzeContent(content);
-      expect(result.risks.some((r) => r.name.includes('Custom'))).toBe(true);
+      expect(result.risks.some(r => r.name.includes('Custom'))).toBe(true);
     });
 
     test('should handle invalid regex gracefully', () => {
@@ -410,14 +417,28 @@ describe('SecurityAnalysisResult', () => {
     const risks = [
       new SecurityRisk({ category: 'a', name: 'a', level: RiskLevel.LOW, match: '', position: 0 }),
       new SecurityRisk({ category: 'b', name: 'b', level: RiskLevel.HIGH, match: '', position: 0 }),
-      new SecurityRisk({ category: 'c', name: 'c', level: RiskLevel.MEDIUM, match: '', position: 0 }),
+      new SecurityRisk({
+        category: 'c',
+        name: 'c',
+        level: RiskLevel.MEDIUM,
+        match: '',
+        position: 0,
+      }),
     ];
     const result = new SecurityAnalysisResult(risks);
     expect(result.getHighestLevel()).toBe(RiskLevel.HIGH);
   });
 
   test('should check threshold exceedance', () => {
-    const risks = [new SecurityRisk({ category: 'a', name: 'a', level: RiskLevel.MEDIUM, match: '', position: 0 })];
+    const risks = [
+      new SecurityRisk({
+        category: 'a',
+        name: 'a',
+        level: RiskLevel.MEDIUM,
+        match: '',
+        position: 0,
+      }),
+    ];
     const result = new SecurityAnalysisResult(risks);
 
     expect(result.exceedsThreshold(RiskLevel.LOW)).toBe(true);
@@ -425,8 +446,24 @@ describe('SecurityAnalysisResult', () => {
   });
 
   test('should determine if action should be blocked', () => {
-    const criticalRisks = [new SecurityRisk({ category: 'a', name: 'a', level: RiskLevel.CRITICAL, match: '', position: 0 })];
-    const mediumRisks = [new SecurityRisk({ category: 'a', name: 'a', level: RiskLevel.MEDIUM, match: '', position: 0 })];
+    const criticalRisks = [
+      new SecurityRisk({
+        category: 'a',
+        name: 'a',
+        level: RiskLevel.CRITICAL,
+        match: '',
+        position: 0,
+      }),
+    ];
+    const mediumRisks = [
+      new SecurityRisk({
+        category: 'a',
+        name: 'a',
+        level: RiskLevel.MEDIUM,
+        match: '',
+        position: 0,
+      }),
+    ];
 
     expect(new SecurityAnalysisResult(criticalRisks).shouldBlock()).toBe(true);
     expect(new SecurityAnalysisResult(mediumRisks).shouldBlock()).toBe(false);
@@ -446,8 +483,20 @@ describe('SecurityAnalysisResult', () => {
 
   test('should get summary statistics', () => {
     const risks = [
-      new SecurityRisk({ category: 'secrets', name: 'a', level: RiskLevel.HIGH, match: '', position: 0 }),
-      new SecurityRisk({ category: 'dangerousCommands', name: 'b', level: RiskLevel.CRITICAL, match: '', position: 0 }),
+      new SecurityRisk({
+        category: 'secrets',
+        name: 'a',
+        level: RiskLevel.HIGH,
+        match: '',
+        position: 0,
+      }),
+      new SecurityRisk({
+        category: 'dangerousCommands',
+        name: 'b',
+        level: RiskLevel.CRITICAL,
+        match: '',
+        position: 0,
+      }),
     ];
     const result = new SecurityAnalysisResult(risks);
     const summary = result.getSummary();

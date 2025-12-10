@@ -58,7 +58,7 @@ describe('CriticResult', () => {
     it('should serialize properly', () => {
       const result = new CriticResult(0.7, 'message', { detail: 'info' });
       const json = result.toJSON();
-      
+
       expect(json.score).toBe(0.7);
       expect(json.grade).toBe(Grade.B);
       expect(json.message).toBe('message');
@@ -73,7 +73,7 @@ describe('CriticResult', () => {
         criterion2: 0.7,
       });
       const md = result.toMarkdown();
-      
+
       expect(md).toContain('## Evaluation Result');
       expect(md).toContain('80%');
       expect(md).toContain('Grade');
@@ -364,7 +364,7 @@ describe('CriticSystem', () => {
     it('should generate markdown report', () => {
       const results = system.evaluateAll({});
       const report = system.generateReport(results);
-      
+
       expect(report).toContain('# MUSUBI Quality Report');
       expect(report).toContain('## Overall Score');
       expect(report).toContain('## Stage Results');

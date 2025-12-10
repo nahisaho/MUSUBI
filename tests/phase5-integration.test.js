@@ -28,7 +28,7 @@ const {
   AdvancedValidation,
   VALIDATION_TYPE,
   ARTIFACT_TYPE,
-  GAP_SEVERITY
+  GAP_SEVERITY,
 } = require('../src/phase5-integration');
 
 describe('Phase5Integration', () => {
@@ -83,7 +83,13 @@ describe('Phase5Integration', () => {
     test('should run comprehensive analysis', async () => {
       const context = {
         coverage: { lines: 80, branches: 70, functions: 85, statements: 75, overall: 78 },
-        quality: { complexity: 70, maintainability: 75, documentation: 65, testQuality: 80, overall: 73 }
+        quality: {
+          complexity: 70,
+          maintainability: 75,
+          documentation: 65,
+          testQuality: 80,
+          overall: 73,
+        },
       };
 
       const result = await integration.analyzeProject(context);
@@ -123,7 +129,7 @@ describe('Phase5Integration', () => {
     test('should validate multiple steering files', () => {
       const files = {
         'structure.md': '# Structure\n\n## Patterns\nContent here',
-        'tech.md': '# Technology Stack\n\n## Languages\nContent here'
+        'tech.md': '# Technology Stack\n\n## Languages\nContent here',
       };
 
       const result = integration.validateSteering(files);
@@ -134,7 +140,7 @@ describe('Phase5Integration', () => {
 
     test('should return overall validity', () => {
       const files = {
-        'test.md': '# Test\nContent'
+        'test.md': '# Test\nContent',
       };
 
       const result = integration.validateSteering(files);
@@ -185,7 +191,7 @@ When user logs in, the system shall authenticate.
       const integration = new Phase5Integration();
       await integration.analyzeProject({
         coverage: { overall: 75 },
-        quality: { overall: 70 }
+        quality: { overall: 70 },
       });
 
       const report = integration.generateReport();
@@ -256,7 +262,7 @@ When user logs in, the system shall authenticate.
       // Trigger low health metrics
       await integration.analyzeProject({
         coverage: { overall: 10 },
-        quality: { overall: 10 }
+        quality: { overall: 10 },
       });
 
       // Note: Event may not fire if thresholds not met
@@ -272,7 +278,7 @@ describe('createPhase5Integration()', () => {
 
   test('should accept options', () => {
     const integration = createPhase5Integration({
-      validation: { strict: true }
+      validation: { strict: true },
     });
     expect(integration.advancedValidation.strict).toBe(true);
   });

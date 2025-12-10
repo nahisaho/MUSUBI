@@ -66,9 +66,13 @@ As a user, I want to do something so that I benefit.
       });
 
       expect(result.filesConverted).toBeGreaterThan(0);
-      expect(await fs.pathExists(path.join(MUSUBI_OUTPUT, 'steering', 'rules', 'constitution.md'))).toBe(true);
+      expect(
+        await fs.pathExists(path.join(MUSUBI_OUTPUT, 'steering', 'rules', 'constitution.md'))
+      ).toBe(true);
       expect(await fs.pathExists(path.join(MUSUBI_OUTPUT, 'steering', 'project.yml'))).toBe(true);
-      expect(await fs.pathExists(path.join(MUSUBI_OUTPUT, 'storage', 'specs', '001-feature', 'spec.md'))).toBe(true);
+      expect(
+        await fs.pathExists(path.join(MUSUBI_OUTPUT, 'storage', 'specs', '001-feature', 'spec.md'))
+      ).toBe(true);
     });
 
     test('should preserve feature structure', async () => {
@@ -131,7 +135,9 @@ WHEN the user submits credentials, the system SHALL authenticate.
       });
 
       expect(result.filesConverted).toBeGreaterThan(0);
-      expect(await fs.pathExists(path.join(SPECKIT_OUTPUT, '.specify', 'memory', 'constitution.md'))).toBe(true);
+      expect(
+        await fs.pathExists(path.join(SPECKIT_OUTPUT, '.specify', 'memory', 'constitution.md'))
+      ).toBe(true);
       expect(await fs.pathExists(path.join(SPECKIT_OUTPUT, '.specify', 'specs'))).toBe(true);
     });
 
@@ -140,11 +146,8 @@ WHEN the user submits credentials, the system SHALL authenticate.
       const specsDir = path.join(SPECKIT_OUTPUT, '.specify', 'specs');
       const features = await fs.readdir(specsDir);
       const featureDir = features[0];
-      
-      const specContent = await fs.readFile(
-        path.join(specsDir, featureDir, 'spec.md'),
-        'utf-8'
-      );
+
+      const specContent = await fs.readFile(path.join(specsDir, featureDir, 'spec.md'), 'utf-8');
 
       expect(specContent).toContain('User Scenarios');
       expect(specContent).toContain('As a');
@@ -217,7 +220,7 @@ As a developer, I want to test so that code works.
       );
 
       const result = await testRoundtrip(projectPath);
-      
+
       expect(result).toHaveProperty('passed');
       expect(result).toHaveProperty('similarity');
       expect(result).toHaveProperty('differences');
@@ -226,7 +229,7 @@ As a developer, I want to test so that code works.
 
     test('should handle non-existent project', async () => {
       const result = await testRoundtrip('/nonexistent/path');
-      
+
       expect(result.passed).toBe(false);
       expect(result.differences.length).toBeGreaterThan(0);
     });

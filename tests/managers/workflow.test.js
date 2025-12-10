@@ -23,7 +23,7 @@ describe('WorkflowEngine', () => {
   describe('initWorkflow', () => {
     it('should initialize workflow with default stage', async () => {
       const state = await engine.initWorkflow('test-feature');
-      
+
       expect(state.feature).toBe('test-feature');
       expect(state.currentStage).toBe('requirements');
       expect(state.stages.requirements.status).toBe('in-progress');
@@ -33,7 +33,7 @@ describe('WorkflowEngine', () => {
 
     it('should initialize workflow with custom start stage', async () => {
       const state = await engine.initWorkflow('test-feature', { startStage: 'spike' });
-      
+
       expect(state.currentStage).toBe('spike');
       expect(state.stages.spike.status).toBe('in-progress');
     });
@@ -42,9 +42,9 @@ describe('WorkflowEngine', () => {
   describe('transitionTo', () => {
     it('should allow valid transitions', async () => {
       await engine.initWorkflow('test-feature');
-      
+
       const state = await engine.transitionTo('design');
-      
+
       expect(state.currentStage).toBe('design');
       expect(state.stages.requirements.status).toBe('completed');
       expect(state.stages.design.status).toBe('in-progress');
@@ -52,9 +52,8 @@ describe('WorkflowEngine', () => {
 
     it('should reject invalid transitions', async () => {
       await engine.initWorkflow('test-feature');
-      
-      await expect(engine.transitionTo('deployment'))
-        .rejects.toThrow('Invalid transition');
+
+      await expect(engine.transitionTo('deployment')).rejects.toThrow('Invalid transition');
     });
 
     it('should track stage attempts on re-entry', async () => {
@@ -65,7 +64,7 @@ describe('WorkflowEngine', () => {
       await engine.transitionTo('review');
       // Go back to implementation (feedback loop)
       await engine.transitionTo('implementation');
-      
+
       const state = await engine.getState();
       expect(state.stages.implementation.attempts).toBe(2);
     });
@@ -78,12 +77,12 @@ describe('WorkflowEngine', () => {
       await engine.transitionTo('tasks');
       await engine.transitionTo('implementation');
       await engine.transitionTo('review');
-      
+
       await engine.recordFeedbackLoop('review', 'implementation', 'Code needs refactoring');
-      
+
       const state = await engine.getState();
       const feedbackEvent = state.history.find(h => h.action === 'feedback-loop');
-      
+
       expect(feedbackEvent).toBeDefined();
       expect(feedbackEvent.from).toBe('review');
       expect(feedbackEvent.to).toBe('implementation');
@@ -96,13 +95,13 @@ describe('WorkflowEngine', () => {
       await engine.initWorkflow('test-feature');
       await engine.transitionTo('design');
       await engine.transitionTo('tasks');
-      
+
       const summary = await engine.completeWorkflow('All done!');
-      
+
       expect(summary.feature).toBe('test-feature');
       expect(summary.stages).toHaveLength(3);
       expect(summary.feedbackLoops).toBe(0);
-      
+
       const state = await engine.getState();
       expect(state.status).toBe('completed');
     });
@@ -119,9 +118,9 @@ describe('WorkflowEngine', () => {
       await engine.transitionTo('design');
       await engine.transitionTo('tasks');
       await engine.completeWorkflow();
-      
+
       const summary = await engine.getMetricsSummary();
-      
+
       expect(summary.totalWorkflows).toBe(1);
       expect(summary.completedWorkflows).toBe(1);
       expect(summary.stageTransitions).toBe(2);
@@ -132,7 +131,7 @@ describe('WorkflowEngine', () => {
   describe('getValidTransitions', () => {
     it('should return valid transitions for current stage', async () => {
       await engine.initWorkflow('test-feature');
-      
+
       const transitions = await engine.getValidTransitions();
       expect(transitions).toContain('design');
     });

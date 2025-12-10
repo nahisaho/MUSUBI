@@ -11,7 +11,7 @@ const {
   PreCommitGenerator,
   PipelineValidator,
   CICDManager,
-  createCICDManager
+  createCICDManager,
 } = require('../../src/integrations/cicd');
 
 describe('CI/CD Integration', () => {
@@ -55,7 +55,7 @@ describe('CI/CD Integration', () => {
         generator = new WorkflowGenerator(CIProvider.GITHUB_ACTIONS, {
           nodeVersion: '20',
           branch: 'main',
-          jobs: [JobType.VALIDATE, JobType.TEST]
+          jobs: [JobType.VALIDATE, JobType.TEST],
         });
       });
 
@@ -104,7 +104,7 @@ describe('CI/CD Integration', () => {
 
       beforeEach(() => {
         generator = new WorkflowGenerator(CIProvider.GITLAB_CI, {
-          jobs: [JobType.VALIDATE, JobType.ANALYZE]
+          jobs: [JobType.VALIDATE, JobType.ANALYZE],
         });
       });
 
@@ -136,7 +136,7 @@ describe('CI/CD Integration', () => {
     describe('Azure Pipelines', () => {
       it('should generate valid structure', () => {
         const generator = new WorkflowGenerator(CIProvider.AZURE_PIPELINES, {
-          jobs: [JobType.VALIDATE]
+          jobs: [JobType.VALIDATE],
         });
         const yaml = generator.generate();
         expect(yaml).toContain('trigger:');
@@ -147,7 +147,7 @@ describe('CI/CD Integration', () => {
     describe('Jenkinsfile', () => {
       it('should generate Groovy pipeline', () => {
         const generator = new WorkflowGenerator(CIProvider.JENKINS, {
-          jobs: [JobType.VALIDATE, JobType.TEST]
+          jobs: [JobType.VALIDATE, JobType.TEST],
         });
         const groovy = generator.generate();
         expect(groovy).toContain('pipeline {');
@@ -160,7 +160,7 @@ describe('CI/CD Integration', () => {
     describe('CircleCI', () => {
       it('should include version', () => {
         const generator = new WorkflowGenerator(CIProvider.CIRCLE_CI, {
-          jobs: [JobType.VALIDATE]
+          jobs: [JobType.VALIDATE],
         });
         const yaml = generator.generate();
         expect(yaml).toContain('version: 2.1');
@@ -168,7 +168,7 @@ describe('CI/CD Integration', () => {
 
       it('should define workflows', () => {
         const generator = new WorkflowGenerator(CIProvider.CIRCLE_CI, {
-          jobs: [JobType.VALIDATE]
+          jobs: [JobType.VALIDATE],
         });
         const yaml = generator.generate();
         expect(yaml).toContain('workflows:');
@@ -179,7 +179,7 @@ describe('CI/CD Integration', () => {
     describe('Travis CI', () => {
       it('should specify language and node version', () => {
         const generator = new WorkflowGenerator(CIProvider.TRAVIS_CI, {
-          jobs: [JobType.TEST]
+          jobs: [JobType.TEST],
         });
         const yaml = generator.generate();
         expect(yaml).toContain('language: node_js');
@@ -190,7 +190,7 @@ describe('CI/CD Integration', () => {
     describe('Bitbucket Pipelines', () => {
       it('should generate valid structure', () => {
         const generator = new WorkflowGenerator(CIProvider.BITBUCKET_PIPELINES, {
-          jobs: [JobType.VALIDATE]
+          jobs: [JobType.VALIDATE],
         });
         const yaml = generator.generate();
         expect(yaml).toContain('image: node:20');
@@ -209,14 +209,14 @@ describe('CI/CD Integration', () => {
 
     beforeEach(() => {
       generator = new PreCommitGenerator({
-        hooks: ['validate', 'lint', 'test']
+        hooks: ['validate', 'lint', 'test'],
       });
     });
 
     it('should generate pre-commit hook script', () => {
       const result = generator.generate();
       const preCommit = result['pre-commit'];
-      
+
       expect(preCommit).toContain('#!/bin/sh');
       expect(preCommit).toContain('musubi validate');
     });
@@ -249,7 +249,7 @@ describe('CI/CD Integration', () => {
 
     it('should include sync hook when specified', () => {
       const syncGenerator = new PreCommitGenerator({
-        hooks: ['sync']
+        hooks: ['sync'],
       });
       const result = syncGenerator.generate();
       expect(result['pre-commit']).toContain('musubi sync');
@@ -304,7 +304,8 @@ jobs:
     });
 
     it('should warn about missing caching', () => {
-      const content = 'jobs:\n  test:\n    runs-on: ubuntu\n    steps:\n      - npm ci\n      - npx musubi validate';
+      const content =
+        'jobs:\n  test:\n    runs-on: ubuntu\n    steps:\n      - npm ci\n      - npx musubi validate';
       const result = validator.validate(content, CIProvider.GITHUB_ACTIONS);
       expect(result.warnings.some(w => w.includes('caching'))).toBe(true);
     });
@@ -367,8 +368,8 @@ test:
       expect(detected.length).toBe(2);
     });
 
-    it('should emit detected event', (done) => {
-      manager.on('detected', (data) => {
+    it('should emit detected event', done => {
+      manager.on('detected', data => {
         expect(data.providers).toBeDefined();
         done();
       });
@@ -377,15 +378,15 @@ test:
 
     it('should generate workflow for provider', () => {
       const result = manager.generate(CIProvider.GITHUB_ACTIONS, {
-        jobs: [JobType.VALIDATE]
+        jobs: [JobType.VALIDATE],
       });
-      
+
       expect(result.file).toBe('.github/workflows/musubi.yml');
       expect(result.content).toContain('MUSUBI');
     });
 
-    it('should emit generated event', (done) => {
-      manager.on('generated', (data) => {
+    it('should emit generated event', done => {
+      manager.on('generated', data => {
         expect(data.provider).toBe(CIProvider.GITHUB_ACTIONS);
         done();
       });
@@ -404,13 +405,14 @@ test:
     });
 
     it('should validate pipeline', () => {
-      const content = 'jobs:\n  test:\n    runs-on: ubuntu\n    steps:\n      - npm ci\n      - npx musubi validate';
+      const content =
+        'jobs:\n  test:\n    runs-on: ubuntu\n    steps:\n      - npm ci\n      - npx musubi validate';
       const result = manager.validate(content, CIProvider.GITHUB_ACTIONS);
       expect(result).toBeDefined();
     });
 
-    it('should emit validated event', (done) => {
-      manager.on('validated', (data) => {
+    it('should emit validated event', done => {
+      manager.on('validated', data => {
         expect(data.result).toBeDefined();
         done();
       });
@@ -437,9 +439,9 @@ test:
     it('should get recommended config', () => {
       const config = manager.getRecommendedConfig(CIProvider.GITHUB_ACTIONS, {
         hasDocumentation: true,
-        multiPlatform: true
+        multiPlatform: true,
       });
-      
+
       expect(config.jobs).toContain(JobType.VALIDATE);
       expect(config.jobs).toContain(JobType.REPORT);
       expect(config.jobs).toContain(JobType.SYNC);
@@ -448,7 +450,7 @@ test:
     it('should convert to JSON', () => {
       manager.detect(['.github/workflows/musubi.yml']);
       const json = manager.toJSON();
-      
+
       expect(json.projectRoot).toBe('/test/project');
       expect(json.detectedProvider).toBe(CIProvider.GITHUB_ACTIONS);
     });

@@ -15,7 +15,7 @@ describe('NLParser', () => {
   describe('parse', () => {
     test('should parse navigate command (Japanese)', () => {
       const result = parser.parse('https://example.com を開く');
-      
+
       expect(result.success).toBe(true);
       expect(result.actions).toHaveLength(1);
       expect(result.actions[0].type).toBe('navigate');
@@ -24,7 +24,7 @@ describe('NLParser', () => {
 
     test('should parse navigate command (English)', () => {
       const result = parser.parse('go to https://example.com');
-      
+
       expect(result.success).toBe(true);
       expect(result.actions).toHaveLength(1);
       expect(result.actions[0].type).toBe('navigate');
@@ -33,7 +33,7 @@ describe('NLParser', () => {
 
     test('should parse click command (Japanese)', () => {
       const result = parser.parse('ログインボタンをクリック');
-      
+
       expect(result.success).toBe(true);
       expect(result.actions).toHaveLength(1);
       expect(result.actions[0].type).toBe('click');
@@ -42,7 +42,7 @@ describe('NLParser', () => {
 
     test('should parse click command (English)', () => {
       const result = parser.parse('click login button');
-      
+
       expect(result.success).toBe(true);
       expect(result.actions).toHaveLength(1);
       expect(result.actions[0].type).toBe('click');
@@ -50,7 +50,7 @@ describe('NLParser', () => {
 
     test('should parse fill command (Japanese)', () => {
       const result = parser.parse('メール欄に「test@example.com」と入力');
-      
+
       expect(result.success).toBe(true);
       expect(result.actions).toHaveLength(1);
       expect(result.actions[0].type).toBe('fill');
@@ -59,7 +59,7 @@ describe('NLParser', () => {
 
     test('should parse fill command (English)', () => {
       const result = parser.parse('type "hello world" in email field');
-      
+
       expect(result.success).toBe(true);
       expect(result.actions).toHaveLength(1);
       expect(result.actions[0].type).toBe('fill');
@@ -68,7 +68,7 @@ describe('NLParser', () => {
 
     test('should parse wait command (Japanese)', () => {
       const result = parser.parse('3秒待つ');
-      
+
       expect(result.success).toBe(true);
       expect(result.actions).toHaveLength(1);
       expect(result.actions[0].type).toBe('wait');
@@ -77,7 +77,7 @@ describe('NLParser', () => {
 
     test('should parse wait command (English)', () => {
       const result = parser.parse('wait 5 seconds');
-      
+
       expect(result.success).toBe(true);
       expect(result.actions).toHaveLength(1);
       expect(result.actions[0].type).toBe('wait');
@@ -86,7 +86,7 @@ describe('NLParser', () => {
 
     test('should parse screenshot command (Japanese)', () => {
       const result = parser.parse('スクリーンショットを取る');
-      
+
       expect(result.success).toBe(true);
       expect(result.actions).toHaveLength(1);
       expect(result.actions[0].type).toBe('screenshot');
@@ -94,7 +94,7 @@ describe('NLParser', () => {
 
     test('should parse screenshot with name (Japanese)', () => {
       const result = parser.parse('画面を「login-page」として保存');
-      
+
       expect(result.success).toBe(true);
       expect(result.actions).toHaveLength(1);
       expect(result.actions[0].type).toBe('screenshot');
@@ -103,7 +103,7 @@ describe('NLParser', () => {
 
     test('should parse assert command (Japanese)', () => {
       const result = parser.parse('「ログイン成功」が表示される');
-      
+
       expect(result.success).toBe(true);
       expect(result.actions).toHaveLength(1);
       expect(result.actions[0].type).toBe('assert');
@@ -112,7 +112,7 @@ describe('NLParser', () => {
 
     test('should parse multiple commands separated by comma', () => {
       const result = parser.parse('https://example.com を開く、ログインボタンをクリック');
-      
+
       expect(result.success).toBe(true);
       expect(result.actions).toHaveLength(2);
       expect(result.actions[0].type).toBe('navigate');
@@ -121,14 +121,14 @@ describe('NLParser', () => {
 
     test('should parse multiple commands with "and"', () => {
       const result = parser.parse('go to https://example.com and click login button');
-      
+
       expect(result.success).toBe(true);
       expect(result.actions).toHaveLength(2);
     });
 
     test('should return error for unrecognized command', () => {
       const result = parser.parse('do something unknown');
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
     });

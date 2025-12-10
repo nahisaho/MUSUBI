@@ -1,12 +1,12 @@
 /**
  * Quality Metrics Dashboard
  * カバレッジメトリクス、Constitutional準拠メトリクス、プロジェクトヘルス指標
- * 
+ *
  * Part of MUSUBI v5.0.0 - Production Readiness
- * 
+ *
  * @module monitoring/quality-dashboard
  * @version 1.0.0
- * 
+ *
  * @traceability
  * - Requirement: REQ-P5-001 (Quality Dashboard)
  * - Design: docs/design/tdd-musubi-v5.0.0.md#3.1
@@ -24,17 +24,17 @@ const METRIC_CATEGORY = {
   QUALITY: 'quality',
   HEALTH: 'health',
   PERFORMANCE: 'performance',
-  CUSTOM: 'custom'
+  CUSTOM: 'custom',
 };
 
 /**
  * Health status levels
  */
 const HEALTH_STATUS = {
-  HEALTHY: 'healthy',        // 80-100%
-  WARNING: 'warning',        // 50-79%
-  CRITICAL: 'critical',      // 20-49%
-  FAILING: 'failing'         // <20%
+  HEALTHY: 'healthy', // 80-100%
+  WARNING: 'warning', // 50-79%
+  CRITICAL: 'critical', // 20-49%
+  FAILING: 'failing', // <20%
 };
 
 /**
@@ -49,7 +49,7 @@ const CONSTITUTIONAL_ARTICLES = {
   INCREMENTAL_ADOPTION: 'article-6',
   SEPARATION_OF_CONCERNS: 'article-7',
   FEEDBACK_LOOPS: 'article-8',
-  GOVERNANCE: 'article-9'
+  GOVERNANCE: 'article-9',
 };
 
 /**
@@ -64,17 +64,17 @@ class QualityDashboard extends EventEmitter {
    */
   constructor(options = {}) {
     super();
-    
+
     this.thresholds = {
       coverage: { healthy: 80, warning: 50, critical: 20 },
       constitutional: { healthy: 90, warning: 70, critical: 50 },
       quality: { healthy: 80, warning: 60, critical: 40 },
-      ...options.thresholds
+      ...options.thresholds,
     };
 
     this.autoCollect = options.autoCollect ?? false;
     this.collectInterval = options.collectInterval ?? 60000;
-    
+
     this.metrics = new Map();
     this.history = [];
     this.collectors = new Map();
@@ -93,25 +93,27 @@ class QualityDashboard extends EventEmitter {
    */
   initializeDefaultCollectors() {
     // Coverage metrics collector
-    this.registerCollector('coverage', async (context) => ({
+    this.registerCollector('coverage', async context => ({
       lines: context?.coverage?.lines ?? 0,
       branches: context?.coverage?.branches ?? 0,
       functions: context?.coverage?.functions ?? 0,
       statements: context?.coverage?.statements ?? 0,
-      overall: context?.coverage?.overall ?? 
-        ((context?.coverage?.lines ?? 0) + 
-         (context?.coverage?.branches ?? 0) + 
-         (context?.coverage?.functions ?? 0) + 
-         (context?.coverage?.statements ?? 0)) / 4
+      overall:
+        context?.coverage?.overall ??
+        ((context?.coverage?.lines ?? 0) +
+          (context?.coverage?.branches ?? 0) +
+          (context?.coverage?.functions ?? 0) +
+          (context?.coverage?.statements ?? 0)) /
+          4,
     }));
 
     // Constitutional compliance collector
-    this.registerCollector('constitutional', async (context) => {
+    this.registerCollector('constitutional', async context => {
       const articles = context?.constitutional ?? {};
       const scores = Object.values(CONSTITUTIONAL_ARTICLES).map(id => ({
         id,
         score: articles[id]?.score ?? 0,
-        compliant: articles[id]?.compliant ?? false
+        compliant: articles[id]?.compliant ?? false,
       }));
 
       const totalScore = scores.reduce((sum, s) => sum + s.score, 0) / scores.length;
@@ -122,25 +124,27 @@ class QualityDashboard extends EventEmitter {
         totalScore,
         compliantCount,
         totalArticles: scores.length,
-        complianceRate: (compliantCount / scores.length) * 100
+        complianceRate: (compliantCount / scores.length) * 100,
       };
     });
 
     // Quality metrics collector
-    this.registerCollector('quality', async (context) => ({
+    this.registerCollector('quality', async context => ({
       codeComplexity: context?.quality?.complexity ?? 0,
       maintainability: context?.quality?.maintainability ?? 0,
       documentation: context?.quality?.documentation ?? 0,
       testQuality: context?.quality?.testQuality ?? 0,
-      overall: context?.quality?.overall ??
+      overall:
+        context?.quality?.overall ??
         ((context?.quality?.complexity ?? 0) +
-         (context?.quality?.maintainability ?? 0) +
-         (context?.quality?.documentation ?? 0) +
-         (context?.quality?.testQuality ?? 0)) / 4
+          (context?.quality?.maintainability ?? 0) +
+          (context?.quality?.documentation ?? 0) +
+          (context?.quality?.testQuality ?? 0)) /
+          4,
     }));
 
     // Health metrics collector
-    this.registerCollector('health', async (_context) => {
+    this.registerCollector('health', async _context => {
       const coverage = await this.getMetric('coverage');
       const constitutional = await this.getMetric('constitutional');
       const quality = await this.getMetric('quality');
@@ -157,7 +161,7 @@ class QualityDashboard extends EventEmitter {
         qualityScore,
         overall,
         status: this.calculateStatus(overall, 'quality'),
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     });
   }
@@ -197,20 +201,20 @@ class QualityDashboard extends EventEmitter {
         const data = await collector(context);
         results[name] = {
           ...data,
-          collectedAt: timestamp
+          collectedAt: timestamp,
         };
         this.metrics.set(name, results[name]);
       } catch (error) {
         results[name] = {
           error: error.message,
-          collectedAt: timestamp
+          collectedAt: timestamp,
         };
       }
     }
 
     const snapshot = {
       timestamp,
-      metrics: { ...results }
+      metrics: { ...results },
     };
 
     this.history.push(snapshot);
@@ -271,20 +275,20 @@ class QualityDashboard extends EventEmitter {
       breakdown: {
         coverage: {
           score: coverage?.overall ?? 0,
-          status: this.calculateStatus(coverage?.overall ?? 0, 'coverage')
+          status: this.calculateStatus(coverage?.overall ?? 0, 'coverage'),
         },
         constitutional: {
           score: constitutional?.totalScore ?? 0,
           status: this.calculateStatus(constitutional?.totalScore ?? 0, 'constitutional'),
           compliantArticles: constitutional?.compliantCount ?? 0,
-          totalArticles: constitutional?.totalArticles ?? 9
+          totalArticles: constitutional?.totalArticles ?? 9,
         },
         quality: {
           score: quality?.overall ?? 0,
-          status: this.calculateStatus(quality?.overall ?? 0, 'quality')
-        }
+          status: this.calculateStatus(quality?.overall ?? 0, 'quality'),
+        },
       },
-      lastUpdated: health?.timestamp ?? null
+      lastUpdated: health?.timestamp ?? null,
     };
   }
 
@@ -300,7 +304,7 @@ class QualityDashboard extends EventEmitter {
       .slice(-limit)
       .map(h => ({
         timestamp: h.timestamp,
-        value: h.metrics[metricName]
+        value: h.metrics[metricName],
       }));
 
     if (data.length < 2) {
@@ -414,7 +418,7 @@ class QualityDashboard extends EventEmitter {
       [HEALTH_STATUS.HEALTHY]: '🟢',
       [HEALTH_STATUS.WARNING]: '🟡',
       [HEALTH_STATUS.CRITICAL]: '🟠',
-      [HEALTH_STATUS.FAILING]: '🔴'
+      [HEALTH_STATUS.FAILING]: '🔴',
     };
     return emojis[status] || '⚪';
   }
@@ -456,7 +460,7 @@ class QualityDashboard extends EventEmitter {
   setThresholds(category, thresholds) {
     this.thresholds[category] = {
       ...this.thresholds[category],
-      ...thresholds
+      ...thresholds,
     };
   }
 
@@ -470,7 +474,7 @@ class QualityDashboard extends EventEmitter {
       collectorsCount: this.collectors.size,
       historyCount: this.history.length,
       autoCollecting: this.intervalId !== null,
-      thresholds: { ...this.thresholds }
+      thresholds: { ...this.thresholds },
     };
   }
 }
@@ -487,5 +491,5 @@ module.exports = {
   createQualityDashboard,
   METRIC_CATEGORY,
   HEALTH_STATUS,
-  CONSTITUTIONAL_ARTICLES
+  CONSTITUTIONAL_ARTICLES,
 };

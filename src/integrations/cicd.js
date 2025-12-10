@@ -16,7 +16,7 @@ const CIProvider = {
   JENKINS: 'jenkins',
   CIRCLE_CI: 'circle-ci',
   TRAVIS_CI: 'travis-ci',
-  BITBUCKET_PIPELINES: 'bitbucket-pipelines'
+  BITBUCKET_PIPELINES: 'bitbucket-pipelines',
 };
 
 const ProviderConfig = {
@@ -26,7 +26,7 @@ const ProviderConfig = {
     format: 'yaml',
     supportsMatrix: true,
     supportsCache: true,
-    supportsArtifacts: true
+    supportsArtifacts: true,
   },
   [CIProvider.GITLAB_CI]: {
     name: 'GitLab CI',
@@ -34,7 +34,7 @@ const ProviderConfig = {
     format: 'yaml',
     supportsMatrix: true,
     supportsCache: true,
-    supportsArtifacts: true
+    supportsArtifacts: true,
   },
   [CIProvider.AZURE_PIPELINES]: {
     name: 'Azure Pipelines',
@@ -42,7 +42,7 @@ const ProviderConfig = {
     format: 'yaml',
     supportsMatrix: true,
     supportsCache: true,
-    supportsArtifacts: true
+    supportsArtifacts: true,
   },
   [CIProvider.JENKINS]: {
     name: 'Jenkins',
@@ -50,7 +50,7 @@ const ProviderConfig = {
     format: 'groovy',
     supportsMatrix: true,
     supportsCache: false,
-    supportsArtifacts: true
+    supportsArtifacts: true,
   },
   [CIProvider.CIRCLE_CI]: {
     name: 'CircleCI',
@@ -58,7 +58,7 @@ const ProviderConfig = {
     format: 'yaml',
     supportsMatrix: true,
     supportsCache: true,
-    supportsArtifacts: true
+    supportsArtifacts: true,
   },
   [CIProvider.TRAVIS_CI]: {
     name: 'Travis CI',
@@ -66,7 +66,7 @@ const ProviderConfig = {
     format: 'yaml',
     supportsMatrix: true,
     supportsCache: true,
-    supportsArtifacts: false
+    supportsArtifacts: false,
   },
   [CIProvider.BITBUCKET_PIPELINES]: {
     name: 'Bitbucket Pipelines',
@@ -74,8 +74,8 @@ const ProviderConfig = {
     format: 'yaml',
     supportsMatrix: false,
     supportsCache: true,
-    supportsArtifacts: true
-  }
+    supportsArtifacts: true,
+  },
 };
 
 // ============================================================================
@@ -88,7 +88,7 @@ const JobType = {
   SYNC: 'sync',
   TEST: 'test',
   REPORT: 'report',
-  DEPLOY: 'deploy'
+  DEPLOY: 'deploy',
 };
 
 const JobConfig = {
@@ -96,38 +96,38 @@ const JobConfig = {
     name: 'Validate Steering',
     description: 'Validate steering files and constitution compliance',
     command: 'npx musubi validate',
-    required: true
+    required: true,
   },
   [JobType.ANALYZE]: {
     name: 'Analyze Codebase',
     description: 'Analyze codebase structure and patterns',
     command: 'npx musubi analyze',
-    required: false
+    required: false,
   },
   [JobType.SYNC]: {
     name: 'Sync Steering',
     description: 'Synchronize steering files across platforms',
     command: 'npx musubi sync',
-    required: false
+    required: false,
   },
   [JobType.TEST]: {
     name: 'Run Tests',
     description: 'Execute test suite with validation',
     command: 'npm test',
-    required: true
+    required: true,
   },
   [JobType.REPORT]: {
     name: 'Generate Report',
     description: 'Generate quality metrics report',
     command: 'npx musubi gaps --format json',
-    required: false
+    required: false,
   },
   [JobType.DEPLOY]: {
     name: 'Deploy Documentation',
     description: 'Deploy generated documentation',
     command: 'npx musubi share --deploy',
-    required: false
-  }
+    required: false,
+  },
 };
 
 // ============================================================================
@@ -143,7 +143,7 @@ class WorkflowGenerator {
       branch: options.branch || 'main',
       jobs: options.jobs || [JobType.VALIDATE, JobType.TEST],
       cacheEnabled: options.cacheEnabled !== false,
-      ...options
+      ...options,
     };
   }
 
@@ -170,7 +170,7 @@ class WorkflowGenerator {
 
   generateGitHubActions() {
     const jobs = {};
-    
+
     for (const jobType of this.options.jobs) {
       const jobConfig = JobConfig[jobType];
       jobs[jobType] = this.createGitHubJob(jobType, jobConfig);
@@ -180,9 +180,9 @@ class WorkflowGenerator {
       name: 'MUSUBI SDD Validation',
       on: {
         push: { branches: [this.options.branch] },
-        pull_request: { branches: [this.options.branch] }
+        pull_request: { branches: [this.options.branch] },
       },
-      jobs
+      jobs,
     };
 
     return this.toYaml(workflow);
@@ -194,8 +194,8 @@ class WorkflowGenerator {
       {
         name: 'Setup Node.js',
         uses: 'actions/setup-node@v4',
-        with: { 'node-version': this.options.nodeVersion }
-      }
+        with: { 'node-version': this.options.nodeVersion },
+      },
     ];
 
     if (this.options.cacheEnabled) {
@@ -204,8 +204,8 @@ class WorkflowGenerator {
         uses: 'actions/cache@v4',
         with: {
           path: 'node_modules',
-          key: "${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}"
-        }
+          key: "${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}",
+        },
       });
     }
 
@@ -220,59 +220,36 @@ class WorkflowGenerator {
         uses: 'actions/upload-artifact@v4',
         with: {
           name: 'musubi-report',
-          path: 'musubi-report.json'
-        }
+          path: 'musubi-report.json',
+        },
       });
     }
 
     return {
       'runs-on': 'ubuntu-latest',
-      steps
+      steps,
     };
   }
 
   generateGitLabCI() {
-    const lines = [
-      'image: node:' + this.options.nodeVersion,
-      '',
-      'stages:'
-    ];
+    const lines = ['image: node:' + this.options.nodeVersion, '', 'stages:'];
 
     for (const jobType of this.options.jobs) {
       lines.push(`  - ${jobType}`);
     }
 
     if (this.options.cacheEnabled) {
-      lines.push(
-        '',
-        'cache:',
-        '  paths:',
-        '    - node_modules/'
-      );
+      lines.push('', 'cache:', '  paths:', '    - node_modules/');
     }
 
-    lines.push(
-      '',
-      'before_script:',
-      '  - npm ci',
-      ''
-    );
+    lines.push('', 'before_script:', '  - npm ci', '');
 
     for (const jobType of this.options.jobs) {
       const jobConfig = JobConfig[jobType];
-      lines.push(
-        `${jobType}:`,
-        `  stage: ${jobType}`,
-        '  script:',
-        `    - ${jobConfig.command}`
-      );
+      lines.push(`${jobType}:`, `  stage: ${jobType}`, '  script:', `    - ${jobConfig.command}`);
 
       if (jobType === JobType.REPORT) {
-        lines.push(
-          '  artifacts:',
-          '    paths:',
-          '      - musubi-report.json'
-        );
+        lines.push('  artifacts:', '    paths:', '      - musubi-report.json');
       }
 
       lines.push('');
@@ -286,36 +263,40 @@ class WorkflowGenerator {
       const jobConfig = JobConfig[jobType];
       return {
         stage: jobType.charAt(0).toUpperCase() + jobType.slice(1),
-        jobs: [{
-          job: jobType,
-          pool: { vmImage: 'ubuntu-latest' },
-          steps: [
-            { task: 'NodeTool@0', inputs: { versionSpec: this.options.nodeVersion } },
-            { script: 'npm ci', displayName: 'Install dependencies' },
-            { script: jobConfig.command, displayName: jobConfig.name }
-          ]
-        }]
+        jobs: [
+          {
+            job: jobType,
+            pool: { vmImage: 'ubuntu-latest' },
+            steps: [
+              { task: 'NodeTool@0', inputs: { versionSpec: this.options.nodeVersion } },
+              { script: 'npm ci', displayName: 'Install dependencies' },
+              { script: jobConfig.command, displayName: jobConfig.name },
+            ],
+          },
+        ],
       };
     });
 
     const pipeline = {
       trigger: [this.options.branch],
-      stages
+      stages,
     };
 
     return this.toYaml(pipeline);
   }
 
   generateJenkinsfile() {
-    const stages = this.options.jobs.map(jobType => {
-      const jobConfig = JobConfig[jobType];
-      return `
+    const stages = this.options.jobs
+      .map(jobType => {
+        const jobConfig = JobConfig[jobType];
+        return `
         stage('${jobConfig.name}') {
             steps {
                 sh '${jobConfig.command}'
             }
         }`;
-    }).join('\n');
+      })
+      .join('\n');
 
     return `pipeline {
     agent any
@@ -343,7 +324,7 @@ ${stages}
 
   generateCircleCI() {
     const jobs = {};
-    
+
     for (const jobType of this.options.jobs) {
       const jobConfig = JobConfig[jobType];
       jobs[jobType] = {
@@ -352,9 +333,14 @@ ${stages}
           'checkout',
           { restore_cache: { keys: ['v1-deps-{{ checksum "package-lock.json" }}'] } },
           { run: 'npm ci' },
-          { save_cache: { paths: ['node_modules'], key: 'v1-deps-{{ checksum "package-lock.json" }}' } },
-          { run: { name: jobConfig.name, command: jobConfig.command } }
-        ]
+          {
+            save_cache: {
+              paths: ['node_modules'],
+              key: 'v1-deps-{{ checksum "package-lock.json" }}',
+            },
+          },
+          { run: { name: jobConfig.name, command: jobConfig.command } },
+        ],
       };
     }
 
@@ -363,9 +349,9 @@ ${stages}
       jobs,
       workflows: {
         musubi: {
-          jobs: this.options.jobs.map(j => ({ [j]: {} }))
-        }
-      }
+          jobs: this.options.jobs.map(j => ({ [j]: {} })),
+        },
+      },
     };
 
     return this.toYaml(config);
@@ -380,7 +366,7 @@ ${stages}
       'cache:',
       '  npm: true',
       '',
-      'script:'
+      'script:',
     ];
 
     for (const jobType of this.options.jobs) {
@@ -398,8 +384,8 @@ ${stages}
         step: {
           name: jobConfig.name,
           caches: ['node'],
-          script: ['npm ci', jobConfig.command]
-        }
+          script: ['npm ci', jobConfig.command],
+        },
       };
     });
 
@@ -408,9 +394,9 @@ ${stages}
       pipelines: {
         default: steps,
         branches: {
-          [this.options.branch]: steps
-        }
-      }
+          [this.options.branch]: steps,
+        },
+      },
     };
 
     return this.toYaml(pipelines);
@@ -454,7 +440,7 @@ class PreCommitGenerator {
     this.options = {
       hooks: options.hooks || ['validate', 'lint'],
       packageManager: options.packageManager || 'npm',
-      ...options
+      ...options,
     };
   }
 
@@ -462,7 +448,7 @@ class PreCommitGenerator {
     return {
       'pre-commit': this.generatePreCommit(),
       'husky-config': this.generateHuskyConfig(),
-      'lint-staged': this.generateLintStaged()
+      'lint-staged': this.generateLintStaged(),
     };
   }
 
@@ -500,8 +486,8 @@ echo "✅ Pre-commit checks passed!"
   generateHuskyConfig() {
     return {
       hooks: {
-        'pre-commit': 'npx lint-staged && npx musubi validate'
-      }
+        'pre-commit': 'npx lint-staged && npx musubi validate',
+      },
     };
   }
 
@@ -521,11 +507,11 @@ echo "✅ Pre-commit checks passed!"
 
   generatePackageJsonScripts() {
     return {
-      'prepare': 'husky install',
-      'lint': 'eslint src tests',
+      prepare: 'husky install',
+      lint: 'eslint src tests',
       'lint:fix': 'eslint src tests --fix',
-      'validate': 'npx musubi validate',
-      'validate:all': 'npx musubi validate --all'
+      validate: 'npx musubi validate',
+      'validate:all': 'npx musubi validate --all',
     };
   }
 }
@@ -627,7 +613,7 @@ class PipelineValidator {
     return {
       valid: this.errors.length === 0,
       errors: [...this.errors],
-      warnings: [...this.warnings]
+      warnings: [...this.warnings],
     };
   }
 }
@@ -649,8 +635,8 @@ class CICDManager extends EventEmitter {
     const detected = [];
 
     for (const [provider, config] of Object.entries(ProviderConfig)) {
-      const hasConfig = files.some(f => 
-        f.includes(config.configFile) || f.endsWith(config.configFile.split('/').pop())
+      const hasConfig = files.some(
+        f => f.includes(config.configFile) || f.endsWith(config.configFile.split('/').pop())
       );
       if (hasConfig) {
         detected.push(provider);
@@ -667,7 +653,7 @@ class CICDManager extends EventEmitter {
 
   getGenerator(provider, options = {}) {
     const key = `${provider}-${JSON.stringify(options)}`;
-    
+
     if (!this.generators.has(key)) {
       this.generators.set(key, new WorkflowGenerator(provider, options));
     }
@@ -678,17 +664,17 @@ class CICDManager extends EventEmitter {
   generate(provider, options = {}) {
     const generator = this.getGenerator(provider, options);
     const content = generator.generate();
-    
+
     this.emit('generated', { provider, content });
     return {
       file: ProviderConfig[provider].configFile,
-      content
+      content,
     };
   }
 
   generateAll(options = {}) {
     const results = new Map();
-    
+
     for (const provider of Object.values(CIProvider)) {
       try {
         const result = this.generate(provider, options);
@@ -719,7 +705,7 @@ class CICDManager extends EventEmitter {
   listProviders() {
     return Object.entries(ProviderConfig).map(([id, config]) => ({
       id,
-      ...config
+      ...config,
     }));
   }
 
@@ -739,7 +725,7 @@ class CICDManager extends EventEmitter {
       jobs,
       nodeVersion: projectInfo.nodeVersion || '20',
       branch: projectInfo.defaultBranch || 'main',
-      cacheEnabled: true
+      cacheEnabled: true,
     };
   }
 
@@ -747,7 +733,7 @@ class CICDManager extends EventEmitter {
     return {
       projectRoot: this.projectRoot,
       detectedProvider: this.detectedProvider,
-      availableProviders: Object.keys(CIProvider)
+      availableProviders: Object.keys(CIProvider),
     };
   }
 }
@@ -770,13 +756,13 @@ module.exports = {
   ProviderConfig,
   JobType,
   JobConfig,
-  
+
   // Classes
   WorkflowGenerator,
   PreCommitGenerator,
   PipelineValidator,
   CICDManager,
-  
+
   // Factory
-  createCICDManager
+  createCICDManager,
 };

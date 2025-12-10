@@ -6,12 +6,12 @@
 
 'use strict';
 
-const { 
-  ReasoningEngine, 
-  createReasoningEngine, 
+const {
+  ReasoningEngine,
+  createReasoningEngine,
   reason,
   STRATEGY,
-  STEP_TYPE
+  STEP_TYPE,
 } = require('./reasoning-engine');
 
 const {
@@ -20,7 +20,7 @@ const {
   createPlan,
   PLAN_STATUS,
   TASK_STATUS,
-  PRIORITY
+  PRIORITY,
 } = require('./planning-engine');
 
 const {
@@ -29,7 +29,7 @@ const {
   correctError,
   SEVERITY,
   CORRECTION_STRATEGY,
-  DEFAULT_PATTERNS
+  DEFAULT_PATTERNS,
 } = require('./self-correction');
 
 module.exports = {
@@ -39,7 +39,7 @@ module.exports = {
   reason,
   STRATEGY,
   STEP_TYPE,
-  
+
   // Planning Engine
   PlanningEngine,
   createPlanningEngine,
@@ -47,12 +47,12 @@ module.exports = {
   PLAN_STATUS,
   TASK_STATUS,
   PRIORITY,
-  
+
   // Self-Correction
   SelfCorrection,
   createSelfCorrection,
   correctError,
   SEVERITY,
   CORRECTION_STRATEGY,
-  DEFAULT_PATTERNS
+  DEFAULT_PATTERNS,
 };

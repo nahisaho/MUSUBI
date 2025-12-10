@@ -16,7 +16,7 @@ const SEVERITY = {
   INFO: 'info',
   WARNING: 'warning',
   ERROR: 'error',
-  CRITICAL: 'critical'
+  CRITICAL: 'critical',
 };
 
 /**
@@ -30,7 +30,7 @@ const CORRECTION_STRATEGY = {
   SIMPLIFY: 'simplify',
   ESCALATE: 'escalate',
   SKIP: 'skip',
-  ROLLBACK: 'rollback'
+  ROLLBACK: 'rollback',
 };
 
 /**
@@ -83,62 +83,62 @@ const DEFAULT_PATTERNS = [
     pattern: /syntax\s*error/i,
     type: 'syntax',
     strategy: CORRECTION_STRATEGY.SIMPLIFY,
-    description: 'Syntax error in code'
+    description: 'Syntax error in code',
   },
   {
     pattern: /undefined|not\s*defined/i,
     type: 'reference',
     strategy: CORRECTION_STRATEGY.FALLBACK,
-    description: 'Undefined reference'
+    description: 'Undefined reference',
   },
   {
     pattern: /timeout|timed?\s*out/i,
     type: 'timeout',
     strategy: CORRECTION_STRATEGY.RETRY,
-    description: 'Operation timed out'
+    description: 'Operation timed out',
   },
   {
     pattern: /permission|access\s*denied|forbidden/i,
     type: 'permission',
     strategy: CORRECTION_STRATEGY.ESCALATE,
-    description: 'Permission denied'
+    description: 'Permission denied',
   },
   {
     pattern: /not\s*found|missing|does\s*not\s*exist/i,
     type: 'not-found',
     strategy: CORRECTION_STRATEGY.FALLBACK,
-    description: 'Resource not found'
+    description: 'Resource not found',
   },
   {
     pattern: /out\s*of\s*memory|heap|allocation/i,
     type: 'memory',
     strategy: CORRECTION_STRATEGY.DECOMPOSE,
-    description: 'Memory allocation error'
+    description: 'Memory allocation error',
   },
   {
     pattern: /network|connection|socket/i,
     type: 'network',
     strategy: CORRECTION_STRATEGY.RETRY,
-    description: 'Network error'
+    description: 'Network error',
   },
   {
     pattern: /invalid|malformed|corrupt/i,
     type: 'validation',
     strategy: CORRECTION_STRATEGY.SIMPLIFY,
-    description: 'Invalid input or data'
+    description: 'Invalid input or data',
   },
   {
     pattern: /deadlock|race\s*condition/i,
     type: 'concurrency',
     strategy: CORRECTION_STRATEGY.RETRY,
-    description: 'Concurrency issue'
+    description: 'Concurrency issue',
   },
   {
     pattern: /assertion|expect|test.*fail/i,
     type: 'test',
     strategy: CORRECTION_STRATEGY.FALLBACK,
-    description: 'Test assertion failure'
-  }
+    description: 'Test assertion failure',
+  },
 ];
 
 /**
@@ -152,26 +152,26 @@ class SelfCorrection extends EventEmitter {
    */
   constructor(options = {}) {
     super();
-    
+
     this.maxRetries = options.maxRetries ?? 3;
     this.retryDelay = options.retryDelay ?? 1000;
     this.exponentialBackoff = options.exponentialBackoff ?? true;
     this.maxBackoff = options.maxBackoff ?? 30000;
     this.learnFromErrors = options.learnFromErrors ?? true;
     this.memorySize = options.memorySize ?? 100;
-    
+
     // State
     this.patterns = [...DEFAULT_PATTERNS];
     this.errorMemory = [];
     this.corrections = new Map();
     this.successPatterns = new Map();
     this.errorCounter = 0;
-    
+
     // Handlers
     this.strategyHandlers = new Map();
     this.registerDefaultHandlers();
   }
-  
+
   /**
    * Register default strategy handlers
    * @private
@@ -185,7 +185,7 @@ class SelfCorrection extends EventEmitter {
     this.strategyHandlers.set(CORRECTION_STRATEGY.SKIP, this.handleSkip.bind(this));
     this.strategyHandlers.set(CORRECTION_STRATEGY.ROLLBACK, this.handleRollback.bind(this));
   }
-  
+
   /**
    * Analyze an error
    * @param {Error|string} error - Error to analyze
@@ -195,10 +195,10 @@ class SelfCorrection extends EventEmitter {
   analyzeError(error, context = {}) {
     const message = error instanceof Error ? error.message : String(error);
     const stack = error instanceof Error ? error.stack : null;
-    
+
     // Classify error
     const classification = this.classifyError(message);
-    
+
     const record = {
       id: `err-${++this.errorCounter}`,
       message,
@@ -210,20 +210,20 @@ class SelfCorrection extends EventEmitter {
       description: classification.description,
       attempts: [],
       resolved: false,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
-    
+
     // Store in memory
     this.errorMemory.push(record);
     if (this.errorMemory.length > this.memorySize) {
       this.errorMemory.shift();
     }
-    
+
     this.emit('error:analyzed', { record });
-    
+
     return record;
   }
-  
+
   /**
    * Classify error based on patterns
    * @private
@@ -235,30 +235,29 @@ class SelfCorrection extends EventEmitter {
         return info;
       }
     }
-    
+
     // Check default patterns
     for (const pattern of this.patterns) {
-      const regex = pattern.pattern instanceof RegExp 
-        ? pattern.pattern 
-        : new RegExp(pattern.pattern, 'i');
-      
+      const regex =
+        pattern.pattern instanceof RegExp ? pattern.pattern : new RegExp(pattern.pattern, 'i');
+
       if (regex.test(message)) {
         return {
           type: pattern.type,
           strategy: pattern.strategy,
-          description: pattern.description
+          description: pattern.description,
         };
       }
     }
-    
+
     // Default classification
     return {
       type: 'unknown',
       strategy: CORRECTION_STRATEGY.RETRY,
-      description: 'Unknown error'
+      description: 'Unknown error',
     };
   }
-  
+
   /**
    * Determine severity based on error type
    * @private
@@ -275,12 +274,12 @@ class SelfCorrection extends EventEmitter {
       validation: SEVERITY.ERROR,
       concurrency: SEVERITY.ERROR,
       test: SEVERITY.INFO,
-      unknown: SEVERITY.ERROR
+      unknown: SEVERITY.ERROR,
     };
-    
+
     return severities[type] || SEVERITY.ERROR;
   }
-  
+
   /**
    * Attempt to correct an error
    * @param {ErrorRecord} record - Error record
@@ -290,14 +289,14 @@ class SelfCorrection extends EventEmitter {
    */
   async correct(record, operation, options = {}) {
     const startTime = Date.now();
-    
+
     this.emit('correction:start', { errorId: record.id, strategy: record.strategy });
-    
+
     const handler = this.strategyHandlers.get(record.strategy);
     if (!handler) {
       throw new Error(`No handler for strategy: ${record.strategy}`);
     }
-    
+
     const attempt = {
       id: `attempt-${record.attempts.length + 1}`,
       errorId: record.id,
@@ -305,105 +304,103 @@ class SelfCorrection extends EventEmitter {
       successful: false,
       result: null,
       timestamp: Date.now(),
-      duration: 0
+      duration: 0,
     };
-    
+
     try {
       const result = await handler(record, operation, options);
-      
+
       attempt.successful = true;
       attempt.result = 'Correction successful';
       record.resolved = true;
-      
+
       // Learn from success
       if (this.learnFromErrors) {
         this.learnSuccess(record);
       }
-      
+
       this.emit('correction:success', { errorId: record.id, attempt });
-      
+
       return { success: true, result, attempt };
-      
     } catch (correctionError) {
       attempt.successful = false;
       attempt.result = correctionError.message;
-      
-      this.emit('correction:failure', { 
-        errorId: record.id, 
-        attempt, 
-        error: correctionError.message 
-      });
-      
-      return { 
-        success: false, 
-        error: correctionError, 
+
+      this.emit('correction:failure', {
+        errorId: record.id,
         attempt,
-        canRetry: record.attempts.length < this.maxRetries
+        error: correctionError.message,
+      });
+
+      return {
+        success: false,
+        error: correctionError,
+        attempt,
+        canRetry: record.attempts.length < this.maxRetries,
       };
-      
     } finally {
       attempt.duration = Date.now() - startTime;
       record.attempts.push(attempt);
       this.corrections.set(record.id, record);
     }
   }
-  
+
   /**
    * Handle retry strategy
    * @private
    */
   async handleRetry(record, operation, _options) {
     const attemptNumber = record.attempts.length;
-    
+
     // Calculate delay
     let delay = this.retryDelay;
     if (this.exponentialBackoff) {
       delay = Math.min(this.retryDelay * Math.pow(2, attemptNumber), this.maxBackoff);
     }
-    
+
     // Wait before retry
     await this.delay(delay);
-    
+
     // Retry the operation
     return operation();
   }
-  
+
   /**
    * Handle fallback strategy
    * @private
    */
   async handleFallback(record, operation, options) {
     const fallback = options.fallback;
-    
+
     if (fallback) {
       if (typeof fallback === 'function') {
         return fallback(record);
       }
       return fallback;
     }
-    
+
     // Try simpler version of operation
     if (options.simplifiedOperation) {
       return options.simplifiedOperation();
     }
-    
+
     throw new Error('No fallback available');
   }
-  
+
   /**
    * Handle decompose strategy
    * @private
    */
   async handleDecompose(record, operation, options) {
     const decomposer = options.decompose;
-    
+
     if (!decomposer) {
       throw new Error('No decomposer provided');
     }
-    
+
     // Decompose into smaller operations
     const subOperations = await decomposer(record);
-    
+
     // Execute sub-operations
     const results = [];
     for (const subOp of subOperations) {
@@ -414,74 +411,74 @@ class SelfCorrection extends EventEmitter {
         results.push({ success: false, error: error.message });
       }
     }
-    
+
     return { results, successful: results.every(r => r.success) };
   }
-  
+
   /**
    * Handle simplify strategy
    * @private
    */
   async handleSimplify(record, operation, options) {
     const simplifier = options.simplify;
-    
+
     if (simplifier) {
       const simplified = await simplifier(record);
       return simplified;
     }
-    
+
     // Default simplification: retry with reduced scope
     if (options.simplifiedOperation) {
       return options.simplifiedOperation();
     }
-    
+
     throw new Error('Cannot simplify operation');
   }
-  
+
   /**
    * Handle escalate strategy
    * @private
    */
   async handleEscalate(record, operation, options) {
     const escalationHandler = options.escalate;
-    
+
     this.emit('correction:escalated', { record });
-    
+
     if (escalationHandler) {
       return escalationHandler(record);
     }
-    
+
     // Mark as requiring human intervention
     record.escalated = true;
     throw new Error('Error escalated - requires human intervention');
   }
-  
+
   /**
    * Handle skip strategy
    * @private
    */
   async handleSkip(record, _operation, _options) {
     this.emit('correction:skipped', { record });
-    
+
     return { skipped: true, reason: record.message };
   }
-  
+
   /**
    * Handle rollback strategy
    * @private
    */
   async handleRollback(record, operation, options) {
     const rollbackHandler = options.rollback;
-    
+
     if (!rollbackHandler) {
       throw new Error('No rollback handler provided');
     }
-    
+
     this.emit('correction:rollback', { record });
-    
+
     return rollbackHandler(record);
   }
-  
+
   /**
    * Learn from successful correction
    * @private
@@ -489,16 +486,16 @@ class SelfCorrection extends EventEmitter {
   learnSuccess(record) {
     // Extract key part of error message
     const key = this.extractErrorSignature(record.message);
-    
+
     if (key) {
       this.successPatterns.set(key, {
         type: record.type,
         strategy: record.strategy,
-        description: record.description
+        description: record.description,
       });
     }
   }
-  
+
   /**
    * Extract error signature for learning
    * @private
@@ -511,7 +508,7 @@ class SelfCorrection extends EventEmitter {
       .replace(/\/[^\s]+/g, '/PATH')
       .substring(0, 50);
   }
-  
+
   /**
    * Add custom error pattern
    * @param {ErrorPattern} pattern - Pattern definition
@@ -519,7 +516,7 @@ class SelfCorrection extends EventEmitter {
   addPattern(pattern) {
     this.patterns.unshift(pattern);
   }
-  
+
   /**
    * Register custom strategy handler
    * @param {string} strategy - Strategy name
@@ -528,18 +525,16 @@ class SelfCorrection extends EventEmitter {
   registerHandler(strategy, handler) {
     this.strategyHandlers.set(strategy, handler);
   }
-  
+
   /**
    * Get error by ID
    * @param {string} errorId - Error identifier
    * @returns {ErrorRecord|null}
    */
   getError(errorId) {
-    return this.corrections.get(errorId) || 
-           this.errorMemory.find(e => e.id === errorId) || 
-           null;
+    return this.corrections.get(errorId) || this.errorMemory.find(e => e.id === errorId) || null;
   }
-  
+
   /**
    * Get recent errors
    * @param {number} [count=10] - Number of errors to return
@@ -548,7 +543,7 @@ class SelfCorrection extends EventEmitter {
   getRecentErrors(count = 10) {
     return this.errorMemory.slice(-count);
   }
-  
+
   /**
    * Get unresolved errors
    * @returns {ErrorRecord[]}
@@ -556,7 +551,7 @@ class SelfCorrection extends EventEmitter {
   getUnresolvedErrors() {
     return this.errorMemory.filter(e => !e.resolved);
   }
-  
+
   /**
    * Get error statistics
    * @returns {Object}
@@ -567,13 +562,13 @@ class SelfCorrection extends EventEmitter {
     const byType = {};
     const bySeverity = {};
     const byStrategy = {};
-    
+
     for (const error of this.errorMemory) {
       byType[error.type] = (byType[error.type] || 0) + 1;
       bySeverity[error.severity] = (bySeverity[error.severity] || 0) + 1;
       byStrategy[error.strategy] = (byStrategy[error.strategy] || 0) + 1;
     }
-    
+
     // Calculate success rates by strategy
     const strategySuccess = {};
     for (const [, record] of this.corrections) {
@@ -586,7 +581,7 @@ class SelfCorrection extends EventEmitter {
         strategySuccess[strategy].success++;
       }
     }
-    
+
     return {
       total,
       resolved,
@@ -596,10 +591,10 @@ class SelfCorrection extends EventEmitter {
       bySeverity,
       byStrategy,
       strategySuccess,
-      learnedPatterns: this.successPatterns.size
+      learnedPatterns: this.successPatterns.size,
     };
   }
-  
+
   /**
    * Get correction recommendations for an error
    * @param {ErrorRecord} record - Error record
@@ -607,7 +602,7 @@ class SelfCorrection extends EventEmitter {
    */
   getRecommendations(record) {
     const recommendations = [];
-    
+
     // Based on error type
     const typeRecs = {
       syntax: ['Check for typos', 'Verify code structure', 'Use linter'],
@@ -619,34 +614,32 @@ class SelfCorrection extends EventEmitter {
       network: ['Check connection', 'Retry request', 'Check firewall'],
       validation: ['Verify input format', 'Check data types', 'Validate schema'],
       concurrency: ['Add locking', 'Use queue', 'Retry with backoff'],
-      test: ['Review test logic', 'Check expected values', 'Update assertions']
+      test: ['Review test logic', 'Check expected values', 'Update assertions'],
     };
-    
+
     recommendations.push(...(typeRecs[record.type] || ['Review error details']));
-    
+
     // Based on similar past errors
     const similar = this.findSimilarErrors(record);
     if (similar.length > 0 && similar[0].resolved) {
       recommendations.push(`Similar error resolved using: ${similar[0].strategy}`);
     }
-    
+
     return {
       primaryStrategy: record.strategy,
       alternatives: this.getAlternativeStrategies(record.strategy),
-      actionItems: recommendations
+      actionItems: recommendations,
     };
   }
-  
+
   /**
    * Find similar past errors
    * @private
    */
   findSimilarErrors(record) {
-    return this.errorMemory
-      .filter(e => e.id !== record.id && e.type === record.type)
-      .slice(-5);
+    return this.errorMemory.filter(e => e.id !== record.id && e.type === record.type).slice(-5);
   }
-  
+
   /**
    * Get alternative strategies
    * @private
@@ -655,7 +648,7 @@ class SelfCorrection extends EventEmitter {
     const all = Object.values(CORRECTION_STRATEGY);
     return all.filter(s => s !== primaryStrategy);
   }
-  
+
   /**
    * Delay helper
    * @private
@@ -663,7 +656,7 @@ class SelfCorrection extends EventEmitter {
   delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
-  
+
   /**
    * Clear error memory
    */
@@ -672,49 +665,49 @@ class SelfCorrection extends EventEmitter {
     this.corrections.clear();
     this.errorCounter = 0;
   }
-  
+
   /**
    * Reset learned patterns
    */
   resetLearning() {
     this.successPatterns.clear();
   }
-  
+
   /**
    * Export error report
    * @returns {string}
    */
   exportReport() {
     const stats = this.getStats();
-    
+
     let report = `# Error Correction Report\n\n`;
     report += `## Summary\n`;
     report += `- Total Errors: ${stats.total}\n`;
     report += `- Resolved: ${stats.resolved} (${(stats.resolutionRate * 100).toFixed(1)}%)\n`;
     report += `- Learned Patterns: ${stats.learnedPatterns}\n\n`;
-    
+
     report += `## Errors by Type\n`;
     for (const [type, count] of Object.entries(stats.byType)) {
       report += `- ${type}: ${count}\n`;
     }
-    
+
     report += `\n## Errors by Severity\n`;
     for (const [severity, count] of Object.entries(stats.bySeverity)) {
       report += `- ${severity}: ${count}\n`;
     }
-    
+
     report += `\n## Strategy Effectiveness\n`;
     for (const [strategy, data] of Object.entries(stats.strategySuccess)) {
-      const rate = data.total > 0 ? (data.success / data.total * 100).toFixed(1) : 0;
+      const rate = data.total > 0 ? ((data.success / data.total) * 100).toFixed(1) : 0;
       report += `- ${strategy}: ${rate}% success (${data.success}/${data.total})\n`;
     }
-    
+
     report += `\n## Recent Errors\n`;
     for (const error of this.getRecentErrors(5)) {
       const status = error.resolved ? '✅' : '❌';
       report += `- ${status} [${error.type}] ${error.message.substring(0, 50)}...\n`;
     }
-    
+
     return report;
   }
 }
@@ -747,5 +740,5 @@ module.exports = {
   correctError,
   SEVERITY,
   CORRECTION_STRATEGY,
-  DEFAULT_PATTERNS
+  DEFAULT_PATTERNS,
 };

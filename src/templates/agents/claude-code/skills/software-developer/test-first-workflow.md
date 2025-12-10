@@ -43,23 +43,23 @@ describe('AuthService', () => {
       const authService = new AuthService(mockUserRepo);
       const email = 'test@example.com';
       const password = 'validPassword123';
-      
+
       // Act
       const result = await authService.login(email, password);
-      
+
       // Assert
       expect(result.success).toBe(true);
       expect(result.user.email).toBe(email);
     });
-    
+
     it('should throw error when credentials are invalid', async () => {
       // Arrange
       const authService = new AuthService(mockUserRepo);
-      
+
       // Act & Assert
-      await expect(
-        authService.login('test@example.com', 'wrongPassword')
-      ).rejects.toThrow('Invalid credentials');
+      await expect(authService.login('test@example.com', 'wrongPassword')).rejects.toThrow(
+        'Invalid credentials'
+      );
     });
   });
 });
@@ -78,17 +78,17 @@ describe('AuthService', () => {
 
 export class AuthService {
   constructor(private userRepository: UserRepository) {}
-  
+
   async login(email: string, password: string): Promise<AuthResult> {
     const user = await this.userRepository.findByEmail(email);
-    
+
     if (!user || !this.verifyPassword(password, user.passwordHash)) {
       throw new Error('Invalid credentials');
     }
-    
+
     return { success: true, user };
   }
-  
+
   private verifyPassword(password: string, hash: string): boolean {
     // Minimal implementation - just enough to pass test
     return bcrypt.compareSync(password, hash);
@@ -113,16 +113,16 @@ export class AuthService {
     private passwordService: PasswordService, // Extract dependency
     private logger: Logger // Add observability
   ) {}
-  
+
   async login(email: string, password: string): Promise<AuthResult> {
     const user = await this.findUserOrFail(email);
     await this.validatePasswordOrFail(password, user);
-    
+
     this.logger.info('User logged in', { userId: user.id });
-    
+
     return { success: true, user };
   }
-  
+
   private async findUserOrFail(email: string): Promise<User> {
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
@@ -130,7 +130,7 @@ export class AuthService {
     }
     return user;
   }
-  
+
   private async validatePasswordOrFail(password: string, user: User): Promise<void> {
     const isValid = await this.passwordService.verify(password, user.passwordHash);
     if (!isValid) {
@@ -199,7 +199,7 @@ describe('POST /api/auth/login', () => {
     const response = await request(app)
       .post('/api/auth/login')
       .send({ email: 'user@test.com', password: 'password123' });
-    
+
     expect(response.status).toBe(200);
     expect(response.body.token).toBeDefined();
   });
@@ -211,7 +211,7 @@ describe('POST /api/auth/login', () => {
     const response = await request(app)
       .post('/api/auth/login')
       .send({ email: 'user@test.com', password: 'wrong' });
-    
+
     expect(response.status).toBe(401);
   });
 });
@@ -244,32 +244,32 @@ describe('[ClassName]', () => {
   // Setup
   let sut: ClassName; // System Under Test
   let mockDependency: jest.Mocked<Dependency>;
-  
+
   beforeEach(() => {
     mockDependency = {
       method: jest.fn(),
     };
     sut = new ClassName(mockDependency);
   });
-  
+
   describe('[methodName]', () => {
     it('should [expected behavior] when [condition]', () => {
       // Arrange
       const input = 'test input';
       mockDependency.method.mockReturnValue('mocked result');
-      
+
       // Act
       const result = sut.methodName(input);
-      
+
       // Assert
       expect(result).toBe('expected result');
       expect(mockDependency.method).toHaveBeenCalledWith(input);
     });
-    
+
     it('should throw [ErrorType] when [error condition]', () => {
       // Arrange
       const invalidInput = null;
-      
+
       // Act & Assert
       expect(() => sut.methodName(invalidInput)).toThrow(ErrorType);
     });
@@ -284,36 +284,36 @@ describe('[API Endpoint]', () => {
   // Setup
   let app: Express;
   let db: TestDatabase;
-  
+
   beforeAll(async () => {
     db = await TestDatabase.create();
     app = createApp({ database: db });
   });
-  
+
   afterAll(async () => {
     await db.close();
   });
-  
+
   beforeEach(async () => {
     await db.clear();
     await db.seed();
   });
-  
+
   describe('[HTTP Method] [Path]', () => {
     it('should return [status] when [condition]', async () => {
       // Arrange
       const payload = { key: 'value' };
-      
+
       // Act
       const response = await request(app)
         .post('/api/resource')
         .set('Authorization', `Bearer ${token}`)
         .send(payload);
-      
+
       // Assert
       expect(response.status).toBe(201);
       expect(response.body.id).toBeDefined();
-      
+
       // Verify side effects
       const record = await db.find('resources', response.body.id);
       expect(record).toBeDefined();
@@ -327,24 +327,28 @@ describe('[API Endpoint]', () => {
 ## Common Test-First Mistakes
 
 ### Mistake 1: Writing Test and Code Together
+
 ```
 ❌ Creating test and implementation in same commit
 ✅ Always commit test first, then implementation
 ```
 
 ### Mistake 2: Testing Implementation Details
+
 ```
 ❌ expect(service.internalCache.size).toBe(1);
 ✅ expect(service.getData()).toEqual(expectedData);
 ```
 
 ### Mistake 3: Skipping Integration Tests
+
 ```
 ❌ Only unit tests with mocks
 ✅ Integration tests first, then unit tests for gaps
 ```
 
 ### Mistake 4: Writing Too Many Tests at Once
+
 ```
 ❌ Writing 10 tests before any implementation
 ✅ One test at a time: RED → GREEN → REFACTOR
@@ -355,16 +359,19 @@ describe('[API Endpoint]', () => {
 ## Test-First Checklist
 
 Before implementation:
+
 - [ ] Test file created before source file
 - [ ] Test describes expected behavior
 - [ ] Test is failing (RED)
 
 During implementation:
+
 - [ ] Minimal code written to pass test
 - [ ] Test is passing (GREEN)
 - [ ] No code without corresponding test
 
 After implementation:
+
 - [ ] Code refactored for quality
 - [ ] Tests still passing
 - [ ] Test committed before source in git history

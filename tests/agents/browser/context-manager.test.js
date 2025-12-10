@@ -48,7 +48,7 @@ describe('ContextManager', () => {
   describe('getActionHistory', () => {
     test('should return a copy of action history', () => {
       manager.recordAction({ type: 'navigate' }, { success: true });
-      
+
       const history = manager.getActionHistory();
       history.push({ extra: 'item' });
 
@@ -60,7 +60,7 @@ describe('ContextManager', () => {
     test('should clear action history', () => {
       manager.recordAction({ type: 'navigate' }, { success: true });
       manager.recordAction({ type: 'click' }, { success: true });
-      
+
       manager.clearHistory();
 
       expect(manager.actionHistory).toHaveLength(0);
@@ -84,7 +84,7 @@ describe('ContextManager', () => {
   describe('reset', () => {
     test('should reset all state', () => {
       manager.recordAction({ type: 'navigate' }, { success: true });
-      
+
       manager.reset();
 
       expect(manager.browser).toBeNull();

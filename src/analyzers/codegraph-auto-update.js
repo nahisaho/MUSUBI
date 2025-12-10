@@ -2,9 +2,9 @@
  * @file codegraph-auto-update.js
  * @description Automatic CodeGraph and MCP Index update engine
  * @version 1.0.0
- * 
+ *
  * Part of MUSUBI v5.1.0 - Codebase Intelligence Auto-Update
- * 
+ *
  * @trace REQ-P4-001
  * @requirement REQ-P4-001 Repository Map Generation
  */
@@ -28,7 +28,7 @@ const TRIGGER = {
   MCP_CONFIG_CHANGE: 'mcp-config-change',
   MANUAL: 'manual',
   SCHEDULED: 'scheduled',
-  STARTUP: 'startup'
+  STARTUP: 'startup',
 };
 
 /**
@@ -40,7 +40,7 @@ const TARGET = {
   SYMBOL_INDEX: 'symbol-index',
   DEPENDENCY_GRAPH: 'dependency-graph',
   MCP_REGISTRY: 'mcp-registry',
-  CONTEXT_CACHE: 'context-cache'
+  CONTEXT_CACHE: 'context-cache',
 };
 
 /**
@@ -84,7 +84,7 @@ const DEFAULT_IGNORE = [
   'coverage',
   '.musubi/cache',
   '*.log',
-  '*.tmp'
+  '*.tmp',
 ];
 
 /**
@@ -97,39 +97,39 @@ class CodeGraphAutoUpdate extends EventEmitter {
    */
   constructor(options = {}) {
     super();
-    
+
     this.cacheDir = options.cacheDir || '.musubi/cache';
     this.debounceMs = options.debounceMs || 500;
     this.watchFiles = options.watchFiles !== false;
     this.watchMcp = options.watchMcp !== false;
     this.ignorePatterns = options.ignorePatterns || DEFAULT_IGNORE;
     this.maxCacheAge = options.maxCacheAge || 3600000;
-    
+
     // State
     /** @type {Map<string, FileHash>} */
     this.fileHashes = new Map();
-    
+
     /** @type {Map<string, Object>} */
     this.cache = new Map();
-    
+
     /** @type {Map<string, number>} */
     this.cacheTimestamps = new Map();
-    
+
     /** @type {Set<string>} */
     this.pendingUpdates = new Set();
-    
+
     /** @type {UpdateResult[]} */
     this.updateHistory = [];
-    
+
     /** @type {NodeJS.Timeout|null} */
     this.debounceTimer = null;
-    
+
     /** @type {fs.FSWatcher|null} */
     this.fileWatcher = null;
-    
+
     /** @type {fs.FSWatcher|null} */
     this.mcpWatcher = null;
-    
+
     this.updateCounter = 0;
     this.isUpdating = false;
     this.projectRoot = process.cwd();
@@ -142,28 +142,28 @@ class CodeGraphAutoUpdate extends EventEmitter {
    */
   async initialize(projectRoot) {
     this.projectRoot = projectRoot || process.cwd();
-    
+
     // Ensure cache directory exists
     const cacheFullPath = path.join(this.projectRoot, this.cacheDir);
     await this._ensureDir(cacheFullPath);
-    
+
     // Load existing cache
     await this._loadCache();
-    
+
     // Start watchers
     if (this.watchFiles) {
       this._startFileWatcher();
     }
-    
+
     if (this.watchMcp) {
       this._startMcpWatcher();
     }
-    
+
     // Initial scan
     await this.triggerUpdate(TRIGGER.STARTUP, {
-      targets: [TARGET.REPOSITORY_MAP, TARGET.MCP_REGISTRY]
+      targets: [TARGET.REPOSITORY_MAP, TARGET.MCP_REGISTRY],
     });
-    
+
     this.emit('initialized', { projectRoot: this.projectRoot });
   }
 
@@ -176,17 +176,17 @@ class CodeGraphAutoUpdate extends EventEmitter {
   async triggerUpdate(trigger, context = {}) {
     const targets = context.targets || this._getTargetsForTrigger(trigger);
     const results = [];
-    
+
     this.isUpdating = true;
     this.emit('update-start', { trigger, targets });
-    
+
     for (const target of targets) {
       const startTime = Date.now();
       const updateId = `update-${++this.updateCounter}`;
-      
+
       try {
         const result = await this._updateTarget(target, trigger, context);
-        
+
         const updateResult = {
           id: updateId,
           target,
@@ -195,13 +195,12 @@ class CodeGraphAutoUpdate extends EventEmitter {
           filesUpdated: result.filesUpdated || 0,
           duration: Date.now() - startTime,
           timestamp: new Date(),
-          changes: result.changes || []
+          changes: result.changes || [],
         };
-        
+
         results.push(updateResult);
         this.updateHistory.push(updateResult);
         this.emit('update-complete', updateResult);
-        
       } catch (error) {
         const updateResult = {
           id: updateId,
@@ -212,21 +211,21 @@ class CodeGraphAutoUpdate extends EventEmitter {
           duration: Date.now() - startTime,
           timestamp: new Date(),
           changes: [],
-          error: error.message
+          error: error.message,
         };
-        
+
         results.push(updateResult);
         this.updateHistory.push(updateResult);
         this.emit('update-error', { ...updateResult, error });
       }
     }
-    
+
     this.isUpdating = false;
     this.emit('update-batch-complete', { trigger, results });
-    
+
     // Persist cache
     await this._saveCache();
-    
+
     return results;
   }
 
@@ -238,24 +237,24 @@ class CodeGraphAutoUpdate extends EventEmitter {
     switch (trigger) {
       case TRIGGER.FILE_CHANGE:
         return [TARGET.REPOSITORY_MAP, TARGET.SYMBOL_INDEX];
-      
+
       case TRIGGER.GIT_COMMIT:
       case TRIGGER.BRANCH_SWITCH:
         return [TARGET.REPOSITORY_MAP, TARGET.SYMBOL_INDEX, TARGET.DEPENDENCY_GRAPH];
-      
+
       case TRIGGER.DEPENDENCY_INSTALL:
         return [TARGET.DEPENDENCY_GRAPH, TARGET.SYMBOL_INDEX];
-      
+
       case TRIGGER.MCP_CONFIG_CHANGE:
         return [TARGET.MCP_REGISTRY];
-      
+
       case TRIGGER.STARTUP:
       case TRIGGER.MANUAL:
         return [TARGET.REPOSITORY_MAP, TARGET.SYMBOL_INDEX, TARGET.MCP_REGISTRY];
-      
+
       case TRIGGER.SCHEDULED:
         return [TARGET.REPOSITORY_MAP, TARGET.CONTEXT_CACHE];
-      
+
       default:
         return [TARGET.REPOSITORY_MAP];
     }
@@ -269,19 +268,19 @@ class CodeGraphAutoUpdate extends EventEmitter {
     switch (target) {
       case TARGET.REPOSITORY_MAP:
         return this._updateRepositoryMap(context);
-      
+
       case TARGET.SYMBOL_INDEX:
         return this._updateSymbolIndex(context);
-      
+
       case TARGET.DEPENDENCY_GRAPH:
         return this._updateDependencyGraph(context);
-      
+
       case TARGET.MCP_REGISTRY:
         return this._updateMcpRegistry(context);
-      
+
       case TARGET.CONTEXT_CACHE:
         return this._updateContextCache(context);
-      
+
       default:
         return { filesUpdated: 0, changes: [] };
     }
@@ -294,42 +293,42 @@ class CodeGraphAutoUpdate extends EventEmitter {
   async _updateRepositoryMap(context) {
     const changes = [];
     let filesUpdated = 0;
-    
+
     // Get changed files since last update
-    const changedFiles = context.changedFiles || await this._detectChangedFiles();
-    
+    const changedFiles = context.changedFiles || (await this._detectChangedFiles());
+
     if (changedFiles.added.length > 0) {
       changes.push(`Added ${changedFiles.added.length} files`);
       filesUpdated += changedFiles.added.length;
     }
-    
+
     if (changedFiles.modified.length > 0) {
       changes.push(`Modified ${changedFiles.modified.length} files`);
       filesUpdated += changedFiles.modified.length;
     }
-    
+
     if (changedFiles.deleted.length > 0) {
       changes.push(`Deleted ${changedFiles.deleted.length} files`);
       filesUpdated += changedFiles.deleted.length;
     }
-    
+
     // Update file hashes
     for (const file of [...changedFiles.added, ...changedFiles.modified]) {
       const hash = await this._computeFileHash(file);
       this.fileHashes.set(file, hash);
     }
-    
+
     for (const file of changedFiles.deleted) {
       this.fileHashes.delete(file);
     }
-    
+
     // Update cache
     this.cache.set(TARGET.REPOSITORY_MAP, {
       files: Array.from(this.fileHashes.entries()),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
     this.cacheTimestamps.set(TARGET.REPOSITORY_MAP, Date.now());
-    
+
     return { filesUpdated, changes };
   }
 
@@ -340,11 +339,12 @@ class CodeGraphAutoUpdate extends EventEmitter {
   async _updateSymbolIndex(context) {
     const changes = [];
     let filesUpdated = 0;
-    
-    const changedFiles = context.changedFiles || await this._detectChangedFiles();
-    const codeFiles = [...changedFiles.added, ...changedFiles.modified]
-      .filter(f => this._isCodeFile(f));
-    
+
+    const changedFiles = context.changedFiles || (await this._detectChangedFiles());
+    const codeFiles = [...changedFiles.added, ...changedFiles.modified].filter(f =>
+      this._isCodeFile(f)
+    );
+
     for (const file of codeFiles) {
       const symbols = await this._extractSymbols(file);
       if (symbols.length > 0) {
@@ -352,16 +352,16 @@ class CodeGraphAutoUpdate extends EventEmitter {
         filesUpdated++;
       }
     }
-    
+
     // Remove symbols from deleted files
     for (const file of changedFiles.deleted) {
       if (this._isCodeFile(file)) {
         changes.push(`Removed symbols from ${path.basename(file)}`);
       }
     }
-    
+
     this.cacheTimestamps.set(TARGET.SYMBOL_INDEX, Date.now());
-    
+
     return { filesUpdated, changes };
   }
 
@@ -372,34 +372,34 @@ class CodeGraphAutoUpdate extends EventEmitter {
   async _updateDependencyGraph(_context) {
     const changes = [];
     let filesUpdated = 0;
-    
+
     // Check package.json for dependency changes
     const packageJsonPath = path.join(this.projectRoot, 'package.json');
-    
+
     if (fs.existsSync(packageJsonPath)) {
       const currentHash = await this._computeFileHash(packageJsonPath);
       const cachedHash = this.fileHashes.get(packageJsonPath);
-      
+
       if (!cachedHash || cachedHash.hash !== currentHash.hash) {
         const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
         const deps = Object.keys(pkg.dependencies || {});
         const devDeps = Object.keys(pkg.devDependencies || {});
-        
+
         changes.push(`Dependencies: ${deps.length} production, ${devDeps.length} dev`);
         filesUpdated = 1;
-        
+
         this.cache.set(TARGET.DEPENDENCY_GRAPH, {
           dependencies: deps,
           devDependencies: devDeps,
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         });
-        
+
         this.fileHashes.set(packageJsonPath, currentHash);
       }
     }
-    
+
     this.cacheTimestamps.set(TARGET.DEPENDENCY_GRAPH, Date.now());
-    
+
     return { filesUpdated, changes };
   }
 
@@ -410,44 +410,39 @@ class CodeGraphAutoUpdate extends EventEmitter {
   async _updateMcpRegistry(_context) {
     const changes = [];
     let filesUpdated = 0;
-    
-    const mcpConfigs = [
-      '.mcp/config.json',
-      '.mcp.json',
-      'mcp.config.json'
-    ];
-    
+
+    const mcpConfigs = ['.mcp/config.json', '.mcp.json', 'mcp.config.json'];
+
     const servers = [];
-    
+
     for (const configFile of mcpConfigs) {
       const configPath = path.join(this.projectRoot, configFile);
-      
+
       if (fs.existsSync(configPath)) {
         try {
           const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
           const mcpServers = config.mcpServers || config.servers || {};
-          
+
           for (const [name, serverConfig] of Object.entries(mcpServers)) {
             servers.push({ name, ...serverConfig });
           }
-          
+
           changes.push(`Loaded ${Object.keys(mcpServers).length} servers from ${configFile}`);
           filesUpdated++;
-          
         } catch (error) {
           changes.push(`Error parsing ${configFile}: ${error.message}`);
         }
       }
     }
-    
+
     this.cache.set(TARGET.MCP_REGISTRY, {
       servers,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
     this.cacheTimestamps.set(TARGET.MCP_REGISTRY, Date.now());
-    
+
     this.emit('mcp-registry-updated', { servers });
-    
+
     return { filesUpdated, changes };
   }
 
@@ -458,10 +453,10 @@ class CodeGraphAutoUpdate extends EventEmitter {
   async _updateContextCache(_context) {
     const changes = [];
     let filesUpdated = 0;
-    
+
     // Invalidate old cache entries
     const now = Date.now();
-    
+
     for (const [key, timestamp] of this.cacheTimestamps.entries()) {
       if (now - timestamp > this.maxCacheAge) {
         this.cache.delete(key);
@@ -470,7 +465,7 @@ class CodeGraphAutoUpdate extends EventEmitter {
         filesUpdated++;
       }
     }
-    
+
     return { filesUpdated, changes };
   }
 
@@ -482,34 +477,34 @@ class CodeGraphAutoUpdate extends EventEmitter {
     const added = [];
     const modified = [];
     const deleted = [];
-    
+
     const currentFiles = await this._scanDirectory(this.projectRoot);
     const knownFiles = new Set(this.fileHashes.keys());
-    
+
     for (const file of currentFiles) {
       if (this._shouldIgnore(file)) continue;
-      
+
       const relativePath = path.relative(this.projectRoot, file);
-      
+
       if (!knownFiles.has(relativePath)) {
         added.push(relativePath);
       } else {
         const currentHash = await this._computeFileHash(relativePath);
         const cachedHash = this.fileHashes.get(relativePath);
-        
+
         if (cachedHash && cachedHash.hash !== currentHash.hash) {
           modified.push(relativePath);
         }
-        
+
         knownFiles.delete(relativePath);
       }
     }
-    
+
     // Remaining known files are deleted
     for (const file of knownFiles) {
       deleted.push(file);
     }
-    
+
     return { added, modified, deleted };
   }
 
@@ -519,21 +514,21 @@ class CodeGraphAutoUpdate extends EventEmitter {
    */
   async _scanDirectory(dir, files = []) {
     if (!fs.existsSync(dir)) return files;
-    
+
     const entries = fs.readdirSync(dir, { withFileTypes: true });
-    
+
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
-      
+
       if (this._shouldIgnore(fullPath)) continue;
-      
+
       if (entry.isDirectory()) {
         await this._scanDirectory(fullPath, files);
       } else if (entry.isFile()) {
         files.push(fullPath);
       }
     }
-    
+
     return files;
   }
 
@@ -542,23 +537,21 @@ class CodeGraphAutoUpdate extends EventEmitter {
    * @private
    */
   async _computeFileHash(filePath) {
-    const fullPath = path.isAbsolute(filePath) 
-      ? filePath 
-      : path.join(this.projectRoot, filePath);
-    
+    const fullPath = path.isAbsolute(filePath) ? filePath : path.join(this.projectRoot, filePath);
+
     if (!fs.existsSync(fullPath)) {
       return null;
     }
-    
+
     const stats = fs.statSync(fullPath);
     const content = fs.readFileSync(fullPath);
     const hash = crypto.createHash('md5').update(content).digest('hex');
-    
+
     return {
       path: filePath,
       hash,
       mtime: stats.mtimeMs,
-      size: stats.size
+      size: stats.size,
     };
   }
 
@@ -569,24 +562,24 @@ class CodeGraphAutoUpdate extends EventEmitter {
   async _extractSymbols(filePath) {
     const symbols = [];
     const fullPath = path.join(this.projectRoot, filePath);
-    
+
     if (!fs.existsSync(fullPath)) return symbols;
-    
+
     try {
       const content = fs.readFileSync(fullPath, 'utf-8');
-      
+
       // Extract function declarations
       const funcMatches = content.matchAll(/(?:function|const|let|var)\s+(\w+)\s*[=(]/g);
       for (const match of funcMatches) {
         symbols.push({ name: match[1], type: 'function', file: filePath });
       }
-      
+
       // Extract class declarations
       const classMatches = content.matchAll(/class\s+(\w+)/g);
       for (const match of classMatches) {
         symbols.push({ name: match[1], type: 'class', file: filePath });
       }
-      
+
       // Extract exports
       const exportMatches = content.matchAll(/module\.exports\s*=\s*{([^}]+)}/g);
       for (const match of exportMatches) {
@@ -595,11 +588,10 @@ class CodeGraphAutoUpdate extends EventEmitter {
           if (exp) symbols.push({ name: exp, type: 'export', file: filePath });
         }
       }
-      
     } catch (error) {
       // Ignore parse errors
     }
-    
+
     return symbols;
   }
 
@@ -618,7 +610,7 @@ class CodeGraphAutoUpdate extends EventEmitter {
    */
   _shouldIgnore(filePath) {
     const relativePath = path.relative(this.projectRoot, filePath);
-    
+
     for (const pattern of this.ignorePatterns) {
       if (pattern.includes('*')) {
         const regex = new RegExp(pattern.replace('*', '.*'));
@@ -627,7 +619,7 @@ class CodeGraphAutoUpdate extends EventEmitter {
         if (relativePath.includes(pattern)) return true;
       }
     }
-    
+
     return false;
   }
 
@@ -637,17 +629,13 @@ class CodeGraphAutoUpdate extends EventEmitter {
    */
   _startFileWatcher() {
     try {
-      this.fileWatcher = fs.watch(
-        this.projectRoot,
-        { recursive: true },
-        (eventType, filename) => {
-          if (!filename || this._shouldIgnore(filename)) return;
-          
-          this.pendingUpdates.add(filename);
-          this._debouncedUpdate(TRIGGER.FILE_CHANGE);
-        }
-      );
-      
+      this.fileWatcher = fs.watch(this.projectRoot, { recursive: true }, (eventType, filename) => {
+        if (!filename || this._shouldIgnore(filename)) return;
+
+        this.pendingUpdates.add(filename);
+        this._debouncedUpdate(TRIGGER.FILE_CHANGE);
+      });
+
       this.emit('watcher-started', { type: 'file' });
     } catch (error) {
       this.emit('watcher-error', { type: 'file', error });
@@ -660,18 +648,18 @@ class CodeGraphAutoUpdate extends EventEmitter {
    */
   _startMcpWatcher() {
     const mcpDir = path.join(this.projectRoot, '.mcp');
-    
+
     if (!fs.existsSync(mcpDir)) {
       return;
     }
-    
+
     try {
       this.mcpWatcher = fs.watch(mcpDir, (eventType, filename) => {
         if (filename && filename.endsWith('.json')) {
           this._debouncedUpdate(TRIGGER.MCP_CONFIG_CHANGE);
         }
       });
-      
+
       this.emit('watcher-started', { type: 'mcp' });
     } catch (error) {
       this.emit('watcher-error', { type: 'mcp', error });
@@ -686,17 +674,17 @@ class CodeGraphAutoUpdate extends EventEmitter {
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer);
     }
-    
+
     this.debounceTimer = setTimeout(async () => {
       const changedFiles = Array.from(this.pendingUpdates);
       this.pendingUpdates.clear();
-      
+
       await this.triggerUpdate(trigger, {
         changedFiles: {
           added: [],
           modified: changedFiles,
-          deleted: []
-        }
+          deleted: [],
+        },
       });
     }, this.debounceMs);
   }
@@ -707,11 +695,11 @@ class CodeGraphAutoUpdate extends EventEmitter {
    */
   async _loadCache() {
     const cacheFile = path.join(this.projectRoot, this.cacheDir, 'codegraph-cache.json');
-    
+
     if (fs.existsSync(cacheFile)) {
       try {
         const data = JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
-        
+
         if (data.fileHashes) {
           this.fileHashes = new Map(data.fileHashes);
         }
@@ -721,7 +709,7 @@ class CodeGraphAutoUpdate extends EventEmitter {
         if (data.cacheTimestamps) {
           this.cacheTimestamps = new Map(Object.entries(data.cacheTimestamps));
         }
-        
+
         this.emit('cache-loaded', { entries: this.cache.size });
       } catch (error) {
         this.emit('cache-error', { action: 'load', error });
@@ -735,17 +723,17 @@ class CodeGraphAutoUpdate extends EventEmitter {
    */
   async _saveCache() {
     const cacheFile = path.join(this.projectRoot, this.cacheDir, 'codegraph-cache.json');
-    
+
     try {
       await this._ensureDir(path.dirname(cacheFile));
-      
+
       const data = {
         fileHashes: Array.from(this.fileHashes.entries()),
         cache: Object.fromEntries(this.cache),
         cacheTimestamps: Object.fromEntries(this.cacheTimestamps),
-        savedAt: new Date().toISOString()
+        savedAt: new Date().toISOString(),
       };
-      
+
       fs.writeFileSync(cacheFile, JSON.stringify(data, null, 2));
       this.emit('cache-saved', { entries: this.cache.size });
     } catch (error) {
@@ -787,14 +775,15 @@ class CodeGraphAutoUpdate extends EventEmitter {
    */
   getStatistics() {
     const recentUpdates = this.updateHistory.slice(-100);
-    
+
     return {
       totalUpdates: this.updateHistory.length,
       successRate: recentUpdates.filter(u => u.success).length / Math.max(recentUpdates.length, 1),
-      averageDuration: recentUpdates.reduce((sum, u) => sum + u.duration, 0) / Math.max(recentUpdates.length, 1),
+      averageDuration:
+        recentUpdates.reduce((sum, u) => sum + u.duration, 0) / Math.max(recentUpdates.length, 1),
       cacheSize: this.cache.size,
       filesTracked: this.fileHashes.size,
-      lastUpdate: recentUpdates[recentUpdates.length - 1]?.timestamp || null
+      lastUpdate: recentUpdates[recentUpdates.length - 1]?.timestamp || null,
     };
   }
 
@@ -807,9 +796,9 @@ class CodeGraphAutoUpdate extends EventEmitter {
     this.fileHashes.clear();
     this.cache.clear();
     this.cacheTimestamps.clear();
-    
+
     return this.triggerUpdate(TRIGGER.MANUAL, {
-      targets: Object.values(TARGET)
+      targets: Object.values(TARGET),
     });
   }
 
@@ -821,11 +810,11 @@ class CodeGraphAutoUpdate extends EventEmitter {
     if (this.watchFiles && !this.fileWatcher) {
       this._startFileWatcher();
     }
-    
+
     if (this.watchMcp && !this.mcpWatcher) {
       this._startMcpWatcher();
     }
-    
+
     this.emit('started');
   }
 
@@ -837,17 +826,17 @@ class CodeGraphAutoUpdate extends EventEmitter {
       this.fileWatcher.close();
       this.fileWatcher = null;
     }
-    
+
     if (this.mcpWatcher) {
       this.mcpWatcher.close();
       this.mcpWatcher = null;
     }
-    
+
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer);
       this.debounceTimer = null;
     }
-    
+
     this.emit('stopped');
   }
 }
@@ -865,5 +854,5 @@ module.exports = {
   CodeGraphAutoUpdate,
   createCodeGraphAutoUpdate,
   TRIGGER,
-  TARGET
+  TARGET,
 };

@@ -1,8 +1,8 @@
 /**
  * MUSUBI Issue Resolver
- * 
+ *
  * GitHub Issue を分析し、自動的に解決策を提案・実装
- * 
+ *
  * @module src/resolvers/issue-resolver
  * @see REQ-P0-B006
  * @inspired-by OpenHands openhands/resolver/
@@ -63,10 +63,10 @@ class IssueInfo {
    * @returns {string}
    */
   get type() {
-    const labelNames = this.labels.map(l => 
+    const labelNames = this.labels.map(l =>
       typeof l === 'string' ? l.toLowerCase() : (l.name || '').toLowerCase()
     );
-    
+
     if (labelNames.some(l => l.includes('bug') || l.includes('fix'))) {
       return IssueType.BUG;
     }
@@ -234,7 +234,7 @@ class IssueResolver {
     this.draftPR = options.draftPR !== false;
     this.dryRun = options.dryRun || false;
     this.repo = options.repo || this._detectRepo();
-    
+
     // GitHub クライアント初期化
     this.github = null;
     if (GitHubClient && this.githubToken && this.repo) {
@@ -276,21 +276,23 @@ class IssueResolver {
 
     try {
       // 1. Issue 情報を取得/正規化
-      const issueInfo = issue instanceof IssueInfo 
-        ? issue 
-        : await this.fetchIssue(issue);
+      const issueInfo = issue instanceof IssueInfo ? issue : await this.fetchIssue(issue);
       result.issue = issueInfo;
 
       // 2. 要件抽出
       result.requirements = this.extractRequirements(issueInfo);
-      
+
       // 3. 影響範囲分析
       result.status = ResolverStatus.ANALYZING;
       result.impactAnalysis = await this.analyzeImpact(result.requirements, issueInfo);
 
       // 4. 変更計画を生成
       result.status = ResolverStatus.IMPLEMENTING;
-      result.changes = await this.planChanges(issueInfo, result.requirements, result.impactAnalysis);
+      result.changes = await this.planChanges(
+        issueInfo,
+        result.requirements,
+        result.impactAnalysis
+      );
 
       // 5. テスト計画を生成
       result.status = ResolverStatus.TESTING;
@@ -340,7 +342,7 @@ class IssueResolver {
 
   /**
    * 分析コメントをフォーマット
-   * @param {ResolverResult} result 
+   * @param {ResolverResult} result
    * @returns {string}
    */
   _formatAnalysisComment(result) {
@@ -361,7 +363,10 @@ class IssueResolver {
       comment += `- **Risk Level**: ${result.impactAnalysis.riskLevel}\n`;
       comment += `- **Estimated Effort**: ${result.impactAnalysis.estimatedEffort}\n`;
       if (result.impactAnalysis.affectedFiles.length > 0) {
-        comment += `- **Affected Files**: ${result.impactAnalysis.affectedFiles.slice(0, 5).map(f => `\`${f}\``).join(', ')}\n`;
+        comment += `- **Affected Files**: ${result.impactAnalysis.affectedFiles
+          .slice(0, 5)
+          .map(f => `\`${f}\``)
+          .join(', ')}\n`;
       }
     }
 
@@ -371,8 +376,8 @@ class IssueResolver {
 
   /**
    * PR 本文をフォーマット
-   * @param {IssueInfo} issue 
-   * @param {ResolverResult} result 
+   * @param {IssueInfo} issue
+   * @param {ResolverResult} result
    * @returns {string}
    */
   _formatPRBody(issue, result) {
@@ -455,7 +460,7 @@ class IssueResolver {
 
   /**
    * Issue から要件を抽出
-   * @param {IssueInfo} issue 
+   * @param {IssueInfo} issue
    * @returns {string[]}
    */
   extractRequirements(issue) {
@@ -503,8 +508,8 @@ class IssueResolver {
 
   /**
    * 影響範囲を分析
-   * @param {string[]} requirements 
-   * @param {IssueInfo} issue 
+   * @param {string[]} requirements
+   * @param {IssueInfo} issue
    * @returns {Promise<ImpactAnalysis>}
    */
   async analyzeImpact(requirements, issue) {
@@ -561,15 +566,22 @@ class IssueResolver {
 
   /**
    * リスクレベルを推定
-   * @param {IssueInfo} issue 
-   * @param {ImpactAnalysis} analysis 
+   * @param {IssueInfo} issue
+   * @param {ImpactAnalysis} analysis
    * @returns {string}
    */
   _estimateRiskLevel(issue, analysis) {
     const content = issue.fullContent.toLowerCase();
-    
+
     // 高リスクキーワード
-    const highRiskKeywords = ['security', 'authentication', 'authorization', 'database', 'migration', 'production'];
+    const highRiskKeywords = [
+      'security',
+      'authentication',
+      'authorization',
+      'database',
+      'migration',
+      'production',
+    ];
     if (highRiskKeywords.some(k => content.includes(k))) {
       return 'high';
     }
@@ -584,8 +596,8 @@ class IssueResolver {
 
   /**
    * 工数を推定
-   * @param {IssueInfo} issue 
-   * @param {string[]} requirements 
+   * @param {IssueInfo} issue
+   * @param {string[]} requirements
    * @returns {string}
    */
   _estimateEffort(issue, requirements) {
@@ -596,9 +608,9 @@ class IssueResolver {
 
   /**
    * 変更計画を作成
-   * @param {IssueInfo} issue 
-   * @param {string[]} requirements 
-   * @param {ImpactAnalysis} impact 
+   * @param {IssueInfo} issue
+   * @param {string[]} requirements
+   * @param {ImpactAnalysis} impact
    * @returns {Promise<Object[]>}
    */
   async planChanges(issue, requirements, impact) {
@@ -635,8 +647,8 @@ class IssueResolver {
 
   /**
    * テスト計画を作成
-   * @param {IssueInfo} issue 
-   * @param {Object[]} changes 
+   * @param {IssueInfo} issue
+   * @param {Object[]} changes
    * @returns {Promise<Object[]>}
    */
   async planTests(issue, changes) {
@@ -667,7 +679,7 @@ class IssueResolver {
 
   /**
    * ブランチ名を生成
-   * @param {IssueInfo} issue 
+   * @param {IssueInfo} issue
    * @returns {string}
    */
   generateBranchName(issue) {
@@ -682,7 +694,7 @@ class IssueResolver {
 
   /**
    * プレビューを生成（dry run用）
-   * @param {ResolverResult} result 
+   * @param {ResolverResult} result
    * @returns {string}
    */
   generatePreview(result) {

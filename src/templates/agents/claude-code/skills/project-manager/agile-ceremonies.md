@@ -8,19 +8,20 @@ Guide for running effective Agile ceremonies.
 
 ## Ceremony Overview
 
-| Ceremony | Frequency | Duration | Participants |
-|----------|-----------|----------|--------------|
-| Sprint Planning | Sprint start | 2-4 hours | Team, PO |
-| Daily Standup | Daily | 15 min | Team |
-| Sprint Review | Sprint end | 1-2 hours | Team, PO, Stakeholders |
-| Retrospective | Sprint end | 1-2 hours | Team |
-| Backlog Refinement | Weekly | 1 hour | Team, PO |
+| Ceremony           | Frequency    | Duration  | Participants           |
+| ------------------ | ------------ | --------- | ---------------------- |
+| Sprint Planning    | Sprint start | 2-4 hours | Team, PO               |
+| Daily Standup      | Daily        | 15 min    | Team                   |
+| Sprint Review      | Sprint end   | 1-2 hours | Team, PO, Stakeholders |
+| Retrospective      | Sprint end   | 1-2 hours | Team                   |
+| Backlog Refinement | Weekly       | 1 hour    | Team, PO               |
 
 ---
 
 ## Sprint Planning
 
 ### Objectives
+
 1. Define sprint goal
 2. Select user stories
 3. Create task breakdown
@@ -53,6 +54,7 @@ Guide for running effective Agile ceremonies.
 ```
 
 ### Best Practices
+
 - Come prepared with refined backlog
 - Focus on "what" not "how"
 - Don't overcommit
@@ -65,21 +67,23 @@ Guide for running effective Agile ceremonies.
 ### Format
 
 Each team member answers:
+
 1. What did I complete yesterday?
 2. What will I work on today?
 3. Do I have any blockers?
 
 ### Anti-patterns to Avoid
 
-| Anti-pattern | Better Approach |
-|--------------|-----------------|
-| Status report to manager | Team sync |
-| Solving problems in standup | Take offline |
-| Going over 15 minutes | Keep it short |
-| Only talking to Scrum Master | Talk to team |
-| Sitting down | Stand up (energy) |
+| Anti-pattern                 | Better Approach   |
+| ---------------------------- | ----------------- |
+| Status report to manager     | Team sync         |
+| Solving problems in standup  | Take offline      |
+| Going over 15 minutes        | Keep it short     |
+| Only talking to Scrum Master | Talk to team      |
+| Sitting down                 | Stand up (energy) |
 
 ### Virtual Standup Tips
+
 - Camera on
 - Mute when not speaking
 - Use visual board
@@ -91,6 +95,7 @@ Each team member answers:
 ## Sprint Review (Demo)
 
 ### Objectives
+
 1. Demonstrate completed work
 2. Get stakeholder feedback
 3. Discuss backlog priorities
@@ -121,6 +126,7 @@ Each team member answers:
 ```
 
 ### Tips for Good Demos
+
 - Use real scenarios
 - Show working software
 - Keep it interactive
@@ -132,6 +138,7 @@ Each team member answers:
 ## Retrospective
 
 ### Objectives
+
 1. Reflect on the sprint
 2. Identify improvements
 3. Create action items
@@ -139,6 +146,7 @@ Each team member answers:
 ### Formats
 
 #### Start/Stop/Continue
+
 ```
 🟢 START doing: [What new things should we try?]
 🔴 STOP doing: [What's not working?]
@@ -146,6 +154,7 @@ Each team member answers:
 ```
 
 #### 4Ls
+
 ```
 😍 LIKED: [What did you like?]
 📚 LEARNED: [What did you learn?]
@@ -154,6 +163,7 @@ Each team member answers:
 ```
 
 #### Sailboat
+
 ```
 ⛵ WIND (helps us): [What's pushing us forward?]
 ⚓ ANCHOR (slows us): [What's holding us back?]
@@ -162,6 +172,7 @@ Each team member answers:
 ```
 
 ### Facilitation Tips
+
 - Safe space - no blame
 - Everyone participates
 - Time-box discussions
@@ -174,6 +185,7 @@ Each team member answers:
 ## Backlog Refinement
 
 ### Objectives
+
 1. Clarify upcoming stories
 2. Estimate stories
 3. Break down large items
@@ -204,6 +216,7 @@ Each team member answers:
 ### Definition of Ready
 
 Story is ready when:
+
 - [ ] Clearly written with user perspective
 - [ ] Acceptance criteria defined
 - [ ] Estimated by team
@@ -217,36 +230,38 @@ Story is ready when:
 
 ### Planning Poker
 
-| Points | Meaning |
-|--------|---------|
-| 1 | Trivial |
-| 2 | Simple |
-| 3 | Moderate |
-| 5 | Complex |
-| 8 | Very Complex |
-| 13 | Epic-sized (split it) |
+| Points | Meaning               |
+| ------ | --------------------- |
+| 1      | Trivial               |
+| 2      | Simple                |
+| 3      | Moderate              |
+| 5      | Complex               |
+| 8      | Very Complex          |
+| 13     | Epic-sized (split it) |
 
 ### T-Shirt Sizing
 
 | Size | Relative Effort |
-|------|-----------------|
-| XS | Hours |
-| S | 1-2 days |
-| M | 3-5 days |
-| L | 1-2 weeks |
-| XL | Needs breakdown |
+| ---- | --------------- |
+| XS   | Hours           |
+| S    | 1-2 days        |
+| M    | 3-5 days        |
+| L    | 1-2 weeks       |
+| XL   | Needs breakdown |
 
 ---
 
 ## Remote Ceremony Tips
 
 ### Tools
+
 - Video: Zoom, Teams
 - Board: Miro, Mural
 - Voting: Mentimeter
 - Timer: Online stopwatch
 
 ### Best Practices
+
 - Camera on for engagement
 - Use virtual whiteboard
 - More breaks for longer sessions
@@ -259,24 +274,28 @@ Story is ready when:
 ## Ceremony Health Check
 
 ### Sprint Planning
+
 - [ ] Sprint goal is clear
 - [ ] Team has capacity
 - [ ] Stories are refined
 - [ ] Commitment is realistic
 
 ### Daily Standup
+
 - [ ] Starts on time
 - [ ] Finishes in 15 min
 - [ ] Blockers are raised
 - [ ] Team is engaged
 
 ### Sprint Review
+
 - [ ] Working software shown
 - [ ] Stakeholders present
 - [ ] Feedback captured
 - [ ] Team celebrated
 
 ### Retrospective
+
 - [ ] Safe environment
 - [ ] Everyone participated
 - [ ] Actions are specific

@@ -13,6 +13,7 @@ MUSUBI Web GUI provides a visual dashboard for Specification Driven Development 
 ## Overview
 
 The Web GUI Dashboard provides:
+
 - **Real-time Project Monitoring**: Live updates via WebSocket
 - **Workflow Visualization**: Visual SDD stage tracking
 - **Traceability Matrix**: Requirements-to-implementation mapping
@@ -28,6 +29,7 @@ musubi-gui start
 ```
 
 Options:
+
 - `-p, --port <port>` - Server port (default: 3000)
 - `-d, --dir <directory>` - Project directory (default: current)
 - `--no-open` - Don't open browser automatically
@@ -113,10 +115,13 @@ src/gui/
 ## Dashboard Views
 
 ### Dashboard
+
 Overview of project status, statistics, and recent specifications.
 
 ### Workflow
+
 Visual representation of SDD workflow stages:
+
 1. Steering
 2. Requirements
 3. Design
@@ -127,12 +132,15 @@ Visual representation of SDD workflow stages:
 8. Completion
 
 ### Requirements
+
 List of all requirements with EARS pattern detection.
 
 ### Traceability
+
 Matrix showing links between requirements, designs, tasks, and implementations.
 
 ### Constitution
+
 Display of constitutional articles governing the project.
 
 ## Integration

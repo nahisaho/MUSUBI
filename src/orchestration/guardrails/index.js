@@ -1,9 +1,9 @@
 /**
  * @fileoverview Guardrails module exports
- * 
+ *
  * This module provides guardrail functionality for input/output validation
  * in the MUSUBI orchestration system.
- * 
+ *
  * @module orchestration/guardrails
  * @version 3.9.0
  */
@@ -17,7 +17,7 @@ const {
   SafetyCheckGuardrail,
   createSafetyCheckGuardrail,
   SafetyLevel,
-  ConstitutionalMapping
+  ConstitutionalMapping,
 } = require('./safety-check');
 const {
   RuleType,
@@ -26,7 +26,7 @@ const {
   RuleRegistry,
   rules,
   CommonRuleSets,
-  globalRuleRegistry
+  globalRuleRegistry,
 } = require('./guardrail-rules');
 
 module.exports = {
@@ -57,5 +57,5 @@ module.exports = {
   RuleRegistry,
   rules,
   CommonRuleSets,
-  globalRuleRegistry
+  globalRuleRegistry,
 };

@@ -88,7 +88,9 @@ async function showSummary(tracker) {
 
   console.log(chalk.white('\n── This Month ──'));
   console.log(`  Requests: ${chalk.cyan(period.requests)}`);
-  console.log(`  Tokens: ${chalk.cyan((period.inputTokens + period.outputTokens).toLocaleString())}`);
+  console.log(
+    `  Tokens: ${chalk.cyan((period.inputTokens + period.outputTokens).toLocaleString())}`
+  );
   console.log(`  Cost: ${chalk.green('$' + period.cost.toFixed(4))}`);
 
   if (period.budgetLimit) {
@@ -234,9 +236,17 @@ async function showPricing(args) {
   } else {
     // Group by provider
     const providers = {
-      'OpenAI': ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo', 'o1', 'o1-mini', 'o3-mini'],
-      'Anthropic': ['claude-opus-4', 'claude-sonnet-4', 'claude-3.5-sonnet', 'claude-3.5-haiku', 'claude-3-opus', 'claude-3-sonnet', 'claude-3-haiku'],
-      'Google': ['gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash'],
+      OpenAI: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo', 'o1', 'o1-mini', 'o3-mini'],
+      Anthropic: [
+        'claude-opus-4',
+        'claude-sonnet-4',
+        'claude-3.5-sonnet',
+        'claude-3.5-haiku',
+        'claude-3-opus',
+        'claude-3-sonnet',
+        'claude-3-haiku',
+      ],
+      Google: ['gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash'],
       'Local (Free)': ['ollama', 'llama3.2', 'codellama', 'mistral', 'qwen2.5'],
     };
 
@@ -247,7 +257,9 @@ async function showPricing(args) {
         if (p) {
           const inputStr = p.input === 0 ? 'Free' : `$${p.input.toFixed(2)}`;
           const outputStr = p.output === 0 ? 'Free' : `$${p.output.toFixed(2)}`;
-          console.log(`    ${chalk.cyan(m.padEnd(20))} In: ${inputStr.padStart(7)} / Out: ${outputStr.padStart(7)}`);
+          console.log(
+            `    ${chalk.cyan(m.padEnd(20))} In: ${inputStr.padStart(7)} / Out: ${outputStr.padStart(7)}`
+          );
         }
       }
       console.log('');
@@ -273,10 +285,12 @@ async function showHistory(tracker, args) {
     try {
       const data = await fs.readJSON(path.join(STORAGE_DIR, file));
       const summary = data.summary;
-      
+
       console.log(chalk.white(`  ${summary.sessionStart}`));
       console.log(`    Duration: ${formatDuration(summary.duration)}`);
-      console.log(`    Requests: ${summary.totalRequests}, Tokens: ${summary.totalTokens.toLocaleString()}`);
+      console.log(
+        `    Requests: ${summary.totalRequests}, Tokens: ${summary.totalTokens.toLocaleString()}`
+      );
       console.log(`    Cost: ${chalk.green('$' + summary.totalCost.toFixed(4))}`);
       console.log('');
     } catch (e) {

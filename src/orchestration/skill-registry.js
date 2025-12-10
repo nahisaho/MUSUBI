@@ -1,7 +1,7 @@
 /**
  * Skill Registry - Centralized skill registration and discovery
  * Sprint 3.1: Skill System Architecture
- * 
+ *
  * Inspired by OpenAI Agents SDK skill management patterns
  */
 
@@ -32,23 +32,23 @@ class SkillMetadata {
 
   validate() {
     const errors = [];
-    
+
     if (!this.id) {
       errors.push('Skill ID is required');
     }
-    
+
     if (!this.name) {
       errors.push('Skill name is required');
     }
-    
+
     if (!/^[a-z0-9-]+$/.test(this.id)) {
       errors.push('Skill ID must be lowercase alphanumeric with hyphens');
     }
-    
+
     if (!['P0', 'P1', 'P2', 'P3'].includes(this.priority)) {
       errors.push('Priority must be P0, P1, P2, or P3');
     }
-    
+
     // Validate inputs
     for (const input of this.inputs) {
       if (!input.name) {
@@ -58,17 +58,17 @@ class SkillMetadata {
         errors.push(`Input ${input.name || 'unknown'} must have a type`);
       }
     }
-    
+
     // Validate outputs
     for (const output of this.outputs) {
       if (!output.name) {
         errors.push('Output name is required');
       }
     }
-    
+
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -89,7 +89,7 @@ class SkillMetadata {
       priority: this.priority,
       permissions: this.permissions,
       createdAt: this.createdAt,
-      updatedAt: this.updatedAt
+      updatedAt: this.updatedAt,
     };
   }
 }
@@ -107,7 +107,7 @@ const SkillCategory = {
   VALIDATION: 'validation',
   INTEGRATION: 'integration',
   MONITORING: 'monitoring',
-  GENERAL: 'general'
+  GENERAL: 'general',
 };
 
 /**
@@ -117,7 +117,7 @@ const SkillPriority = {
   P0: 'P0', // Critical - blocks all other work
   P1: 'P1', // High - should run soon
   P2: 'P2', // Medium - normal priority
-  P3: 'P3'  // Low - background/optional
+  P3: 'P3', // Low - background/optional
 };
 
 /**
@@ -127,7 +127,7 @@ const SkillHealth = {
   HEALTHY: 'healthy',
   DEGRADED: 'degraded',
   UNHEALTHY: 'unhealthy',
-  UNKNOWN: 'unknown'
+  UNKNOWN: 'unknown',
 };
 
 /**
@@ -146,17 +146,17 @@ class SkillRegistry extends EventEmitter {
       beforeRegister: [],
       afterRegister: [],
       beforeUnregister: [],
-      afterUnregister: []
+      afterUnregister: [],
     };
-    
+
     // Options
     this.options = {
       enableHealthMonitoring: options.enableHealthMonitoring !== false,
       healthCheckInterval: options.healthCheckInterval || 60000,
       maxSkills: options.maxSkills || 1000,
-      enableStats: options.enableStats !== false
+      enableStats: options.enableStats !== false,
     };
-    
+
     // Start health monitoring if enabled
     if (this.options.enableHealthMonitoring) {
       this._startHealthMonitoring();
@@ -167,21 +167,19 @@ class SkillRegistry extends EventEmitter {
    * Register a new skill
    */
   registerSkill(skillDef, handler = null) {
-    const metadata = skillDef instanceof SkillMetadata 
-      ? skillDef 
-      : new SkillMetadata(skillDef);
-    
+    const metadata = skillDef instanceof SkillMetadata ? skillDef : new SkillMetadata(skillDef);
+
     // Validate metadata
     const validation = metadata.validate();
     if (!validation.valid) {
       throw new Error(`Invalid skill metadata: ${validation.errors.join(', ')}`);
     }
-    
+
     // Check max skills limit
     if (this.skills.size >= this.options.maxSkills) {
       throw new Error(`Maximum skill limit (${this.options.maxSkills}) reached`);
     }
-    
+
     // Run custom validators
     for (const validator of this.validators) {
       const result = validator(metadata);
@@ -189,38 +187,38 @@ class SkillRegistry extends EventEmitter {
         throw new Error(`Skill validation failed: ${result.error}`);
       }
     }
-    
+
     // Run beforeRegister hooks
     for (const hook of this.hooks.beforeRegister) {
       hook(metadata);
     }
-    
+
     // Check for duplicate
     if (this.skills.has(metadata.id)) {
       throw new Error(`Skill with ID '${metadata.id}' already exists`);
     }
-    
+
     // Validate dependencies exist
     for (const dep of metadata.dependencies) {
       if (!this.skills.has(dep)) {
         throw new Error(`Dependency '${dep}' not found for skill '${metadata.id}'`);
       }
     }
-    
+
     // Store skill
     const skillEntry = {
       metadata,
       handler,
-      registeredAt: new Date().toISOString()
+      registeredAt: new Date().toISOString(),
     };
     this.skills.set(metadata.id, skillEntry);
-    
+
     // Update indexes
     this._addToIndex(this.categoryIndex, metadata.category, metadata.id);
     for (const tag of metadata.tags) {
       this._addToIndex(this.tagIndex, tag, metadata.id);
     }
-    
+
     // Initialize health and stats
     this.healthStatus.set(metadata.id, SkillHealth.HEALTHY);
     if (this.options.enableStats) {
@@ -229,17 +227,17 @@ class SkillRegistry extends EventEmitter {
         successCount: 0,
         failureCount: 0,
         averageExecutionTime: 0,
-        lastExecutedAt: null
+        lastExecutedAt: null,
       });
     }
-    
+
     // Run afterRegister hooks
     for (const hook of this.hooks.afterRegister) {
       hook(metadata);
     }
-    
+
     this.emit('skill-registered', { skillId: metadata.id, metadata });
-    
+
     return metadata;
   }
 
@@ -251,39 +249,37 @@ class SkillRegistry extends EventEmitter {
     if (!skillEntry) {
       return false;
     }
-    
+
     // Check if other skills depend on this one
     const dependents = this._findDependents(skillId);
     if (dependents.length > 0) {
-      throw new Error(
-        `Cannot unregister skill '${skillId}': required by ${dependents.join(', ')}`
-      );
+      throw new Error(`Cannot unregister skill '${skillId}': required by ${dependents.join(', ')}`);
     }
-    
+
     // Run beforeUnregister hooks
     for (const hook of this.hooks.beforeUnregister) {
       hook(skillEntry.metadata);
     }
-    
+
     // Remove from indexes
     const metadata = skillEntry.metadata;
     this._removeFromIndex(this.categoryIndex, metadata.category, skillId);
     for (const tag of metadata.tags) {
       this._removeFromIndex(this.tagIndex, tag, skillId);
     }
-    
+
     // Remove skill
     this.skills.delete(skillId);
     this.healthStatus.delete(skillId);
     this.executionStats.delete(skillId);
-    
+
     // Run afterUnregister hooks
     for (const hook of this.hooks.afterUnregister) {
       hook(metadata);
     }
-    
+
     this.emit('skill-unregistered', { skillId, metadata });
-    
+
     return true;
   }
 
@@ -321,7 +317,9 @@ class SkillRegistry extends EventEmitter {
    */
   findByCategory(category) {
     const skillIds = this.categoryIndex.get(category) || new Set();
-    return Array.from(skillIds).map(id => this.getSkill(id)).filter(Boolean);
+    return Array.from(skillIds)
+      .map(id => this.getSkill(id))
+      .filter(Boolean);
   }
 
   /**
@@ -330,9 +328,7 @@ class SkillRegistry extends EventEmitter {
   findByTags(tags, matchAll = false) {
     if (matchAll) {
       // AND matching - skill must have all tags
-      return this.getAllSkills().filter(skill => 
-        tags.every(tag => skill.tags.includes(tag))
-      );
+      return this.getAllSkills().filter(skill => tags.every(tag => skill.tags.includes(tag)));
     } else {
       // OR matching - skill must have at least one tag
       const matchedIds = new Set();
@@ -342,7 +338,9 @@ class SkillRegistry extends EventEmitter {
           matchedIds.add(id);
         }
       }
-      return Array.from(matchedIds).map(id => this.getSkill(id)).filter(Boolean);
+      return Array.from(matchedIds)
+        .map(id => this.getSkill(id))
+        .filter(Boolean);
     }
   }
 
@@ -351,11 +349,12 @@ class SkillRegistry extends EventEmitter {
    */
   search(query) {
     const lowerQuery = query.toLowerCase();
-    return this.getAllSkills().filter(skill => 
-      skill.id.toLowerCase().includes(lowerQuery) ||
-      skill.name.toLowerCase().includes(lowerQuery) ||
-      skill.description.toLowerCase().includes(lowerQuery) ||
-      skill.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+    return this.getAllSkills().filter(
+      skill =>
+        skill.id.toLowerCase().includes(lowerQuery) ||
+        skill.name.toLowerCase().includes(lowerQuery) ||
+        skill.description.toLowerCase().includes(lowerQuery) ||
+        skill.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
     );
   }
 
@@ -374,13 +373,13 @@ class SkillRegistry extends EventEmitter {
     if (!skill) {
       throw new Error(`Skill '${skillId}' not found`);
     }
-    
+
     // Circular dependency check
     if (visited.has(skillId)) {
       throw new Error(`Circular dependency detected: ${skillId}`);
     }
     visited.add(skillId);
-    
+
     const resolved = [];
     for (const depId of skill.dependencies) {
       const depResolved = this.resolveDependencies(depId, new Set(visited));
@@ -391,7 +390,7 @@ class SkillRegistry extends EventEmitter {
       }
     }
     resolved.push(skillId);
-    
+
     return resolved;
   }
 
@@ -402,19 +401,19 @@ class SkillRegistry extends EventEmitter {
     if (!this.skills.has(skillId)) {
       return false;
     }
-    
+
     const previousStatus = this.healthStatus.get(skillId);
     this.healthStatus.set(skillId, status);
-    
+
     if (previousStatus !== status) {
-      this.emit('health-changed', { 
-        skillId, 
-        previousStatus, 
+      this.emit('health-changed', {
+        skillId,
+        previousStatus,
         newStatus: status,
-        reason 
+        reason,
       });
     }
-    
+
     return true;
   }
 
@@ -429,9 +428,7 @@ class SkillRegistry extends EventEmitter {
    * Get all healthy skills
    */
   getHealthySkills() {
-    return this.getAllSkills().filter(
-      skill => this.getHealth(skill.id) === SkillHealth.HEALTHY
-    );
+    return this.getAllSkills().filter(skill => this.getHealth(skill.id) === SkillHealth.HEALTHY);
   }
 
   /**
@@ -439,25 +436,24 @@ class SkillRegistry extends EventEmitter {
    */
   recordExecution(skillId, success, executionTime) {
     if (!this.options.enableStats) return;
-    
+
     const stats = this.executionStats.get(skillId);
     if (!stats) return;
-    
+
     stats.totalExecutions++;
     if (success) {
       stats.successCount++;
     } else {
       stats.failureCount++;
     }
-    
+
     // Update average execution time
-    stats.averageExecutionTime = (
-      (stats.averageExecutionTime * (stats.totalExecutions - 1) + executionTime) / 
-      stats.totalExecutions
-    );
-    
+    stats.averageExecutionTime =
+      (stats.averageExecutionTime * (stats.totalExecutions - 1) + executionTime) /
+      stats.totalExecutions;
+
     stats.lastExecutedAt = new Date().toISOString();
-    
+
     this.emit('execution-recorded', { skillId, success, executionTime, stats });
   }
 
@@ -499,22 +495,22 @@ class SkillRegistry extends EventEmitter {
     for (const [category, ids] of this.categoryIndex) {
       categories[category] = ids.size;
     }
-    
+
     const healthCounts = {
       [SkillHealth.HEALTHY]: 0,
       [SkillHealth.DEGRADED]: 0,
       [SkillHealth.UNHEALTHY]: 0,
-      [SkillHealth.UNKNOWN]: 0
+      [SkillHealth.UNKNOWN]: 0,
     };
     for (const status of this.healthStatus.values()) {
       healthCounts[status]++;
     }
-    
+
     return {
       totalSkills: this.skills.size,
       categories,
       healthStatus: healthCounts,
-      tags: Array.from(this.tagIndex.keys())
+      tags: Array.from(this.tagIndex.keys()),
     };
   }
 
@@ -527,7 +523,7 @@ class SkillRegistry extends EventEmitter {
       version: '1.0.0',
       exportedAt: new Date().toISOString(),
       skills,
-      summary: this.getSummary()
+      summary: this.getSummary(),
     };
   }
 
@@ -538,10 +534,10 @@ class SkillRegistry extends EventEmitter {
     if (!data.skills || !Array.isArray(data.skills)) {
       throw new Error('Invalid import data: skills array required');
     }
-    
+
     const imported = [];
     const errors = [];
-    
+
     for (const skillDef of data.skills) {
       try {
         const metadata = this.registerSkill(skillDef);
@@ -550,7 +546,7 @@ class SkillRegistry extends EventEmitter {
         errors.push({ skillId: skillDef.id, error: error.message });
       }
     }
-    
+
     return { imported, errors };
   }
 
@@ -607,16 +603,16 @@ class SkillRegistry extends EventEmitter {
       if (!stats || stats.totalExecutions === 0) {
         continue;
       }
-      
+
       const failureRate = stats.failureCount / stats.totalExecutions;
-      
+
       let newStatus = SkillHealth.HEALTHY;
       if (failureRate > 0.5) {
         newStatus = SkillHealth.UNHEALTHY;
       } else if (failureRate > 0.2) {
         newStatus = SkillHealth.DEGRADED;
       }
-      
+
       this.updateHealth(skillId, newStatus, `Failure rate: ${(failureRate * 100).toFixed(1)}%`);
     }
   }
@@ -646,5 +642,5 @@ module.exports = {
   SkillMetadata,
   SkillCategory,
   SkillPriority,
-  SkillHealth
+  SkillHealth,
 };

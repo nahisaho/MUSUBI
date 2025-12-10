@@ -11,7 +11,7 @@ const {
   createMCPToolRegistry,
   MCPContextProvider,
   createMCPContextProvider,
-  createMCPIntegration
+  createMCPIntegration,
 } = require('../../../src/integrations/mcp');
 
 describe('MCP Integration Exports', () => {
@@ -19,32 +19,32 @@ describe('MCP Integration Exports', () => {
     expect(MCPDiscovery).toBeDefined();
     expect(typeof MCPDiscovery).toBe('function');
   });
-  
+
   it('should export createMCPDiscovery', () => {
     expect(createMCPDiscovery).toBeDefined();
     expect(typeof createMCPDiscovery).toBe('function');
   });
-  
+
   it('should export MCPToolRegistry', () => {
     expect(MCPToolRegistry).toBeDefined();
     expect(typeof MCPToolRegistry).toBe('function');
   });
-  
+
   it('should export createMCPToolRegistry', () => {
     expect(createMCPToolRegistry).toBeDefined();
     expect(typeof createMCPToolRegistry).toBe('function');
   });
-  
+
   it('should export MCPContextProvider', () => {
     expect(MCPContextProvider).toBeDefined();
     expect(typeof MCPContextProvider).toBe('function');
   });
-  
+
   it('should export createMCPContextProvider', () => {
     expect(createMCPContextProvider).toBeDefined();
     expect(typeof createMCPContextProvider).toBe('function');
   });
-  
+
   it('should export createMCPIntegration', () => {
     expect(createMCPIntegration).toBeDefined();
     expect(typeof createMCPIntegration).toBe('function');
@@ -54,7 +54,7 @@ describe('MCP Integration Exports', () => {
 describe('createMCPIntegration', () => {
   let integration;
   let mockConnector;
-  
+
   beforeEach(() => {
     mockConnector = {
       connect: jest.fn().mockResolvedValue(undefined),
@@ -63,110 +63,110 @@ describe('createMCPIntegration', () => {
       listPrompts: jest.fn().mockResolvedValue({ prompts: [] }),
       callTool: jest.fn().mockResolvedValue({ content: [] }),
       readResource: jest.fn().mockResolvedValue({ contents: '' }),
-      getPrompt: jest.fn().mockResolvedValue({ messages: [] })
+      getPrompt: jest.fn().mockResolvedValue({ messages: [] }),
     };
-    
+
     integration = createMCPIntegration({
-      connector: mockConnector
+      connector: mockConnector,
     });
   });
-  
+
   afterEach(() => {
     if (integration) {
       integration.cleanup();
     }
   });
-  
+
   describe('structure', () => {
     it('should have discovery component', () => {
       expect(integration.discovery).toBeInstanceOf(MCPDiscovery);
     });
-    
+
     it('should have registry component', () => {
       expect(integration.registry).toBeInstanceOf(MCPToolRegistry);
     });
-    
+
     it('should have context component', () => {
       expect(integration.context).toBeInstanceOf(MCPContextProvider);
     });
   });
-  
+
   describe('initialize', () => {
     it('should initialize without errors', async () => {
       const status = await integration.initialize({
         autoDiscover: false,
-        watchChanges: false
+        watchChanges: false,
       });
-      
+
       expect(status).toBeDefined();
       expect(status.discovery).toBeDefined();
       expect(status.registry).toBeDefined();
       expect(status.context).toBeDefined();
     });
   });
-  
+
   describe('getTools', () => {
     it('should return empty array initially', () => {
       const tools = integration.getTools();
       expect(tools).toEqual([]);
     });
-    
+
     it('should return registered tools', () => {
       integration.registry.registerTool({
         name: 'server/test_tool',
         description: 'Test',
-        serverName: 'server'
+        serverName: 'server',
       });
-      
+
       const tools = integration.getTools();
       expect(tools).toHaveLength(1);
     });
   });
-  
+
   describe('getToolDefinitions', () => {
     it('should return tool definitions for Agent Loop', () => {
       integration.registry.registerTool({
         name: 'server/test_tool',
         description: 'Test tool',
         inputSchema: { type: 'object' },
-        serverName: 'server'
+        serverName: 'server',
       });
-      
+
       const defs = integration.getToolDefinitions();
       expect(defs).toHaveLength(1);
       expect(defs[0].description).toBe('Test tool');
     });
   });
-  
+
   describe('buildContext', () => {
     it('should build empty context', async () => {
       const context = await integration.buildContext({});
-      
+
       expect(context.resources).toEqual([]);
       expect(context.prompts).toEqual([]);
       expect(context.metadata).toBeDefined();
     });
   });
-  
+
   describe('getStatus', () => {
     it('should return integration status', () => {
       const status = integration.getStatus();
-      
+
       expect(status.discovery).toBeDefined();
       expect(status.registry).toBeDefined();
       expect(status.context).toBeDefined();
     });
   });
-  
+
   describe('cleanup', () => {
     it('should clean up resources', () => {
       integration.registry.registerTool({
         name: 'server/tool',
-        serverName: 'server'
+        serverName: 'server',
       });
-      
+
       integration.cleanup();
-      
+
       expect(integration.registry.tools.size).toBe(0);
     });
   });
@@ -179,14 +179,14 @@ describe('Factory Functions', () => {
       expect(discovery).toBeInstanceOf(MCPDiscovery);
     });
   });
-  
+
   describe('createMCPToolRegistry', () => {
     it('should create registry instance', () => {
       const registry = createMCPToolRegistry();
       expect(registry).toBeInstanceOf(MCPToolRegistry);
     });
   });
-  
+
   describe('createMCPContextProvider', () => {
     it('should create context provider instance', () => {
       const context = createMCPContextProvider();

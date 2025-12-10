@@ -14,13 +14,13 @@ Common patterns for optimizing application performance.
 async function getUser(id: string): Promise<User> {
   // Try cache first
   let user = await cache.get(`user:${id}`);
-  
+
   if (!user) {
     // Cache miss - load from DB
     user = await db.users.findById(id);
     await cache.set(`user:${id}`, user, { ttl: 3600 });
   }
-  
+
   return user;
 }
 ```
@@ -33,10 +33,10 @@ async function getUser(id: string): Promise<User> {
 async function updateUser(id: string, data: Partial<User>): Promise<User> {
   // Update DB
   const user = await db.users.update(id, data);
-  
+
   // Update cache
   await cache.set(`user:${id}`, user, { ttl: 3600 });
-  
+
   return user;
 }
 ```
@@ -61,8 +61,8 @@ async function deleteUser(id: string): Promise<void> {
 
 ```typescript
 const pool = new Pool({
-  max: 20,        // Max connections
-  min: 5,         // Min connections
+  max: 20, // Max connections
+  min: 5, // Min connections
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 });
@@ -92,7 +92,7 @@ for (const user of users) {
 
 // GOOD: Eager loading
 const users = await User.findAll({
-  include: [{ model: Order }]  // 1 query with JOIN
+  include: [{ model: Order }], // 1 query with JOIN
 });
 ```
 
@@ -100,16 +100,16 @@ const users = await User.findAll({
 
 ```typescript
 // Offset pagination (simple but slow for large offsets)
-const page = await db.query(
-  'SELECT * FROM items LIMIT $1 OFFSET $2',
-  [pageSize, (page - 1) * pageSize]
-);
+const page = await db.query('SELECT * FROM items LIMIT $1 OFFSET $2', [
+  pageSize,
+  (page - 1) * pageSize,
+]);
 
 // Cursor pagination (efficient)
-const page = await db.query(
-  'SELECT * FROM items WHERE id > $1 ORDER BY id LIMIT $2',
-  [lastSeenId, pageSize]
-);
+const page = await db.query('SELECT * FROM items WHERE id > $1 ORDER BY id LIMIT $2', [
+  lastSeenId,
+  pageSize,
+]);
 ```
 
 ---
@@ -129,9 +129,7 @@ app.use(compression());
 // GET /users?fields=id,name,email
 app.get('/users', (req, res) => {
   const fields = req.query.fields?.split(',') || ['*'];
-  const users = await db.query(
-    `SELECT ${fields.join(',')} FROM users`
-  );
+  const users = await db.query(`SELECT ${fields.join(',')} FROM users`);
   res.json(users);
 });
 ```
@@ -158,11 +156,11 @@ await api.getUsers([1, 2, 3]);
 // Don't block request for slow operations
 app.post('/orders', async (req, res) => {
   const order = await createOrder(req.body);
-  
+
   // Queue async tasks
   await queue.add('send-confirmation-email', { orderId: order.id });
   await queue.add('update-inventory', { orderId: order.id });
-  
+
   res.json(order); // Respond immediately
 });
 ```
@@ -176,11 +174,7 @@ const products = await getProducts();
 const orders = await getOrders();
 
 // GOOD: Parallel
-const [users, products, orders] = await Promise.all([
-  getUsers(),
-  getProducts(),
-  getOrders()
-]);
+const [users, products, orders] = await Promise.all([getUsers(), getProducts(), getOrders()]);
 ```
 
 ---
@@ -199,7 +193,7 @@ const Settings = React.lazy(() => import('./Settings'));
 
 ```html
 <!-- Responsive images -->
-<img 
+<img
   srcset="image-300.jpg 300w, image-600.jpg 600w"
   sizes="(max-width: 600px) 300px, 600px"
   loading="lazy"
@@ -211,11 +205,11 @@ const Settings = React.lazy(() => import('./Settings'));
 
 ```typescript
 // Debounce search input
-const debouncedSearch = debounce((query) => {
+const debouncedSearch = debounce(query => {
   api.search(query);
 }, 300);
 
-input.addEventListener('input', (e) => {
+input.addEventListener('input', e => {
   debouncedSearch(e.target.value);
 });
 ```
@@ -226,13 +220,13 @@ input.addEventListener('input', (e) => {
 
 ### Key Metrics
 
-| Metric | Target | Tool |
-|--------|--------|------|
-| TTFB | < 200ms | Lighthouse |
-| FCP | < 1.8s | Lighthouse |
-| LCP | < 2.5s | Lighthouse |
-| API p95 | < 200ms | APM |
-| DB p95 | < 50ms | DB monitoring |
+| Metric  | Target  | Tool          |
+| ------- | ------- | ------------- |
+| TTFB    | < 200ms | Lighthouse    |
+| FCP     | < 1.8s  | Lighthouse    |
+| LCP     | < 2.5s  | Lighthouse    |
+| API p95 | < 200ms | APM           |
+| DB p95  | < 50ms  | DB monitoring |
 
 ### Monitoring Queries
 
@@ -249,24 +243,28 @@ LIMIT 10;
 ## Optimization Checklist
 
 ### Database
+
 - [ ] Indexes on frequently queried columns
 - [ ] Connection pooling configured
 - [ ] N+1 queries eliminated
 - [ ] Query plans analyzed (EXPLAIN)
 
 ### API
+
 - [ ] Response compression enabled
 - [ ] Pagination implemented
 - [ ] Caching strategy in place
 - [ ] Slow operations moved to background
 
 ### Frontend
+
 - [ ] Code splitting implemented
 - [ ] Images optimized and lazy loaded
 - [ ] CDN for static assets
 - [ ] Bundle size analyzed
 
 ### Infrastructure
+
 - [ ] Auto-scaling configured
 - [ ] Load balancing in place
 - [ ] CDN configured

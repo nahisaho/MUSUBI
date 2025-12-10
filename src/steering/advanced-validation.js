@@ -1,6 +1,6 @@
 /**
  * Advanced Validation Module
- * 
+ *
  * Provides:
  * - Cross-artifact consistency validation
  * - Gap detection between requirements and implementation
@@ -18,7 +18,7 @@ const ValidationType = {
   GAP: 'gap',
   DEPENDENCY: 'dependency',
   REFERENCE: 'reference',
-  CUSTOM: 'custom'
+  CUSTOM: 'custom',
 };
 
 // Severity Levels
@@ -26,7 +26,7 @@ const Severity = {
   CRITICAL: 'critical',
   ERROR: 'error',
   WARNING: 'warning',
-  INFO: 'info'
+  INFO: 'info',
 };
 
 // Artifact Types
@@ -36,7 +36,7 @@ const ArtifactType = {
   IMPLEMENTATION: 'implementation',
   TEST: 'test',
   DOCUMENTATION: 'documentation',
-  STEERING: 'steering'
+  STEERING: 'steering',
 };
 
 /**
@@ -66,7 +66,7 @@ class ValidationIssue {
       location: this.location,
       suggestion: this.suggestion,
       relatedArtifacts: this.relatedArtifacts,
-      timestamp: this.timestamp.toISOString()
+      timestamp: this.timestamp.toISOString(),
     };
   }
 }
@@ -102,8 +102,8 @@ class ArtifactReference {
       name: this.name,
       path: this.path,
       version: this.version,
-      dependencies: this.dependencies.map(d => typeof d === 'string' ? d : d.id),
-      references: this.references.map(r => typeof r === 'string' ? r : r.id)
+      dependencies: this.dependencies.map(d => (typeof d === 'string' ? d : d.id)),
+      references: this.references.map(r => (typeof r === 'string' ? r : r.id)),
     };
   }
 }
@@ -130,19 +130,21 @@ class ConsistencyChecker {
         const ruleIssues = rule.check(artifacts);
         issues.push(...ruleIssues);
       } catch (error) {
-        issues.push(new ValidationIssue({
-          type: ValidationType.CONSISTENCY,
-          severity: Severity.ERROR,
-          message: `Rule check failed: ${error.message}`,
-          metadata: { rule: rule.name, error: error.message }
-        }));
+        issues.push(
+          new ValidationIssue({
+            type: ValidationType.CONSISTENCY,
+            severity: Severity.ERROR,
+            message: `Rule check failed: ${error.message}`,
+            metadata: { rule: rule.name, error: error.message },
+          })
+        );
       }
     }
 
     return {
       valid: !issues.some(i => i.severity === Severity.CRITICAL || i.severity === Severity.ERROR),
       issues,
-      rulesChecked: this.rules.length
+      rulesChecked: this.rules.length,
     };
   }
 
@@ -150,7 +152,7 @@ class ConsistencyChecker {
   static createNamingConsistencyRule() {
     return {
       name: 'naming-consistency',
-      check: (artifacts) => {
+      check: artifacts => {
         const issues = [];
         const names = new Map();
 
@@ -158,13 +160,15 @@ class ConsistencyChecker {
           const normalized = artifact.name?.toLowerCase().replace(/[-_\s]/g, '');
           if (normalized && names.has(normalized)) {
             const existing = names.get(normalized);
-            issues.push(new ValidationIssue({
-              type: ValidationType.CONSISTENCY,
-              severity: Severity.WARNING,
-              message: `Similar names detected: "${artifact.name}" and "${existing.name}"`,
-              artifact: artifact.id,
-              relatedArtifacts: [existing.id]
-            }));
+            issues.push(
+              new ValidationIssue({
+                type: ValidationType.CONSISTENCY,
+                severity: Severity.WARNING,
+                message: `Similar names detected: "${artifact.name}" and "${existing.name}"`,
+                artifact: artifact.id,
+                relatedArtifacts: [existing.id],
+              })
+            );
           }
           if (normalized) {
             names.set(normalized, artifact);
@@ -172,14 +176,14 @@ class ConsistencyChecker {
         }
 
         return issues;
-      }
+      },
     };
   }
 
   static createVersionConsistencyRule() {
     return {
       name: 'version-consistency',
-      check: (artifacts) => {
+      check: artifacts => {
         const issues = [];
         const versions = new Map();
 
@@ -195,17 +199,19 @@ class ConsistencyChecker {
         for (const [type, typeArtifacts] of versions) {
           const uniqueVersions = new Set(typeArtifacts.map(a => a.version));
           if (uniqueVersions.size > 1) {
-            issues.push(new ValidationIssue({
-              type: ValidationType.CONSISTENCY,
-              severity: Severity.WARNING,
-              message: `Multiple versions found for ${type}: ${[...uniqueVersions].join(', ')}`,
-              metadata: { type, versions: [...uniqueVersions] }
-            }));
+            issues.push(
+              new ValidationIssue({
+                type: ValidationType.CONSISTENCY,
+                severity: Severity.WARNING,
+                message: `Multiple versions found for ${type}: ${[...uniqueVersions].join(', ')}`,
+                metadata: { type, versions: [...uniqueVersions] },
+              })
+            );
           }
         }
 
         return issues;
-      }
+      },
     };
   }
 }
@@ -219,7 +225,7 @@ class GapDetector {
     this.requiredLinks = options.requiredLinks || {
       [ArtifactType.REQUIREMENT]: [ArtifactType.DESIGN, ArtifactType.TEST],
       [ArtifactType.DESIGN]: [ArtifactType.IMPLEMENTATION],
-      [ArtifactType.IMPLEMENTATION]: [ArtifactType.TEST]
+      [ArtifactType.IMPLEMENTATION]: [ArtifactType.TEST],
     };
   }
 
@@ -246,20 +252,22 @@ class GapDetector {
         });
 
         if (!hasLink) {
-          issues.push(new ValidationIssue({
-            type: ValidationType.GAP,
-            severity: Severity.WARNING,
-            message: `${artifact.type} "${artifact.name}" has no linked ${requiredType}`,
-            artifact: artifact.id,
-            suggestion: `Create or link a ${requiredType} for this ${artifact.type}`
-          }));
+          issues.push(
+            new ValidationIssue({
+              type: ValidationType.GAP,
+              severity: Severity.WARNING,
+              message: `${artifact.type} "${artifact.name}" has no linked ${requiredType}`,
+              artifact: artifact.id,
+              suggestion: `Create or link a ${requiredType} for this ${artifact.type}`,
+            })
+          );
         }
       }
     }
 
     return {
       gaps: issues,
-      coverage: this.calculateCoverage(artifacts, issues)
+      coverage: this.calculateCoverage(artifacts, issues),
     };
   }
 
@@ -269,19 +277,19 @@ class GapDetector {
     }, 0);
 
     if (totalRequired === 0) return 100;
-    
+
     const gapCount = gaps.length;
     return ((totalRequired - gapCount) / totalRequired) * 100;
   }
 
   getTraceabilityReport() {
     const report = [];
-    
+
     for (const [source, targets] of this.traceabilityMatrix) {
       report.push({
         source,
         targets: [...targets],
-        count: targets.size
+        count: targets.size,
       });
     }
 
@@ -316,43 +324,47 @@ class CompletenessChecker {
     for (const field of requiredFields) {
       const value = artifact[field] || artifact.metadata?.[field];
       if (value === undefined || value === null || value === '') {
-        issues.push(new ValidationIssue({
-          type: ValidationType.COMPLETENESS,
-          severity: Severity.ERROR,
-          message: `Missing required field "${field}" in ${artifact.type} "${artifact.name}"`,
-          artifact: artifact.id,
-          location: field
-        }));
+        issues.push(
+          new ValidationIssue({
+            type: ValidationType.COMPLETENESS,
+            severity: Severity.ERROR,
+            message: `Missing required field "${field}" in ${artifact.type} "${artifact.name}"`,
+            artifact: artifact.id,
+            location: field,
+          })
+        );
       }
     }
 
     // Check required sections (for document-like artifacts)
     const requiredSections = this.requiredSections[artifact.type] || [];
     const content = artifact.content || '';
-    
+
     for (const section of requiredSections) {
       const sectionPattern = new RegExp(`^##?\\s+${section}`, 'im');
       if (!sectionPattern.test(content)) {
-        issues.push(new ValidationIssue({
-          type: ValidationType.COMPLETENESS,
-          severity: Severity.WARNING,
-          message: `Missing section "${section}" in ${artifact.type} "${artifact.name}"`,
-          artifact: artifact.id,
-          suggestion: `Add a "## ${section}" section`
-        }));
+        issues.push(
+          new ValidationIssue({
+            type: ValidationType.COMPLETENESS,
+            severity: Severity.WARNING,
+            message: `Missing section "${section}" in ${artifact.type} "${artifact.name}"`,
+            artifact: artifact.id,
+            suggestion: `Add a "## ${section}" section`,
+          })
+        );
       }
     }
 
     return {
       complete: issues.filter(i => i.severity === Severity.ERROR).length === 0,
       issues,
-      artifact: artifact.id
+      artifact: artifact.id,
     };
   }
 
   checkAll(artifacts) {
     const results = [];
-    
+
     for (const artifact of artifacts) {
       results.push(this.checkArtifact(artifact));
     }
@@ -364,7 +376,7 @@ class CompletenessChecker {
       valid: allIssues.filter(i => i.severity === Severity.ERROR).length === 0,
       completeness: (completeCount / artifacts.length) * 100,
       results,
-      issues: allIssues
+      issues: allIssues,
     };
   }
 }
@@ -448,23 +460,27 @@ class DependencyValidator {
     // Check for missing dependencies
     for (const [from, tos] of this.dependencies) {
       if (!artifactIds.has(from)) {
-        issues.push(new ValidationIssue({
-          type: ValidationType.DEPENDENCY,
-          severity: Severity.ERROR,
-          message: `Dependency source "${from}" not found in artifacts`,
-          artifact: from
-        }));
+        issues.push(
+          new ValidationIssue({
+            type: ValidationType.DEPENDENCY,
+            severity: Severity.ERROR,
+            message: `Dependency source "${from}" not found in artifacts`,
+            artifact: from,
+          })
+        );
       }
 
       for (const to of tos) {
         if (!artifactIds.has(to)) {
-          issues.push(new ValidationIssue({
-            type: ValidationType.DEPENDENCY,
-            severity: Severity.ERROR,
-            message: `Dependency target "${to}" not found (required by "${from}")`,
-            artifact: from,
-            relatedArtifacts: [to]
-          }));
+          issues.push(
+            new ValidationIssue({
+              type: ValidationType.DEPENDENCY,
+              severity: Severity.ERROR,
+              message: `Dependency target "${to}" not found (required by "${from}")`,
+              artifact: from,
+              relatedArtifacts: [to],
+            })
+          );
         }
       }
     }
@@ -473,19 +489,21 @@ class DependencyValidator {
     if (!this.allowCycles) {
       const cycles = this.detectCycles();
       for (const cycle of cycles) {
-        issues.push(new ValidationIssue({
-          type: ValidationType.DEPENDENCY,
-          severity: Severity.ERROR,
-          message: `Circular dependency detected: ${cycle.join(' → ')}`,
-          metadata: { cycle }
-        }));
+        issues.push(
+          new ValidationIssue({
+            type: ValidationType.DEPENDENCY,
+            severity: Severity.ERROR,
+            message: `Circular dependency detected: ${cycle.join(' → ')}`,
+            metadata: { cycle },
+          })
+        );
       }
     }
 
     return {
       valid: issues.length === 0,
       issues,
-      cycles: this.detectCycles()
+      cycles: this.detectCycles(),
     };
   }
 
@@ -494,13 +512,13 @@ class DependencyValidator {
     const visited = new Set();
     const temp = new Set();
 
-    const visit = (node) => {
+    const visit = node => {
       if (temp.has(node)) return false; // cycle
       if (visited.has(node)) return true;
 
       temp.add(node);
       const deps = this.dependencies.get(node) || new Set();
-      
+
       for (const dep of deps) {
         if (!visit(dep)) return false;
       }
@@ -529,7 +547,7 @@ class ReferenceValidator {
       requirement: /REQ-\d+/g,
       design: /DES-\d+/g,
       test: /TEST-\d+/g,
-      issue: /#\d+/g
+      issue: /#\d+/g,
     };
   }
 
@@ -560,13 +578,15 @@ class ReferenceValidator {
 
       for (const ref of refs) {
         if (!this.references.has(ref.id)) {
-          issues.push(new ValidationIssue({
-            type: ValidationType.REFERENCE,
-            severity: Severity.WARNING,
-            message: `Reference "${ref.id}" not found`,
-            artifact: artifact.id,
-            metadata: { referenceType: ref.type, referenceId: ref.id }
-          }));
+          issues.push(
+            new ValidationIssue({
+              type: ValidationType.REFERENCE,
+              severity: Severity.WARNING,
+              message: `Reference "${ref.id}" not found`,
+              artifact: artifact.id,
+              metadata: { referenceType: ref.type, referenceId: ref.id },
+            })
+          );
         }
       }
     }
@@ -574,7 +594,7 @@ class ReferenceValidator {
     return {
       valid: issues.length === 0,
       issues,
-      totalReferences: this.references.size
+      totalReferences: this.references.size,
     };
   }
 }
@@ -597,11 +617,7 @@ class AdvancedValidator extends EventEmitter {
   // Artifact Management
   registerArtifact(artifact) {
     if (!(artifact instanceof ArtifactReference)) {
-      artifact = new ArtifactReference(
-        artifact.type,
-        artifact.id,
-        artifact
-      );
+      artifact = new ArtifactReference(artifact.type, artifact.id, artifact);
     }
     this.artifacts.set(artifact.id, artifact);
     this.referenceValidator.registerReference(artifact.id, artifact);
@@ -666,7 +682,7 @@ class AdvancedValidator extends EventEmitter {
       gaps: this.validateGaps(),
       completeness: this.validateCompleteness(),
       dependencies: this.validateDependencies(),
-      references: this.validateReferences()
+      references: this.validateReferences(),
     };
 
     const allIssues = [
@@ -674,11 +690,11 @@ class AdvancedValidator extends EventEmitter {
       ...results.gaps.gaps,
       ...results.completeness.issues,
       ...results.dependencies.issues,
-      ...results.references.issues
+      ...results.references.issues,
     ];
 
-    const valid = !allIssues.some(i => 
-      i.severity === Severity.CRITICAL || i.severity === Severity.ERROR
+    const valid = !allIssues.some(
+      i => i.severity === Severity.CRITICAL || i.severity === Severity.ERROR
     );
 
     this.emit('validation:complete', { results, valid, issues: allIssues });
@@ -694,8 +710,8 @@ class AdvancedValidator extends EventEmitter {
         errorIssues: allIssues.filter(i => i.severity === Severity.ERROR).length,
         warningIssues: allIssues.filter(i => i.severity === Severity.WARNING).length,
         gapCoverage: results.gaps.coverage,
-        completeness: results.completeness.completeness
-      }
+        completeness: results.completeness.completeness,
+      },
     };
   }
 
@@ -703,7 +719,7 @@ class AdvancedValidator extends EventEmitter {
     this.validationHistory.push({
       type,
       result,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Keep last 100 validations
@@ -740,15 +756,15 @@ class AdvancedValidator extends EventEmitter {
       `- Critical: ${validation.summary.criticalIssues}`,
       `- Error: ${validation.summary.errorIssues}`,
       `- Warning: ${validation.summary.warningIssues}`,
-      ''
+      '',
     ];
 
     if (validation.issues.length > 0) {
       lines.push('## Issues', '');
 
       for (const issue of validation.issues) {
-        const icon = issue.severity === 'critical' ? '🔴' : 
-                    issue.severity === 'error' ? '🟠' : '🟡';
+        const icon =
+          issue.severity === 'critical' ? '🔴' : issue.severity === 'error' ? '🟠' : '🟡';
         lines.push(`### ${icon} ${issue.message}`);
         lines.push('');
         lines.push(`- Type: ${issue.type}`);
@@ -770,23 +786,16 @@ function createAdvancedValidator(options = {}) {
   const validator = new AdvancedValidator(options);
 
   // Add default consistency rules
-  validator.consistencyChecker.addRule(
-    ConsistencyChecker.createNamingConsistencyRule()
-  );
-  validator.consistencyChecker.addRule(
-    ConsistencyChecker.createVersionConsistencyRule()
-  );
+  validator.consistencyChecker.addRule(ConsistencyChecker.createNamingConsistencyRule());
+  validator.consistencyChecker.addRule(ConsistencyChecker.createVersionConsistencyRule());
 
   // Set default completeness requirements
   validator.completenessChecker.setRequiredFields(ArtifactType.REQUIREMENT, [
-    'name', 'description'
+    'name',
+    'description',
   ]);
-  validator.completenessChecker.setRequiredFields(ArtifactType.DESIGN, [
-    'name', 'description'
-  ]);
-  validator.completenessChecker.setRequiredSections(ArtifactType.STEERING, [
-    'Overview', 'Purpose'
-  ]);
+  validator.completenessChecker.setRequiredFields(ArtifactType.DESIGN, ['name', 'description']);
+  validator.completenessChecker.setRequiredSections(ArtifactType.STEERING, ['Overview', 'Purpose']);
 
   return validator;
 }
@@ -796,7 +805,7 @@ module.exports = {
   ValidationType,
   Severity,
   ArtifactType,
-  
+
   // Classes
   ValidationIssue,
   ArtifactReference,
@@ -806,7 +815,7 @@ module.exports = {
   DependencyValidator,
   ReferenceValidator,
   AdvancedValidator,
-  
+
   // Factory
-  createAdvancedValidator
+  createAdvancedValidator,
 };

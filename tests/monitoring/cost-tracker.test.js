@@ -110,8 +110,8 @@ describe('CostTracker', () => {
       expect(tracker.periodTotals.outputTokens).toBe(500);
     });
 
-    test('should emit usage event', (done) => {
-      tracker.on('usage', (record) => {
+    test('should emit usage event', done => {
+      tracker.on('usage', record => {
         expect(record.provider).toBe('anthropic');
         done();
       });
@@ -124,10 +124,10 @@ describe('CostTracker', () => {
       });
     });
 
-    test('should emit budget-exceeded event', (done) => {
+    test('should emit budget-exceeded event', done => {
       tracker.setBudget(0.001, 'monthly');
 
-      tracker.on('budget-exceeded', (data) => {
+      tracker.on('budget-exceeded', data => {
         expect(data.current).toBeGreaterThanOrEqual(data.limit);
         done();
       });
@@ -141,13 +141,13 @@ describe('CostTracker', () => {
       });
     });
 
-    test('should emit budget-warning event at 80%', (done) => {
+    test('should emit budget-warning event at 80%', done => {
       // Set a budget that will trigger warning but not exceeded
       // GPT-4o: $2.50/1M input, $10.00/1M output
       // 10000 input + 5000 output = $0.025 + $0.05 = $0.075
       tracker.setBudget(0.09, 'monthly'); // 80% of 0.09 = 0.072
 
-      tracker.on('budget-warning', (data) => {
+      tracker.on('budget-warning', data => {
         expect(data.percentage).toBeGreaterThanOrEqual(80);
         done();
       });
@@ -190,7 +190,12 @@ describe('CostTracker', () => {
     beforeEach(() => {
       tracker.record({ provider: 'openai', model: 'gpt-4o', inputTokens: 1000, outputTokens: 500 });
       tracker.record({ provider: 'openai', model: 'gpt-4o', inputTokens: 500, outputTokens: 200 });
-      tracker.record({ provider: 'anthropic', model: 'claude-3.5-sonnet', inputTokens: 800, outputTokens: 400 });
+      tracker.record({
+        provider: 'anthropic',
+        model: 'claude-3.5-sonnet',
+        inputTokens: 800,
+        outputTokens: 400,
+      });
     });
 
     test('should calculate total tokens and cost', () => {
@@ -249,7 +254,12 @@ describe('CostTracker', () => {
   describe('generateReport', () => {
     beforeEach(() => {
       tracker.record({ provider: 'openai', model: 'gpt-4o', inputTokens: 1000, outputTokens: 500 });
-      tracker.record({ provider: 'anthropic', model: 'claude-3.5-sonnet', inputTokens: 500, outputTokens: 200 });
+      tracker.record({
+        provider: 'anthropic',
+        model: 'claude-3.5-sonnet',
+        inputTokens: 500,
+        outputTokens: 200,
+      });
     });
 
     test('should generate text report', () => {
@@ -391,11 +401,15 @@ describe('CostTracker', () => {
       expect(tracker).toBeInstanceOf(require('events').EventEmitter);
     });
 
-    test('should support multiple listeners', (done) => {
+    test('should support multiple listeners', done => {
       let count = 0;
 
-      tracker.on('usage', () => { count++; });
-      tracker.on('usage', () => { count++; });
+      tracker.on('usage', () => {
+        count++;
+      });
+      tracker.on('usage', () => {
+        count++;
+      });
       tracker.on('usage', () => {
         if (count === 2) done();
       });
@@ -414,7 +428,7 @@ describe('CostTracker', () => {
       });
 
       // GPT-4o: $2.50/1M input, $10.00/1M output
-      expect(record.cost).toBeCloseTo(2.50 + 10.00, 2);
+      expect(record.cost).toBeCloseTo(2.5 + 10.0, 2);
     });
 
     test('should calculate correctly for Claude Sonnet', () => {
@@ -426,7 +440,7 @@ describe('CostTracker', () => {
       });
 
       // Claude 3.5 Sonnet: $3.00/1M input, $15.00/1M output
-      expect(record.cost).toBeCloseTo(3.00 + 15.00, 2);
+      expect(record.cost).toBeCloseTo(3.0 + 15.0, 2);
     });
   });
 

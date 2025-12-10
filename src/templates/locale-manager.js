@@ -80,7 +80,7 @@ class LocaleManager {
    */
   async getTemplate(category, locale = this.defaultLocale) {
     const baseName = TEMPLATE_CATEGORIES[category] || category;
-    
+
     // Try exact locale match first
     let templatePath = this.getTemplatePath(baseName, locale);
     if (await fs.pathExists(templatePath)) {
@@ -123,19 +123,19 @@ class LocaleManager {
    */
   async listTemplates() {
     const result = {};
-    
-    if (!await fs.pathExists(this.templatesPath)) {
+
+    if (!(await fs.pathExists(this.templatesPath))) {
       return result;
     }
 
     const files = await fs.readdir(this.templatesPath);
-    
+
     for (const file of files) {
       if (!file.endsWith('.md')) continue;
-      
+
       const { category, locale } = this.parseTemplateFilename(file);
       if (!category) continue;
-      
+
       if (!result[category]) {
         result[category] = [];
       }
@@ -154,7 +154,7 @@ class LocaleManager {
    */
   parseTemplateFilename(filename) {
     const baseName = filename.replace('.md', '');
-    
+
     // Check for locale suffix
     for (const locale of SUPPORTED_LOCALES) {
       if (baseName.endsWith(`.${locale}`)) {
@@ -164,7 +164,7 @@ class LocaleManager {
         };
       }
     }
-    
+
     // No locale suffix means English
     return {
       category: baseName,
@@ -182,10 +182,10 @@ class LocaleManager {
   async createLocalizedTemplate(category, locale, content) {
     const baseName = TEMPLATE_CATEGORIES[category] || category;
     const templatePath = this.getTemplatePath(baseName, locale);
-    
+
     await fs.ensureDir(path.dirname(templatePath));
     await fs.writeFile(templatePath, content, 'utf-8');
-    
+
     return templatePath;
   }
 
@@ -199,19 +199,19 @@ class LocaleManager {
     // Extract translatable sections
     const sections = [];
     const lines = content.split('\n');
-    
+
     let inCodeBlock = false;
-    
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      
+
       if (line.startsWith('```')) {
         inCodeBlock = !inCodeBlock;
         continue;
       }
-      
+
       if (inCodeBlock) continue;
-      
+
       // Headers
       if (line.startsWith('#')) {
         sections.push({
@@ -221,7 +221,7 @@ class LocaleManager {
           translate: true,
         });
       }
-      
+
       // Paragraphs (non-empty, non-special lines)
       if (line.trim() && !line.startsWith('-') && !line.startsWith('*') && !line.startsWith('|')) {
         sections.push({

@@ -83,7 +83,8 @@ async function runE2ETests() {
     const response = await provider.complete(
       'Return a JSON object with keys "status" set to "ok" and "tool" set to "musubi".',
       {
-        systemPrompt: 'You are a helpful assistant that responds only in valid JSON format. No explanation, just JSON.',
+        systemPrompt:
+          'You are a helpful assistant that responds only in valid JSON format. No explanation, just JSON.',
         temperature: 0,
         maxTokens: 100,
       }
@@ -128,7 +129,12 @@ async function runE2ETests() {
         throw new Error('No embedding returned');
       }
       console.log(`\n    Embedding dimension: ${embedding.length}`);
-      console.log(`    First 5 values: [${embedding.slice(0, 5).map(v => v.toFixed(4)).join(', ')}...]`);
+      console.log(
+        `    First 5 values: [${embedding
+          .slice(0, 5)
+          .map(v => v.toFixed(4))
+          .join(', ')}...]`
+      );
     } catch (error) {
       if (error.message.includes('not found') || error.message.includes('does not exist')) {
         console.log(`\n    (Skipped: ${EMBED_MODEL} model not available)`);
@@ -179,9 +185,9 @@ async function runE2ETests() {
 Question: What is the secret code I mentioned?`,
       { temperature: 0, maxTokens: 50 }
     );
-    
+
     console.log(`    Second response: "${response2.content.substring(0, 80)}..."`);
-    
+
     if (!response2.content.includes('MUSUBI') && !response2.content.includes('2025')) {
       console.log('    Warning: Context may not be maintained');
     }
@@ -192,7 +198,8 @@ Question: What is the secret code I mentioned?`,
     const response = await provider.complete(
       'Write a JavaScript function called "add" that takes two numbers and returns their sum. Only code, no explanation.',
       {
-        systemPrompt: 'You are a code assistant. Return only valid JavaScript code without markdown.',
+        systemPrompt:
+          'You are a code assistant. Return only valid JavaScript code without markdown.',
         temperature: 0,
         maxTokens: 150,
       }
@@ -201,7 +208,13 @@ Question: What is the secret code I mentioned?`,
     if (!response.content.includes('function') && !response.content.includes('=>')) {
       console.log(`\n    Warning: Response may not contain valid function`);
     }
-    console.log(`\n    Generated code:\n${response.content.split('\n').slice(0, 6).map(l => '      ' + l).join('\n')}`);
+    console.log(
+      `\n    Generated code:\n${response.content
+        .split('\n')
+        .slice(0, 6)
+        .map(l => '      ' + l)
+        .join('\n')}`
+    );
   });
 
   // Test 11: Long context handling
@@ -211,7 +224,7 @@ Question: What is the secret code I mentioned?`,
       `${longContext}\n\nHow many times does the word "word" appear above? Just give a number.`,
       { temperature: 0, maxTokens: 50 }
     );
-    
+
     console.log(`\n    Response: "${response.content.substring(0, 50)}..."`);
     console.log(`    Prompt tokens: ${response.usage?.promptTokens || 'N/A'}`);
   });
@@ -219,7 +232,7 @@ Question: What is the secret code I mentioned?`,
   // Test 12: Provider metadata
   await test('Provider metadata', async () => {
     const response = await provider.complete('Hi', { maxTokens: 10 });
-    
+
     if (!response.metadata) {
       throw new Error('No metadata in response');
     }
@@ -235,9 +248,11 @@ Question: What is the secret code I mentioned?`,
 
   if (results.failed > 0) {
     console.log('\n❌ Failed tests:');
-    results.tests.filter(t => t.status === 'failed').forEach(t => {
-      console.log(`  - ${t.name}: ${t.error}`);
-    });
+    results.tests
+      .filter(t => t.status === 'failed')
+      .forEach(t => {
+        console.log(`  - ${t.name}: ${t.error}`);
+      });
     process.exit(1);
   } else {
     console.log('\n✅ All E2E tests passed!');

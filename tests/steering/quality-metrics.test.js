@@ -12,7 +12,7 @@ const {
   MetricCategory,
   HealthStatus,
   TrendDirection,
-  createQualityDashboard
+  createQualityDashboard,
 } = require('../../src/steering/quality-metrics');
 
 describe('Quality Metrics Dashboard', () => {
@@ -148,7 +148,7 @@ describe('Quality Metrics Dashboard', () => {
       compliance.addRule('rule-1');
       compliance.addRule('rule-2');
       compliance.addViolation({ rule: 'rule-1' });
-      
+
       const json = compliance.toJSON();
       expect(json.rules).toBe(2);
       expect(json.violations).toBe(1);
@@ -166,7 +166,7 @@ describe('Quality Metrics Dashboard', () => {
 
     test('should check health', async () => {
       const indicator = new HealthIndicator('Test', {
-        checker: async () => ({ status: HealthStatus.HEALTHY, message: 'OK' })
+        checker: async () => ({ status: HealthStatus.HEALTHY, message: 'OK' }),
       });
 
       const result = await indicator.check();
@@ -178,7 +178,9 @@ describe('Quality Metrics Dashboard', () => {
 
     test('should handle check errors', async () => {
       const indicator = new HealthIndicator('Failing', {
-        checker: async () => { throw new Error('Connection failed'); }
+        checker: async () => {
+          throw new Error('Connection failed');
+        },
       });
 
       const result = await indicator.check();
@@ -198,7 +200,7 @@ describe('Quality Metrics Dashboard', () => {
 
     test('should check isHealthy', async () => {
       const indicator = new HealthIndicator('Test', {
-        checker: async () => ({ status: HealthStatus.HEALTHY })
+        checker: async () => ({ status: HealthStatus.HEALTHY }),
       });
 
       await indicator.check();
@@ -207,7 +209,7 @@ describe('Quality Metrics Dashboard', () => {
 
     test('should convert to JSON', async () => {
       const indicator = new HealthIndicator('Test', {
-        checker: async () => ({ status: HealthStatus.HEALTHY, message: 'All good' })
+        checker: async () => ({ status: HealthStatus.HEALTHY, message: 'All good' }),
       });
 
       await indicator.check();
@@ -318,7 +320,7 @@ describe('Quality Metrics Dashboard', () => {
         coverage: [{ value: 80 }, { value: 70 }],
         compliance: [{ value: 100 }],
         health: [{ status: HealthStatus.HEALTHY }],
-        trends: [{ direction: TrendDirection.UP }]
+        trends: [{ direction: TrendDirection.UP }],
       };
 
       const score = calculator.calculate(metrics);
@@ -344,10 +346,7 @@ describe('Quality Metrics Dashboard', () => {
     });
 
     test('should calculate health score', () => {
-      const health = [
-        { status: HealthStatus.HEALTHY },
-        { status: HealthStatus.WARNING }
-      ];
+      const health = [{ status: HealthStatus.HEALTHY }, { status: HealthStatus.WARNING }];
       const score = calculator.calculateHealthScore(health);
 
       expect(score).toBe(80); // (100 + 60) / 2
@@ -355,7 +354,7 @@ describe('Quality Metrics Dashboard', () => {
 
     test('should use custom weights', () => {
       const custom = new QualityScoreCalculator({
-        weights: { coverage: 0.5, compliance: 0.5, health: 0, trends: 0 }
+        weights: { coverage: 0.5, compliance: 0.5, health: 0, trends: 0 },
       });
 
       expect(custom.weights.coverage).toBe(0.5);
@@ -406,21 +405,27 @@ describe('Quality Metrics Dashboard', () => {
     });
 
     test('should check health', async () => {
-      dashboard.addHealthIndicator(new HealthIndicator('Test', {
-        checker: async () => ({ status: HealthStatus.HEALTHY })
-      }));
+      dashboard.addHealthIndicator(
+        new HealthIndicator('Test', {
+          checker: async () => ({ status: HealthStatus.HEALTHY }),
+        })
+      );
 
       const result = await dashboard.checkHealth('Test');
       expect(result.status).toBe(HealthStatus.HEALTHY);
     });
 
     test('should check all health', async () => {
-      dashboard.addHealthIndicator(new HealthIndicator('A', {
-        checker: async () => ({ status: HealthStatus.HEALTHY })
-      }));
-      dashboard.addHealthIndicator(new HealthIndicator('B', {
-        checker: async () => ({ status: HealthStatus.WARNING })
-      }));
+      dashboard.addHealthIndicator(
+        new HealthIndicator('A', {
+          checker: async () => ({ status: HealthStatus.HEALTHY }),
+        })
+      );
+      dashboard.addHealthIndicator(
+        new HealthIndicator('B', {
+          checker: async () => ({ status: HealthStatus.WARNING }),
+        })
+      );
 
       const results = await dashboard.checkAllHealth();
       expect(results.A.status).toBe(HealthStatus.HEALTHY);
@@ -473,9 +478,11 @@ describe('Quality Metrics Dashboard', () => {
 
     test('should generate summary', () => {
       dashboard.addMetric(new CoverageMetric('Coverage', { value: 80 }));
-      dashboard.addHealthIndicator(new HealthIndicator('DB', {
-        status: HealthStatus.HEALTHY
-      }));
+      dashboard.addHealthIndicator(
+        new HealthIndicator('DB', {
+          status: HealthStatus.HEALTHY,
+        })
+      );
 
       const summary = dashboard.generateSummary();
 
@@ -487,9 +494,11 @@ describe('Quality Metrics Dashboard', () => {
 
     test('should generate markdown report', () => {
       dashboard.addMetric(new CoverageMetric('Code Coverage', { value: 85, target: 80 }));
-      dashboard.addHealthIndicator(new HealthIndicator('Database', {
-        status: HealthStatus.HEALTHY
-      }));
+      dashboard.addHealthIndicator(
+        new HealthIndicator('Database', {
+          status: HealthStatus.HEALTHY,
+        })
+      );
 
       const report = dashboard.generateMarkdownReport();
 
@@ -499,8 +508,8 @@ describe('Quality Metrics Dashboard', () => {
       expect(report).toContain('Grade:');
     });
 
-    test('should emit events', (done) => {
-      dashboard.on('metric:added', (metric) => {
+    test('should emit events', done => {
+      dashboard.on('metric:added', metric => {
         expect(metric.name).toBe('Test');
         done();
       });
@@ -535,7 +544,7 @@ describe('Quality Metrics Dashboard', () => {
     test('should accept custom name', () => {
       const dashboard = createQualityDashboard({
         name: 'My Dashboard',
-        includeDefaults: false
+        includeDefaults: false,
       });
 
       expect(dashboard.name).toBe('My Dashboard');

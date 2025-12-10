@@ -1,7 +1,7 @@
 /**
  * ErrorHandler - Comprehensive error handling patterns
  * Sprint 3.5: Advanced Workflows
- * 
+ *
  * Provides:
  * - Error classification and categorization
  * - Recovery strategies
@@ -19,7 +19,7 @@ const ErrorSeverity = {
   LOW: 'low',
   MEDIUM: 'medium',
   HIGH: 'high',
-  CRITICAL: 'critical'
+  CRITICAL: 'critical',
 };
 
 /**
@@ -38,7 +38,7 @@ const ErrorCategory = {
   EXTERNAL_SERVICE: 'external-service',
   CONFIGURATION: 'configuration',
   USER_INPUT: 'user-input',
-  UNKNOWN: 'unknown'
+  UNKNOWN: 'unknown',
 };
 
 /**
@@ -47,7 +47,7 @@ const ErrorCategory = {
 const CircuitState = {
   CLOSED: 'closed',
   OPEN: 'open',
-  HALF_OPEN: 'half-open'
+  HALF_OPEN: 'half-open',
 };
 
 /**
@@ -80,7 +80,7 @@ class WorkflowError extends Error {
       context: this.context,
       timestamp: this.timestamp,
       suggestions: this.suggestions,
-      stack: this.stack
+      stack: this.stack,
     };
   }
 }
@@ -106,32 +106,22 @@ class ErrorClassifier {
           /ENOTFOUND/i,
           /network/i,
           /connection failed/i,
-          /socket hang up/i
-        ]
+          /socket hang up/i,
+        ],
       },
       // Timeout errors
       {
         category: ErrorCategory.TIMEOUT,
         severity: ErrorSeverity.MEDIUM,
         retryable: true,
-        patterns: [
-          /timeout/i,
-          /ETIMEDOUT/i,
-          /timed out/i,
-          /deadline exceeded/i
-        ]
+        patterns: [/timeout/i, /ETIMEDOUT/i, /timed out/i, /deadline exceeded/i],
       },
       // Rate limit errors
       {
         category: ErrorCategory.RATE_LIMIT,
         severity: ErrorSeverity.LOW,
         retryable: true,
-        patterns: [
-          /rate limit/i,
-          /too many requests/i,
-          /429/,
-          /throttl/i
-        ]
+        patterns: [/rate limit/i, /too many requests/i, /429/, /throttl/i],
       },
       // Authentication errors
       {
@@ -143,71 +133,44 @@ class ErrorClassifier {
           /authentication failed/i,
           /invalid token/i,
           /401/,
-          /not authenticated/i
-        ]
+          /not authenticated/i,
+        ],
       },
       // Authorization errors
       {
         category: ErrorCategory.AUTHORIZATION,
         severity: ErrorSeverity.HIGH,
         retryable: false,
-        patterns: [
-          /forbidden/i,
-          /access denied/i,
-          /permission denied/i,
-          /403/,
-          /not authorized/i
-        ]
+        patterns: [/forbidden/i, /access denied/i, /permission denied/i, /403/, /not authorized/i],
       },
       // Resource not found
       {
         category: ErrorCategory.RESOURCE_NOT_FOUND,
         severity: ErrorSeverity.MEDIUM,
         retryable: false,
-        patterns: [
-          /not found/i,
-          /404/,
-          /does not exist/i,
-          /no such/i
-        ]
+        patterns: [/not found/i, /404/, /does not exist/i, /no such/i],
       },
       // Validation errors
       {
         category: ErrorCategory.VALIDATION,
         severity: ErrorSeverity.LOW,
         retryable: false,
-        patterns: [
-          /validation/i,
-          /invalid/i,
-          /required field/i,
-          /must be/i,
-          /expected/i
-        ]
+        patterns: [/validation/i, /invalid/i, /required field/i, /must be/i, /expected/i],
       },
       // Conflict errors
       {
         category: ErrorCategory.CONFLICT,
         severity: ErrorSeverity.MEDIUM,
         retryable: false,
-        patterns: [
-          /conflict/i,
-          /already exists/i,
-          /duplicate/i,
-          /409/
-        ]
+        patterns: [/conflict/i, /already exists/i, /duplicate/i, /409/],
       },
       // Configuration errors
       {
         category: ErrorCategory.CONFIGURATION,
         severity: ErrorSeverity.HIGH,
         retryable: false,
-        patterns: [
-          /configuration/i,
-          /config/i,
-          /missing setting/i,
-          /not configured/i
-        ]
-      }
+        patterns: [/configuration/i, /config/i, /missing setting/i, /not configured/i],
+      },
     ];
   }
 
@@ -216,7 +179,7 @@ class ErrorClassifier {
    */
   classify(error) {
     const errorString = `${error.message} ${error.code || ''} ${error.name || ''}`;
-    
+
     for (const pattern of this.patterns) {
       for (const regex of pattern.patterns) {
         if (regex.test(errorString)) {
@@ -224,7 +187,7 @@ class ErrorClassifier {
             category: pattern.category,
             severity: pattern.severity,
             retryable: pattern.retryable,
-            recoverable: pattern.severity !== ErrorSeverity.CRITICAL
+            recoverable: pattern.severity !== ErrorSeverity.CRITICAL,
           };
         }
       }
@@ -234,7 +197,7 @@ class ErrorClassifier {
       category: ErrorCategory.UNKNOWN,
       severity: ErrorSeverity.MEDIUM,
       retryable: false,
-      recoverable: true
+      recoverable: true,
     };
   }
 
@@ -247,7 +210,7 @@ class ErrorClassifier {
     }
 
     const classification = this.classify(error);
-    
+
     return new WorkflowError(error.message, {
       code: error.code || 'UNKNOWN_ERROR',
       category: classification.category,
@@ -255,7 +218,7 @@ class ErrorClassifier {
       retryable: classification.retryable,
       recoverable: classification.recoverable,
       cause: error,
-      context: { originalName: error.name }
+      context: { originalName: error.name },
     });
   }
 
@@ -300,7 +263,7 @@ class CircuitBreaker extends EventEmitter {
           category: ErrorCategory.EXTERNAL_SERVICE,
           severity: ErrorSeverity.HIGH,
           retryable: true,
-          context: { circuitName: this.name }
+          context: { circuitName: this.name },
         });
       }
     }
@@ -311,7 +274,7 @@ class CircuitBreaker extends EventEmitter {
           code: 'CIRCUIT_HALF_OPEN_LIMIT',
           category: ErrorCategory.EXTERNAL_SERVICE,
           severity: ErrorSeverity.MEDIUM,
-          retryable: true
+          retryable: true,
         });
       }
       this.halfOpenCalls++;
@@ -329,7 +292,7 @@ class CircuitBreaker extends EventEmitter {
 
   _onSuccess() {
     this.failures = 0;
-    
+
     if (this.state === CircuitState.HALF_OPEN) {
       this.successes++;
       if (this.successes >= this.successThreshold) {
@@ -342,7 +305,7 @@ class CircuitBreaker extends EventEmitter {
     this.failures++;
     this.lastFailureTime = Date.now();
     this.successes = 0;
-    
+
     if (this.state === CircuitState.HALF_OPEN) {
       this._transitionTo(CircuitState.OPEN);
     } else if (this.failures >= this.failureThreshold) {
@@ -355,7 +318,7 @@ class CircuitBreaker extends EventEmitter {
   _transitionTo(newState) {
     const oldState = this.state;
     this.state = newState;
-    
+
     if (newState === CircuitState.CLOSED) {
       this.failures = 0;
       this.successes = 0;
@@ -372,7 +335,7 @@ class CircuitBreaker extends EventEmitter {
       state: this.state,
       failures: this.failures,
       successes: this.successes,
-      lastFailureTime: this.lastFailureTime
+      lastFailureTime: this.lastFailureTime,
     };
   }
 
@@ -396,17 +359,16 @@ class ErrorAggregator {
    * Add an error to the aggregator
    */
   add(error, context = {}) {
-    const enhanced = error instanceof WorkflowError ? error : 
-      new ErrorClassifier().enhance(error);
+    const enhanced = error instanceof WorkflowError ? error : new ErrorClassifier().enhance(error);
 
     const entry = {
       error: enhanced.toJSON(),
       context,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     this.errors.push(entry);
-    
+
     // Trim if necessary
     if (this.errors.length > this.maxErrors) {
       this.errors = this.errors.slice(-this.maxErrors);
@@ -433,7 +395,7 @@ class ErrorAggregator {
       bySeverity: Object.fromEntries(this.severityCounts),
       recentErrors: this.errors.slice(-10),
       mostCommonCategory: this._getMostCommon(this.categoryCounts),
-      criticalCount: this.severityCounts.get(ErrorSeverity.CRITICAL) || 0
+      criticalCount: this.severityCounts.get(ErrorSeverity.CRITICAL) || 0,
     };
   }
 
@@ -484,24 +446,24 @@ class ErrorAggregator {
    */
   generateReport() {
     const stats = this.getStats();
-    
+
     return {
       summary: {
         total: stats.totalErrors,
         critical: stats.criticalCount,
-        mostCommonCategory: stats.mostCommonCategory
+        mostCommonCategory: stats.mostCommonCategory,
       },
       breakdown: {
         byCategory: stats.byCategory,
-        bySeverity: stats.bySeverity
+        bySeverity: stats.bySeverity,
       },
       recentErrors: stats.recentErrors.map(e => ({
         message: e.error.message,
         category: e.error.category,
         severity: e.error.severity,
-        timestamp: e.timestamp
+        timestamp: e.timestamp,
       })),
-      recommendations: this._generateRecommendations(stats)
+      recommendations: this._generateRecommendations(stats),
     };
   }
 
@@ -511,7 +473,7 @@ class ErrorAggregator {
     if (stats.criticalCount > 0) {
       recommendations.push({
         priority: 'high',
-        message: `${stats.criticalCount} critical errors require immediate attention`
+        message: `${stats.criticalCount} critical errors require immediate attention`,
       });
     }
 
@@ -519,7 +481,7 @@ class ErrorAggregator {
     if (networkErrors > 5) {
       recommendations.push({
         priority: 'medium',
-        message: 'Multiple network errors detected. Check connectivity and service availability.'
+        message: 'Multiple network errors detected. Check connectivity and service availability.',
       });
     }
 
@@ -527,7 +489,7 @@ class ErrorAggregator {
     if (authErrors > 0) {
       recommendations.push({
         priority: 'high',
-        message: 'Authentication errors detected. Verify credentials and tokens.'
+        message: 'Authentication errors detected. Verify credentials and tokens.',
       });
     }
 
@@ -535,7 +497,8 @@ class ErrorAggregator {
     if (rateLimitErrors > 3) {
       recommendations.push({
         priority: 'medium',
-        message: 'Rate limiting detected. Consider implementing backoff or reducing request frequency.'
+        message:
+          'Rate limiting detected. Consider implementing backoff or reducing request frequency.',
       });
     }
 
@@ -560,7 +523,7 @@ class GracefulDegradation {
       fn: fallbackFn,
       ttl: options.ttl || 60000, // 1 minute default cache
       lastResult: null,
-      lastResultTime: null
+      lastResultTime: null,
     });
   }
 
@@ -570,24 +533,23 @@ class GracefulDegradation {
   async execute(serviceName, primaryFn, _options = {}) {
     try {
       const result = await primaryFn();
-      
+
       // Service recovered
       if (this.degradedServices.has(serviceName)) {
         this.degradedServices.delete(serviceName);
       }
-      
+
       // Cache successful result for fallback
       const fallback = this.fallbacks.get(serviceName);
       if (fallback) {
         fallback.lastResult = result;
         fallback.lastResultTime = Date.now();
       }
-      
+
       return { result, degraded: false };
-      
     } catch (error) {
       const fallback = this.fallbacks.get(serviceName);
-      
+
       if (!fallback) {
         throw error;
       }
@@ -595,13 +557,12 @@ class GracefulDegradation {
       this.degradedServices.add(serviceName);
 
       // Try cached result first
-      if (fallback.lastResult && 
-          (Date.now() - fallback.lastResultTime) < fallback.ttl) {
+      if (fallback.lastResult && Date.now() - fallback.lastResultTime < fallback.ttl) {
         return {
           result: fallback.lastResult,
           degraded: true,
           source: 'cache',
-          error: error.message
+          error: error.message,
         };
       }
 
@@ -612,7 +573,7 @@ class GracefulDegradation {
           result: fallbackResult,
           degraded: true,
           source: 'fallback',
-          error: error.message
+          error: error.message,
         };
       } catch (fallbackError) {
         // Both primary and fallback failed
@@ -624,8 +585,8 @@ class GracefulDegradation {
           context: {
             serviceName,
             primaryError: error.message,
-            fallbackError: fallbackError.message
-          }
+            fallbackError: fallbackError.message,
+          },
         });
       }
     }
@@ -660,7 +621,7 @@ class ErrorHandler extends EventEmitter {
       maxRetries: 3,
       backoffMs: 1000,
       backoffMultiplier: 2,
-      maxBackoffMs: 30000
+      maxBackoffMs: 30000,
     };
   }
 
@@ -670,7 +631,7 @@ class ErrorHandler extends EventEmitter {
   getCircuitBreaker(serviceName, options = {}) {
     if (!this.circuitBreakers.has(serviceName)) {
       const breaker = new CircuitBreaker({ name: serviceName, ...options });
-      breaker.on('state-change', (event) => {
+      breaker.on('state-change', event => {
         this.emit('circuit-state-change', { service: serviceName, ...event });
       });
       this.circuitBreakers.set(serviceName, breaker);
@@ -684,10 +645,10 @@ class ErrorHandler extends EventEmitter {
   handle(error, context = {}) {
     // Classify and enhance error
     const enhanced = this.classifier.enhance(error);
-    
+
     // Add to aggregator
     this.aggregator.add(enhanced, context);
-    
+
     // Emit error event
     this.emit('error', { error: enhanced, context });
 
@@ -698,7 +659,7 @@ class ErrorHandler extends EventEmitter {
     return {
       error: enhanced,
       handled: true,
-      suggestions: this._getSuggestions(enhanced)
+      suggestions: this._getSuggestions(enhanced),
     };
   }
 
@@ -707,7 +668,7 @@ class ErrorHandler extends EventEmitter {
       message: error.message,
       category: error.category,
       severity: error.severity,
-      context: { ...error.context, ...context }
+      context: { ...error.context, ...context },
     };
 
     switch (error.severity) {
@@ -778,18 +739,15 @@ class ErrorHandler extends EventEmitter {
           throw enhanced;
         }
 
-        this.emit('retry', { 
-          attempt: attempt + 1, 
+        this.emit('retry', {
+          attempt: attempt + 1,
           maxRetries: policy.maxRetries,
           backoffMs: currentBackoff,
-          error: enhanced.message
+          error: enhanced.message,
         });
 
         await this._sleep(currentBackoff);
-        currentBackoff = Math.min(
-          currentBackoff * policy.backoffMultiplier,
-          policy.maxBackoffMs
-        );
+        currentBackoff = Math.min(currentBackoff * policy.backoffMultiplier, policy.maxBackoffMs);
       }
     }
 
@@ -805,7 +763,7 @@ class ErrorHandler extends EventEmitter {
       circuitBreakers: Object.fromEntries(
         [...this.circuitBreakers].map(([name, breaker]) => [name, breaker.getState()])
       ),
-      degradedServices: this.degradation.getDegradedServices()
+      degradedServices: this.degradation.getDegradedServices(),
     };
   }
 
@@ -823,5 +781,5 @@ module.exports = {
   WorkflowError,
   ErrorSeverity,
   ErrorCategory,
-  CircuitState
+  CircuitState,
 };

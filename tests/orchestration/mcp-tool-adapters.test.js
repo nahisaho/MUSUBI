@@ -10,7 +10,7 @@ const {
   SchemaTranslator,
   MCPToSkillAdapter,
   SkillToMCPAdapter,
-  MCPAdapterManager
+  MCPAdapterManager,
 } = require('../../src/orchestration/mcp-tool-adapters');
 
 // Mock SkillRegistry
@@ -37,14 +37,14 @@ const createMockRegistry = () => ({
       }
     }
     return result;
-  }
+  },
 });
 
 // Mock SkillExecutor
 const createMockExecutor = () => ({
   async execute(_skillId, _input) {
     return { success: true, output: { result: 'executed' } };
-  }
+  },
 });
 
 describe('MCPToolDefinition', () => {
@@ -55,9 +55,9 @@ describe('MCPToolDefinition', () => {
       inputSchema: {
         type: 'object',
         properties: {
-          input: { type: 'string' }
-        }
-      }
+          input: { type: 'string' },
+        },
+      },
     });
 
     const validation = tool.validate();
@@ -66,7 +66,7 @@ describe('MCPToolDefinition', () => {
 
   test('should reject tool without name', () => {
     const tool = new MCPToolDefinition({
-      description: 'Missing name'
+      description: 'Missing name',
     });
 
     const validation = tool.validate();
@@ -76,7 +76,7 @@ describe('MCPToolDefinition', () => {
 
   test('should have default transport', () => {
     const tool = new MCPToolDefinition({
-      name: 'default_transport'
+      name: 'default_transport',
     });
 
     expect(tool.transport).toBe(MCPTransport.STDIO);
@@ -90,9 +90,9 @@ describe('SchemaTranslator', () => {
         type: 'object',
         properties: {
           text: { type: 'string', description: 'Input text' },
-          count: { type: 'number' }
+          count: { type: 'number' },
         },
-        required: ['text']
+        required: ['text'],
       };
 
       const musubiSchema = SchemaTranslator.mcpToMusubi(mcpSchema);
@@ -110,10 +110,10 @@ describe('SchemaTranslator', () => {
           config: {
             type: 'object',
             properties: {
-              enabled: { type: 'boolean' }
-            }
-          }
-        }
+              enabled: { type: 'boolean' },
+            },
+          },
+        },
       };
 
       const musubiSchema = SchemaTranslator.mcpToMusubi(mcpSchema);
@@ -128,9 +128,9 @@ describe('SchemaTranslator', () => {
         properties: {
           items: {
             type: 'array',
-            items: { type: 'string' }
-          }
-        }
+            items: { type: 'string' },
+          },
+        },
       };
 
       const musubiSchema = SchemaTranslator.mcpToMusubi(mcpSchema);
@@ -152,9 +152,9 @@ describe('SchemaTranslator', () => {
       const musubiSchema = {
         type: 'object',
         properties: {
-          input: { type: 'string' }
+          input: { type: 'string' },
         },
-        required: ['input']
+        required: ['input'],
       };
 
       const mcpSchema = SchemaTranslator.musubiToMcp(musubiSchema);
@@ -181,7 +181,7 @@ describe('MCPToSkillAdapter', () => {
     mockRegistry = createMockRegistry();
     adapter = new MCPToSkillAdapter({
       registry: mockRegistry,
-      timeout: 5000
+      timeout: 5000,
     });
   });
 
@@ -195,9 +195,9 @@ describe('MCPToSkillAdapter', () => {
           {
             name: 'tool1',
             description: 'Test tool 1',
-            inputSchema: { type: 'object', properties: {} }
-          }
-        ]
+            inputSchema: { type: 'object', properties: {} },
+          },
+        ],
       });
 
       expect(skills.length).toBe(1);
@@ -211,12 +211,12 @@ describe('MCPToSkillAdapter', () => {
       await adapter.registerServer({
         id: 'event-server',
         transport: MCPTransport.HTTP,
-        tools: []
+        tools: [],
       });
 
       expect(listener).toHaveBeenCalledWith(
         expect.objectContaining({
-          serverId: 'event-server'
+          serverId: 'event-server',
         })
       );
     });
@@ -225,14 +225,16 @@ describe('MCPToSkillAdapter', () => {
       await adapter.registerServer({
         id: 'dup-server',
         transport: MCPTransport.STDIO,
-        tools: []
+        tools: [],
       });
 
-      await expect(adapter.registerServer({
-        id: 'dup-server',
-        transport: MCPTransport.STDIO,
-        tools: []
-      })).rejects.toThrow('already registered');
+      await expect(
+        adapter.registerServer({
+          id: 'dup-server',
+          transport: MCPTransport.STDIO,
+          tools: [],
+        })
+      ).rejects.toThrow('already registered');
     });
   });
 
@@ -244,9 +246,9 @@ describe('MCPToSkillAdapter', () => {
         inputSchema: {
           type: 'object',
           properties: {
-            query: { type: 'string' }
-          }
-        }
+            query: { type: 'string' },
+          },
+        },
       });
 
       expect(skill.id).toBe('mcp.test-server.imported_tool');
@@ -260,21 +262,23 @@ describe('MCPToSkillAdapter', () => {
 
       await adapter.importTool('event-server', {
         name: 'event_tool',
-        description: 'Test'
+        description: 'Test',
       });
 
       expect(listener).toHaveBeenCalledWith(
         expect.objectContaining({
-          toolName: 'event_tool'
+          toolName: 'event_tool',
         })
       );
     });
 
     test('should reject invalid tool', async () => {
-      await expect(adapter.importTool('test-server', {
-        // Missing name
-        description: 'Invalid tool'
-      })).rejects.toThrow('Invalid MCP tool');
+      await expect(
+        adapter.importTool('test-server', {
+          // Missing name
+          description: 'Invalid tool',
+        })
+      ).rejects.toThrow('Invalid MCP tool');
     });
   });
 
@@ -283,9 +287,7 @@ describe('MCPToSkillAdapter', () => {
       await adapter.registerServer({
         id: 'disconnect-server',
         transport: MCPTransport.STDIO,
-        tools: [
-          { name: 'tool1', description: 'Test' }
-        ]
+        tools: [{ name: 'tool1', description: 'Test' }],
       });
 
       const result = await adapter.disconnectServer('disconnect-server');
@@ -299,7 +301,7 @@ describe('MCPToSkillAdapter', () => {
       await adapter.registerServer({
         id: 'dc-server',
         transport: MCPTransport.HTTP,
-        tools: []
+        tools: [],
       });
 
       await adapter.disconnectServer('dc-server');
@@ -317,7 +319,7 @@ describe('MCPToSkillAdapter', () => {
       await adapter.registerServer({
         id: 'status-server',
         transport: MCPTransport.STDIO,
-        tools: []
+        tools: [],
       });
 
       const status = adapter.getConnectionStatus();
@@ -335,12 +337,12 @@ describe('SkillToMCPAdapter', () => {
   beforeEach(() => {
     mockRegistry = createMockRegistry();
     mockExecutor = createMockExecutor();
-    
+
     adapter = new SkillToMCPAdapter({
       registry: mockRegistry,
       executor: mockExecutor,
       serverName: 'test-musubi-server',
-      version: '1.0.0'
+      version: '1.0.0',
     });
 
     // Add test skills
@@ -353,10 +355,10 @@ describe('SkillToMCPAdapter', () => {
       inputSchema: {
         type: 'object',
         properties: {
-          input: { type: 'string' }
-        }
+          input: { type: 'string' },
+        },
       },
-      handler: async (input) => ({ result: input.input })
+      handler: async input => ({ result: input.input }),
     });
   });
 
@@ -377,14 +379,13 @@ describe('SkillToMCPAdapter', () => {
 
       expect(listener).toHaveBeenCalledWith(
         expect.objectContaining({
-          skillId: 'export-skill'
+          skillId: 'export-skill',
         })
       );
     });
 
     test('should throw for non-existent skill', () => {
-      expect(() => adapter.exportSkill('non-existent'))
-        .toThrow('not found');
+      expect(() => adapter.exportSkill('non-existent')).toThrow('not found');
     });
 
     test('should sanitize skill ID to valid tool name', () => {
@@ -393,7 +394,7 @@ describe('SkillToMCPAdapter', () => {
         name: 'Special Skill',
         description: 'Test',
         category: 'test',
-        version: '1.0.0'
+        version: '1.0.0',
       });
 
       const tool = adapter.exportSkill('skill-with.special/chars');
@@ -417,7 +418,7 @@ describe('SkillToMCPAdapter', () => {
 
       const result = await adapter.handleCallTool({
         name: 'export_skill',
-        arguments: { input: 'test' }
+        arguments: { input: 'test' },
       });
 
       expect(result.isError).toBe(false);
@@ -426,7 +427,7 @@ describe('SkillToMCPAdapter', () => {
     test('should return error for unknown tool', async () => {
       const result = await adapter.handleCallTool({
         name: 'unknown_tool',
-        arguments: {}
+        arguments: {},
       });
 
       expect(result.isError).toBe(true);
@@ -452,10 +453,10 @@ describe('SkillToMCPAdapter', () => {
 
     test('should handle initialize request', async () => {
       const handler = adapter.createProtocolHandler();
-      
+
       const response = await handler({
         method: 'initialize',
-        id: 1
+        id: 1,
       });
 
       expect(response.result.name).toBe('test-musubi-server');
@@ -464,10 +465,10 @@ describe('SkillToMCPAdapter', () => {
     test('should handle tools/list request', async () => {
       adapter.exportSkill('export-skill');
       const handler = adapter.createProtocolHandler();
-      
+
       const response = await handler({
         method: 'tools/list',
-        id: 2
+        id: 2,
       });
 
       expect(response.result.tools.length).toBe(1);
@@ -476,14 +477,14 @@ describe('SkillToMCPAdapter', () => {
     test('should handle tools/call request', async () => {
       adapter.exportSkill('export-skill');
       const handler = adapter.createProtocolHandler();
-      
+
       const response = await handler({
         method: 'tools/call',
         id: 3,
         params: {
           name: 'export_skill',
-          arguments: { input: 'test' }
-        }
+          arguments: { input: 'test' },
+        },
       });
 
       expect(response.result).toBeDefined();
@@ -491,10 +492,10 @@ describe('SkillToMCPAdapter', () => {
 
     test('should handle unknown method', async () => {
       const handler = adapter.createProtocolHandler();
-      
+
       const response = await handler({
         method: 'unknown/method',
-        id: 4
+        id: 4,
       });
 
       expect(response.error).toBeDefined();
@@ -511,12 +512,12 @@ describe('MCPAdapterManager', () => {
   beforeEach(() => {
     mockRegistry = createMockRegistry();
     mockExecutor = createMockExecutor();
-    
+
     manager = new MCPAdapterManager({
       registry: mockRegistry,
       executor: mockExecutor,
       serverName: 'test-manager',
-      version: '1.0.0'
+      version: '1.0.0',
     });
 
     // Add test skill
@@ -526,7 +527,7 @@ describe('MCPAdapterManager', () => {
       description: 'Test',
       category: 'test',
       version: '1.0.0',
-      handler: async () => ({ done: true })
+      handler: async () => ({ done: true }),
     });
   });
 
@@ -535,9 +536,7 @@ describe('MCPAdapterManager', () => {
       const skills = await manager.registerMCPServer({
         id: 'managed-server',
         transport: MCPTransport.STDIO,
-        tools: [
-          { name: 'tool1', description: 'Test' }
-        ]
+        tools: [{ name: 'tool1', description: 'Test' }],
       });
 
       expect(skills.length).toBe(1);
@@ -559,9 +558,7 @@ describe('MCPAdapterManager', () => {
       await manager.registerMCPServer({
         id: 'status-server',
         transport: MCPTransport.HTTP,
-        tools: [
-          { name: 'tool1', description: 'Test' }
-        ]
+        tools: [{ name: 'tool1', description: 'Test' }],
       });
 
       manager.exportSkill('managed-skill');
@@ -578,8 +575,8 @@ describe('MCPAdapterManager', () => {
         transport: MCPTransport.STDIO,
         tools: [
           { name: 'tool1', description: 'Test' },
-          { name: 'tool2', description: 'Test' }
-        ]
+          { name: 'tool2', description: 'Test' },
+        ],
       });
 
       expect(manager.getImportedSkillCount()).toBe(2);
@@ -599,7 +596,7 @@ describe('MCPAdapterManager', () => {
       await manager.registerMCPServer({
         id: 'event-server',
         transport: MCPTransport.STDIO,
-        tools: []
+        tools: [],
       });
 
       expect(listener).toHaveBeenCalled();

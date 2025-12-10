@@ -1,6 +1,6 @@
 /**
  * Integration tests for Handoff and Triage patterns
- * 
+ *
  * Tests end-to-end workflows combining both patterns
  */
 
@@ -14,7 +14,7 @@ const {
   TriagePattern,
   TriageCategory,
   TriageStrategy,
-  AgentCapability
+  AgentCapability,
 } = require('../../../src/orchestration');
 
 describe('Handoff and Triage Integration', () => {
@@ -34,13 +34,13 @@ describe('Handoff and Triage Integration', () => {
             agent: { name: 'billing-agent' },
             categories: [TriageCategory.BILLING, TriageCategory.REFUND],
             keywords: ['invoice', 'payment', 'refund', 'charge'],
-            priority: 2
+            priority: 2,
           }),
-          execute: async (_input) => ({
+          execute: async _input => ({
             agent: 'billing-agent',
             processed: true,
-            action: 'refund_processed'
-          })
+            action: 'refund_processed',
+          }),
         },
         {
           name: 'support-agent',
@@ -48,14 +48,14 @@ describe('Handoff and Triage Integration', () => {
             agent: { name: 'support-agent' },
             categories: [TriageCategory.SUPPORT],
             keywords: ['help', 'issue', 'problem'],
-            priority: 1
+            priority: 1,
           }),
-          execute: async (_input) => ({
+          execute: async _input => ({
             agent: 'support-agent',
             processed: true,
-            action: 'support_ticket_created'
-          })
-        }
+            action: 'support_ticket_created',
+          }),
+        },
       ];
 
       // Step 1: Triage the request
@@ -64,8 +64,8 @@ describe('Handoff and Triage Integration', () => {
         input: {
           message: 'I need a refund for order #12345',
           agents,
-          enableHandoff: false  // Just classify, don't auto-handoff
-        }
+          enableHandoff: false, // Just classify, don't auto-handoff
+        },
       });
 
       expect(triageContext.status).toBe(ExecutionStatus.COMPLETED);
@@ -84,9 +84,9 @@ describe('Handoff and Triage Integration', () => {
           reason: `Classified as ${triageContext.output.classification.category}`,
           context: {
             classification: triageContext.output.classification,
-            originalMessage: 'I need a refund for order #12345'
-          }
-        }
+            originalMessage: 'I need a refund for order #12345',
+          },
+        },
       });
 
       expect(handoffContext.status).toBe(ExecutionStatus.COMPLETED);
@@ -101,8 +101,8 @@ describe('Handoff and Triage Integration', () => {
             agent: { name: 'senior-billing' },
             categories: [TriageCategory.BILLING, TriageCategory.REFUND],
             keywords: ['urgent', 'large', 'important'],
-            priority: 3  // Higher priority
-          })
+            priority: 3, // Higher priority
+          }),
         },
         {
           name: 'junior-billing',
@@ -110,9 +110,9 @@ describe('Handoff and Triage Integration', () => {
             agent: { name: 'junior-billing' },
             categories: [TriageCategory.BILLING, TriageCategory.REFUND],
             keywords: ['refund', 'payment'],
-            priority: 1
-          })
-        }
+            priority: 1,
+          }),
+        },
       ];
 
       const context = await engine.execute(PatternType.TRIAGE, {
@@ -120,8 +120,8 @@ describe('Handoff and Triage Integration', () => {
         input: {
           message: 'This is URGENT - I need a large refund immediately',
           agents,
-          enableHandoff: false
-        }
+          enableHandoff: false,
+        },
       });
 
       expect(context.status).toBe(ExecutionStatus.COMPLETED);
@@ -134,17 +134,17 @@ describe('Handoff and Triage Integration', () => {
     it('should track handoff chain through multiple agents', async () => {
       const _frontlineAgent = {
         name: 'frontline',
-        execute: async () => ({ action: 'initial_response' })
+        execute: async () => ({ action: 'initial_response' }),
       };
 
       const specialistAgent = {
         name: 'specialist',
-        execute: async () => ({ action: 'specialized_handling' })
+        execute: async () => ({ action: 'specialized_handling' }),
       };
 
       const supervisorAgent = {
         name: 'supervisor',
-        execute: async () => ({ action: 'escalation_resolved' })
+        execute: async () => ({ action: 'escalation_resolved' }),
       };
 
       // First handoff: frontline -> specialist
@@ -153,8 +153,8 @@ describe('Handoff and Triage Integration', () => {
         input: {
           sourceAgent: 'frontline',
           targetAgents: [specialistAgent],
-          reason: 'Technical expertise required'
-        }
+          reason: 'Technical expertise required',
+        },
       });
 
       expect(handoff1.status).toBe(ExecutionStatus.COMPLETED);
@@ -169,8 +169,8 @@ describe('Handoff and Triage Integration', () => {
           sourceAgent: 'specialist',
           targetAgents: [supervisorAgent],
           reason: 'Customer requested manager',
-          previousChain: handoff1.output.handoffChain
-        }
+          previousChain: handoff1.output.handoffChain,
+        },
       });
 
       expect(handoff2.status).toBe(ExecutionStatus.COMPLETED);
@@ -185,15 +185,15 @@ describe('Handoff and Triage Integration', () => {
         { role: 'agent', content: 'Hi, how can I help?' },
         { role: 'user', content: 'I have a billing question' },
         { role: 'agent', content: 'Let me transfer you to billing' },
-        { role: 'user', content: 'I need a refund please' }
+        { role: 'user', content: 'I need a refund please' },
       ];
 
       const billingAgent = {
         name: 'billing',
-        execute: async (input) => ({
+        execute: async input => ({
           receivedHistory: input.history,
-          processed: true
-        })
+          processed: true,
+        }),
       };
 
       // Use lastN filter to only pass recent messages
@@ -205,8 +205,8 @@ describe('Handoff and Triage Integration', () => {
           sourceAgent: 'triage',
           targetAgents: [billingAgent],
           history: filteredHistory,
-          reason: 'Billing question detected'
-        }
+          reason: 'Billing question detected',
+        },
       });
 
       expect(context.status).toBe(ExecutionStatus.COMPLETED);
@@ -221,7 +221,7 @@ describe('Handoff and Triage Integration', () => {
         { role: 'user', content: 'Hello' },
         { role: 'agent', content: 'Hi!' },
         { role: 'user', content: 'Help me' },
-        { role: 'system', content: 'Connecting...' }
+        { role: 'system', content: 'Connecting...' },
       ];
 
       const filtered = HandoffFilters.userMessagesOnly(history);
@@ -239,13 +239,13 @@ describe('Handoff and Triage Integration', () => {
           agent: { name: 'general-agent' },
           categories: [TriageCategory.GENERAL],
           keywords: [],
-          priority: 0
-        })
+          priority: 0,
+        }),
       };
 
       const triagePattern = new TriagePattern({
         strategy: TriageStrategy.KEYWORD,
-        fallbackAgent: generalAgent
+        fallbackAgent: generalAgent,
       });
 
       triagePattern.registerAgent('general-agent', generalAgent.capability);
@@ -264,13 +264,15 @@ describe('Handoff and Triage Integration', () => {
         name: 'primary',
         // Simulate unavailable agent
         available: false,
-        execute: async () => { throw new Error('Agent unavailable'); }
+        execute: async () => {
+          throw new Error('Agent unavailable');
+        },
       };
 
       const fallbackAgent = {
         name: 'fallback',
         available: true,
-        execute: async () => ({ action: 'handled_by_fallback' })
+        execute: async () => ({ action: 'handled_by_fallback' }),
       };
 
       const context = await engine.execute(PatternType.HANDOFF, {
@@ -278,8 +280,8 @@ describe('Handoff and Triage Integration', () => {
         input: {
           sourceAgent: 'router',
           targetAgents: [fallbackAgent], // Skip unavailable, use fallback
-          reason: 'Routing to available agent'
-        }
+          reason: 'Routing to available agent',
+        },
       });
 
       expect(context.status).toBe(ExecutionStatus.COMPLETED);
@@ -295,9 +297,9 @@ describe('Handoff and Triage Integration', () => {
           capability: new AgentCapability({
             agent: { name: 'tech-agent' },
             categories: [TriageCategory.TECHNICAL],
-            keywords: ['api', 'bug', 'error', 'code', 'integration']
-          })
-        }
+            keywords: ['api', 'bug', 'error', 'code', 'integration'],
+          }),
+        },
       ];
 
       const context = await engine.execute(PatternType.TRIAGE, {
@@ -306,8 +308,8 @@ describe('Handoff and Triage Integration', () => {
           message: 'I have an API integration error in my code',
           agents,
           strategy: TriageStrategy.KEYWORD,
-          enableHandoff: false
-        }
+          enableHandoff: false,
+        },
       });
 
       expect(context.status).toBe(ExecutionStatus.COMPLETED);
@@ -321,13 +323,13 @@ describe('Handoff and Triage Integration', () => {
           capability: new AgentCapability({
             agent: { name: 'refund-agent' },
             categories: [TriageCategory.REFUND],
-            keywords: ['refund', 'money back']
-          })
-        }
+            keywords: ['refund', 'money back'],
+          }),
+        },
       ];
 
       const triagePattern = new TriagePattern({
-        strategy: TriageStrategy.INTENT
+        strategy: TriageStrategy.INTENT,
       });
       triagePattern.registerAgent('refund-agent', agents[0].capability);
 
@@ -347,9 +349,9 @@ describe('Handoff and Triage Integration', () => {
           capability: new AgentCapability({
             agent: { name: 'sales-agent' },
             categories: [TriageCategory.SALES],
-            keywords: ['buy', 'purchase', 'pricing']
-          })
-        }
+            keywords: ['buy', 'purchase', 'pricing'],
+          }),
+        },
       ];
 
       const context = await engine.execute(PatternType.TRIAGE, {
@@ -358,8 +360,8 @@ describe('Handoff and Triage Integration', () => {
           message: 'I want to buy your enterprise plan',
           agents,
           strategy: TriageStrategy.HYBRID,
-          enableHandoff: false
-        }
+          enableHandoff: false,
+        },
       });
 
       expect(context.status).toBe(ExecutionStatus.COMPLETED);
@@ -371,10 +373,10 @@ describe('Handoff and Triage Integration', () => {
   describe('Event emission', () => {
     it('should emit triage events', async () => {
       const events = [];
-      
-      engine.on('triage:started', (data) => events.push({ type: 'started', data }));
-      engine.on('triage:classified', (data) => events.push({ type: 'classified', data }));
-      engine.on('triage:completed', (data) => events.push({ type: 'completed', data }));
+
+      engine.on('triage:started', data => events.push({ type: 'started', data }));
+      engine.on('triage:classified', data => events.push({ type: 'classified', data }));
+      engine.on('triage:completed', data => events.push({ type: 'completed', data }));
 
       const agents = [
         {
@@ -382,9 +384,9 @@ describe('Handoff and Triage Integration', () => {
           capability: new AgentCapability({
             agent: { name: 'test-agent' },
             categories: [TriageCategory.GENERAL],
-            keywords: []
-          })
-        }
+            keywords: [],
+          }),
+        },
       ];
 
       await engine.execute(PatternType.TRIAGE, {
@@ -392,8 +394,8 @@ describe('Handoff and Triage Integration', () => {
         input: {
           message: 'Test message',
           agents,
-          enableHandoff: false
-        }
+          enableHandoff: false,
+        },
       });
 
       expect(events.some(e => e.type === 'started')).toBe(true);
@@ -403,21 +405,21 @@ describe('Handoff and Triage Integration', () => {
 
     it('should emit handoff events', async () => {
       const events = [];
-      
-      engine.on('handoff:started', (data) => events.push({ type: 'started', data }));
-      engine.on('handoff:completed', (data) => events.push({ type: 'completed', data }));
+
+      engine.on('handoff:started', data => events.push({ type: 'started', data }));
+      engine.on('handoff:completed', data => events.push({ type: 'completed', data }));
 
       const targetAgent = {
         name: 'target',
-        execute: async () => ({ done: true })
+        execute: async () => ({ done: true }),
       };
 
       await engine.execute(PatternType.HANDOFF, {
         task: 'Test events',
         input: {
           sourceAgent: 'source',
-          targetAgents: [targetAgent]
-        }
+          targetAgents: [targetAgent],
+        },
       });
 
       expect(events.some(e => e.type === 'started')).toBe(true);
@@ -432,8 +434,8 @@ describe('Handoff and Triage Integration', () => {
         input: {
           message: 'Test message',
           agents: [],
-          enableHandoff: false
-        }
+          enableHandoff: false,
+        },
       });
 
       expect(context.status).toBe(ExecutionStatus.FAILED);
@@ -444,8 +446,8 @@ describe('Handoff and Triage Integration', () => {
       const context = await engine.execute(PatternType.TRIAGE, {
         task: 'Classify without message',
         input: {
-          agents: [{ name: 'test' }]
-        }
+          agents: [{ name: 'test' }],
+        },
       });
 
       expect(context.status).toBe(ExecutionStatus.FAILED);
@@ -456,8 +458,8 @@ describe('Handoff and Triage Integration', () => {
       const context = await engine.execute(PatternType.HANDOFF, {
         task: 'Handoff without source',
         input: {
-          targetAgents: [{ name: 'target' }]
-        }
+          targetAgents: [{ name: 'target' }],
+        },
       });
 
       expect(context.status).toBe(ExecutionStatus.FAILED);
@@ -473,24 +475,24 @@ describe('Handoff and Triage Integration', () => {
           capability: new AgentCapability({
             agent: { name: 'agent1' },
             categories: [TriageCategory.BILLING],
-            keywords: ['billing']
-          })
-        }
+            keywords: ['billing'],
+          }),
+        },
       ];
 
       const start = Date.now();
-      
+
       await engine.execute(PatternType.TRIAGE, {
         task: 'Quick classify',
         input: {
           message: 'billing question',
           agents,
-          enableHandoff: false
-        }
+          enableHandoff: false,
+        },
       });
 
       const duration = Date.now() - start;
-      
+
       // Classification should complete in under 100ms
       expect(duration).toBeLessThan(100);
     });
@@ -502,18 +504,12 @@ describe('Handoff and Triage Integration', () => {
           capability: new AgentCapability({
             agent: { name: 'agent' },
             categories: [TriageCategory.GENERAL],
-            keywords: []
-          })
-        }
+            keywords: [],
+          }),
+        },
       ];
 
-      const messages = [
-        'Message 1',
-        'Message 2',
-        'Message 3',
-        'Message 4',
-        'Message 5'
-      ];
+      const messages = ['Message 1', 'Message 2', 'Message 3', 'Message 4', 'Message 5'];
 
       const promises = messages.map(message =>
         engine.execute(PatternType.TRIAGE, {
@@ -521,8 +517,8 @@ describe('Handoff and Triage Integration', () => {
           input: {
             message,
             agents,
-            enableHandoff: false
-          }
+            enableHandoff: false,
+          },
         })
       );
 

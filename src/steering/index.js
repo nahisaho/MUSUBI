@@ -1,6 +1,6 @@
 /**
  * Steering Module - Main Entry Point
- * 
+ *
  * Provides comprehensive steering file management:
  * - Auto-Update: Automatic steering file updates
  * - Template Constraints: LLM-constraining syntax
@@ -17,7 +17,7 @@ const {
   SteeringAutoUpdater,
   SteeringFileType,
   UpdateTrigger,
-  createSteeringAutoUpdater
+  createSteeringAutoUpdater,
 } = require('./auto-updater');
 
 // Template Constraints Module
@@ -32,7 +32,7 @@ const {
   ConstraintType,
   UncertaintyMarker,
   Severity: ConstraintSeverity,
-  createTemplateConstraintEngine
+  createTemplateConstraintEngine,
 } = require('./template-constraints');
 
 // Quality Metrics Module
@@ -47,7 +47,7 @@ const {
   MetricCategory,
   HealthStatus,
   TrendDirection,
-  createQualityDashboard
+  createQualityDashboard,
 } = require('./quality-metrics');
 
 // Advanced Validation Module
@@ -63,7 +63,7 @@ const {
   ValidationType,
   Severity: ValidationSeverity,
   ArtifactType,
-  createAdvancedValidator
+  createAdvancedValidator,
 } = require('./advanced-validation');
 
 module.exports = {
@@ -115,5 +115,5 @@ module.exports = {
   ValidationType,
   ValidationSeverity,
   ArtifactType,
-  createAdvancedValidator
+  createAdvancedValidator,
 };

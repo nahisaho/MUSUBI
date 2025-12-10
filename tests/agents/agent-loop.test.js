@@ -12,7 +12,7 @@ describe('AgentLoop', () => {
     agentLoop = new AgentLoop({
       maxIterations: 5,
       timeout: 10000,
-      iterationTimeout: 5000
+      iterationTimeout: 5000,
     });
   });
 
@@ -36,7 +36,7 @@ describe('AgentLoop', () => {
       const loop = new AgentLoop({
         maxIterations: 20,
         timeout: 120000,
-        continueOnError: true
+        continueOnError: true,
       });
       expect(loop.maxIterations).toBe(20);
       expect(loop.timeout).toBe(120000);
@@ -49,7 +49,7 @@ describe('AgentLoop', () => {
       agentLoop.registerTool({
         name: 'test_tool',
         description: 'A test tool',
-        handler: async () => 'result'
+        handler: async () => 'result',
       });
 
       expect(agentLoop.tools.has('test_tool')).toBe(true);
@@ -58,7 +58,7 @@ describe('AgentLoop', () => {
     test('should register multiple tools', () => {
       agentLoop.registerTools([
         { name: 'tool_1', handler: async () => 'a' },
-        { name: 'tool_2', handler: async () => 'b' }
+        { name: 'tool_2', handler: async () => 'b' },
       ]);
 
       expect(agentLoop.tools.size).toBe(2);
@@ -67,7 +67,7 @@ describe('AgentLoop', () => {
     test('should unregister a tool', () => {
       agentLoop.registerTool({ name: 'temp_tool', handler: async () => {} });
       expect(agentLoop.tools.has('temp_tool')).toBe(true);
-      
+
       agentLoop.unregisterTool('temp_tool');
       expect(agentLoop.tools.has('temp_tool')).toBe(false);
     });
@@ -96,11 +96,11 @@ describe('AgentLoop', () => {
         parameters: {
           type: 'object',
           properties: {
-            query: { type: 'string', description: 'Search query' }
+            query: { type: 'string', description: 'Search query' },
           },
-          required: ['query']
+          required: ['query'],
         },
-        handler: async () => {}
+        handler: async () => {},
       });
 
       const schemas = agentLoop.getToolSchemas();
@@ -114,25 +114,23 @@ describe('AgentLoop', () => {
           parameters: {
             type: 'object',
             properties: {
-              query: { type: 'string', description: 'Search query' }
+              query: { type: 'string', description: 'Search query' },
             },
-            required: ['query']
-          }
-        }
+            required: ['query'],
+          },
+        },
       });
     });
   });
 
   describe('run', () => {
     test('should complete with final response', async () => {
-      const mockLLM = createMockLLMProvider([
-        { content: 'Hello, I completed the task!' }
-      ]);
+      const mockLLM = createMockLLMProvider([{ content: 'Hello, I completed the task!' }]);
 
       const result = await agentLoop.run({
         llmProvider: mockLLM,
         systemPrompt: 'You are a helpful assistant',
-        userMessage: 'Say hello'
+        userMessage: 'Say hello',
       });
 
       expect(result.status).toBe('completed');
@@ -144,21 +142,21 @@ describe('AgentLoop', () => {
       agentLoop.registerTool({
         name: 'get_weather',
         description: 'Get weather',
-        handler: async (args) => ({ temperature: 72, city: args.city })
+        handler: async args => ({ temperature: 72, city: args.city }),
       });
 
       const mockLLM = createMockLLMProvider([
         {
           content: null,
-          toolCalls: [{ id: 'call_1', tool: 'get_weather', arguments: { city: 'Tokyo' } }]
+          toolCalls: [{ id: 'call_1', tool: 'get_weather', arguments: { city: 'Tokyo' } }],
         },
-        { content: 'The weather in Tokyo is 72°F' }
+        { content: 'The weather in Tokyo is 72°F' },
       ]);
 
       const result = await agentLoop.run({
         llmProvider: mockLLM,
         systemPrompt: 'You are a weather assistant',
-        userMessage: 'What is the weather in Tokyo?'
+        userMessage: 'What is the weather in Tokyo?',
       });
 
       expect(result.status).toBe('completed');
@@ -170,23 +168,23 @@ describe('AgentLoop', () => {
     test('should handle multiple tool calls', async () => {
       agentLoop.registerTools([
         { name: 'tool_a', handler: async () => 'result_a' },
-        { name: 'tool_b', handler: async () => 'result_b' }
+        { name: 'tool_b', handler: async () => 'result_b' },
       ]);
 
       const mockLLM = createMockLLMProvider([
         {
           toolCalls: [
             { id: 'call_1', tool: 'tool_a', arguments: {} },
-            { id: 'call_2', tool: 'tool_b', arguments: {} }
-          ]
+            { id: 'call_2', tool: 'tool_b', arguments: {} },
+          ],
         },
-        { content: 'Both tools executed' }
+        { content: 'Both tools executed' },
       ]);
 
       const result = await agentLoop.run({
         llmProvider: mockLLM,
         systemPrompt: 'Assistant',
-        userMessage: 'Run both tools'
+        userMessage: 'Run both tools',
       });
 
       expect(result.toolCalls).toHaveLength(2);
@@ -195,25 +193,25 @@ describe('AgentLoop', () => {
 
     test('should stop at max iterations', async () => {
       agentLoop.maxIterations = 3;
-      
+
       agentLoop.registerTool({
         name: 'loop_tool',
-        handler: async () => 'continue'
+        handler: async () => 'continue',
       });
 
       // LLM always requests tool calls
       const mockLLM = {
         async chat() {
           return {
-            toolCalls: [{ id: `call_${Date.now()}`, tool: 'loop_tool', arguments: {} }]
+            toolCalls: [{ id: `call_${Date.now()}`, tool: 'loop_tool', arguments: {} }],
           };
-        }
+        },
       };
 
       const result = await agentLoop.run({
         llmProvider: mockLLM,
         systemPrompt: 'Assistant',
-        userMessage: 'Keep looping'
+        userMessage: 'Keep looping',
       });
 
       expect(result.status).toBe('max_iterations');
@@ -222,23 +220,25 @@ describe('AgentLoop', () => {
 
     test('should handle tool errors with continueOnError=true', async () => {
       agentLoop.continueOnError = true;
-      
+
       agentLoop.registerTool({
         name: 'failing_tool',
-        handler: async () => { throw new Error('Tool failed'); }
+        handler: async () => {
+          throw new Error('Tool failed');
+        },
       });
 
       const mockLLM = createMockLLMProvider([
         {
-          toolCalls: [{ id: 'call_1', tool: 'failing_tool', arguments: {} }]
+          toolCalls: [{ id: 'call_1', tool: 'failing_tool', arguments: {} }],
         },
-        { content: 'Handled the error' }
+        { content: 'Handled the error' },
       ]);
 
       const result = await agentLoop.run({
         llmProvider: mockLLM,
         systemPrompt: 'Assistant',
-        userMessage: 'Try the tool'
+        userMessage: 'Try the tool',
       });
 
       expect(result.status).toBe('completed');
@@ -247,16 +247,18 @@ describe('AgentLoop', () => {
 
     test('should fail on tool error with continueOnError=false', async () => {
       agentLoop.continueOnError = false;
-      
+
       agentLoop.registerTool({
         name: 'failing_tool',
-        handler: async () => { throw new Error('Tool failed'); }
+        handler: async () => {
+          throw new Error('Tool failed');
+        },
       });
 
       const mockLLM = createMockLLMProvider([
         {
-          toolCalls: [{ id: 'call_1', tool: 'failing_tool', arguments: {} }]
-        }
+          toolCalls: [{ id: 'call_1', tool: 'failing_tool', arguments: {} }],
+        },
       ]);
 
       // The run method should catch errors and return error status
@@ -265,7 +267,7 @@ describe('AgentLoop', () => {
         result = await agentLoop.run({
           llmProvider: mockLLM,
           systemPrompt: 'Assistant',
-          userMessage: 'Try the tool'
+          userMessage: 'Try the tool',
         });
       } catch (e) {
         // If it throws, that's also acceptable behavior
@@ -278,21 +280,21 @@ describe('AgentLoop', () => {
     });
 
     test('should prevent concurrent runs', async () => {
-      const mockLLM = createMockLLMProvider([
-        { content: 'Done' }
-      ]);
+      const mockLLM = createMockLLMProvider([{ content: 'Done' }]);
 
       const promise1 = agentLoop.run({
         llmProvider: mockLLM,
         systemPrompt: 'Assistant',
-        userMessage: 'Task 1'
+        userMessage: 'Task 1',
       });
 
-      await expect(agentLoop.run({
-        llmProvider: mockLLM,
-        systemPrompt: 'Assistant',
-        userMessage: 'Task 2'
-      })).rejects.toThrow('Agent loop is already running');
+      await expect(
+        agentLoop.run({
+          llmProvider: mockLLM,
+          systemPrompt: 'Assistant',
+          userMessage: 'Task 2',
+        })
+      ).rejects.toThrow('Agent loop is already running');
 
       await promise1;
     });
@@ -300,23 +302,21 @@ describe('AgentLoop', () => {
     test('should emit iteration events', async () => {
       const iterationStart = jest.fn();
       const iterationComplete = jest.fn();
-      
+
       agentLoop.on('iteration:start', iterationStart);
       agentLoop.on('iteration:complete', iterationComplete);
 
-      const mockLLM = createMockLLMProvider([
-        { content: 'Done' }
-      ]);
+      const mockLLM = createMockLLMProvider([{ content: 'Done' }]);
 
       await agentLoop.run({
         llmProvider: mockLLM,
         systemPrompt: 'Assistant',
-        userMessage: 'Hello'
+        userMessage: 'Hello',
       });
 
       expect(iterationStart).toHaveBeenCalledWith({
         iteration: 1,
-        maxIterations: 5
+        maxIterations: 5,
       });
       expect(iterationComplete).toHaveBeenCalled();
     });
@@ -329,21 +329,21 @@ describe('AgentLoop', () => {
         handler: async () => {
           await new Promise(resolve => setTimeout(resolve, 1000));
           return 'done';
-        }
+        },
       });
 
       const mockLLM = {
         async chat() {
           return {
-            toolCalls: [{ id: 'call_1', tool: 'slow_tool', arguments: {} }]
+            toolCalls: [{ id: 'call_1', tool: 'slow_tool', arguments: {} }],
           };
-        }
+        },
       };
 
       const promise = agentLoop.run({
         llmProvider: mockLLM,
         systemPrompt: 'Assistant',
-        userMessage: 'Run slow tool'
+        userMessage: 'Run slow tool',
       });
 
       // Abort after short delay
@@ -374,7 +374,7 @@ describe('AgentLoop', () => {
       await agentLoop.run({
         llmProvider: mockLLM,
         systemPrompt: 'Assistant',
-        userMessage: 'Hello'
+        userMessage: 'Hello',
       });
 
       expect(agentLoop.messages.length).toBeGreaterThan(0);
@@ -390,13 +390,13 @@ describe('AgentLoop', () => {
         async chat() {
           await new Promise(resolve => setTimeout(resolve, 1000));
           return { content: 'Done' };
-        }
+        },
       };
 
       const promise = agentLoop.run({
         llmProvider: mockLLM,
         systemPrompt: 'Assistant',
-        userMessage: 'Hello'
+        userMessage: 'Hello',
       });
 
       expect(() => agentLoop.reset()).toThrow('Cannot reset while loop is running');
@@ -415,9 +415,9 @@ describe('AgentLoop', () => {
                 return { valid: false, reason: 'Forbidden content' };
               }
               return { valid: true, transformed: input.toUpperCase() };
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       const mockLLM = createMockLLMProvider([{ content: 'Done' }]);
@@ -425,7 +425,7 @@ describe('AgentLoop', () => {
       const result = await loop.run({
         llmProvider: mockLLM,
         systemPrompt: 'Assistant',
-        userMessage: 'hello'
+        userMessage: 'hello',
       });
 
       expect(result.status).toBe('completed');
@@ -441,9 +441,9 @@ describe('AgentLoop', () => {
                 return { valid: false, reason: 'Forbidden content' };
               }
               return { valid: true };
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       const mockLLM = createMockLLMProvider([{ content: 'Done' }]);
@@ -453,7 +453,7 @@ describe('AgentLoop', () => {
         result = await loop.run({
           llmProvider: mockLLM,
           systemPrompt: 'Assistant',
-          userMessage: 'This is forbidden content'
+          userMessage: 'This is forbidden content',
         });
       } catch (e) {
         // If it throws, that's also acceptable behavior
@@ -474,9 +474,9 @@ describe('AgentLoop', () => {
                 return { valid: false, reason: 'Contains secret', fallback: '[REDACTED]' };
               }
               return { valid: true };
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       const mockLLM = createMockLLMProvider([{ content: 'The secret is 123' }]);
@@ -484,7 +484,7 @@ describe('AgentLoop', () => {
       const result = await loop.run({
         llmProvider: mockLLM,
         systemPrompt: 'Assistant',
-        userMessage: 'Tell me the secret'
+        userMessage: 'Tell me the secret',
       });
 
       expect(result.finalOutput).toBe('[REDACTED]');
@@ -495,19 +495,19 @@ describe('AgentLoop', () => {
     test('should track execution metrics', async () => {
       agentLoop.registerTool({
         name: 'counter',
-        handler: async () => ({ count: 1 })
+        handler: async () => ({ count: 1 }),
       });
 
       const mockLLM = createMockLLMProvider([
         { toolCalls: [{ id: '1', tool: 'counter', arguments: {} }], usage: { total_tokens: 50 } },
         { toolCalls: [{ id: '2', tool: 'counter', arguments: {} }], usage: { total_tokens: 50 } },
-        { content: 'Done', usage: { total_tokens: 30 } }
+        { content: 'Done', usage: { total_tokens: 30 } },
       ]);
 
       const result = await agentLoop.run({
         llmProvider: mockLLM,
         systemPrompt: 'Counter',
-        userMessage: 'Count twice'
+        userMessage: 'Count twice',
       });
 
       expect(result.metrics.iterations).toBe(3);
@@ -522,10 +522,7 @@ describe('AgentLoop', () => {
 
 describe('createMockLLMProvider', () => {
   test('should create mock provider with responses', async () => {
-    const mock = createMockLLMProvider([
-      { content: 'Response 1' },
-      { content: 'Response 2' }
-    ]);
+    const mock = createMockLLMProvider([{ content: 'Response 1' }, { content: 'Response 2' }]);
 
     const r1 = await mock.chat({});
     const r2 = await mock.chat({});

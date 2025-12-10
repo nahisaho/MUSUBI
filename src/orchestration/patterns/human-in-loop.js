@@ -1,6 +1,6 @@
 /**
  * HumanInLoopPattern - Validation gates with human interaction
- * 
+ *
  * Enables human validation at key points in the workflow.
  * Supports approval gates, feedback collection, and decision points.
  */
@@ -12,10 +12,10 @@ const { PatternType, ExecutionContext, ExecutionStatus } = require('../orchestra
  * Gate type
  */
 const GateType = {
-  APPROVAL: 'approval',         // Yes/No approval
-  REVIEW: 'review',             // Review with feedback
-  DECISION: 'decision',         // Multiple choice decision
-  CONFIRMATION: 'confirmation'  // Simple confirmation
+  APPROVAL: 'approval', // Yes/No approval
+  REVIEW: 'review', // Review with feedback
+  DECISION: 'decision', // Multiple choice decision
+  CONFIRMATION: 'confirmation', // Simple confirmation
 };
 
 /**
@@ -26,7 +26,7 @@ const GateResult = {
   REJECTED: 'rejected',
   NEEDS_CHANGES: 'needs-changes',
   TIMEOUT: 'timeout',
-  SKIPPED: 'skipped'
+  SKIPPED: 'skipped',
 };
 
 /**
@@ -40,15 +40,10 @@ class HumanInLoopPattern extends BasePattern {
       description: 'Enable human validation gates at key workflow points',
       version: '1.0.0',
       tags: ['validation', 'human', 'approval', 'gate'],
-      useCases: [
-        'Quality gates',
-        'Approval workflows',
-        'Decision points',
-        'Review processes'
-      ],
+      useCases: ['Quality gates', 'Approval workflows', 'Decision points', 'Review processes'],
       complexity: 'medium',
       supportsParallel: false,
-      requiresHuman: true
+      requiresHuman: true,
     });
 
     this.options = {
@@ -56,7 +51,7 @@ class HumanInLoopPattern extends BasePattern {
       autoApproveOnTimeout: options.autoApproveOnTimeout || false,
       collectFeedback: options.collectFeedback || true,
       notifyOnGate: options.notifyOnGate || true,
-      ...options
+      ...options,
     };
   }
 
@@ -79,15 +74,15 @@ class HumanInLoopPattern extends BasePattern {
       // Validate each step
       for (let i = 0; i < input.workflow.length; i++) {
         const step = input.workflow[i];
-        
+
         if (!step.skill && !step.gate) {
           errors.push(`Workflow step ${i + 1} requires either skill or gate`);
         }
-        
+
         if (step.skill && !engine.getSkill(step.skill)) {
           errors.push(`Unknown skill in workflow: ${step.skill}`);
         }
-        
+
         if (step.gate && !Object.values(GateType).includes(step.gate)) {
           errors.push(`Invalid gate type: ${step.gate}`);
         }
@@ -96,7 +91,7 @@ class HumanInLoopPattern extends BasePattern {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -120,7 +115,7 @@ class HumanInLoopPattern extends BasePattern {
     engine.emit('humanInLoopStarted', {
       context,
       workflow: workflow.map(s => s.skill || s.gate),
-      totalSteps: workflow.length
+      totalSteps: workflow.length,
     });
 
     for (let i = 0; i < workflow.length && !aborted; i++) {
@@ -131,7 +126,7 @@ class HumanInLoopPattern extends BasePattern {
         context,
         step,
         stepNumber,
-        totalSteps: workflow.length
+        totalSteps: workflow.length,
       });
 
       try {
@@ -148,13 +143,7 @@ class HumanInLoopPattern extends BasePattern {
           );
         } else if (step.gate) {
           // Execute gate
-          stepResult = await this._executeGateStep(
-            step,
-            currentInput,
-            context,
-            engine,
-            stepNumber
-          );
+          stepResult = await this._executeGateStep(step, currentInput, context, engine, stepNumber);
         }
 
         results.push({
@@ -162,7 +151,7 @@ class HumanInLoopPattern extends BasePattern {
           type: step.skill ? 'skill' : 'gate',
           name: step.skill || step.gate,
           status: stepResult.status,
-          result: stepResult
+          result: stepResult,
         });
 
         // Check if gate rejected
@@ -172,7 +161,7 @@ class HumanInLoopPattern extends BasePattern {
             context,
             step,
             stepNumber,
-            reason: 'Gate rejected'
+            reason: 'Gate rejected',
           });
         } else if (step.gate && stepResult.result === GateResult.NEEDS_CHANGES) {
           // Could implement retry logic here
@@ -184,7 +173,7 @@ class HumanInLoopPattern extends BasePattern {
               currentInput = {
                 ...currentInput,
                 feedback: stepResult.feedback,
-                needsChanges: true
+                needsChanges: true,
               };
               continue;
             }
@@ -200,23 +189,22 @@ class HumanInLoopPattern extends BasePattern {
           context,
           step,
           stepNumber,
-          result: stepResult
+          result: stepResult,
         });
-
       } catch (error) {
         results.push({
           step: stepNumber,
           type: step.skill ? 'skill' : 'gate',
           name: step.skill || step.gate,
           status: ExecutionStatus.FAILED,
-          error: error.message
+          error: error.message,
         });
 
         engine.emit('humanInLoopStepFailed', {
           context,
           step,
           stepNumber,
-          error
+          error,
         });
 
         if (!step.continueOnError) {
@@ -231,14 +219,14 @@ class HumanInLoopPattern extends BasePattern {
       context,
       results,
       summary,
-      aborted
+      aborted,
     });
 
     return {
       results,
       summary,
       aborted,
-      finalOutput: currentInput
+      finalOutput: currentInput,
     };
   }
 
@@ -255,8 +243,8 @@ class HumanInLoopPattern extends BasePattern {
       metadata: {
         pattern: PatternType.HUMAN_IN_LOOP,
         stepNumber,
-        stepType: 'skill'
-      }
+        stepType: 'skill',
+      },
     });
 
     parentContext.children.push(stepContext);
@@ -267,7 +255,7 @@ class HumanInLoopPattern extends BasePattern {
 
     return {
       status: ExecutionStatus.COMPLETED,
-      output
+      output,
     };
   }
 
@@ -285,8 +273,8 @@ class HumanInLoopPattern extends BasePattern {
         pattern: PatternType.HUMAN_IN_LOOP,
         stepNumber,
         stepType: 'gate',
-        gateType: step.gate
-      }
+        gateType: step.gate,
+      },
     });
 
     parentContext.children.push(stepContext);
@@ -299,7 +287,7 @@ class HumanInLoopPattern extends BasePattern {
         context: parentContext,
         gate: step,
         stepNumber,
-        input
+        input,
       });
     }
 
@@ -318,20 +306,16 @@ class HumanInLoopPattern extends BasePattern {
         response = this.options.autoApproveOnTimeout
           ? { approved: true, feedback: 'Auto-approved on timeout' }
           : { approved: false, feedback: 'Timeout waiting for human response' };
-        
+
         stepContext.complete({
-          result: this.options.autoApproveOnTimeout 
-            ? GateResult.APPROVED 
-            : GateResult.TIMEOUT,
-          feedback: response.feedback
+          result: this.options.autoApproveOnTimeout ? GateResult.APPROVED : GateResult.TIMEOUT,
+          feedback: response.feedback,
         });
 
         return {
           status: ExecutionStatus.COMPLETED,
-          result: this.options.autoApproveOnTimeout 
-            ? GateResult.APPROVED 
-            : GateResult.TIMEOUT,
-          feedback: response.feedback
+          result: this.options.autoApproveOnTimeout ? GateResult.APPROVED : GateResult.TIMEOUT,
+          feedback: response.feedback,
         };
       }
       throw error;
@@ -339,18 +323,18 @@ class HumanInLoopPattern extends BasePattern {
 
     // Process response
     const gateResult = this._processGateResponse(step.gate, response);
-    
+
     stepContext.complete({
       result: gateResult,
       feedback: response.feedback,
-      response
+      response,
     });
 
     return {
       status: ExecutionStatus.COMPLETED,
       result: gateResult,
       feedback: response.feedback,
-      output: response.output
+      output: response.output,
     };
   }
 
@@ -383,17 +367,17 @@ class HumanInLoopPattern extends BasePattern {
   _buildGateQuestion(step, input) {
     const context = step.context || '';
     const prompt = step.prompt || this._getDefaultPrompt(step.gate);
-    
+
     let question = prompt;
     if (context) {
       question = `${context}\n\n${prompt}`;
     }
-    
+
     // Include relevant input data
     if (step.showInput && input) {
       question += `\n\nContext:\n${JSON.stringify(input, null, 2)}`;
     }
-    
+
     return question;
   }
 
@@ -424,18 +408,18 @@ class HumanInLoopPattern extends BasePattern {
     if (response.approved === true) {
       return GateResult.APPROVED;
     }
-    
+
     if (response.approved === false) {
       if (response.needsChanges) {
         return GateResult.NEEDS_CHANGES;
       }
       return GateResult.REJECTED;
     }
-    
+
     if (response.skipped) {
       return GateResult.SKIPPED;
     }
-    
+
     // Default based on gate type
     switch (gateType) {
       case GateType.CONFIRMATION:
@@ -465,14 +449,10 @@ class HumanInLoopPattern extends BasePattern {
   _createSummary(results, aborted) {
     const skillSteps = results.filter(r => r.type === 'skill');
     const gateSteps = results.filter(r => r.type === 'gate');
-    
-    const approvedGates = gateSteps.filter(r => 
-      r.result?.result === GateResult.APPROVED
-    ).length;
-    
-    const rejectedGates = gateSteps.filter(r => 
-      r.result?.result === GateResult.REJECTED
-    ).length;
+
+    const approvedGates = gateSteps.filter(r => r.result?.result === GateResult.APPROVED).length;
+
+    const rejectedGates = gateSteps.filter(r => r.result?.result === GateResult.REJECTED).length;
 
     return {
       totalSteps: results.length,
@@ -482,9 +462,8 @@ class HumanInLoopPattern extends BasePattern {
       rejectedGates,
       aborted,
       completed: !aborted,
-      gateApprovalRate: gateSteps.length > 0 
-        ? (approvedGates / gateSteps.length * 100).toFixed(1) + '%' 
-        : 'N/A'
+      gateApprovalRate:
+        gateSteps.length > 0 ? ((approvedGates / gateSteps.length) * 100).toFixed(1) + '%' : 'N/A',
     };
   }
 }
@@ -502,5 +481,5 @@ module.exports = {
   HumanInLoopPattern,
   GateType,
   GateResult,
-  createHumanInLoopPattern
+  createHumanInLoopPattern,
 };

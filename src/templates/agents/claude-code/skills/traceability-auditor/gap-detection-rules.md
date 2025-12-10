@@ -13,10 +13,11 @@ Rules for detecting traceability gaps in MUSUBI SDD projects.
 **Definition**: Requirements with no design, code, or tests.
 
 **Detection Rule**:
+
 ```python
 for req in requirements:
     if req.id not in design.references:
-        report_gap("orphaned_requirement", req.id, 
+        report_gap("orphaned_requirement", req.id,
                    "Requirement not referenced in design")
 ```
 
@@ -27,6 +28,7 @@ for req in requirements:
 **Definition**: Tests with no corresponding requirement.
 
 **Detection Rule**:
+
 ```python
 for test in tests:
     if not has_requirement_reference(test):
@@ -41,6 +43,7 @@ for test in tests:
 **Definition**: Source files with no test coverage.
 
 **Detection Rule**:
+
 ```python
 for src_file in source_files:
     test_file = get_corresponding_test(src_file)
@@ -56,6 +59,7 @@ for src_file in source_files:
 **Definition**: Tasks with no code.
 
 **Detection Rule**:
+
 ```python
 for task in tasks:
     if not exists(task.target_file):
@@ -70,6 +74,7 @@ for task in tasks:
 **Definition**: References to non-existent items.
 
 **Detection Rule**:
+
 ```python
 for ref in all_references:
     if not exists(ref.target):
@@ -112,7 +117,7 @@ done < /tmp/reqs.txt
 for src_file in src/**/*.ts; do
     test_file="${src_file/src\//tests/}"
     test_file="${test_file/.ts/.test.ts}"
-    
+
     if [ ! -f "$test_file" ]; then
         echo "UNTESTED: $src_file"
     fi
@@ -132,27 +137,27 @@ done
 
 ## Summary
 
-| Gap Type | Count | Severity |
-|----------|-------|----------|
-| Orphaned Requirements | 2 | 🔴 Critical |
-| Orphaned Tests | 1 | 🟠 Warning |
-| Untested Code | 3 | 🔴 Critical |
-| Broken References | 0 | - |
+| Gap Type              | Count | Severity    |
+| --------------------- | ----- | ----------- |
+| Orphaned Requirements | 2     | 🔴 Critical |
+| Orphaned Tests        | 1     | 🟠 Warning  |
+| Untested Code         | 3     | 🔴 Critical |
+| Broken References     | 0     | -           |
 
 ## Detailed Gaps
 
 ### Orphaned Requirements
 
-| REQ ID | Description | Recommended Action |
-|--------|-------------|-------------------|
-| REQ-003 | 2FA login | Add to design or defer |
-| REQ-007 | Email notify | Add to design |
+| REQ ID  | Description  | Recommended Action     |
+| ------- | ------------ | ---------------------- |
+| REQ-003 | 2FA login    | Add to design or defer |
+| REQ-007 | Email notify | Add to design          |
 
 ### Untested Code
 
-| File | Functions | Action |
-|------|-----------|--------|
-| src/auth/otp.ts | generateOTP | Create tests |
+| File                | Functions    | Action       |
+| ------------------- | ------------ | ------------ |
+| src/auth/otp.ts     | generateOTP  | Create tests |
 | src/user/profile.ts | updateAvatar | Create tests |
 
 ## Resolution Plan
@@ -178,14 +183,14 @@ class GapDetector:
     def __init__(self, feature_path):
         self.feature_path = feature_path
         self.gaps = []
-    
+
     def detect_all(self):
         self.detect_orphaned_requirements()
         self.detect_orphaned_tests()
         self.detect_untested_code()
         self.detect_broken_references()
         return self.gaps
-    
+
     def get_report(self):
         return {
             "feature": self.feature_path,

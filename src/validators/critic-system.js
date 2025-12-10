@@ -1,8 +1,8 @@
 /**
  * MUSUBI Critic System
- * 
+ *
  * SDDステージの品質評価システム
- * 
+ *
  * @module src/validators/critic-system
  * @see REQ-P0-B005
  * @inspired-by OpenHands openhands/critic/
@@ -15,10 +15,10 @@ const path = require('path');
  * 評価グレード
  */
 const Grade = {
-  A: 'A',   // 0.8+
-  B: 'B',   // 0.5-0.79
-  C: 'C',   // 0.3-0.49
-  F: 'F',   // < 0.3
+  A: 'A', // 0.8+
+  B: 'B', // 0.5-0.79
+  C: 'C', // 0.3-0.49
+  F: 'F', // < 0.3
 };
 
 /**
@@ -97,13 +97,13 @@ class CriticResult {
     md += `- **Grade**: ${this.grade}\n`;
     md += `- **Status**: ${this.success ? '✅ Pass' : '❌ Fail'}\n\n`;
     md += `### Summary\n\n${this.message}\n\n`;
-    
+
     if (Object.keys(this.details).length > 0) {
       md += `### Details\n\n`;
       md += `| Criterion | Score | Status |\n`;
       md += `|-----------|-------|--------|\n`;
       for (const [key, value] of Object.entries(this.details)) {
-        const score = typeof value === 'number' ? value : (value.score || 0);
+        const score = typeof value === 'number' ? value : value.score || 0;
         const pct = Math.round(score * 100);
         const status = score >= 0.5 ? '✅' : '❌';
         md += `| ${key} | ${pct}% | ${status} |\n`;
@@ -148,7 +148,7 @@ class BaseCritic {
     let weightedSum = 0;
 
     for (const [key, value] of entries) {
-      const score = typeof value === 'number' ? value : (value.score || 0);
+      const score = typeof value === 'number' ? value : value.score || 0;
       const weight = this.weights[key] || 1;
       weightedSum += score * weight;
       totalWeight += weight;
@@ -159,7 +159,7 @@ class BaseCritic {
 
   /**
    * ファイルが存在するかチェック
-   * @param {string} relativePath 
+   * @param {string} relativePath
    * @returns {boolean}
    */
   fileExists(relativePath) {
@@ -168,7 +168,7 @@ class BaseCritic {
 
   /**
    * ファイル内容を読み込み
-   * @param {string} relativePath 
+   * @param {string} relativePath
    * @returns {string|null}
    */
   readFile(relativePath) {
@@ -202,20 +202,17 @@ class RequirementsCritic extends BaseCritic {
     };
 
     const totalScore = this.calculateWeightedScore(scores);
-    
-    return new CriticResult(
-      totalScore,
-      this._generateMessage(totalScore, scores),
-      scores
-    );
+
+    return new CriticResult(totalScore, this._generateMessage(totalScore, scores), scores);
   }
 
   /**
    * EARS形式準拠チェック
    */
   checkEarsFormat(context) {
-    const content = context.content || this.readFile('docs/requirements/srs/srs-musubi-v3.0.0.ja.md') || '';
-    
+    const content =
+      context.content || this.readFile('docs/requirements/srs/srs-musubi-v3.0.0.ja.md') || '';
+
     // EARS キーワードパターン
     const earsPatterns = [
       /\b(When|If|While|Where)\b.*\b(shall|should|must)\b/gi,
@@ -225,7 +222,7 @@ class RequirementsCritic extends BaseCritic {
 
     const reqPattern = /REQ-[A-Z0-9]+-\d+/g;
     const requirements = content.match(reqPattern) || [];
-    
+
     if (requirements.length === 0) return 0;
 
     // EARS パターンの出現をカウント
@@ -243,8 +240,9 @@ class RequirementsCritic extends BaseCritic {
    * 完全性チェック
    */
   checkCompleteness(context) {
-    const content = context.content || this.readFile('docs/requirements/srs/srs-musubi-v3.0.0.ja.md') || '';
-    
+    const content =
+      context.content || this.readFile('docs/requirements/srs/srs-musubi-v3.0.0.ja.md') || '';
+
     const requiredSections = [
       /## 機能要件|## Functional Requirements/i,
       /## 非機能要件|## Non-Functional Requirements/i,
@@ -259,13 +257,14 @@ class RequirementsCritic extends BaseCritic {
    * テスト可能性チェック
    */
   checkTestability(context) {
-    const content = context.content || this.readFile('docs/requirements/srs/srs-musubi-v3.0.0.ja.md') || '';
-    
+    const content =
+      context.content || this.readFile('docs/requirements/srs/srs-musubi-v3.0.0.ja.md') || '';
+
     // 数値目標や測定可能な基準があるかチェック
     const measurablePatterns = [
-      /\d+%/g,                          // パーセンテージ
-      /\d+\s*(秒|ms|ミリ秒|seconds?)/gi,  // 時間
-      /\d+\s*(回|times?)/gi,            // 回数
+      /\d+%/g, // パーセンテージ
+      /\d+\s*(秒|ms|ミリ秒|seconds?)/gi, // 時間
+      /\d+\s*(回|times?)/gi, // 回数
       /less than|greater than|at least|最大|最小/gi,
     ];
 
@@ -284,14 +283,14 @@ class RequirementsCritic extends BaseCritic {
    */
   checkTraceability(context) {
     const content = context.content || '';
-    
+
     // 要件IDへの参照をチェック
     const reqPattern = /REQ-[A-Z0-9]+-\d+/g;
     const requirements = content.match(reqPattern) || [];
-    
+
     // 重複を除去してユニークな要件数をカウント
     const uniqueReqs = [...new Set(requirements)];
-    
+
     // 5つ以上のユニーク要件があれば良好
     return Math.min(1, uniqueReqs.length / 5);
   }
@@ -333,12 +332,8 @@ class DesignCritic extends BaseCritic {
     };
 
     const totalScore = this.calculateWeightedScore(scores);
-    
-    return new CriticResult(
-      totalScore,
-      this._generateMessage(totalScore, scores),
-      scores
-    );
+
+    return new CriticResult(totalScore, this._generateMessage(totalScore, scores), scores);
   }
 
   /**
@@ -351,7 +346,7 @@ class DesignCritic extends BaseCritic {
     // C4レベルのキーワードをチェック
     const c4Keywords = ['Context', 'Container', 'Component', 'Code'];
     const files = fs.readdirSync(designDir).filter(f => f.endsWith('.md'));
-    
+
     let c4Score = 0;
     for (const file of files) {
       const content = fs.readFileSync(path.join(designDir, file), 'utf-8');
@@ -370,9 +365,7 @@ class DesignCritic extends BaseCritic {
     const adrDir = path.join(this.projectRoot, 'docs/design/adr');
     if (!fs.existsSync(adrDir)) return 0;
 
-    const adrFiles = fs.readdirSync(adrDir).filter(f => 
-      f.startsWith('ADR-') && f.endsWith('.md')
-    );
+    const adrFiles = fs.readdirSync(adrDir).filter(f => f.startsWith('ADR-') && f.endsWith('.md'));
 
     // 3つ以上のADRがあれば満点
     return Math.min(1, adrFiles.length / 3);
@@ -435,12 +428,8 @@ class ImplementationCritic extends BaseCritic {
     };
 
     const totalScore = this.calculateWeightedScore(scores);
-    
-    return new CriticResult(
-      totalScore,
-      this._generateMessage(totalScore, scores),
-      scores
-    );
+
+    return new CriticResult(totalScore, this._generateMessage(totalScore, scores), scores);
   }
 
   /**
@@ -570,8 +559,8 @@ class CriticSystem {
 
   /**
    * 特定ステージを評価
-   * @param {string} stage 
-   * @param {Object} context 
+   * @param {string} stage
+   * @param {Object} context
    * @returns {CriticResult}
    */
   evaluate(stage, context = {}) {
@@ -584,7 +573,7 @@ class CriticSystem {
 
   /**
    * 全ステージを評価
-   * @param {Object} context 
+   * @param {Object} context
    * @returns {Object}
    */
   evaluateAll(context = {}) {
@@ -610,13 +599,13 @@ class CriticSystem {
 
   /**
    * レポートを生成
-   * @param {Object} results 
+   * @param {Object} results
    * @returns {string}
    */
   generateReport(results) {
     let md = `# MUSUBI Quality Report\n\n`;
     md += `Generated: ${new Date().toISOString()}\n\n`;
-    
+
     if (results.overall) {
       md += `## Overall Score\n\n`;
       md += `- **Score**: ${results.overall.percentage}%\n`;
@@ -634,7 +623,8 @@ class CriticSystem {
   }
 
   _generateOverallMessage(results) {
-    const avgScore = Object.values(results).reduce((sum, r) => sum + r.score, 0) / Object.keys(results).length;
+    const avgScore =
+      Object.values(results).reduce((sum, r) => sum + r.score, 0) / Object.keys(results).length;
     if (avgScore >= 0.8) {
       return 'プロジェクトは全体的に高品質です。';
     } else if (avgScore >= 0.5) {

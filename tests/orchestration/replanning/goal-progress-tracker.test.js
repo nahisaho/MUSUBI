@@ -1,6 +1,6 @@
 /**
  * GoalProgressTracker Tests
- * 
+ *
  * Tests for goal progress tracking functionality
  */
 
@@ -9,7 +9,7 @@
 const {
   GoalProgressTracker,
   Goal,
-  ProgressSnapshot
+  ProgressSnapshot,
 } = require('../../../src/orchestration/replanning/goal-progress-tracker');
 
 describe('GoalProgressTracker', () => {
@@ -33,8 +33,8 @@ describe('GoalProgressTracker', () => {
       const custom = new GoalProgressTracker({
         config: {
           minProgressRate: 0.1,
-          stallThreshold: 5
-        }
+          stallThreshold: 5,
+        },
       });
       expect(custom.config.minProgressRate).toBe(0.1);
       expect(custom.config.stallThreshold).toBe(5);
@@ -45,7 +45,7 @@ describe('GoalProgressTracker', () => {
     it('should register a new goal', () => {
       const goal = tracker.registerGoal({
         id: 'goal-1',
-        name: 'Test Goal'
+        name: 'Test Goal',
       });
 
       expect(goal).toBeInstanceOf(Goal);
@@ -64,8 +64,8 @@ describe('GoalProgressTracker', () => {
         name: 'Parent Goal',
         subGoals: [
           { id: 'child-1', name: 'Child 1' },
-          { id: 'child-2', name: 'Child 2' }
-        ]
+          { id: 'child-2', name: 'Child 2' },
+        ],
       });
 
       expect(tracker.goals.has('child-1')).toBe(true);
@@ -115,10 +115,10 @@ describe('GoalProgressTracker', () => {
   describe('tracking', () => {
     it('should start and stop tracking', () => {
       expect(tracker.isTracking).toBe(false);
-      
+
       tracker.startTracking();
       expect(tracker.isTracking).toBe(true);
-      
+
       tracker.stopTracking();
       expect(tracker.isTracking).toBe(false);
     });
@@ -176,7 +176,7 @@ describe('Goal', () => {
       const goal = new Goal({
         id: 'custom-goal',
         name: 'Custom Goal',
-        priority: 5
+        priority: 5,
       });
       expect(goal.id).toBe('custom-goal');
       expect(goal.name).toBe('Custom Goal');
@@ -204,7 +204,7 @@ describe('Goal', () => {
   describe('hasSubGoals', () => {
     it('should return true when has sub-goals', () => {
       const goal = new Goal({
-        subGoals: [{ name: 'Sub 1' }]
+        subGoals: [{ name: 'Sub 1' }],
       });
       expect(goal.hasSubGoals()).toBe(true);
     });
@@ -225,8 +225,8 @@ describe('Goal', () => {
       const goal = new Goal({
         subGoals: [
           { progress: 0.5, priority: 1 },
-          { progress: 1.0, priority: 1 }
-        ]
+          { progress: 1.0, priority: 1 },
+        ],
       });
       expect(goal.calculateProgress()).toBe(0.75);
     });
@@ -234,9 +234,9 @@ describe('Goal', () => {
     it('should respect priority weights', () => {
       const goal = new Goal({
         subGoals: [
-          { progress: 0.0, priority: 1 },  // weight 1
-          { progress: 1.0, priority: 3 }   // weight 3
-        ]
+          { progress: 0.0, priority: 1 }, // weight 1
+          { progress: 1.0, priority: 3 }, // weight 3
+        ],
       });
       expect(goal.calculateProgress()).toBe(0.75); // (0*1 + 1*3) / 4
     });
@@ -264,7 +264,7 @@ describe('Goal', () => {
     it('should return true when ETA exceeds deadline', () => {
       const goal = new Goal({
         progress: 0.1,
-        deadline: Date.now() + 1000 // 1 second from now
+        deadline: Date.now() + 1000, // 1 second from now
       });
       expect(goal.isAtRisk(0.0001)).toBe(true); // Very slow rate
     });
@@ -275,7 +275,7 @@ describe('Goal', () => {
       const goal = new Goal({
         id: 'json-goal',
         name: 'JSON Goal',
-        progress: 0.5
+        progress: 0.5,
       });
 
       const json = goal.toJSON();

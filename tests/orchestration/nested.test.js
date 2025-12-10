@@ -8,7 +8,7 @@ const {
   PatternType,
   ExecutionStatus,
   NestedPattern,
-  createNestedPattern
+  createNestedPattern,
 } = require('../../src/orchestration');
 
 describe('NestedPattern', () => {
@@ -16,33 +16,33 @@ describe('NestedPattern', () => {
   let pattern;
 
   beforeEach(() => {
-    engine = new OrchestrationEngine({ 
-      enableHumanValidation: false 
+    engine = new OrchestrationEngine({
+      enableHumanValidation: false,
     });
     pattern = createNestedPattern();
     engine.registerPattern(PatternType.NESTED, pattern);
 
     // Register test skills with subtask support
-    engine.registerSkill('decompose', async (input) => ({
+    engine.registerSkill('decompose', async input => ({
       subtasks: input.subtasks || ['subtask1', 'subtask2'],
-      decomposed: true
+      decomposed: true,
     }));
 
-    engine.registerSkill('processor', async (input) => ({
+    engine.registerSkill('processor', async input => ({
       processed: true,
       task: input.task,
-      value: input.value || 'processed'
+      value: input.value || 'processed',
     }));
 
-    engine.registerSkill('aggregator', async (input) => ({
+    engine.registerSkill('aggregator', async input => ({
       aggregated: true,
       results: input.results || [],
-      count: (input.results || []).length
+      count: (input.results || []).length,
     }));
 
-    engine.registerSkill('simple', async (input) => ({
+    engine.registerSkill('simple', async input => ({
       simple: true,
-      input
+      input,
     }));
   });
 
@@ -62,7 +62,7 @@ describe('NestedPattern', () => {
     test('should create pattern with custom options', () => {
       const p = createNestedPattern({
         maxDepth: 3,
-        allowRecursion: false
+        allowRecursion: false,
       });
       expect(p.options.maxDepth).toBe(3);
       expect(p.options.allowRecursion).toBe(false);
@@ -79,7 +79,7 @@ describe('NestedPattern', () => {
     test('should fail without skill hierarchy', () => {
       const context = new ExecutionContext({
         task: 'Test task',
-        input: {}
+        input: {},
       });
 
       const result = pattern.validate(context, engine);
@@ -92,8 +92,8 @@ describe('NestedPattern', () => {
         task: 'Test task',
         input: {
           rootSkill: 'simple',
-          initialInput: { value: 1 }
-        }
+          initialInput: { value: 1 },
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -106,10 +106,10 @@ describe('NestedPattern', () => {
         input: {
           skills: {
             decompose: { skill: 'decompose' },
-            process: { skill: 'processor' }
+            process: { skill: 'processor' },
           },
-          rootSkill: 'decompose'
-        }
+          rootSkill: 'decompose',
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -120,8 +120,8 @@ describe('NestedPattern', () => {
       const context = new ExecutionContext({
         task: 'Test task',
         input: {
-          rootSkill: 'unknown_skill'
-        }
+          rootSkill: 'unknown_skill',
+        },
       });
 
       const result = pattern.validate(context, engine);
@@ -133,11 +133,10 @@ describe('NestedPattern', () => {
   describe('Simple Execution', () => {
     test('should execute single skill', async () => {
       const context = await engine.execute(PatternType.NESTED, {
-        
         input: {
           rootSkill: 'simple',
-          initialInput: { value: 'test' }
-        }
+          initialInput: { value: 'test' },
+        },
       });
 
       expect(context.output.tree).toBeDefined();
@@ -148,11 +147,10 @@ describe('NestedPattern', () => {
 
     test('should track execution depth', async () => {
       const context = await engine.execute(PatternType.NESTED, {
-        
         input: {
           rootSkill: 'simple',
-          initialInput: { value: 'test' }
-        }
+          initialInput: { value: 'test' },
+        },
       });
 
       expect(context.output.tree.depth).toBe(0);
@@ -161,17 +159,16 @@ describe('NestedPattern', () => {
 
     test('should emit events during execution', async () => {
       const events = [];
-      engine.on('nestedStarted', (data) => events.push({ type: 'started', data }));
-      engine.on('nestedNodeStarted', (data) => events.push({ type: 'nodeStarted', data }));
-      engine.on('nestedNodeCompleted', (data) => events.push({ type: 'nodeCompleted', data }));
-      engine.on('nestedCompleted', (data) => events.push({ type: 'completed', data }));
+      engine.on('nestedStarted', data => events.push({ type: 'started', data }));
+      engine.on('nestedNodeStarted', data => events.push({ type: 'nodeStarted', data }));
+      engine.on('nestedNodeCompleted', data => events.push({ type: 'nodeCompleted', data }));
+      engine.on('nestedCompleted', data => events.push({ type: 'completed', data }));
 
       await engine.execute(PatternType.NESTED, {
-        
         input: {
           rootSkill: 'simple',
-          initialInput: { value: 'test' }
-        }
+          initialInput: { value: 'test' },
+        },
       });
 
       expect(events.some(e => e.type === 'started')).toBe(true);
@@ -187,26 +184,25 @@ describe('NestedPattern', () => {
       engine.registerSkill('parent', async (input, _context) => {
         return {
           parentResult: true,
-          data: input
+          data: input,
         };
       });
 
-      engine.registerSkill('grandparent', async (input) => ({
+      engine.registerSkill('grandparent', async input => ({
         level: 'grandparent',
-        data: input
+        data: input,
       }));
     });
 
     test('should execute subtasks using delegationMap', async () => {
       const context = await engine.execute(PatternType.NESTED, {
-        
         input: {
           rootSkill: 'parent',
           delegationMap: {
-            'parent': ['processor', 'processor']
+            parent: ['processor', 'processor'],
           },
-          initialInput: {}
-        }
+          initialInput: {},
+        },
       });
 
       expect(context.output.tree.children).toBeDefined();
@@ -220,15 +216,14 @@ describe('NestedPattern', () => {
       engine.registerPattern(PatternType.NESTED, limitedPattern);
 
       const context = await engine.execute(PatternType.NESTED, {
-        
         input: {
           rootSkill: 'grandparent',
           delegationMap: {
-            'grandparent': ['parent'],
-            'parent': ['processor']
+            grandparent: ['parent'],
+            parent: ['processor'],
           },
-          initialInput: {}
-        }
+          initialInput: {},
+        },
       });
 
       // Should stop at depth 1, not go to grandchildren
@@ -237,14 +232,13 @@ describe('NestedPattern', () => {
 
     test('should track nested depths correctly', async () => {
       const context = await engine.execute(PatternType.NESTED, {
-        
         input: {
           rootSkill: 'parent',
           delegationMap: {
-            'parent': ['processor']
+            parent: ['processor'],
           },
-          initialInput: {}
-        }
+          initialInput: {},
+        },
       });
 
       expect(context.output.tree.depth).toBe(0);
@@ -259,18 +253,17 @@ describe('NestedPattern', () => {
         throw new Error('Skill failed');
       });
 
-      engine.registerSkill('partialFail', async (_input) => ({
-        result: true
+      engine.registerSkill('partialFail', async _input => ({
+        result: true,
       }));
     });
 
     test('should handle skill errors', async () => {
       const context = await engine.execute(PatternType.NESTED, {
-        
         input: {
           rootSkill: 'failing',
-          initialInput: {}
-        }
+          initialInput: {},
+        },
       });
 
       expect(context.status).toBe(ExecutionStatus.FAILED);
@@ -282,14 +275,13 @@ describe('NestedPattern', () => {
       engine.registerPattern(PatternType.NESTED, continuePattern);
 
       const _context = await engine.execute(PatternType.NESTED, {
-        
         input: {
           rootSkill: 'partialFail',
           delegationMap: {
-            'partialFail': ['processor', 'failing']
+            partialFail: ['processor', 'failing'],
           },
-          initialInput: {}
-        }
+          initialInput: {},
+        },
       });
 
       // Note: With current implementation, errors throw and stop execution
@@ -299,11 +291,10 @@ describe('NestedPattern', () => {
 
     test('should provide execution summary', async () => {
       const context = await engine.execute(PatternType.NESTED, {
-        
         input: {
           rootSkill: 'simple',
-          initialInput: {}
-        }
+          initialInput: {},
+        },
       });
 
       expect(context.output.summary).toBeDefined();
@@ -316,14 +307,13 @@ describe('NestedPattern', () => {
   describe('Skill Hierarchy Definition', () => {
     test('should support explicit skill hierarchy', async () => {
       const context = await engine.execute(PatternType.NESTED, {
-        
         input: {
           rootSkill: 'decompose',
           delegationMap: {
-            'decompose': ['processor', 'processor']
+            decompose: ['processor', 'processor'],
           },
-          initialInput: {}
-        }
+          initialInput: {},
+        },
       });
 
       expect(context.output.tree).toBeDefined();
@@ -331,20 +321,19 @@ describe('NestedPattern', () => {
     });
 
     test('should pass aggregated results to aggregator', async () => {
-      engine.registerSkill('coordinator', async (input) => ({
+      engine.registerSkill('coordinator', async input => ({
         coordinated: true,
-        data: input
+        data: input,
       }));
 
       const context = await engine.execute(PatternType.NESTED, {
-        
         input: {
           rootSkill: 'coordinator',
           delegationMap: {
-            'coordinator': ['processor', 'processor']
+            coordinator: ['processor', 'processor'],
           },
-          initialInput: {}
-        }
+          initialInput: {},
+        },
       });
 
       expect(context.output.tree.children.length).toBe(2);
@@ -354,18 +343,17 @@ describe('NestedPattern', () => {
   describe('Input/Output Flow', () => {
     test('should pass parent output to children', async () => {
       engine.registerSkill('dataProvider', async () => ({
-        data: { value: 42 }
+        data: { value: 42 },
       }));
 
       const context = await engine.execute(PatternType.NESTED, {
-        
         input: {
           rootSkill: 'dataProvider',
           delegationMap: {
-            'dataProvider': ['processor']
+            dataProvider: ['processor'],
           },
-          initialInput: {}
-        }
+          initialInput: {},
+        },
       });
 
       expect(context.output.tree.output.data.value).toBe(42);
@@ -374,18 +362,17 @@ describe('NestedPattern', () => {
     });
 
     test('should merge initial input with skill input', async () => {
-      engine.registerSkill('inputMerger', async (input) => ({
+      engine.registerSkill('inputMerger', async input => ({
         received: input,
         hasInitial: !!input.fromInitial,
-        hasSkill: !!input.fromSkill
+        hasSkill: !!input.fromSkill,
       }));
 
       const context = await engine.execute(PatternType.NESTED, {
-        
         input: {
           rootSkill: 'inputMerger',
-          initialInput: { fromInitial: true, fromSkill: false }
-        }
+          initialInput: { fromInitial: true, fromSkill: false },
+        },
       });
 
       expect(context.output.tree.output.hasInitial).toBe(true);
@@ -395,11 +382,10 @@ describe('NestedPattern', () => {
   describe('Integration', () => {
     test('should work with OrchestrationEngine execute', async () => {
       const context = await engine.execute(PatternType.NESTED, {
-        
         input: {
           rootSkill: 'simple',
-          initialInput: { test: true }
-        }
+          initialInput: { test: true },
+        },
       });
 
       expect(context).toBeDefined();
@@ -415,11 +401,10 @@ describe('NestedPattern', () => {
       };
 
       await engine.execute(PatternType.NESTED, {
-        
         input: {
           rootSkill: 'simple',
-          initialInput: {}
-        }
+          initialInput: {},
+        },
       });
 
       expect(contexts.length).toBeGreaterThan(0);

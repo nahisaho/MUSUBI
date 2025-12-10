@@ -60,7 +60,7 @@ describe('FileWatcher', () => {
   describe('close()', () => {
     it('should close the watcher', async () => {
       watcher = new FileWatcher(tempDir);
-      
+
       await watcher.close();
 
       expect(watcher.watcher).toBeNull();
@@ -68,8 +68,11 @@ describe('FileWatcher', () => {
 
     it('should clear debounce timers', async () => {
       watcher = new FileWatcher(tempDir);
-      watcher.debounceTimers.set('test', setTimeout(() => {}, 10000));
-      
+      watcher.debounceTimers.set(
+        'test',
+        setTimeout(() => {}, 10000)
+      );
+
       await watcher.close();
 
       expect(watcher.debounceTimers.size).toBe(0);
@@ -77,7 +80,7 @@ describe('FileWatcher', () => {
   });
 
   describe('events', () => {
-    it('should emit ready event', (done) => {
+    it('should emit ready event', done => {
       watcher = new FileWatcher(tempDir);
 
       watcher.on('ready', () => {
@@ -85,7 +88,7 @@ describe('FileWatcher', () => {
       });
     }, 5000);
 
-    it('should emit change event for file changes', (done) => {
+    it('should emit change event for file changes', done => {
       watcher = new FileWatcher(tempDir);
       watcher.debounceDelay = 100;
 
@@ -100,13 +103,13 @@ describe('FileWatcher', () => {
         fs.writeFile(testFile, 'modified content');
       });
 
-      watcher.on('change', (filePath) => {
+      watcher.on('change', filePath => {
         expect(filePath).toBe(testFile);
         done();
       });
     }, 10000);
 
-    it('should emit add event for new files', (done) => {
+    it('should emit add event for new files', done => {
       watcher = new FileWatcher(tempDir);
       watcher.debounceDelay = 100;
 
@@ -116,13 +119,13 @@ describe('FileWatcher', () => {
         await fs.writeFile(testFile, 'new content');
       });
 
-      watcher.on('add', (filePath) => {
+      watcher.on('add', filePath => {
         expect(filePath).toBe(testFile);
         done();
       });
     }, 10000);
 
-    it('should emit unlink event for deleted files', (done) => {
+    it('should emit unlink event for deleted files', done => {
       watcher = new FileWatcher(tempDir);
       watcher.debounceDelay = 100;
 
@@ -136,7 +139,7 @@ describe('FileWatcher', () => {
         await fs.remove(testFile);
       });
 
-      watcher.on('unlink', (filePath) => {
+      watcher.on('unlink', filePath => {
         expect(filePath).toBe(testFile);
         done();
       });
@@ -169,7 +172,7 @@ describe('FileWatcher', () => {
       watcher.debounceDelay = 100;
 
       const changedFiles = [];
-      watcher.on('change', (file) => {
+      watcher.on('change', file => {
         changedFiles.push(file);
       });
 

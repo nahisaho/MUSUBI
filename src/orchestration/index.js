@@ -1,6 +1,6 @@
 /**
  * MUSUBI Orchestration Module
- * 
+ *
  * Multi-skill orchestration with ag2-inspired patterns:
  * - Auto: Automatic skill selection based on task
  * - Sequential: Linear skill execution
@@ -12,58 +12,46 @@
  * - Triage: Request classification and routing (OpenAI Agents SDK inspired)
  */
 
-const { 
-  OrchestrationEngine, 
-  ExecutionContext, 
-  PatternType, 
-  ExecutionStatus, 
-  Priority 
+const {
+  OrchestrationEngine,
+  ExecutionContext,
+  PatternType,
+  ExecutionStatus,
+  Priority,
 } = require('./orchestration-engine');
 
-const { 
-  PatternRegistry, 
-  PatternMetadata, 
-  BasePattern, 
-  createDefaultRegistry 
+const {
+  PatternRegistry,
+  PatternMetadata,
+  BasePattern,
+  createDefaultRegistry,
 } = require('./pattern-registry');
 
-const { 
-  SequentialPattern, 
-  SequentialOptions, 
-  createSequentialPattern 
+const {
+  SequentialPattern,
+  SequentialOptions,
+  createSequentialPattern,
 } = require('./patterns/sequential');
 
-const { 
-  AutoPattern, 
-  ConfidenceLevel, 
-  createAutoPattern 
-} = require('./patterns/auto');
+const { AutoPattern, ConfidenceLevel, createAutoPattern } = require('./patterns/auto');
 
-const {
-  NestedPattern,
-  createNestedPattern
-} = require('./patterns/nested');
+const { NestedPattern, createNestedPattern } = require('./patterns/nested');
 
 const {
   GroupChatPattern,
   DiscussionMode,
   ConsensusType,
-  createGroupChatPattern
+  createGroupChatPattern,
 } = require('./patterns/group-chat');
 
 const {
   HumanInLoopPattern,
   GateType,
   GateResult,
-  createHumanInLoopPattern
+  createHumanInLoopPattern,
 } = require('./patterns/human-in-loop');
 
-const {
-  SwarmPattern,
-  PLabel,
-  SwarmStrategy,
-  createSwarmPattern
-} = require('./patterns/swarm');
+const { SwarmPattern, PLabel, SwarmStrategy, createSwarmPattern } = require('./patterns/swarm');
 
 const {
   HandoffPattern,
@@ -71,7 +59,7 @@ const {
   EscalationData,
   HandoffConfig,
   handoff,
-  createHandoffPattern
+  createHandoffPattern,
 } = require('./patterns/handoff');
 
 const {
@@ -81,7 +69,7 @@ const {
   AgentCapability,
   TriageResult,
   DEFAULT_KEYWORD_MAPPINGS,
-  createTriagePattern
+  createTriagePattern,
 } = require('./patterns/triage');
 
 const {
@@ -89,7 +77,7 @@ const {
   StepType,
   WorkflowState,
   SDDWorkflowTemplates,
-  createWorkflowOrchestrator
+  createWorkflowOrchestrator,
 } = require('./workflow-orchestrator');
 
 const {
@@ -102,7 +90,7 @@ const {
   ReplanDecision,
   defaultReplanningConfig,
   mergeConfig: mergeReplanningConfig,
-  validateConfig: validateReplanningConfig
+  validateConfig: validateReplanningConfig,
 } = require('./replanning');
 
 const {
@@ -124,7 +112,7 @@ const {
   RuleRegistry,
   rules,
   CommonRuleSets,
-  globalRuleRegistry
+  globalRuleRegistry,
 } = require('./guardrails');
 
 // Sprint 3.5: Advanced Workflows
@@ -135,7 +123,7 @@ const {
   StepResult,
   StepType: WorkflowStepType,
   ExecutionState,
-  RecoveryStrategy
+  RecoveryStrategy,
 } = require('./workflow-executor');
 
 const {
@@ -147,7 +135,7 @@ const {
   WorkflowError,
   ErrorSeverity,
   ErrorCategory,
-  CircuitState
+  CircuitState,
 } = require('./error-handler');
 
 const {
@@ -156,23 +144,18 @@ const {
   codeReviewWorkflow,
   incidentResponseWorkflow,
   dataPipelineWorkflow,
-  createWorkflowFromTemplate
+  createWorkflowFromTemplate,
 } = require('./workflow-examples');
 
 // Sprint 3.1-3.3: Skill System Architecture
-const {
-  SkillRegistry,
-  SkillDefinition,
-  SkillHealth,
-  SkillCategory
-} = require('./skill-registry');
+const { SkillRegistry, SkillDefinition, SkillHealth, SkillCategory } = require('./skill-registry');
 
 const {
   SkillExecutor,
   ExecutionPriority,
   ParallelExecutor,
   ValidationError,
-  GuardrailError
+  GuardrailError,
 } = require('./skill-executor');
 
 const {
@@ -180,7 +163,7 @@ const {
   AgentDefinition,
   BindingRecord,
   AgentStatus,
-  CapabilityMatcher
+  CapabilityMatcher,
 } = require('./agent-skill-binding');
 
 const {
@@ -190,7 +173,7 @@ const {
   SchemaTranslator,
   MCPToSkillAdapter,
   SkillToMCPAdapter,
-  MCPAdapterManager
+  MCPAdapterManager,
 } = require('./mcp-tool-adapters');
 
 // Phase 4: Agent Loop & Agentic Features
@@ -215,7 +198,7 @@ const {
   CodeGenerator,
   CodeReviewer,
   createCodeGenerator,
-  createCodeReviewer
+  createCodeReviewer,
 } = phase4;
 
 // Phase 5: Advanced Features
@@ -251,13 +234,13 @@ const {
   createAdvancedValidation,
   VALIDATION_TYPE,
   ARTIFACT_TYPE,
-  GAP_SEVERITY
+  GAP_SEVERITY,
 } = require('../phase5-integration');
 
 /**
  * Create a fully configured orchestration engine
  * with default patterns registered
- * 
+ *
  * @param {object} options - Engine options
  * @returns {OrchestrationEngine} Configured engine
  */
@@ -283,7 +266,7 @@ function createOrchestrationEngine(options = {}) {
 
 /**
  * Create an orchestration engine with custom patterns
- * 
+ *
  * @param {object} options - Engine options
  * @param {object[]} patterns - Custom patterns to register
  * @returns {OrchestrationEngine} Configured engine
@@ -504,5 +487,5 @@ module.exports = {
   createAdvancedValidation,
   VALIDATION_TYPE,
   ARTIFACT_TYPE,
-  GAP_SEVERITY
+  GAP_SEVERITY,
 };

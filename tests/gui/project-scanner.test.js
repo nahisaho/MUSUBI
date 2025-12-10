@@ -49,7 +49,7 @@ describe('ProjectScanner', () => {
 
     it('should cache results', async () => {
       await fs.ensureDir(path.join(tempDir, 'steering'));
-      
+
       const result1 = await scanner.scan();
       const result2 = await scanner.scan();
 
@@ -71,10 +71,7 @@ describe('ProjectScanner', () => {
         path.join(steeringDir, 'product.md'),
         '---\ntitle: Test Product\n---\n# Product'
       );
-      await fs.writeFile(
-        path.join(steeringDir, 'tech.md'),
-        '---\nstack: Node.js\n---\n# Tech'
-      );
+      await fs.writeFile(path.join(steeringDir, 'tech.md'), '---\nstack: Node.js\n---\n# Tech');
 
       const result = await scanner.getSteering();
 

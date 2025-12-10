@@ -1,6 +1,6 @@
 /**
  * PatternRegistry Tests
- * 
+ *
  * Tests for pattern registry and metadata
  */
 
@@ -8,7 +8,7 @@ const {
   PatternRegistry,
   PatternMetadata,
   BasePattern,
-  createDefaultRegistry
+  createDefaultRegistry,
 } = require('../../src/orchestration/pattern-registry');
 
 const { PatternType } = require('../../src/orchestration/orchestration-engine');
@@ -17,7 +17,7 @@ describe('PatternMetadata', () => {
   describe('constructor', () => {
     it('should create metadata with defaults', () => {
       const meta = new PatternMetadata();
-      
+
       expect(meta.name).toBe('');
       expect(meta.type).toBe(PatternType.SEQUENTIAL);
       expect(meta.description).toBe('');
@@ -38,9 +38,9 @@ describe('PatternMetadata', () => {
         version: '2.0.0',
         tags: ['parallel', 'fast'],
         complexity: 'high',
-        supportsParallel: true
+        supportsParallel: true,
       });
-      
+
       expect(meta.name).toBe('test-pattern');
       expect(meta.type).toBe(PatternType.SWARM);
       expect(meta.description).toBe('Test description');
@@ -58,7 +58,7 @@ describe('PatternMetadata', () => {
       complexity: 'low',
       supportsParallel: false,
       requiresHuman: true,
-      tags: ['simple', 'basic']
+      tags: ['simple', 'basic'],
     });
 
     it('should match empty criteria', () => {
@@ -92,15 +92,19 @@ describe('PatternMetadata', () => {
     });
 
     it('should match multiple criteria', () => {
-      expect(meta.matches({
-        type: PatternType.SEQUENTIAL,
-        complexity: 'low'
-      })).toBe(true);
-      
-      expect(meta.matches({
-        type: PatternType.SEQUENTIAL,
-        complexity: 'high'
-      })).toBe(false);
+      expect(
+        meta.matches({
+          type: PatternType.SEQUENTIAL,
+          complexity: 'low',
+        })
+      ).toBe(true);
+
+      expect(
+        meta.matches({
+          type: PatternType.SEQUENTIAL,
+          complexity: 'high',
+        })
+      ).toBe(false);
     });
   });
 
@@ -109,11 +113,11 @@ describe('PatternMetadata', () => {
       const meta = new PatternMetadata({
         name: 'json-test',
         type: PatternType.AUTO,
-        description: 'JSON test pattern'
+        description: 'JSON test pattern',
       });
-      
+
       const json = meta.toJSON();
-      
+
       expect(json.name).toBe('json-test');
       expect(json.type).toBe(PatternType.AUTO);
       expect(json.description).toBe('JSON test pattern');
@@ -126,9 +130,9 @@ describe('BasePattern', () => {
     it('should create pattern with metadata', () => {
       const pattern = new BasePattern({
         name: 'base-test',
-        description: 'Test base pattern'
+        description: 'Test base pattern',
       });
-      
+
       expect(pattern.metadata).toBeInstanceOf(PatternMetadata);
       expect(pattern.metadata.name).toBe('base-test');
     });
@@ -137,7 +141,7 @@ describe('BasePattern', () => {
   describe('execute', () => {
     it('should throw not implemented error', async () => {
       const pattern = new BasePattern({ name: 'base' });
-      
+
       await expect(pattern.execute({}, {})).rejects.toThrow(
         'Pattern must implement execute method'
       );
@@ -148,7 +152,7 @@ describe('BasePattern', () => {
     it('should return valid by default', () => {
       const pattern = new BasePattern({ name: 'base' });
       const result = pattern.validate({}, {});
-      
+
       expect(result.valid).toBe(true);
       expect(result.errors).toEqual([]);
     });
@@ -165,7 +169,7 @@ describe('BasePattern', () => {
     it('should return pattern metadata', () => {
       const pattern = new BasePattern({ name: 'get-meta-test' });
       const meta = pattern.getMetadata();
-      
+
       expect(meta).toBeInstanceOf(PatternMetadata);
       expect(meta.name).toBe('get-meta-test');
     });
@@ -183,7 +187,7 @@ describe('PatternRegistry', () => {
     it('should register a pattern', () => {
       const pattern = { execute: async () => {} };
       registry.register('test', pattern);
-      
+
       expect(registry.get('test')).toBe(pattern);
       expect(registry.has('test')).toBe(true);
     });
@@ -209,13 +213,13 @@ describe('PatternRegistry', () => {
     it('should extract metadata from BasePattern', () => {
       const pattern = new BasePattern({
         name: 'meta-extract',
-        description: 'Extracted metadata'
+        description: 'Extracted metadata',
       });
       // Add execute method
       pattern.execute = async () => {};
-      
+
       registry.register('meta-extract', pattern);
-      
+
       const meta = registry.getMetadata('meta-extract');
       expect(meta.description).toBe('Extracted metadata');
     });
@@ -223,11 +227,11 @@ describe('PatternRegistry', () => {
     it('should allow metadata override', () => {
       const pattern = new BasePattern({ name: 'override' });
       pattern.execute = async () => {};
-      
+
       registry.register('override', pattern, {
-        description: 'Overridden description'
+        description: 'Overridden description',
       });
-      
+
       const meta = registry.getMetadata('override');
       expect(meta.description).toBe('Overridden description');
     });
@@ -237,9 +241,9 @@ describe('PatternRegistry', () => {
     it('should remove pattern', () => {
       const pattern = { execute: async () => {} };
       registry.register('remove', pattern);
-      
+
       const result = registry.unregister('remove');
-      
+
       expect(result).toBe(true);
       expect(registry.has('remove')).toBe(false);
     });
@@ -253,7 +257,7 @@ describe('PatternRegistry', () => {
     it('should return registered pattern', () => {
       const pattern = { execute: async () => {} };
       registry.register('get-test', pattern);
-      
+
       expect(registry.get('get-test')).toBe(pattern);
     });
 
@@ -281,7 +285,7 @@ describe('PatternRegistry', () => {
     it('should return all pattern names', () => {
       registry.register('a', { execute: async () => {} });
       registry.register('b', { execute: async () => {} });
-      
+
       const list = registry.list();
       expect(list).toContain('a');
       expect(list).toContain('b');
@@ -291,17 +295,25 @@ describe('PatternRegistry', () => {
 
   describe('find', () => {
     beforeEach(() => {
-      registry.register('seq', { execute: async () => {} }, {
-        type: PatternType.SEQUENTIAL,
-        complexity: 'low',
-        supportsParallel: false
-      });
-      
-      registry.register('swarm', { execute: async () => {} }, {
-        type: PatternType.SWARM,
-        complexity: 'high',
-        supportsParallel: true
-      });
+      registry.register(
+        'seq',
+        { execute: async () => {} },
+        {
+          type: PatternType.SEQUENTIAL,
+          complexity: 'low',
+          supportsParallel: false,
+        }
+      );
+
+      registry.register(
+        'swarm',
+        { execute: async () => {} },
+        {
+          type: PatternType.SWARM,
+          complexity: 'high',
+          supportsParallel: true,
+        }
+      );
     });
 
     it('should find by type', () => {
@@ -324,22 +336,38 @@ describe('PatternRegistry', () => {
 
   describe('findBestPattern', () => {
     beforeEach(() => {
-      registry.register(PatternType.SEQUENTIAL, { execute: async () => {} }, {
-        type: PatternType.SEQUENTIAL
-      });
-      
-      registry.register(PatternType.SWARM, { execute: async () => {} }, {
-        type: PatternType.SWARM,
-        supportsParallel: true
-      });
-      
-      registry.register(PatternType.AUTO, { execute: async () => {} }, {
-        type: PatternType.AUTO
-      });
-      
-      registry.register(PatternType.GROUP_CHAT, { execute: async () => {} }, {
-        type: PatternType.GROUP_CHAT
-      });
+      registry.register(
+        PatternType.SEQUENTIAL,
+        { execute: async () => {} },
+        {
+          type: PatternType.SEQUENTIAL,
+        }
+      );
+
+      registry.register(
+        PatternType.SWARM,
+        { execute: async () => {} },
+        {
+          type: PatternType.SWARM,
+          supportsParallel: true,
+        }
+      );
+
+      registry.register(
+        PatternType.AUTO,
+        { execute: async () => {} },
+        {
+          type: PatternType.AUTO,
+        }
+      );
+
+      registry.register(
+        PatternType.GROUP_CHAT,
+        { execute: async () => {} },
+        {
+          type: PatternType.GROUP_CHAT,
+        }
+      );
     });
 
     it('should return swarm for parallel task', () => {
@@ -371,14 +399,14 @@ describe('PatternRegistry', () => {
   describe('registerWithEngine', () => {
     it('should register all patterns with engine', () => {
       const mockEngine = {
-        registerPattern: jest.fn()
+        registerPattern: jest.fn(),
       };
-      
+
       registry.register('p1', { execute: async () => {} });
       registry.register('p2', { execute: async () => {} });
-      
+
       registry.registerWithEngine(mockEngine);
-      
+
       expect(mockEngine.registerPattern).toHaveBeenCalledTimes(2);
     });
   });
@@ -386,7 +414,7 @@ describe('PatternRegistry', () => {
   describe('getSummary', () => {
     it('should return summary for empty registry', () => {
       const summary = registry.getSummary();
-      
+
       expect(summary.total).toBe(0);
       expect(summary.patterns).toEqual([]);
       expect(summary.byType).toEqual({});
@@ -394,18 +422,26 @@ describe('PatternRegistry', () => {
     });
 
     it('should return summary with patterns', () => {
-      registry.register('seq1', { execute: async () => {} }, {
-        type: PatternType.SEQUENTIAL,
-        complexity: 'low'
-      });
-      
-      registry.register('seq2', { execute: async () => {} }, {
-        type: PatternType.SEQUENTIAL,
-        complexity: 'medium'
-      });
-      
+      registry.register(
+        'seq1',
+        { execute: async () => {} },
+        {
+          type: PatternType.SEQUENTIAL,
+          complexity: 'low',
+        }
+      );
+
+      registry.register(
+        'seq2',
+        { execute: async () => {} },
+        {
+          type: PatternType.SEQUENTIAL,
+          complexity: 'medium',
+        }
+      );
+
       const summary = registry.getSummary();
-      
+
       expect(summary.total).toBe(2);
       expect(summary.patterns).toHaveLength(2);
       expect(summary.byType[PatternType.SEQUENTIAL]).toBe(2);
@@ -418,9 +454,9 @@ describe('PatternRegistry', () => {
     it('should clear all patterns', () => {
       registry.register('p1', { execute: async () => {} });
       registry.register('p2', { execute: async () => {} });
-      
+
       registry.clear();
-      
+
       expect(registry.list()).toEqual([]);
     });
   });
@@ -429,7 +465,7 @@ describe('PatternRegistry', () => {
 describe('createDefaultRegistry', () => {
   it('should create empty registry', () => {
     const registry = createDefaultRegistry();
-    
+
     expect(registry).toBeInstanceOf(PatternRegistry);
     expect(registry.list()).toEqual([]);
   });

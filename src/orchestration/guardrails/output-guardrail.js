@@ -1,9 +1,9 @@
 /**
  * @fileoverview Output Guardrail for validating agent outputs
- * 
+ *
  * OutputGuardrail validates and filters agent outputs before they reach users.
  * Inspired by OpenAI Agents SDK guardrails pattern.
- * 
+ *
  * @module orchestration/guardrails/output-guardrail
  * @version 3.9.0
  */
@@ -11,7 +11,12 @@
 'use strict';
 
 const { BaseGuardrail } = require('./base-guardrail');
-const { RuleBuilder: _RuleBuilder, rules, globalRuleRegistry, SecurityPatterns } = require('./guardrail-rules');
+const {
+  RuleBuilder: _RuleBuilder,
+  rules,
+  globalRuleRegistry,
+  SecurityPatterns,
+} = require('./guardrail-rules');
 
 /**
  * Output guardrail configuration
@@ -46,7 +51,7 @@ const SecretPatterns = {
   TOKEN: /\b(token|bearer|auth)\s*[:=]\s*['"]?[\w.-]{20,}['"]?/gi,
   AWS_KEY: /\b(AKIA[0-9A-Z]{16})\b/g,
   PRIVATE_KEY: /-----BEGIN\s+(RSA\s+)?PRIVATE KEY-----/g,
-  CONNECTION_STRING: /\b(mongodb|mysql|postgres|redis):\/\/[^\s]+/gi
+  CONNECTION_STRING: /\b(mongodb|mysql|postgres|redis):\/\/[^\s]+/gi,
 };
 
 /**
@@ -65,7 +70,7 @@ class OutputGuardrail extends BaseGuardrail {
       failFast: config.failFast,
       severity: config.severity,
       tripwireEnabled: config.tripwireEnabled,
-      options: config.options
+      options: config.options,
     });
 
     // Load rules from config, rule set, or default
@@ -84,7 +89,7 @@ class OutputGuardrail extends BaseGuardrail {
       redactSecrets: true,
       replacement: '[REDACTED]',
       customPatterns: [],
-      ...config.redactOptions
+      ...config.redactOptions,
     };
 
     this.enforceTone = config.enforceTone || false;
@@ -111,7 +116,7 @@ class OutputGuardrail extends BaseGuardrail {
     this.contentPolicies.push({
       name: policy.name,
       check: policy.check,
-      severity: policy.severity || 'error'
+      severity: policy.severity || 'error',
     });
     return this;
   }
@@ -128,7 +133,7 @@ class OutputGuardrail extends BaseGuardrail {
     this.qualityChecks.push({
       name: check.name,
       check: check.check,
-      threshold: check.threshold || 0.5
+      threshold: check.threshold || 0.5,
     });
     return this;
   }
@@ -148,12 +153,14 @@ class OutputGuardrail extends BaseGuardrail {
       try {
         processedOutput = await this.customTransformer(output, context);
       } catch (error) {
-        violations.push(this.createViolation(
-          'TRANSFORMER_ERROR',
-          `Output transformer error: ${error.message}`,
-          'error',
-          { error: error.message }
-        ));
+        violations.push(
+          this.createViolation(
+            'TRANSFORMER_ERROR',
+            `Output transformer error: ${error.message}`,
+            'error',
+            { error: error.message }
+          )
+        );
       }
     }
 
@@ -162,20 +169,24 @@ class OutputGuardrail extends BaseGuardrail {
       try {
         const customResult = await this.customValidator(processedOutput, context);
         if (customResult === false || (customResult && customResult.passed === false)) {
-          violations.push(this.createViolation(
-            'CUSTOM_VALIDATION_FAILED',
-            customResult.message || 'Custom validation failed',
-            'error',
-            { custom: true }
-          ));
+          violations.push(
+            this.createViolation(
+              'CUSTOM_VALIDATION_FAILED',
+              customResult.message || 'Custom validation failed',
+              'error',
+              { custom: true }
+            )
+          );
         }
       } catch (error) {
-        violations.push(this.createViolation(
-          'CUSTOM_VALIDATOR_ERROR',
-          `Custom validator error: ${error.message}`,
-          'error',
-          { error: error.message }
-        ));
+        violations.push(
+          this.createViolation(
+            'CUSTOM_VALIDATOR_ERROR',
+            `Custom validator error: ${error.message}`,
+            'error',
+            { error: error.message }
+          )
+        );
       }
     }
 
@@ -191,20 +202,24 @@ class OutputGuardrail extends BaseGuardrail {
       try {
         const result = await policy.check(contentToValidate, context);
         if (!result.passed) {
-          violations.push(this.createViolation(
-            `POLICY_${policy.name.toUpperCase()}`,
-            result.message || `Content policy '${policy.name}' violated`,
-            policy.severity,
-            { policy: policy.name }
-          ));
+          violations.push(
+            this.createViolation(
+              `POLICY_${policy.name.toUpperCase()}`,
+              result.message || `Content policy '${policy.name}' violated`,
+              policy.severity,
+              { policy: policy.name }
+            )
+          );
         }
       } catch (error) {
-        violations.push(this.createViolation(
-          'POLICY_ERROR',
-          `Policy '${policy.name}' error: ${error.message}`,
-          'error',
-          { policy: policy.name, error: error.message }
-        ));
+        violations.push(
+          this.createViolation(
+            'POLICY_ERROR',
+            `Policy '${policy.name}' error: ${error.message}`,
+            'error',
+            { policy: policy.name, error: error.message }
+          )
+        );
       }
     }
 
@@ -214,23 +229,27 @@ class OutputGuardrail extends BaseGuardrail {
       try {
         const result = await qualityCheck.check(contentToValidate, context);
         qualityScores[qualityCheck.name] = result.score;
-        
+
         if (result.score < qualityCheck.threshold) {
-          violations.push(this.createViolation(
-            `QUALITY_${qualityCheck.name.toUpperCase()}`,
-            result.message || `Quality check '${qualityCheck.name}' below threshold`,
-            'warning',
-            { check: qualityCheck.name, score: result.score, threshold: qualityCheck.threshold }
-          ));
+          violations.push(
+            this.createViolation(
+              `QUALITY_${qualityCheck.name.toUpperCase()}`,
+              result.message || `Quality check '${qualityCheck.name}' below threshold`,
+              'warning',
+              { check: qualityCheck.name, score: result.score, threshold: qualityCheck.threshold }
+            )
+          );
         }
       } catch (error) {
         // Quality check errors are warnings, not failures
-        violations.push(this.createViolation(
-          'QUALITY_ERROR',
-          `Quality check '${qualityCheck.name}' error: ${error.message}`,
-          'warning',
-          { check: qualityCheck.name, error: error.message }
-        ));
+        violations.push(
+          this.createViolation(
+            'QUALITY_ERROR',
+            `Quality check '${qualityCheck.name}' error: ${error.message}`,
+            'warning',
+            { check: qualityCheck.name, error: error.message }
+          )
+        );
       }
     }
 
@@ -250,8 +269,8 @@ class OutputGuardrail extends BaseGuardrail {
     return this.createResult(
       passed,
       violations,
-      passed 
-        ? 'Output validation passed' 
+      passed
+        ? 'Output validation passed'
         : `Output validation failed with ${errorViolations.length} error(s)`,
       0,
       {
@@ -260,7 +279,7 @@ class OutputGuardrail extends BaseGuardrail {
         redactionApplied: this.redact,
         redactionCount: redactions.length,
         redactions: redactions.length > 0 ? redactions : undefined,
-        qualityScores: Object.keys(qualityScores).length > 0 ? qualityScores : undefined
+        qualityScores: Object.keys(qualityScores).length > 0 ? qualityScores : undefined,
       }
     );
   }
@@ -275,7 +294,7 @@ class OutputGuardrail extends BaseGuardrail {
     if (typeof output === 'string') {
       return output;
     }
-    
+
     if (typeof output === 'object' && output !== null) {
       // Look for common output fields
       if (output.content) return output.content;
@@ -286,10 +305,10 @@ class OutputGuardrail extends BaseGuardrail {
       if (output.result) {
         return typeof output.result === 'string' ? output.result : JSON.stringify(output.result);
       }
-      
+
       return JSON.stringify(output);
     }
-    
+
     return String(output);
   }
 
@@ -305,7 +324,7 @@ class OutputGuardrail extends BaseGuardrail {
     for (const rule of this.rules) {
       try {
         const result = await Promise.resolve(rule.check(content));
-        
+
         let passed = result;
         let additionalContext = {};
 
@@ -316,24 +335,28 @@ class OutputGuardrail extends BaseGuardrail {
         }
 
         if (!passed) {
-          violations.push(this.createViolation(
-            rule.id.toUpperCase(),
-            rule.message,
-            rule.severity || this.defaultSeverity,
-            { rule: rule.id, ...additionalContext }
-          ));
+          violations.push(
+            this.createViolation(
+              rule.id.toUpperCase(),
+              rule.message,
+              rule.severity || this.defaultSeverity,
+              { rule: rule.id, ...additionalContext }
+            )
+          );
 
           if (this.failFast) {
             break;
           }
         }
       } catch (error) {
-        violations.push(this.createViolation(
-          'RULE_ERROR',
-          `Rule '${rule.id}' execution error: ${error.message}`,
-          'error',
-          { rule: rule.id, error: error.message }
-        ));
+        violations.push(
+          this.createViolation(
+            'RULE_ERROR',
+            `Rule '${rule.id}' execution error: ${error.message}`,
+            'error',
+            { rule: rule.id, error: error.message }
+          )
+        );
       }
     }
 
@@ -375,7 +398,7 @@ class OutputGuardrail extends BaseGuardrail {
         { name: 'phone_us', pattern: SecurityPatterns.PHONE_US },
         { name: 'phone_jp', pattern: SecurityPatterns.PHONE_JP },
         { name: 'ssn', pattern: SecurityPatterns.SSN },
-        { name: 'credit_card', pattern: SecurityPatterns.CREDIT_CARD }
+        { name: 'credit_card', pattern: SecurityPatterns.CREDIT_CARD },
       ];
 
       for (const { name, pattern } of piiPatterns) {
@@ -424,7 +447,7 @@ class OutputGuardrail extends BaseGuardrail {
   redactObject(obj) {
     const allRedactions = [];
 
-    const redactValue = (value) => {
+    const redactValue = value => {
       if (typeof value === 'string') {
         const { content, redactions } = this.redactString(value);
         allRedactions.push(...redactions);
@@ -459,7 +482,7 @@ class OutputGuardrail extends BaseGuardrail {
       contentPoliciesCount: this.contentPolicies.length,
       qualityChecksCount: this.qualityChecks.length,
       redact: this.redact,
-      rules: this.rules.map(r => ({ id: r.id, type: r.type, severity: r.severity }))
+      rules: this.rules.map(r => ({ id: r.id, type: r.type, severity: r.severity })),
     };
   }
 }
@@ -476,19 +499,19 @@ function createOutputGuardrail(preset = 'safe', overrides = {}) {
       name: 'SecurityOutputGuardrail',
       description: 'Security-focused output validation',
       ruleSet: 'security',
-      tripwireEnabled: true
+      tripwireEnabled: true,
     },
     safe: {
       name: 'SafeOutputGuardrail',
       description: 'Safe output validation with PII check',
-      ruleSet: 'agentOutput'
+      ruleSet: 'agentOutput',
     },
     strict: {
       name: 'StrictOutputGuardrail',
       description: 'Strict output validation',
       ruleSet: 'strictContent',
       tripwireEnabled: true,
-      failFast: true
+      failFast: true,
     },
     redact: {
       name: 'RedactingOutputGuardrail',
@@ -498,17 +521,17 @@ function createOutputGuardrail(preset = 'safe', overrides = {}) {
       redactOptions: {
         redactPII: true,
         redactSecrets: true,
-        replacement: '[REDACTED]'
-      }
-    }
+        replacement: '[REDACTED]',
+      },
+    },
   };
 
-  const config = { ...presets[preset] || presets.safe, ...overrides };
+  const config = { ...(presets[preset] || presets.safe), ...overrides };
   return new OutputGuardrail(config);
 }
 
 module.exports = {
   OutputGuardrail,
   createOutputGuardrail,
-  SecretPatterns
+  SecretPatterns,
 };

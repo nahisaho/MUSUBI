@@ -11,7 +11,7 @@ const {
   dataPipelineWorkflow,
   createWorkflowFromTemplate,
   StepType,
-  RecoveryStrategy
+  RecoveryStrategy,
 } = require('../../src/orchestration/workflow-examples');
 
 describe('Feature Development Workflow', () => {
@@ -29,7 +29,7 @@ describe('Feature Development Workflow', () => {
 
   test('should have all stages defined', () => {
     const stepIds = featureDevelopmentWorkflow.steps.map(s => s.id);
-    
+
     expect(stepIds).toContain('gather-requirements');
     expect(stepIds).toContain('create-design');
     expect(stepIds).toContain('design-review');
@@ -43,17 +43,15 @@ describe('Feature Development Workflow', () => {
     const checkpoints = featureDevelopmentWorkflow.steps.filter(
       s => s.type === StepType.CHECKPOINT
     );
-    
+
     expect(checkpoints.length).toBeGreaterThan(0);
     expect(checkpoints.map(c => c.name)).toContain('requirements-complete');
     expect(checkpoints.map(c => c.name)).toContain('design-approved');
   });
 
   test('should have human review step', () => {
-    const reviewStep = featureDevelopmentWorkflow.steps.find(
-      s => s.type === StepType.HUMAN_REVIEW
-    );
-    
+    const reviewStep = featureDevelopmentWorkflow.steps.find(s => s.type === StepType.HUMAN_REVIEW);
+
     expect(reviewStep).toBeDefined();
     expect(reviewStep.options).toContain('approve');
   });
@@ -78,14 +76,14 @@ describe('CI/CD Pipeline Workflow', () => {
 
   test('should have pre-flight checks', () => {
     const preflightStep = cicdPipelineWorkflow.steps.find(s => s.id === 'preflight-checks');
-    
+
     expect(preflightStep).toBeDefined();
     expect(preflightStep.type).toBe(StepType.PARALLEL);
   });
 
   test('should have build step with retry', () => {
     const buildStep = cicdPipelineWorkflow.steps.find(s => s.id === 'build');
-    
+
     expect(buildStep).toBeDefined();
     expect(buildStep.retry).toBeDefined();
     expect(buildStep.retry.maxRetries).toBe(2);
@@ -93,17 +91,15 @@ describe('CI/CD Pipeline Workflow', () => {
 
   test('should have test stages', () => {
     const stepIds = cicdPipelineWorkflow.steps.map(s => s.id);
-    
+
     expect(stepIds).toContain('unit-tests');
     expect(stepIds).toContain('integration-tests');
     expect(stepIds).toContain('e2e-tests');
   });
 
   test('should have deployment decision with conditions', () => {
-    const deploymentDecision = cicdPipelineWorkflow.steps.find(
-      s => s.id === 'deployment-decision'
-    );
-    
+    const deploymentDecision = cicdPipelineWorkflow.steps.find(s => s.id === 'deployment-decision');
+
     expect(deploymentDecision).toBeDefined();
     expect(deploymentDecision.type).toBe(StepType.CONDITION);
     expect(deploymentDecision.condition.$and).toBeDefined();
@@ -127,28 +123,24 @@ describe('Code Review Workflow', () => {
 
   test('should have required PR inputs', () => {
     const inputNames = codeReviewWorkflow.inputs.map(i => i.name);
-    
+
     expect(inputNames).toContain('repo_owner');
     expect(inputNames).toContain('repo_name');
     expect(inputNames).toContain('pr_number');
   });
 
   test('should have parallel analysis steps', () => {
-    const parallelAnalysis = codeReviewWorkflow.steps.find(
-      s => s.id === 'parallel-analysis'
-    );
-    
+    const parallelAnalysis = codeReviewWorkflow.steps.find(s => s.id === 'parallel-analysis');
+
     expect(parallelAnalysis).toBeDefined();
     expect(parallelAnalysis.type).toBe(StepType.PARALLEL);
     expect(parallelAnalysis.maxConcurrency).toBe(4);
   });
 
   test('should have multiple analysis types', () => {
-    const parallelAnalysis = codeReviewWorkflow.steps.find(
-      s => s.id === 'parallel-analysis'
-    );
+    const parallelAnalysis = codeReviewWorkflow.steps.find(s => s.id === 'parallel-analysis');
     const analysisIds = parallelAnalysis.steps.map(s => s.id);
-    
+
     expect(analysisIds).toContain('code-quality');
     expect(analysisIds).toContain('security-review');
     expect(analysisIds).toContain('performance-review');
@@ -157,7 +149,7 @@ describe('Code Review Workflow', () => {
 
   test('should post line comments in loop', () => {
     const commentLoop = codeReviewWorkflow.steps.find(s => s.id === 'post-comments');
-    
+
     expect(commentLoop).toBeDefined();
     expect(commentLoop.type).toBe(StepType.LOOP);
     expect(commentLoop.maxIterations).toBe(50);
@@ -177,26 +169,22 @@ describe('Incident Response Workflow', () => {
 
   test('should start with classification', () => {
     const firstStep = incidentResponseWorkflow.steps[0];
-    
+
     expect(firstStep.id).toBe('classify-incident');
     expect(firstStep.skillId).toBe('incident-classifier');
   });
 
   test('should have severity-based routing', () => {
-    const routingStep = incidentResponseWorkflow.steps.find(
-      s => s.id === 'severity-routing'
-    );
-    
+    const routingStep = incidentResponseWorkflow.steps.find(s => s.id === 'severity-routing');
+
     expect(routingStep).toBeDefined();
     expect(routingStep.type).toBe(StepType.CONDITION);
     expect(routingStep.condition.$or).toBeDefined();
   });
 
   test('should handle critical/high severity differently', () => {
-    const routingStep = incidentResponseWorkflow.steps.find(
-      s => s.id === 'severity-routing'
-    );
-    
+    const routingStep = incidentResponseWorkflow.steps.find(s => s.id === 'severity-routing');
+
     expect(routingStep.thenSteps.length).toBeGreaterThan(0);
     expect(routingStep.elseSteps.length).toBeGreaterThan(0);
   });
@@ -205,7 +193,7 @@ describe('Incident Response Workflow', () => {
     const autoRemediation = incidentResponseWorkflow.steps.find(
       s => s.id === 'attempt-auto-resolution'
     );
-    
+
     expect(autoRemediation).toBeDefined();
     expect(autoRemediation.type).toBe(StepType.CONDITION);
   });
@@ -228,7 +216,7 @@ describe('Data Pipeline Workflow', () => {
 
   test('should have parallel extraction', () => {
     const extractStep = dataPipelineWorkflow.steps.find(s => s.id === 'extract-data');
-    
+
     expect(extractStep).toBeDefined();
     expect(extractStep.type).toBe(StepType.PARALLEL);
     expect(extractStep.steps.length).toBe(2);
@@ -236,14 +224,14 @@ describe('Data Pipeline Workflow', () => {
 
   test('should have quality checks', () => {
     const qualityStep = dataPipelineWorkflow.steps.find(s => s.id === 'quality-checks');
-    
+
     expect(qualityStep).toBeDefined();
     expect(qualityStep.type).toBe(StepType.PARALLEL);
   });
 
   test('should have quality gate', () => {
     const gateStep = dataPipelineWorkflow.steps.find(s => s.id === 'quality-gate');
-    
+
     expect(gateStep).toBeDefined();
     expect(gateStep.type).toBe(StepType.CONDITION);
     expect(gateStep.condition.$and).toBeDefined();
@@ -251,7 +239,7 @@ describe('Data Pipeline Workflow', () => {
 
   test('should have fallback for quality failure', () => {
     const gateStep = dataPipelineWorkflow.steps.find(s => s.id === 'quality-gate');
-    
+
     expect(gateStep.elseSteps.length).toBeGreaterThan(0);
     expect(gateStep.elseSteps.some(s => s.type === StepType.HUMAN_REVIEW)).toBe(true);
   });
@@ -259,7 +247,7 @@ describe('Data Pipeline Workflow', () => {
   test('should have retry on extraction', () => {
     const extractStep = dataPipelineWorkflow.steps.find(s => s.id === 'extract-data');
     const sourceAExtract = extractStep.steps.find(s => s.id === 'extract-source-a');
-    
+
     expect(sourceAExtract.retry).toBeDefined();
     expect(sourceAExtract.retry.maxRetries).toBe(3);
   });
@@ -277,7 +265,7 @@ describe('Data Pipeline Workflow', () => {
 describe('createWorkflowFromTemplate', () => {
   test('should create workflow from template', () => {
     const workflow = createWorkflowFromTemplate('feature-development');
-    
+
     expect(workflow.id).toBe('feature-development');
     expect(workflow.name).toBe('Feature Development Workflow');
   });
@@ -285,24 +273,25 @@ describe('createWorkflowFromTemplate', () => {
   test('should allow customization of ID and name', () => {
     const workflow = createWorkflowFromTemplate('feature-development', {
       id: 'custom-feature-dev',
-      name: 'Custom Feature Workflow'
+      name: 'Custom Feature Workflow',
     });
-    
+
     expect(workflow.id).toBe('custom-feature-dev');
     expect(workflow.name).toBe('Custom Feature Workflow');
   });
 
   test('should allow custom description', () => {
     const workflow = createWorkflowFromTemplate('cicd-pipeline', {
-      description: 'My custom pipeline'
+      description: 'My custom pipeline',
     });
-    
+
     expect(workflow.description).toBe('My custom pipeline');
   });
 
   test('should throw for unknown template', () => {
-    expect(() => createWorkflowFromTemplate('unknown-template'))
-      .toThrow('Unknown workflow template: unknown-template');
+    expect(() => createWorkflowFromTemplate('unknown-template')).toThrow(
+      'Unknown workflow template: unknown-template'
+    );
   });
 
   test('should create all available templates', () => {
@@ -311,7 +300,7 @@ describe('createWorkflowFromTemplate', () => {
       'cicd-pipeline',
       'code-review',
       'incident-response',
-      'data-pipeline'
+      'data-pipeline',
     ];
 
     for (const template of templates) {
@@ -324,19 +313,17 @@ describe('createWorkflowFromTemplate', () => {
   test('should preserve original workflow steps if not customized', () => {
     const original = featureDevelopmentWorkflow;
     const created = createWorkflowFromTemplate('feature-development');
-    
+
     expect(created.steps.length).toBe(original.steps.length);
   });
 
   test('should allow custom steps', () => {
-    const customSteps = [
-      { id: 'custom-step', type: StepType.CHECKPOINT, name: 'custom' }
-    ];
-    
+    const customSteps = [{ id: 'custom-step', type: StepType.CHECKPOINT, name: 'custom' }];
+
     const workflow = createWorkflowFromTemplate('feature-development', {
-      steps: customSteps
+      steps: customSteps,
     });
-    
+
     expect(workflow.steps.length).toBe(1);
     expect(workflow.steps[0].id).toBe('custom-step');
   });
@@ -348,35 +335,35 @@ describe('Workflow Step Type Coverage', () => {
     cicdPipelineWorkflow,
     codeReviewWorkflow,
     incidentResponseWorkflow,
-    dataPipelineWorkflow
+    dataPipelineWorkflow,
   ];
 
   function getAllStepTypes(steps) {
     const types = new Set();
-    
+
     function collectTypes(stepList) {
       for (const step of stepList) {
         types.add(step.type);
-        
+
         // Check nested steps
         if (step.thenSteps) collectTypes(step.thenSteps);
         if (step.elseSteps) collectTypes(step.elseSteps);
         if (step.steps) collectTypes(step.steps);
       }
     }
-    
+
     collectTypes(steps);
     return types;
   }
 
   test('all step types are used across workflows', () => {
     const usedTypes = new Set();
-    
+
     for (const workflow of allWorkflows) {
       const types = getAllStepTypes(workflow.steps);
       types.forEach(t => usedTypes.add(t));
     }
-    
+
     expect(usedTypes.has(StepType.SKILL)).toBe(true);
     expect(usedTypes.has(StepType.TOOL)).toBe(true);
     expect(usedTypes.has(StepType.CONDITION)).toBe(true);
@@ -394,7 +381,7 @@ describe('Error Handling Coverage', () => {
       cicdPipelineWorkflow,
       codeReviewWorkflow,
       incidentResponseWorkflow,
-      dataPipelineWorkflow
+      dataPipelineWorkflow,
     ];
 
     for (const workflow of workflows) {
@@ -408,7 +395,7 @@ describe('Error Handling Coverage', () => {
       featureDevelopmentWorkflow.errorHandling.strategy,
       cicdPipelineWorkflow.errorHandling.strategy,
       incidentResponseWorkflow.errorHandling.strategy,
-      dataPipelineWorkflow.errorHandling.strategy
+      dataPipelineWorkflow.errorHandling.strategy,
     ]);
 
     expect(strategies.size).toBeGreaterThan(1);
@@ -422,7 +409,7 @@ describe('Input/Output Configuration', () => {
       cicdPipelineWorkflow,
       codeReviewWorkflow,
       incidentResponseWorkflow,
-      dataPipelineWorkflow
+      dataPipelineWorkflow,
     ];
 
     for (const workflow of workflows) {
@@ -436,7 +423,7 @@ describe('Input/Output Configuration', () => {
       cicdPipelineWorkflow,
       codeReviewWorkflow,
       incidentResponseWorkflow,
-      dataPipelineWorkflow
+      dataPipelineWorkflow,
     ];
 
     for (const workflow of workflows) {

@@ -17,42 +17,45 @@ Template for creating traceability coverage matrices that ensure 100% compliance
 
 ## Forward Traceability (Requirements → Implementation)
 
-| REQ ID | Description | Design Ref | Task ID | Code Files | Test Files | Status |
-|--------|-------------|------------|---------|------------|------------|--------|
-| REQ-001 | User login | AUTH-SVC | P1-001 | auth/login.ts | auth/login.test.ts | ✅ |
-| REQ-002 | Password reset | AUTH-SVC | P1-002 | auth/reset.ts | auth/reset.test.ts | ✅ |
-| REQ-003 | 2FA support | AUTH-SVC | - | - | - | ❌ |
+| REQ ID  | Description    | Design Ref | Task ID | Code Files    | Test Files         | Status |
+| ------- | -------------- | ---------- | ------- | ------------- | ------------------ | ------ |
+| REQ-001 | User login     | AUTH-SVC   | P1-001  | auth/login.ts | auth/login.test.ts | ✅     |
+| REQ-002 | Password reset | AUTH-SVC   | P1-002  | auth/reset.ts | auth/reset.test.ts | ✅     |
+| REQ-003 | 2FA support    | AUTH-SVC   | -       | -             | -                  | ❌     |
 
 ## Backward Traceability (Tests → Requirements)
 
-| Test ID | Test Description | Code File | REQ ID | Status |
-|---------|-----------------|-----------|--------|--------|
-| T-001 | Login success | auth/login.ts | REQ-001 | ✅ |
-| T-002 | Login failure | auth/login.ts | REQ-001 | ✅ |
-| T-003 | Session timeout | auth/session.ts | - | ⚠️ Orphan |
+| Test ID | Test Description | Code File       | REQ ID  | Status    |
+| ------- | ---------------- | --------------- | ------- | --------- |
+| T-001   | Login success    | auth/login.ts   | REQ-001 | ✅        |
+| T-002   | Login failure    | auth/login.ts   | REQ-001 | ✅        |
+| T-003   | Session timeout  | auth/session.ts | -       | ⚠️ Orphan |
 
 ## Coverage Summary
 
-| Metric | Current | Target | Status |
-|--------|---------|--------|--------|
-| Requirements with Design | 100% | 100% | ✅ |
-| Requirements with Code | 67% | 100% | ❌ |
-| Requirements with Tests | 67% | 100% | ❌ |
-| Overall Traceability | 67% | 100% | ❌ |
+| Metric                   | Current | Target | Status |
+| ------------------------ | ------- | ------ | ------ |
+| Requirements with Design | 100%    | 100%   | ✅     |
+| Requirements with Code   | 67%     | 100%   | ❌     |
+| Requirements with Tests  | 67%     | 100%   | ❌     |
+| Overall Traceability     | 67%     | 100%   | ❌     |
 
 ## Gaps Identified
 
 ### Missing Implementations
-| REQ ID | Description | Action Required |
-|--------|-------------|-----------------|
+
+| REQ ID  | Description | Action Required       |
+| ------- | ----------- | --------------------- |
 | REQ-003 | 2FA support | Create design & tasks |
 
 ### Orphaned Tests
-| Test ID | Description | Action Required |
-|---------|-------------|-----------------|
-| T-003 | Session timeout | Add requirement or remove |
+
+| Test ID | Description     | Action Required           |
+| ------- | --------------- | ------------------------- |
+| T-003   | Session timeout | Add requirement or remove |
 
 ## Recommendations
+
 1. Implement REQ-003 or mark as deferred
 2. Create requirement for session timeout test
 ```
@@ -68,12 +71,12 @@ Template for creating traceability coverage matrices that ensure 100% compliance
 
 📊 **Overall: 67%** ❌ (Target: 100%)
 
-| Stage | Coverage | 
-|-------|----------|
-| REQ → Design | ████████░░ 80% |
+| Stage          | Coverage        |
+| -------------- | --------------- |
+| REQ → Design   | ████████░░ 80%  |
 | Design → Tasks | ██████████ 100% |
-| Tasks → Code | ██████░░░░ 60% |
-| Code → Tests | ████████░░ 80% |
+| Tasks → Code   | ██████░░░░ 60%  |
+| Code → Tests   | ████████░░ 80%  |
 
 ## Critical Gaps
 
@@ -95,13 +98,13 @@ Template for creating traceability coverage matrices that ensure 100% compliance
 
 def generate_traceability_matrix(feature_name):
     """Generate traceability matrix for a feature."""
-    
+
     requirements = parse_requirements(f"storage/features/{feature_name}/requirements.md")
     design = parse_design(f"storage/features/{feature_name}/design.md")
     tasks = parse_tasks(f"storage/features/{feature_name}/tasks.md")
     code_files = find_code_files(f"src/{feature_name}/")
     test_files = find_test_files(f"tests/{feature_name}/")
-    
+
     matrix = []
     for req in requirements:
         row = {
@@ -114,7 +117,7 @@ def generate_traceability_matrix(feature_name):
             'status': calculate_status(row)
         }
         matrix.append(row)
-    
+
     return matrix
 ```
 
@@ -122,10 +125,10 @@ def generate_traceability_matrix(feature_name):
 
 ## Status Indicators
 
-| Icon | Meaning |
-|------|---------|
-| ✅ | Fully traced |
-| ⚠️ | Partially traced |
-| ❌ | Not traced |
-| 🔄 | In progress |
-| ⏸️ | Deferred |
+| Icon | Meaning          |
+| ---- | ---------------- |
+| ✅   | Fully traced     |
+| ⚠️   | Partially traced |
+| ❌   | Not traced       |
+| 🔄   | In progress      |
+| ⏸️   | Deferred         |

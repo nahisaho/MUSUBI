@@ -1,6 +1,6 @@
 /**
  * AutoPattern - Automatic skill selection pattern
- * 
+ *
  * Analyzes the task and automatically selects the most appropriate
  * skill to execute. Uses skill metadata and keywords for matching.
  */
@@ -12,10 +12,10 @@ const { PatternType, ExecutionContext, ExecutionStatus } = require('../orchestra
  * Skill match confidence levels
  */
 const ConfidenceLevel = {
-  HIGH: 'high',     // >= 0.8
+  HIGH: 'high', // >= 0.8
   MEDIUM: 'medium', // >= 0.5
-  LOW: 'low',       // >= 0.3
-  NONE: 'none'      // < 0.3
+  LOW: 'low', // >= 0.3
+  NONE: 'none', // < 0.3
 };
 
 /**
@@ -32,11 +32,11 @@ class AutoPattern extends BasePattern {
       useCases: [
         'Dynamic task routing',
         'Intelligent skill selection',
-        'Natural language task processing'
+        'Natural language task processing',
       ],
       complexity: 'medium',
       supportsParallel: false,
-      requiresHuman: false
+      requiresHuman: false,
     });
 
     this.options = {
@@ -44,7 +44,7 @@ class AutoPattern extends BasePattern {
       fallbackSkill: options.fallbackSkill || null,
       multiMatch: options.multiMatch || false, // Execute multiple matching skills
       maxMatches: options.maxMatches || 3,
-      ...options
+      ...options,
     };
 
     // Skill category keywords for classification
@@ -58,7 +58,7 @@ class AutoPattern extends BasePattern {
       security: ['security', 'vulnerability', 'authentication', 'authorization'],
       performance: ['performance', 'optimize', 'benchmark', 'profiling'],
       analysis: ['analyze', 'review', 'assess', 'evaluate', 'audit'],
-      research: ['research', 'investigate', 'explore', 'study']
+      research: ['research', 'investigate', 'explore', 'study'],
     };
   }
 
@@ -81,7 +81,7 @@ class AutoPattern extends BasePattern {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -102,16 +102,16 @@ class AutoPattern extends BasePattern {
 
     engine.emit('autoPatternStarted', {
       context,
-      task
+      task,
     });
 
     // Find matching skills
     const matches = this._findMatchingSkills(task, engine);
-    
+
     engine.emit('autoPatternMatched', {
       context,
       task,
-      matches: matches.map(m => ({ skill: m.skill, confidence: m.confidence }))
+      matches: matches.map(m => ({ skill: m.skill, confidence: m.confidence })),
     });
 
     if (matches.length === 0) {
@@ -119,18 +119,15 @@ class AutoPattern extends BasePattern {
       if (this.options.fallbackSkill && engine.getSkill(this.options.fallbackSkill)) {
         engine.emit('autoPatternFallback', {
           context,
-          fallbackSkill: this.options.fallbackSkill
+          fallbackSkill: this.options.fallbackSkill,
         });
-        
-        return this._executeSingleSkill(
-          this.options.fallbackSkill, 
-          input, 
-          context, 
-          engine,
-          { confidence: 0, reason: 'fallback' }
-        );
+
+        return this._executeSingleSkill(this.options.fallbackSkill, input, context, engine, {
+          confidence: 0,
+          reason: 'fallback',
+        });
       }
-      
+
       throw new Error(`No matching skill found for task: ${task}`);
     }
 
@@ -141,13 +138,7 @@ class AutoPattern extends BasePattern {
 
     // Execute best match
     const bestMatch = matches[0];
-    return this._executeSingleSkill(
-      bestMatch.skill,
-      input,
-      context,
-      engine,
-      bestMatch
-    );
+    return this._executeSingleSkill(bestMatch.skill, input, context, engine, bestMatch);
   }
 
   /**
@@ -162,13 +153,13 @@ class AutoPattern extends BasePattern {
     for (const skillName of engine.listSkills()) {
       const skill = engine.getSkill(skillName);
       const score = this._calculateMatchScore(taskLower, words, skillName, skill);
-      
+
       if (score >= this.options.minConfidence) {
         matches.push({
           skill: skillName,
           confidence: score,
           confidenceLevel: this._getConfidenceLevel(score),
-          matchedKeywords: this._getMatchedKeywords(taskLower, skill)
+          matchedKeywords: this._getMatchedKeywords(taskLower, skill),
         });
       }
     }
@@ -204,9 +195,7 @@ class AutoPattern extends BasePattern {
     const keywords = skill?.keywords || [];
     if (keywords.length > 0) {
       maxScore += 0.4;
-      const matchedKeywords = keywords.filter(k => 
-        taskLower.includes(k.toLowerCase())
-      );
+      const matchedKeywords = keywords.filter(k => taskLower.includes(k.toLowerCase()));
       score += 0.4 * (matchedKeywords.length / keywords.length);
     }
 
@@ -279,8 +268,8 @@ class AutoPattern extends BasePattern {
         pattern: PatternType.AUTO,
         confidence: matchInfo.confidence,
         confidenceLevel: matchInfo.confidenceLevel,
-        matchedKeywords: matchInfo.matchedKeywords
-      }
+        matchedKeywords: matchInfo.matchedKeywords,
+      },
     });
 
     context.children.push(stepContext);
@@ -294,7 +283,7 @@ class AutoPattern extends BasePattern {
         context,
         selectedSkill: skillName,
         confidence: matchInfo.confidence,
-        output
+        output,
       });
 
       return {
@@ -302,9 +291,8 @@ class AutoPattern extends BasePattern {
         confidence: matchInfo.confidence,
         confidenceLevel: matchInfo.confidenceLevel,
         output,
-        multiMatch: false
+        multiMatch: false,
       };
-
     } catch (error) {
       stepContext.fail(error);
       throw error;
@@ -327,8 +315,8 @@ class AutoPattern extends BasePattern {
         metadata: {
           pattern: PatternType.AUTO,
           confidence: match.confidence,
-          multiMatch: true
-        }
+          multiMatch: true,
+        },
       });
 
       context.children.push(stepContext);
@@ -342,16 +330,15 @@ class AutoPattern extends BasePattern {
           skill: match.skill,
           confidence: match.confidence,
           status: ExecutionStatus.COMPLETED,
-          output
+          output,
         });
-
       } catch (error) {
         stepContext.fail(error);
         results.push({
           skill: match.skill,
           confidence: match.confidence,
           status: ExecutionStatus.FAILED,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -359,13 +346,13 @@ class AutoPattern extends BasePattern {
     engine.emit('autoPatternCompleted', {
       context,
       results,
-      multiMatch: true
+      multiMatch: true,
     });
 
     return {
       selectedSkills: matches.map(m => m.skill),
       results,
-      multiMatch: true
+      multiMatch: true,
     };
   }
 }
@@ -382,5 +369,5 @@ function createAutoPattern(options = {}) {
 module.exports = {
   AutoPattern,
   ConfidenceLevel,
-  createAutoPattern
+  createAutoPattern,
 };

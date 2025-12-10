@@ -22,7 +22,7 @@ const {
   createInputGuardrail,
   createOutputGuardrail,
   createSafetyCheckGuardrail,
-  GuardrailChain
+  GuardrailChain,
 } = require('../src/orchestration/guardrails');
 
 const program = new Command();
@@ -129,7 +129,7 @@ program
     try {
       // Get content from argument, file, or stdin
       let inputContent = content;
-      
+
       if (options.file) {
         const fs = require('fs');
         const path = require('path');
@@ -155,20 +155,20 @@ program
       switch (guardrailType) {
         case 'input':
           guardrail = createInputGuardrail('userInput', {
-            sanitize: true
+            sanitize: true,
           });
           break;
-        
+
         case 'output':
           guardrail = createOutputGuardrail(options.redact ? 'redact' : 'safe');
           break;
-        
+
         case 'safety':
           guardrail = createSafetyCheckGuardrail(options.level, {
-            enforceConstitution: options.constitutional
+            enforceConstitution: options.constitutional,
           });
           break;
-        
+
         default:
           console.error(chalk.red(`✗ Unknown guardrail type: ${guardrailType}`));
           process.exit(1);
@@ -199,7 +199,7 @@ program
     try {
       // Get content
       let inputContent = content;
-      
+
       if (options.file) {
         const fs = require('fs');
         const path = require('path');
@@ -222,7 +222,7 @@ program
       const chain = new GuardrailChain({
         name: 'ValidationChain',
         parallel: options.parallel || false,
-        stopOnFirstFailure: options.stopOnFailure || false
+        stopOnFirstFailure: options.stopOnFailure || false,
       });
 
       // Add default guardrails
@@ -251,7 +251,7 @@ program
   .action(async options => {
     try {
       const validator = new ConstitutionValidator(process.cwd());
-      
+
       console.log(chalk.dim('📊 Calculating constitutional compliance score...\n'));
 
       const [constitutionResults, gatesResults, complexityResults] = await Promise.all([
@@ -261,12 +261,15 @@ program
       ]);
 
       // Calculate weighted score
-      const constitutionScore = constitutionResults.passed ? 100 : 
-        Math.max(0, 100 - (constitutionResults.violations?.length || 0) * 10);
-      const gatesScore = gatesResults.passed ? 100 : 
-        Math.max(0, 100 - (gatesResults.violations?.length || 0) * 15);
-      const complexityScore = complexityResults.passed ? 100 : 
-        Math.max(0, 100 - (complexityResults.violations?.length || 0) * 5);
+      const constitutionScore = constitutionResults.passed
+        ? 100
+        : Math.max(0, 100 - (constitutionResults.violations?.length || 0) * 10);
+      const gatesScore = gatesResults.passed
+        ? 100
+        : Math.max(0, 100 - (gatesResults.violations?.length || 0) * 15);
+      const complexityScore = complexityResults.passed
+        ? 100
+        : Math.max(0, 100 - (complexityResults.violations?.length || 0) * 5);
 
       // Weighted average: Constitution 50%, Gates 30%, Complexity 20%
       const overallScore = Math.round(
@@ -283,32 +286,35 @@ program
         breakdown: {
           constitution: { score: constitutionScore, weight: '50%' },
           gates: { score: gatesScore, weight: '30%' },
-          complexity: { score: complexityScore, weight: '20%' }
+          complexity: { score: complexityScore, weight: '20%' },
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       if (options.format === 'json') {
         console.log(JSON.stringify(result, null, 2));
       } else {
-        const scoreBar = '█'.repeat(Math.floor(overallScore / 10)) + 
-                        '░'.repeat(10 - Math.floor(overallScore / 10));
-        
+        const scoreBar =
+          '█'.repeat(Math.floor(overallScore / 10)) +
+          '░'.repeat(10 - Math.floor(overallScore / 10));
+
         console.log(chalk.bold('Constitutional Compliance Score\n'));
         console.log(chalk.bold('━'.repeat(50)));
         console.log(`\n${scoreBar} ${chalk.bold(overallScore)}%\n`);
-        
+
         console.log(chalk.dim('Breakdown:'));
         console.log(`  Constitution (50%): ${constitutionScore}%`);
         console.log(`  Gates (30%):        ${gatesScore}%`);
         console.log(`  Complexity (20%):   ${complexityScore}%`);
-        
+
         console.log('\n' + chalk.bold('━'.repeat(50)));
-        
+
         if (passed) {
           console.log(chalk.bold.green(`\n✓ PASSED (threshold: ${threshold}%)\n`));
         } else {
-          console.log(chalk.bold.red(`\n✗ FAILED (threshold: ${threshold}%, got: ${overallScore}%)\n`));
+          console.log(
+            chalk.bold.red(`\n✗ FAILED (threshold: ${threshold}%, got: ${overallScore}%)\n`)
+          );
         }
       }
 
@@ -507,10 +513,14 @@ function displayGuardrailResults(result, options) {
   if (result.violations && result.violations.length > 0) {
     console.log(chalk.bold.red('Violations:'));
     result.violations.forEach(violation => {
-      const severityIcon = violation.severity === 'error' ? '✗' : 
-                           violation.severity === 'warning' ? '⚠' : 'ℹ';
-      const severityColor = violation.severity === 'error' ? chalk.red :
-                            violation.severity === 'warning' ? chalk.yellow : chalk.blue;
+      const severityIcon =
+        violation.severity === 'error' ? '✗' : violation.severity === 'warning' ? '⚠' : 'ℹ';
+      const severityColor =
+        violation.severity === 'error'
+          ? chalk.red
+          : violation.severity === 'warning'
+            ? chalk.yellow
+            : chalk.blue;
       console.log(severityColor(`  ${severityIcon} [${violation.code}] ${violation.message}`));
     });
     console.log();

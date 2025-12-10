@@ -8,7 +8,7 @@ const {
   SkillToolsManager,
   SkillToolConfig,
   RestrictionLevel,
-  DEFAULT_TOOL_SETS
+  DEFAULT_TOOL_SETS,
 } = require('../../src/managers/skill-tools');
 
 describe('SkillToolsManager', () => {
@@ -26,7 +26,7 @@ describe('SkillToolsManager', () => {
       const config = new SkillToolConfig('test-skill', {
         allowedTools: ['tool1', 'tool2'],
         deniedTools: ['tool3'],
-        restrictionLevel: RestrictionLevel.STRICT
+        restrictionLevel: RestrictionLevel.STRICT,
       });
 
       expect(config.allowedTools).toContain('tool1');
@@ -38,7 +38,7 @@ describe('SkillToolsManager', () => {
       it('should deny explicitly denied tools', () => {
         const config = new SkillToolConfig('skill', {
           allowedTools: ['tool1'],
-          deniedTools: ['tool1']
+          deniedTools: ['tool1'],
         });
 
         expect(config.isToolAllowed('tool1')).toBe(false);
@@ -46,7 +46,7 @@ describe('SkillToolsManager', () => {
 
       it('should allow all tools with NONE restriction', () => {
         const config = new SkillToolConfig('skill', {
-          restrictionLevel: RestrictionLevel.NONE
+          restrictionLevel: RestrictionLevel.NONE,
         });
 
         expect(config.isToolAllowed('any_tool')).toBe(true);
@@ -54,7 +54,7 @@ describe('SkillToolsManager', () => {
 
       it('should allow explicitly allowed tools', () => {
         const config = new SkillToolConfig('skill', {
-          allowedTools: ['tool1', 'tool2']
+          allowedTools: ['tool1', 'tool2'],
         });
 
         expect(config.isToolAllowed('tool1')).toBe(true);
@@ -63,7 +63,7 @@ describe('SkillToolsManager', () => {
 
       it('should allow common tools in STANDARD mode', () => {
         const config = new SkillToolConfig('skill', {
-          restrictionLevel: RestrictionLevel.STANDARD
+          restrictionLevel: RestrictionLevel.STANDARD,
         });
 
         expect(config.isToolAllowed('common_tool')).toBe(true);
@@ -73,7 +73,7 @@ describe('SkillToolsManager', () => {
     describe('getEffectiveTools', () => {
       it('should return allowed tools', () => {
         const config = new SkillToolConfig('skill', {
-          allowedTools: ['tool1', 'tool2']
+          allowedTools: ['tool1', 'tool2'],
         });
 
         const tools = config.getEffectiveTools();
@@ -85,7 +85,7 @@ describe('SkillToolsManager', () => {
       it('should include dependencies', () => {
         const config = new SkillToolConfig('skill', {
           allowedTools: ['tool1'],
-          toolDependencies: { tool1: ['dep1', 'dep2'] }
+          toolDependencies: { tool1: ['dep1', 'dep2'] },
         });
 
         const tools = config.getEffectiveTools();
@@ -98,7 +98,7 @@ describe('SkillToolsManager', () => {
       it('should exclude denied tools', () => {
         const config = new SkillToolConfig('skill', {
           allowedTools: ['tool1', 'tool2'],
-          deniedTools: ['tool2']
+          deniedTools: ['tool2'],
         });
 
         const tools = config.getEffectiveTools();
@@ -109,7 +109,7 @@ describe('SkillToolsManager', () => {
 
       it('should use external dependency map', () => {
         const config = new SkillToolConfig('skill', {
-          allowedTools: ['tool1']
+          allowedTools: ['tool1'],
         });
 
         const depMap = new Map([['tool1', ['ext_dep']]]);
@@ -122,7 +122,7 @@ describe('SkillToolsManager', () => {
     it('should convert to JSON', () => {
       const config = new SkillToolConfig('skill', {
         allowedTools: ['tool1'],
-        restrictionLevel: RestrictionLevel.STRICT
+        restrictionLevel: RestrictionLevel.STRICT,
       });
 
       const json = config.toJSON();
@@ -142,7 +142,7 @@ describe('SkillToolsManager', () => {
     describe('setSkillConfig', () => {
       it('should set and get skill configuration', () => {
         manager.setSkillConfig('test-skill', {
-          allowedTools: ['tool1', 'tool2']
+          allowedTools: ['tool1', 'tool2'],
         });
 
         const config = manager.getSkillConfig('test-skill');
@@ -162,11 +162,11 @@ describe('SkillToolsManager', () => {
 
       it('should handle inheritance', () => {
         manager.setSkillConfig('parent', {
-          allowedTools: ['tool1', 'tool2']
+          allowedTools: ['tool1', 'tool2'],
         });
         manager.setSkillConfig('child', {
           allowedTools: ['tool3'],
-          inheritFrom: 'parent'
+          inheritFrom: 'parent',
         });
 
         const childConfig = manager.getSkillConfig('child');
@@ -179,7 +179,7 @@ describe('SkillToolsManager', () => {
     describe('getAllowedTools', () => {
       it('should return allowed tools for configured skill', () => {
         manager.setSkillConfig('skill1', {
-          allowedTools: ['tool1', 'tool2']
+          allowedTools: ['tool1', 'tool2'],
         });
 
         const tools = manager.getAllowedTools('skill1');
@@ -196,7 +196,7 @@ describe('SkillToolsManager', () => {
 
       it('should filter by available tools when specified', () => {
         manager.setSkillConfig('skill1', {
-          allowedTools: ['tool1', 'tool2', 'tool3']
+          allowedTools: ['tool1', 'tool2', 'tool3'],
         });
         manager.setAvailableTools(['tool1', 'tool3']);
 
@@ -245,7 +245,7 @@ describe('SkillToolsManager', () => {
     describe('validateToolAvailability', () => {
       beforeEach(() => {
         manager.setSkillConfig('skill1', {
-          allowedTools: ['tool1', 'tool2', 'tool3']
+          allowedTools: ['tool1', 'tool2', 'tool3'],
         });
         manager.setAvailableTools(['tool1', 'tool3']);
       });
@@ -262,14 +262,14 @@ describe('SkillToolsManager', () => {
       it('should calculate coverage', () => {
         const result = manager.validateToolAvailability('skill1');
 
-        expect(result.coverage).toBeCloseTo(2/3, 2);
+        expect(result.coverage).toBeCloseTo(2 / 3, 2);
       });
     });
 
     describe('generateOptimizedConfig', () => {
       beforeEach(() => {
         manager.setSkillConfig('skill1', {
-          allowedTools: ['file_read', 'file_write', 'http_request', 'delete_file']
+          allowedTools: ['file_read', 'file_write', 'http_request', 'delete_file'],
         });
         manager.setAvailableTools(['file_read', 'file_write', 'http_request', 'delete_file']);
       });
@@ -307,7 +307,7 @@ describe('SkillToolsManager', () => {
       it('should auto-configure skills based on definitions', () => {
         const skills = [
           { name: 'requirements-gen', description: 'Generate requirements' },
-          { name: 'code-tester', description: 'Run tests' }
+          { name: 'code-tester', description: 'Run tests' },
         ];
 
         const configs = manager.autoConfigureSkills(skills);
@@ -318,9 +318,7 @@ describe('SkillToolsManager', () => {
       });
 
       it('should include explicit allowed tools', () => {
-        const skills = [
-          { name: 'custom', description: 'Custom', allowedTools: ['special_tool'] }
-        ];
+        const skills = [{ name: 'custom', description: 'Custom', allowedTools: ['special_tool'] }];
 
         manager.autoConfigureSkills(skills);
         const config = manager.getSkillConfig('custom');
@@ -333,7 +331,7 @@ describe('SkillToolsManager', () => {
       it('should detect requirements category', () => {
         const category = manager._detectSkillCategory({
           name: 'ears-gen',
-          description: 'Generate EARS requirements specification'
+          description: 'Generate EARS requirements specification',
         });
         expect(category).toBe('requirements');
       });
@@ -341,7 +339,7 @@ describe('SkillToolsManager', () => {
       it('should detect testing category', () => {
         const category = manager._detectSkillCategory({
           name: 'unit-tester',
-          description: 'Run test coverage'
+          description: 'Run test coverage',
         });
         expect(category).toBe('testing');
       });
@@ -349,7 +347,7 @@ describe('SkillToolsManager', () => {
       it('should default to validation', () => {
         const category = manager._detectSkillCategory({
           name: 'xyz',
-          description: 'Unknown skill'
+          description: 'Unknown skill',
         });
         expect(category).toBe('validation');
       });
@@ -377,8 +375,8 @@ toolDependencies:
       it('should load JSON config', () => {
         const json = JSON.stringify({
           skills: {
-            skill1: { allowedTools: ['tool1'] }
-          }
+            skill1: { allowedTools: ['tool1'] },
+          },
         });
 
         manager.loadConfigFromString(json, 'json');
@@ -418,11 +416,11 @@ toolDependencies:
       it('should return statistics', () => {
         manager.setSkillConfig('skill1', {
           allowedTools: ['tool1', 'tool2'],
-          restrictionLevel: RestrictionLevel.STANDARD
+          restrictionLevel: RestrictionLevel.STANDARD,
         });
         manager.setSkillConfig('skill2', {
           allowedTools: ['tool2', 'tool3'],
-          restrictionLevel: RestrictionLevel.STRICT
+          restrictionLevel: RestrictionLevel.STRICT,
         });
 
         const stats = manager.getStats();
