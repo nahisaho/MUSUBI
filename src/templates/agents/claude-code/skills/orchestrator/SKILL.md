@@ -507,6 +507,87 @@ codegraph-mcp community "/path/to/project"
 
 ---
 
+## MUSUBI CodeGraphMCP Module (v5.5.0+)
+
+**Available Module**: `src/integrations/codegraph-mcp.js`
+
+The CodeGraphMCP module provides programmatic integration with CodeGraph MCP server.
+
+### Module Usage
+
+```javascript
+const { CodeGraphMCP } = require('musubi-sdd');
+
+const codegraph = new CodeGraphMCP({
+  mcpEndpoint: 'http://localhost:3000',
+  repoPath: '/path/to/project'
+});
+
+// Generate call graph
+const callGraph = await codegraph.generateCallGraph('src/main.c', { depth: 3 });
+
+// Analyze impact of changes
+const impact = await codegraph.analyzeImpact('src/utils.c');
+
+// Detect circular dependencies
+const cycles = await codegraph.detectCircularDependencies('src/');
+
+// Identify hotspots (highly-connected entities)
+const hotspots = await codegraph.identifyHotspots(5);
+
+// Detect code communities
+const communities = await codegraph.detectCommunities();
+```
+
+### Features
+
+| Feature | Description |
+|---------|-------------|
+| **Call Graph** | Track callers and callees with configurable depth |
+| **Impact Analysis** | Identify affected files when code changes |
+| **Circular Dependencies** | Find cycles in module dependencies |
+| **Hotspots** | Detect highly-connected entities (refactoring candidates) |
+| **Community Detection** | Group related code modules |
+
+---
+
+## MUSUBI HierarchicalReporter Module (v5.5.0+)
+
+**Available Module**: `src/reporters/hierarchical-reporter.js`
+
+The HierarchicalReporter module generates hierarchical analysis reports for large projects.
+
+### Module Usage
+
+```javascript
+const { HierarchicalReporter } = require('musubi-sdd');
+
+const reporter = new HierarchicalReporter();
+const report = await reporter.generateReport('/path/to/project', {
+  format: 'markdown',  // markdown, json, html
+  includeHotspots: true,
+  maxDepth: 5
+});
+
+console.log(report.content);
+```
+
+### Output Formats
+
+- **Markdown**: Human-readable hierarchical report
+- **JSON**: Structured data for further processing
+- **HTML**: Interactive report with navigation
+
+### Hotspot Analysis
+
+The reporter identifies:
+- Files with highest complexity
+- Most frequently changed files
+- Largest files by line count
+- Files with most dependencies
+
+---
+
 ## Managed Agents Overview (25 Types)
 
 ### Orchestration & Governance (3 agents)

@@ -159,7 +159,67 @@ musubi-analyze security --scan ./src --report markdown
 
 ---
 
+## MUSUBI RustMigrationGenerator Module (v5.5.0+)
+
+**Available Module**: `src/generators/rust-migration-generator.js`
+
+The RustMigrationGenerator module assists in migrating C/C++ code to Rust for improved memory safety.
+
+### Module Usage
+
+```javascript
+const { RustMigrationGenerator, UNSAFE_PATTERNS, SECURITY_COMPONENTS } = require('musubi-sdd');
+
+const generator = new RustMigrationGenerator();
+const analysis = await generator.analyzeRustMigration('src/buffer.c');
+
+console.log(`Risk Score: ${analysis.riskScore}`);
+console.log(`Unsafe Patterns Found: ${analysis.unsafePatterns.length}`);
+console.log(`Security Components: ${analysis.securityComponents.length}`);
+```
+
+### Unsafe Pattern Detection (27 Types)
+
+| Category | Patterns |
+|----------|----------|
+| **Memory Management** | malloc, calloc, realloc, free |
+| **Buffer Overflow** | strcpy, strcat, sprintf, gets |
+| **Pointer Operations** | Pointer arithmetic, casts, double pointers |
+| **Concurrency** | pthread misuse, volatile misuse |
+| **Format Strings** | printf with variable format |
+
+### Security Component Identification
+
+- Stack protection (`_FORTIFY_SOURCE`, stack canaries)
+- Sanitizers (AddressSanitizer, MemorySanitizer)
+- Cryptography (OpenSSL, libsodium)
+- Authentication (PAM, SASL)
+
+### Risk Scoring
+
+```javascript
+// Risk weights
+const RISK_WEIGHTS = {
+  buffer_overflow: 10,   // Critical: strcpy, gets, etc.
+  memory_management: 8,  // High: malloc/free misuse
+  pointer_operation: 7,  // High: pointer arithmetic
+  format_string: 9,      // Critical: format string vulns
+  concurrency: 6         // Medium: race conditions
+};
+
+// Calculate total risk
+const totalRisk = analysis.riskScore; // 0-100 scale
+```
+
+### Integration with Security Audit
+
+1. **Identify unsafe code** in C/C++ projects
+2. **Prioritize migration** based on risk score
+3. **Generate migration roadmap** for Rust rewrite
+4. **Track security improvements** post-migration
+
 ---
+
 
 ## Project Memory (Steering System)
 

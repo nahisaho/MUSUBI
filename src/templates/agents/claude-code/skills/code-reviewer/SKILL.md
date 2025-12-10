@@ -120,6 +120,65 @@ musubi-workflow feedback review implementation -r "コード品質の問題を�
 
 ---
 
+## MUSUBI ComplexityAnalyzer Module (v5.5.0+)
+
+**Available Module**: `src/analyzers/complexity-analyzer.js`
+
+The ComplexityAnalyzer module provides automated cyclomatic and cognitive complexity analysis.
+
+### Module Usage
+
+```javascript
+const { ComplexityAnalyzer, THRESHOLDS } = require('musubi-sdd');
+
+const analyzer = new ComplexityAnalyzer();
+
+// Cyclomatic complexity (McCabe)
+const cyclomatic = analyzer.calculateCyclomaticComplexity(code, 'javascript');
+
+// Cognitive complexity (SonarSource method)
+const cognitive = analyzer.calculateCognitiveComplexity(code, 'javascript');
+
+// Analyze entire file
+const fileAnalysis = await analyzer.analyzeFile('src/utils.js');
+console.log(`Cyclomatic: ${fileAnalysis.cyclomatic}`);
+console.log(`Cognitive: ${fileAnalysis.cognitive}`);
+console.log(`Severity: ${fileAnalysis.severity}`);
+```
+
+### Complexity Thresholds
+
+| Level | Cyclomatic | Cognitive | Action |
+|-------|------------|-----------|--------|
+| **Ideal** | ≤10 | ≤15 | No action needed |
+| **Warning** | 11-20 | 16-30 | Consider refactoring |
+| **Critical** | 21-50 | 31-60 | Refactoring required |
+| **Extreme** | >50 | >60 | Urgent refactoring |
+
+### Multi-Language Support
+
+- JavaScript, TypeScript
+- Python
+- Java
+- C, C++
+- Go
+- Rust
+
+### Integration with Code Review
+
+1. **Automated complexity check** before review
+2. **Identify complex functions** that need refactoring
+3. **Generate recommendations** for splitting functions
+4. **Track complexity trends** over time
+
+```javascript
+// Get recommendations
+const recommendations = analyzer.getRecommendations(fileAnalysis);
+// Example: "Consider splitting function processData into smaller functions"
+```
+
+---
+
 ## 3. Documentation Language Policy
 
 **CRITICAL: 英語版と日本語版の両方を必ず作成**
