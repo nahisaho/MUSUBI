@@ -24,5 +24,7 @@ module.exports = {
   ],
   verbose: true,
   // Prevent coverage worker issues with temp directories
-  maxWorkers: 1
+  maxWorkers: 1,
+  // Force exit after tests complete (handles pending timers in swarm tests)
+  forceExit: true
 };

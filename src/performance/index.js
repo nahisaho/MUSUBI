@@ -27,6 +27,16 @@ const {
   defaultCacheManager,
 } = require('./cache-manager');
 
+const {
+  MemoryPressure,
+  ObjectPool,
+  WeakCache,
+  MemoryMonitor,
+  StreamingBuffer,
+  MemoryOptimizer,
+  defaultOptimizer,
+} = require('./memory-optimizer');
+
 /**
  * BatchProcessor for bulk operations
  */
@@ -464,4 +474,13 @@ module.exports = {
   // Performance Monitoring
   PerformanceMonitor,
   defaultPerformanceMonitor,
+
+  // Memory Optimization (Phase 6 P1)
+  MemoryPressure,
+  ObjectPool,
+  WeakCache,
+  MemoryMonitor,
+  StreamingBuffer,
+  MemoryOptimizer,
+  defaultOptimizer,
 };
