@@ -71,29 +71,36 @@ musubi init --windsurf  # Windsurf IDE
 
 ---
 
-## 📊 What's New in v3.11.0
+## 📊 What's New in v5.0.0
 
-- 🎯 **Skill System Architecture** - OpenAI Agents SDK inspired skill registry and execution
-- 📋 **Skill Registry** - Centralized skill registration with metadata, tags, and dependency validation
-- ⚡ **Skill Executor** - Parallel/sequential execution with P-labels (P0-P3), guardrail integration
-- 🔗 **Agent-Skill Binding** - Dynamic capability-based skill assignment with scoring
-- 🔌 **MCP Tool Adapters** - Bidirectional MCP-Skill adapters for external tool integration
-- 🔄 **Workflow Executor** - End-to-end workflows with 8 step types and variable resolution
-- 🛡️ **Error Handler** - Circuit breaker, graceful degradation, retry with backoff
-- 📁 **5 Workflow Templates** - Feature dev, CI/CD, code review, incident response, documentation
+### Phase 5: Advanced Features 🚀
+- 🔄 **Steering Auto-Update** - Automatic project memory synchronization with 5 trigger types
+- ✅ **Steering Validator** - Comprehensive validation for steering documents
+- 📋 **Template Constraints** - Enforce structure requirements with ThinkingChecklist
+- 📊 **Quality Dashboard** - A-F grade metrics with health status monitoring
+- 🔍 **Advanced Validation** - Cross-artifact consistency, gap detection, traceability validation
+- 🎯 **Phase 5 Integration** - Unified access to all advanced features
+
+### Phase 4: Agent Loop & Agentic Features 🤖
+- 🧠 **Codebase Intelligence** - RepositoryMap, ASTExtractor, ContextOptimizer
+- 💭 **Agentic Reasoning** - ReasoningEngine, PlanningEngine, SelfCorrection
+- ⚡ **Code Generation** - CodeGenerator, CodeReviewer with multiple modes
+- 🔗 **Integrated Agent** - Unified agent with all Phase 4 capabilities
 
 ```bash
-# Execute skills with orchestration
-npx musubi-orchestrate run-skill analyze-requirements --input "specs.md"
+# Use advanced features via orchestrator
+const { Phase5Integration, createIntegratedAgent } = require('musubi-sdd');
 
-# Execute workflow from template
-npx musubi-orchestrate run-workflow feature-development --feature "new-auth"
+# Quality dashboard
+const dashboard = new QualityDashboard();
+const metrics = await dashboard.collectMetrics(projectPath);
 
-# Parallel skill execution with P-labels
-npx musubi-orchestrate parallel P0:analyze,P1:design,P2:implement
+# Advanced validation
+const validator = new AdvancedValidation();
+const result = await validator.validateAll(projectPath);
 ```
 
-### Previous (v3.10.0)
+### Previous Highlights (v3.11.0)
 
 - 🌐 **WebSocket Real-time GUI** - Live replanning updates with `musubi-browser` dashboard
 - 📋 **GUI Quick Actions** - Modal dialog for New Requirement, Validate Project, Export Report

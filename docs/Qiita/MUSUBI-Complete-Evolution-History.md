@@ -24,6 +24,8 @@ title: MUSUBIの軌跡：Spec-CopilotからMUSUHI、そしてMUSUBIへの完全�
 - MUSUBI v3.7.0: 多言語テンプレート、Ollama統合、コスト追跡、チェックポイント
 - MUSUBI v3.8.0-v3.10.0: Swarm Enhancement、Guardrails、Documentation
 - MUSUBI v3.11.0: Skill System Architecture、Advanced Workflows
+- MUSUBI v4.0.0: Agent Loop、Codebase Intelligence、Agentic Reasoning
+- MUSUBI v5.0.0: Advanced Features、Steering Auto-Update、Quality Dashboard
 
 ---
 
@@ -2212,6 +2214,34 @@ const cicdWorkflow = WorkflowExamples.getCICDPipelineWorkflow();
 | 5 Workflow Templates | ✅ |
 | 242テスト追加、合計2,574テスト | ✅ |
 
+### MUSUBI v4.0.0
+
+| 機能 | ステータス |
+|------|----------|
+| Agent Loop（エージェントループ統合） | ✅ |
+| RepositoryMap（リポジトリ構造解析） | ✅ |
+| ASTExtractor（AST抽出・解析） | ✅ |
+| ContextOptimizer（コンテキスト最適化） | ✅ |
+| ReasoningEngine（推論エンジン） | ✅ |
+| PlanningEngine（計画エンジン） | ✅ |
+| SelfCorrection（自己修正機能） | ✅ |
+| CodeGenerator（コード生成） | ✅ |
+| CodeReviewer（コードレビュー） | ✅ |
+| createIntegratedAgent（統合エージェント） | ✅ |
+
+### MUSUBI v5.0.0
+
+| 機能 | ステータス |
+|------|----------|
+| SteeringAutoUpdate（自動同期） | ✅ |
+| SteeringValidator（検証エンジン） | ✅ |
+| TemplateConstraints（テンプレート制約） | ✅ |
+| ThinkingChecklist（思考チェックリスト） | ✅ |
+| QualityDashboard（A-F品質メトリクス） | ✅ |
+| AdvancedValidation（クロスアーティファクト検証） | ✅ |
+| Phase5Integration（統合アクセス） | ✅ |
+| 227テスト追加、合計3,378テスト | ✅ |
+
 ---
 
 # 第16章 アップグレード方法
@@ -2297,7 +2327,13 @@ flowchart TB
     subgraph Phase12["🎯 Phase 12: MUSUBI Skill System（v3.11.0）"]
         P12["Skill Registry、Workflow Executor、2,574テスト"]
     end
-    Origin --> Evolution --> Phase1 --> Phase2 --> Phase3 --> Phase4 --> Phase5 --> Phase6 --> Phase7 --> Phase8 --> Phase9 --> Phase10 --> Phase11 --> Phase12
+    subgraph Phase13["🤖 Phase 13: MUSUBI Agent Loop（v4.0.0）"]
+        P13["Codebase Intelligence、Agentic Reasoning、統合エージェント"]
+    end
+    subgraph Phase14["🚀 Phase 14: MUSUBI Advanced Features（v5.0.0）"]
+        P14["Steering Auto-Update、Quality Dashboard、3,378テスト"]
+    end
+    Origin --> Evolution --> Phase1 --> Phase2 --> Phase3 --> Phase4 --> Phase5 --> Phase6 --> Phase7 --> Phase8 --> Phase9 --> Phase10 --> Phase11 --> Phase12 --> Phase13 --> Phase14
 ```
 
 **Key Milestones:**
@@ -2321,8 +2357,10 @@ flowchart TB
 | Guardrails System | MUSUBI v3.9.0 | 入力/出力/安全性検証、2,278テスト |
 | Phase 3 Documentation | MUSUBI v3.10.0 | 9パターンガイド、完全ドキュメント化、2,332テスト |
 | Skill System | MUSUBI v3.11.0 | Skill Registry、Workflow Executor、2,574テスト |
+| Agent Loop | MUSUBI v4.0.0 | Codebase Intelligence、Agentic Reasoning |
+| Advanced Features | MUSUBI v5.0.0 | Steering Auto-Update、Quality Dashboard、3,378テスト |
 
-Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて、MUSUBIは単なる仕様管理ツールから、**包括的なAI支援開発プラットフォーム**へと成長しました。v3.11.0では、OpenAI Agents SDKにインスパイアされたSkill System Architecture、高度なWorkflow Executor、そしてCircuit BreakerやGraceful Degradationを備えたError Handlerを追加しました。2,574のテストと20のCLIコマンドで、堅牢で信頼性の高いSDD体験を提供します。
+Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて、MUSUBIは単なる仕様管理ツールから、**包括的なAI支援開発プラットフォーム**へと成長しました。v5.0.0では、Phase 4のAgent Loop（Codebase Intelligence、Agentic Reasoning）とPhase 5のAdvanced Features（Steering Auto-Update、Quality Dashboard、Advanced Validation）を完成させました。3,378のテストと20のCLIコマンドで、堅牢で信頼性の高いSDD体験を提供します。
 
 ---
 
@@ -2331,6 +2369,8 @@ Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて�
 - [MUSUBI GitHub](https://github.com/nahisaho/musubi)
 - [MUSUHI GitHub](https://github.com/nahisaho/musuhi)（前身プロジェクト）
 - [Spec-Copilot GitHub](https://github.com/nahisaho/spec-copilot)（起源プロジェクト）
+- [MUSUBI v5.0.0 Advanced Features Guide](https://qiita.com/nahisaho/items/musubi-v5-advanced-features)
+- [MUSUBI v4.0.0 Agent Loop Guide](https://qiita.com/nahisaho/items/musubi-v4-agent-loop)
 - [MUSUBI v3.11.0 Skill System Guide](https://qiita.com/nahisaho/items/musubi-v3-skill-system)
 - [MUSUBI v3.10.0 Orchestration Guide](https://qiita.com/nahisaho/items/musubi-v3-orchestration)
 - [MUSUBI v3.9.0 Guardrails Guide](https://qiita.com/nahisaho/items/musubi-v3-guardrails)
@@ -2342,4 +2382,4 @@ Spec-CopilotからMUSUHI、そしてMUSUBIへ。この進化の旅を通じて�
 
 ## タグ
 
-`#MUSUBI` `#MUSUHI` `#Spec-Copilot` `#SDD` `#仕様駆動開発` `#AIエージェント` `#ClaudeCode` `#GitHubCopilot` `#MCP` `#Replanning` `#Ollama` `#Guardrails` `#Swarm` `#Orchestration` `#SkillSystem` `#Workflow`
+`#MUSUBI` `#MUSUHI` `#Spec-Copilot` `#SDD` `#仕様駆動開発` `#AIエージェント` `#ClaudeCode` `#GitHubCopilot` `#MCP` `#Replanning` `#Ollama` `#Guardrails` `#Swarm` `#Orchestration` `#SkillSystem` `#Workflow` `#AgentLoop` `#CodebaseIntelligence` `#QualityDashboard`
