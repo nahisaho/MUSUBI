@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.7.1] - 2025-12-11
+
+### Added
+
+**Phase 6 P1: Memory Optimization Module** 🧠
+
+New `src/performance/memory-optimizer.js` for enterprise-grade memory management:
+
+- **ObjectPool**
+  - Reusable object pooling to reduce GC pressure
+  - Configurable initial/max size with reset function
+  - Recycle rate tracking for optimization
+
+- **WeakCache**
+  - Weak reference caching for large objects
+  - Automatic cleanup when memory is needed
+  - Hit/miss rate statistics
+
+- **MemoryMonitor**
+  - Heap usage tracking with pressure levels (LOW/MODERATE/HIGH/CRITICAL)
+  - Memory trend analysis (stable/increasing/decreasing)
+  - Pressure level listeners for automatic actions
+
+- **StreamingBuffer**
+  - Memory-efficient large data processing
+  - Configurable chunk size and max buffered items
+
+- **MemoryOptimizer**
+  - Coordinator for pools and caches
+  - Auto-GC on HIGH/CRITICAL pressure
+  - Comprehensive statistics
+
+### Changed
+
+- Added 40 new tests for memory optimization (3,958 → 3,998 total)
+- Test suites increased from 132 to 133
+- Jest config: Added `forceExit` to handle pending swarm timers
+
 ## [5.7.0] - 2025-12-11
 
 ### Added
