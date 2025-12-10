@@ -2,6 +2,8 @@
  * Repository Map Tests
  * 
  * Part of MUSUBI v4.1.0 - Codebase Intelligence
+ * @trace REQ-P4-001
+ * @requirement REQ-P4-001 Repository Map Generation
  */
 
 const {

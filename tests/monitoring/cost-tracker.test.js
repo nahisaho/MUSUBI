@@ -1,5 +1,7 @@
 /**
  * @fileoverview Tests for CostTracker - LLM usage and cost tracking
+ * @trace REQ-P5-005
+ * @requirement REQ-P5-005 Cost Tracking
  */
 
 const path = require('path');

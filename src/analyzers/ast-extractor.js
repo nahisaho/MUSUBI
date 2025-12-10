@@ -4,8 +4,15 @@
  * Extracts Abstract Syntax Tree information from source code files.
  * Provides structured analysis of code structure, symbols, and relationships.
  * 
- * Part of MUSUBI v4.1.0 - Codebase Intelligence
+ * Part of MUSUBI v5.0.0 - Codebase Intelligence
+ * 
+ * @module analyzers/ast-extractor
  * @version 1.0.0
+ * 
+ * @traceability
+ * - Requirement: REQ-P4-002 (AST Extraction and Analysis)
+ * - Design: docs/design/tdd-musubi-v5.0.0.md#2.2
+ * - Test: tests/analyzers/ast-extractor.test.js
  */
 
 const fs = require('fs');

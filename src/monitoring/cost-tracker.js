@@ -3,6 +3,13 @@
  * @module monitoring/cost-tracker
  * @version 1.0.0
  * @description Tracks LLM API usage and costs across providers
+ * 
+ * Part of MUSUBI v5.0.0 - Production Readiness
+ * 
+ * @traceability
+ * - Requirement: REQ-P5-005 (Cost Tracking)
+ * - Design: docs/design/tdd-musubi-v5.0.0.md#3.5
+ * - Test: tests/monitoring/cost-tracker.test.js
  */
 
 'use strict';

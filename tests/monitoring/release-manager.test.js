@@ -1,5 +1,7 @@
 /**
  * Tests for Release Manager
+ * @trace REQ-P5-003
+ * @requirement REQ-P5-003 Release Automation
  */
 
 const {

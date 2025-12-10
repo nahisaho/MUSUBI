@@ -6,6 +6,16 @@
  * - Runbook execution
  * - Post-mortem generation
  * - On-call management
+ * 
+ * Part of MUSUBI v5.0.0 - Production Readiness
+ * 
+ * @module monitoring/incident-manager
+ * @version 1.0.0
+ * 
+ * @traceability
+ * - Requirement: REQ-P5-002 (Incident Management)
+ * - Design: docs/design/tdd-musubi-v5.0.0.md#3.2
+ * - Test: tests/monitoring/incident-manager.test.js
  */
 
 const { EventEmitter } = require('events');

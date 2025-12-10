@@ -1,5 +1,7 @@
 /**
  * Quality Dashboard Tests
+ * @trace REQ-P5-001
+ * @requirement REQ-P5-001 Quality Dashboard
  */
 
 const {

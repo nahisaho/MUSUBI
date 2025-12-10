@@ -4,8 +4,15 @@
  * Generates a comprehensive map of the repository structure for LLM context.
  * Implements efficient file scanning, caching, and incremental updates.
  * 
- * Part of MUSUBI v4.1.0 - Codebase Intelligence
+ * Part of MUSUBI v5.0.0 - Codebase Intelligence
+ * 
+ * @module analyzers/repository-map
  * @version 1.0.0
+ * 
+ * @traceability
+ * - Requirement: REQ-P4-001 (Repository Map Generation)
+ * - Design: docs/design/tdd-musubi-v5.0.0.md#2.1
+ * - Test: tests/analyzers/repository-map.test.js
  */
 
 const fs = require('fs');

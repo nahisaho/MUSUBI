@@ -1,5 +1,7 @@
 /**
  * Tests for Observability Module
+ * @trace REQ-P5-004
+ * @requirement REQ-P5-004 Observability Integration
  */
 
 const {

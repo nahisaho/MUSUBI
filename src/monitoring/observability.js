@@ -6,6 +6,16 @@
  * - Metrics collection
  * - Distributed tracing
  * - Correlation IDs
+ * 
+ * Part of MUSUBI v5.0.0 - Production Readiness
+ * 
+ * @module monitoring/observability
+ * @version 1.0.0
+ * 
+ * @traceability
+ * - Requirement: REQ-P5-004 (Observability Integration)
+ * - Design: docs/design/tdd-musubi-v5.0.0.md#3.4
+ * - Test: tests/monitoring/observability.test.js
  */
 
 const { EventEmitter } = require('events');

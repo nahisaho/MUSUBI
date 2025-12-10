@@ -6,6 +6,16 @@
  * - Feature flag management
  * - Rollback procedures
  * - Release notes generation
+ * 
+ * Part of MUSUBI v5.0.0 - Production Readiness
+ * 
+ * @module monitoring/release-manager
+ * @version 1.0.0
+ * 
+ * @traceability
+ * - Requirement: REQ-P5-003 (Release Automation)
+ * - Design: docs/design/tdd-musubi-v5.0.0.md#3.3
+ * - Test: tests/monitoring/release-manager.test.js
  */
 
 const { EventEmitter } = require('events');

@@ -2,6 +2,8 @@
  * Context Optimizer Tests
  * 
  * Part of MUSUBI v4.1.0 - Codebase Intelligence
+ * @trace REQ-P4-003
+ * @requirement REQ-P4-003 Context Optimization
  */
 
 const {

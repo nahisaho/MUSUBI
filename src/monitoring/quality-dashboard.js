@@ -2,7 +2,15 @@
  * Quality Metrics Dashboard
  * カバレッジメトリクス、Constitutional準拠メトリクス、プロジェクトヘルス指標
  * 
+ * Part of MUSUBI v5.0.0 - Production Readiness
+ * 
  * @module monitoring/quality-dashboard
+ * @version 1.0.0
+ * 
+ * @traceability
+ * - Requirement: REQ-P5-001 (Quality Dashboard)
+ * - Design: docs/design/tdd-musubi-v5.0.0.md#3.1
+ * - Test: tests/monitoring/quality-dashboard.test.js
  */
 
 const EventEmitter = require('events');

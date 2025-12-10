@@ -4,8 +4,15 @@
  * Optimizes context for LLM consumption by intelligently selecting
  * and prioritizing relevant code and documentation.
  * 
- * Part of MUSUBI v4.1.0 - Codebase Intelligence
+ * Part of MUSUBI v5.0.0 - Codebase Intelligence
+ * 
+ * @module analyzers/context-optimizer
  * @version 1.0.0
+ * 
+ * @traceability
+ * - Requirement: REQ-P4-003 (Context Optimization)
+ * - Design: docs/design/tdd-musubi-v5.0.0.md#2.3
+ * - Test: tests/analyzers/context-optimizer.test.js
  */
 
 const { EventEmitter } = require('events');
