@@ -95,6 +95,32 @@ aliasFlags.forEach(flag => {
   initCommand.option(`--${flag}`, `Select agent: ${flag}`);
 });
 
+// Add spec option for external specification reference
+initCommand.option(
+  '--spec <source>',
+  'Reference external specification (URL, file path, or git repo)'
+);
+
+// Add reference option for GitHub repository references (can be specified multiple times)
+initCommand.option(
+  '--reference <repo>',
+  'Reference GitHub repository for improvements (can be specified multiple times)',
+  (value, previous) => previous ? [...previous, value] : [value],
+  []
+);
+
+// Shorthand aliases for reference
+initCommand.option(
+  '-r, --ref <repo>',
+  'Alias for --reference',
+  (value, previous) => previous ? [...previous, value] : [value],
+  []
+);
+
+// Add workspace/monorepo option
+initCommand.option('--workspace', 'Initialize as workspace/monorepo project');
+initCommand.option('--template <name>', 'Use project template (e.g., microservices, clean-arch)');
+
 initCommand.action(async options => {
   const agentKey = detectAgentFromFlags(options);
   const agent = getAgentDefinition(agentKey);
@@ -102,9 +128,20 @@ initCommand.action(async options => {
   console.log(chalk.blue(`Initializing MUSUBI for ${chalk.bold(agent.label)}...`));
   console.log(chalk.gray(`Description: ${agent.description}\n`));
 
-  // Delegate to musubi-init.js with agent info
+  // Merge --reference and --ref options
+  const references = [...(options.reference || []), ...(options.ref || [])];
+
+  // Extract init-specific options
+  const initOptions = {
+    spec: options.spec,
+    workspace: options.workspace,
+    template: options.template,
+    references: references.length > 0 ? references : undefined,
+  };
+
+  // Delegate to musubi-init.js with agent info and options
   const initMain = require('./musubi-init.js');
-  await initMain(agent, agentKey);
+  await initMain(agent, agentKey, initOptions);
 });
 
 // ============================================================================

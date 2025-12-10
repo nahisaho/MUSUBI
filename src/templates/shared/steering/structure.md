@@ -15,6 +15,97 @@
 
 ---
 
+## Architecture Layers (Language-Agnostic)
+
+The following layer definitions apply regardless of programming language:
+
+### Layer 1: Domain / Core
+
+**Purpose**: Business logic and domain models
+**Rules**:
+- MUST NOT depend on any other layer
+- Contains: Entities, Value Objects, Domain Services, Domain Events
+- No framework dependencies, no I/O
+
+**Language Examples**:
+| Language | Location | Pattern |
+|----------|----------|---------|
+| TypeScript | `lib/{feature}/domain/` | Classes/Types |
+| Rust | `{crate}/src/domain/` | Structs + Traits |
+| Python | `src/{pkg}/domain/` | Dataclasses |
+| Go | `internal/domain/` | Structs + Interfaces |
+| Java | `src/main/.../domain/` | Classes + Records |
+
+### Layer 2: Application / Use Cases
+
+**Purpose**: Orchestrate domain logic, implement use cases
+**Rules**:
+- Depends only on Domain layer
+- Contains: Application Services, Commands, Queries, DTOs
+- No direct I/O (uses ports/interfaces)
+
+**Language Examples**:
+| Language | Location | Pattern |
+|----------|----------|---------|
+| TypeScript | `lib/{feature}/application/` | Service classes |
+| Rust | `{crate}/src/application/` | Impl blocks |
+| Python | `src/{pkg}/application/` | Service functions |
+| Go | `internal/app/` | Service structs |
+| Java | `src/main/.../application/` | @Service classes |
+
+### Layer 3: Infrastructure / Adapters
+
+**Purpose**: External integrations (DB, APIs, messaging)
+**Rules**:
+- Depends on Application layer (implements ports)
+- Contains: Repositories, API Clients, Message Publishers
+- All I/O operations here
+
+**Language Examples**:
+| Language | Location | Pattern |
+|----------|----------|---------|
+| TypeScript | `lib/{feature}/infrastructure/` | Repository impls |
+| Rust | `{crate}/src/infrastructure/` | Trait impls |
+| Python | `src/{pkg}/infrastructure/` | Repository classes |
+| Go | `internal/infra/` | Interface impls |
+| Java | `src/main/.../infrastructure/` | @Repository classes |
+
+### Layer 4: Interface / Presentation
+
+**Purpose**: Entry points (CLI, API, Web UI)
+**Rules**:
+- Depends on Application layer
+- Contains: Controllers, CLI handlers, API routes
+- Input validation and response formatting
+
+**Language Examples**:
+| Language | Location | Pattern |
+|----------|----------|---------|
+| TypeScript | `app/api/` or `cli/` | Route handlers |
+| Rust | `{crate}/src/api/` or `cli/` | Axum handlers |
+| Python | `src/{pkg}/api/` or `cli/` | FastAPI routes |
+| Go | `cmd/` or `internal/api/` | HTTP handlers |
+| Java | `src/main/.../api/` | @RestController |
+
+### Layer Dependency Rules
+
+```
+┌─────────────────────────────────────────┐
+│        Interface / Presentation         │ ← Entry points
+├─────────────────────────────────────────┤
+│        Application / Use Cases          │ ← Orchestration
+├─────────────────────────────────────────┤
+│        Infrastructure / Adapters        │ ← I/O & External
+├─────────────────────────────────────────┤
+│            Domain / Core                │ ← Pure business logic
+└─────────────────────────────────────────┘
+
+Dependency Direction: ↓ (outer → inner)
+Domain layer has NO dependencies
+```
+
+---
+
 ## Directory Organization
 
 ### Root Structure

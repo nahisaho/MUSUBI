@@ -5,6 +5,68 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.4.0] - 2025-12-10
+
+### Added
+
+**GitHub Reference & Repository Analysis** 📦
+
+New feature to reference multiple GitHub repositories for pattern analysis and improvement suggestions.
+
+#### `--reference` / `-r` Option
+- **Multiple repository references** with `--reference` or `-r` (can be specified multiple times)
+- **Flexible formats**:
+  - `owner/repo` - Simple format
+  - `https://github.com/owner/repo` - HTTPS URL
+  - `git@github.com:owner/repo.git` - SSH URL
+  - `owner/repo@branch` - Branch specification
+  - `owner/repo#path` - Subpath specification
+
+#### Repository Analysis
+- **GitHub API integration** with metadata, structure, and key file fetching
+- **GITHUB_TOKEN support** for API rate limit handling
+- **Key files analyzed**: README.md, package.json, Cargo.toml, pyproject.toml, go.mod, pom.xml
+
+#### Pattern Detection
+- **Architecture patterns**:
+  - Clean Architecture (domain, application, infrastructure, interface)
+  - Hexagonal Architecture (adapters, ports, core)
+  - Domain-Driven Design (aggregates, entities, valueobjects)
+  - Monorepo (packages, apps, libs)
+- **Technology detection**: React, Vue, Angular, Next.js, Express, Fastify, TypeScript, Tokio, Axum, FastAPI, Django
+- **Configuration detection**: Jest, Vitest, Mocha, ESLint, Prettier, Biome, pytest
+
+#### Improvement Suggestions
+- **Architecture recommendations** based on common patterns across referenced repos
+- **Technology suggestions** based on popular choices
+- **Best practices** detected from README badges and CI/CD references
+
+#### Output
+- **Analysis saved to** `steering/references/github-references-YYYY-MM-DD.md`
+- **Includes**: Repository metadata, directory structure, detected patterns, technologies, and improvement suggestions
+
+### Usage Examples
+
+```bash
+# Single repository reference
+musubi init --reference facebook/react
+
+# Multiple repositories (short form)
+musubi init -r vercel/next.js -r facebook/react -r denoland/deno
+
+# Full URL format
+musubi init --reference https://github.com/tokio-rs/tokio
+
+# With branch specification
+musubi init -r owner/repo@develop
+```
+
+### Tests
+- Added 59 new tests for GitHub reference feature
+- All 3,571 tests passing
+
+---
+
 ## [5.3.0] - 2025-12-10
 
 ### Added
