@@ -174,6 +174,11 @@ class ProjectScanner {
    */
   async getSpec(id) {
     const specsPath = path.join(this.projectPath, 'storage', 'specs');
+
+    if (!(await fs.pathExists(specsPath))) {
+      return null;
+    }
+
     const files = await fs.readdir(specsPath);
 
     for (const file of files) {

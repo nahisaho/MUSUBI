@@ -6,6 +6,7 @@
 const chokidar = require('chokidar');
 const EventEmitter = require('events');
 const path = require('path');
+const fs = require('fs');
 
 /**
  * File Watcher - Watches for file changes in the project
@@ -42,10 +43,24 @@ class FileWatcher extends EventEmitter {
    * Start watching
    */
   start() {
-    const watchPaths = [
+    const potentialPaths = [
       path.join(this.projectPath, 'steering'),
       path.join(this.projectPath, 'storage'),
     ];
+
+    // Only watch paths that exist to avoid ENOENT errors
+    const watchPaths = potentialPaths.filter(p => {
+      try {
+        return fs.existsSync(p);
+      } catch {
+        return false;
+      }
+    });
+
+    // If no paths exist, watch the project path itself
+    if (watchPaths.length === 0) {
+      watchPaths.push(this.projectPath);
+    }
 
     this.watcher = chokidar.watch(watchPaths, this.options);
 
