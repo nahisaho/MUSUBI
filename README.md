@@ -71,6 +71,80 @@ musubi init --windsurf  # Windsurf IDE
 
 ---
 
+## 📊 What's New in v5.9.0
+
+### Phase 1-4 Enterprise Features 🏢
+
+Major update with enterprise-ready features for large-scale projects and monorepo support.
+
+#### Workflow Flexibility (Phase 1)
+
+- **3 Workflow Modes**: `small` (bug fixes), `medium` (features), `large` (architecture)
+- **Auto-detection**: Smart mode selection based on feature name patterns
+- **`musubi-release`**: New CLI for release automation with CHANGELOG generation
+
+```bash
+# Generate CHANGELOG from commits
+musubi-release
+
+# Show detected mode for a feature
+musubi-workflow mode --detect "feat: user authentication"
+```
+
+#### Monorepo Support (Phase 2)
+
+- **Package Registry**: `steering/packages.yml` for dependency management
+- **Dependency Graphs**: Mermaid diagram generation for visualization
+- **Coverage Tracking**: Per-package test coverage reporting
+
+#### Constitution Level Management (Phase 3)
+
+- **3 Enforcement Levels**: `critical` (blocking), `advisory` (warnings), `flexible` (suggestions)
+- **Level-aware Validation**: Different enforcement based on article importance
+- **Project Overrides**: Custom levels per project type
+
+| Level | Articles | Behavior |
+|-------|----------|----------|
+| Critical | CONST-001, 002, 003, 005, 009 | Blocks workflow |
+| Advisory | CONST-004, 006, 007 | Warnings only |
+| Flexible | CONST-008 | Suggestions |
+
+#### Project Configuration (Phase 4)
+
+- **`musubi-config`**: New CLI for configuration management
+- **Schema Validation**: v2.0 schema with AJV validation
+- **Auto-migration**: Upgrade v1.0 configs to v2.0
+
+```bash
+musubi-config validate  # Validate project.yml
+musubi-config migrate   # Migrate to v2.0
+musubi-config show      # Show effective config
+```
+
+#### Orchestrator Integration
+
+5 new built-in skills for programmatic access:
+
+| Skill | Category | Usage |
+|-------|----------|-------|
+| `release-manager` | release | CHANGELOG generation |
+| `workflow-mode-manager` | workflow | Mode detection & management |
+| `package-manager` | configuration | Package & dependency analysis |
+| `constitution-level-manager` | validation | Level-aware validation |
+| `project-config-manager` | configuration | Config validation & migration |
+
+```javascript
+const { workflowModeSkill } = require('musubi-sdd/src/orchestration');
+
+const result = await workflowModeSkill.execute({
+  action: 'detect',
+  featureName: 'fix: minor bug'
+});
+console.log(result.detectedMode); // 'small'
+```
+
+---
+
 ## 📊 What's New in v5.8.0
 
 ### CodeGraph MCP v0.8.0 Integration 🔗
@@ -269,8 +343,8 @@ const result = await validator.validateAll(projectPath);
 - 🧠 **Dynamic Replanning** - AI agents dynamically adjust plans on failure with LLM-powered alternatives (v3.6.0+)
 - 🔌 **MCP Server Integration** - CodeGraphMCPServer for advanced code analysis (v2.0.0)
 - 📄 **Flexible Command Formats** - Supports Markdown, TOML, and AGENTS.md formats
-- 🎯 **25 Specialized Agents (All Platforms)** - Orchestrator, Steering, Requirements, Architecture, Development, Quality, Security, Infrastructure
-  - Claude Code: Skills API (25 skills)
+- 🎯 **27 Specialized Skills (All Platforms)** - 25 platform agents + 5 orchestrator built-in skills (v5.9.0)
+  - Claude Code: Skills API (25 skills + 5 built-in)
   - GitHub Copilot & Cursor: AGENTS.md (official support)
   - Other 4 agents: AGENTS.md (compatible format)
 - 📋 **Constitutional Governance** - 9 immutable articles + Phase -1 Gates for quality enforcement
@@ -291,9 +365,9 @@ const result = await validator.validateAll(projectPath);
 
 MUSUBI supports 7 AI coding agents, each with tailored configurations:
 
-| Agent              | Skills API     | 25 Agents      | Command Format   | Command File Format  | Installation Directory                        |
+| Agent              | Skills API     | 27 Skills      | Command Format   | Command File Format  | Installation Directory                        |
 | ------------------ | -------------- | -------------- | ---------------- | -------------------- | --------------------------------------------- |
-| **Claude Code**    | ✅ (25 skills) | ✅             | `/sdd-*`         | Markdown             | `.claude/skills/`, `.claude/commands/`        |
+| **Claude Code**    | ✅ (27 skills) | ✅             | `/sdd-*`         | Markdown             | `.claude/skills/`, `.claude/commands/`        |
 | **GitHub Copilot** | ❌             | ✅ (AGENTS.md) | `#sdd-*`         | Markdown + AGENTS.md | `.github/prompts/`, `.github/AGENTS.md`       |
 | **Cursor IDE**     | ❌             | ✅ (AGENTS.md) | `/sdd-*`         | Markdown + AGENTS.md | `.cursor/commands/`, `.cursor/AGENTS.md`      |
 | **Gemini CLI**     | ❌             | ✅ (GEMINI.md) | `/sdd-*`         | TOML + GEMINI.md     | `.gemini/commands/`, `GEMINI.md`              |
@@ -304,7 +378,8 @@ MUSUBI supports 7 AI coding agents, each with tailored configurations:
 **Notes**:
 
 - Skills API is exclusive to Claude Code
-- **All 7 platforms now support 25 agents** via Skills API (Claude Code) or AGENTS.md (others)
+- **All 7 platforms now support 27 skills** via Skills API (Claude Code) or AGENTS.md (others)
+- v5.9.0 added 5 built-in orchestrator skills (release, workflow, package, constitution-level, project-config)
 - AGENTS.md: OpenAI specification, officially supported by GitHub Copilot & Cursor
 - Gemini CLI uses TOML format + GEMINI.md integration
 
@@ -347,26 +422,26 @@ musubi-validate complexity
 ```bash
 # Initialize MUSUBI for your preferred agent
 
-# Claude Code (default) - 25 Skills API
+# Claude Code (default) - 27 Skills (25 + 5 built-in)
 npx musubi-sdd init
 npx musubi-sdd init --claude
 
-# GitHub Copilot - 25 agents (AGENTS.md, official support)
+# GitHub Copilot - 27 skills (AGENTS.md, official support)
 npx musubi-sdd init --copilot
 
-# Cursor IDE - 25 agents (AGENTS.md, official support)
+# Cursor IDE - 27 skills (AGENTS.md, official support)
 npx musubi-sdd init --cursor
 
-# Gemini CLI - 25 agents (GEMINI.md integration)
+# Gemini CLI - 27 skills (GEMINI.md integration)
 npx musubi-sdd init --gemini
 
-# Codex CLI - 25 agents (AGENTS.md)
+# Codex CLI - 27 skills (AGENTS.md)
 npx musubi-sdd init --codex
 
-# Qwen Code - 25 agents (AGENTS.md)
+# Qwen Code - 27 skills (AGENTS.md)
 npx musubi-sdd init --qwen
 
-# Windsurf IDE - 25 agents (AGENTS.md)
+# Windsurf IDE - 27 skills (AGENTS.md)
 npx musubi-sdd init --windsurf
 
 # Or install globally
@@ -540,7 +615,7 @@ During initialization, MUSUBI asks you to select a **Project Type**. This determ
 ```text
 your-project/
 ├── .claude/
-│   ├── skills/              # 25 Skills API (Claude Code exclusive feature)
+│   ├── skills/              # 25 Skills API + 5 built-in (Claude Code exclusive)
 │   │   ├── orchestrator/
 │   │   ├── steering/
 │   │   ├── requirements-analyst/
@@ -572,10 +647,10 @@ your-project/
 ```text
 your-project/
 ├── .github/prompts/         # For GitHub Copilot (#sdd-*, Markdown)
-│   ├── AGENTS.md             # 25 agents definition (official support)
+│   ├── AGENTS.md             # 27 skills definition (official support)
 │   OR
 ├── .cursor/commands/        # For Cursor (/sdd-*, Markdown)
-│   ├── AGENTS.md             # 25 agents definition (official support)
+│   ├── AGENTS.md             # 27 skills definition (official support)
 │   OR
 ├── .gemini/commands/        # For Gemini CLI (/sdd-*, TOML)
 │   │   ├── sdd-steering.toml
@@ -583,15 +658,15 @@ your-project/
 │   │   └── ... (6 TOML files)
 │   OR
 ├── .codex/prompts/          # For Codex CLI (/prompts:sdd-*, Markdown)
-│   ├── AGENTS.md             # 25 agents definition
+│   ├── AGENTS.md             # 27 skills definition
 │   OR
 ├── .qwen/commands/          # For Qwen Code (/sdd-*, Markdown)
-│   ├── AGENTS.md             # 25 agents definition
+│   ├── AGENTS.md             # 27 skills definition
 │   OR
 ├── .windsurf/workflows/     # For Windsurf (/sdd-*, Markdown)
-│   ├── AGENTS.md             # 25 agents definition
+│   ├── AGENTS.md             # 27 skills definition
 │
-├── GEMINI.md (root, for Gemini)  # 25 agents integrated into existing file
+├── GEMINI.md (root, for Gemini)  # 27 skills integrated into existing file
 ├── steering/                # Project memory (same for all)
 │   ├── project.yml          # Project configuration (v0.2.1+)
 │   ├── memories/            # Persistent knowledge (v0.2.0+)
@@ -608,11 +683,11 @@ your-project/
 
 **Key Differences**:
 
-- **Claude Code**: 25 Skills API (exclusive) + commands (Markdown)
+- **Claude Code**: 27 Skills (25 + 5 built-in) + commands (Markdown)
 - **GitHub Copilot & Cursor**: AGENTS.md (official support) + commands (Markdown)
-- **Gemini CLI**: GEMINI.md integration (25 agents) + TOML commands (unique)
+- **Gemini CLI**: GEMINI.md integration (27 skills) + TOML commands (unique)
 - **Others**: AGENTS.md (compatible) + Markdown commands
-- **All platforms**: Same 25 agents, different implementation formats
+- **All platforms**: Same 27 skills, different implementation formats
 
 ## Usage
 
@@ -804,7 +879,7 @@ Shows the current state of your MUSUBI project:
 
 ✅ MUSUBI is initialized
 
-📁 Claude Code Skills: 25 installed
+📁 Claude Code Skills: 27 installed (25 + 5 built-in)
    Location: .claude/skills/
 
 🧭 Steering Context:
@@ -917,19 +992,27 @@ For comprehensive validation, use your agent's `/sdd-validate` (or equivalent) c
 /prompts:sdd-validate authentication
 ```
 
-## 25 Agents Overview (All Platforms)
+## 27 Skills Overview (All Platforms)
 
 **Available on all 7 platforms** via:
 
-- **Claude Code**: Skills API (automatic invocation)
+- **Claude Code**: Skills API (automatic invocation) + 5 built-in orchestrator skills
 - **GitHub Copilot & Cursor**: AGENTS.md (official support, reference via `@agent-name`)
 - **Gemini, Windsurf, Codex, Qwen**: AGENTS.md (compatible format, natural language reference)
 
-### Orchestration & Management (3)
+### Orchestration & Management (3 + 5 built-in)
 
 - **orchestrator** - Master coordinator for multi-skill workflows
 - **steering** - Project memory manager (auto-updating context)
 - **constitution-enforcer** - Governance validation (9 Articles + Phase -1 Gates)
+
+#### Built-in Orchestrator Skills (v5.9.0)
+
+- **release-manager** - CHANGELOG generation, version management
+- **workflow-mode-manager** - Mode detection (small/medium/large)
+- **package-manager** - Monorepo package & dependency analysis
+- **constitution-level-manager** - Level-aware validation (critical/advisory/flexible)
+- **project-config-manager** - Schema validation & migration
 
 ### Requirements & Planning (3)
 
