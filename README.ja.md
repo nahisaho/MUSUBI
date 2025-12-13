@@ -71,6 +71,80 @@ musubi init --windsurf  # Windsurf IDE
 
 ---
 
+## 📊 v5.9.0 の新機能
+
+### Phase 1-4 エンタープライズ機能 🏢
+
+大規模プロジェクトとモノレポ対応のエンタープライズ機能を大幅追加。
+
+#### ワークフロー柔軟性（Phase 1）
+
+- **3つのワークフローモード**: `small`（バグ修正）、`medium`（機能追加）、`large`（設計変更）
+- **自動検出**: フィーチャー名パターンからモード自動選択
+- **`musubi-release`**: CHANGELOG自動生成付きリリースCLI
+
+```bash
+# コミットからCHANGELOGを生成
+musubi-release
+
+# フィーチャーのモードを検出
+musubi-workflow mode --detect "feat: ユーザー認証"
+```
+
+#### モノレポ対応（Phase 2）
+
+- **パッケージレジストリ**: `steering/packages.yml` で依存関係管理
+- **依存関係グラフ**: Mermaidダイアグラム生成で可視化
+- **カバレッジ追跡**: パッケージ別テストカバレッジレポート
+
+#### 憲法レベル管理（Phase 3）
+
+- **3つの適用レベル**: `critical`（ブロック）、`advisory`（警告）、`flexible`（提案）
+- **レベル別検証**: 条項の重要度に応じた異なる適用
+- **プロジェクト別オーバーライド**: プロジェクトタイプ別カスタムレベル
+
+| レベル | 条項 | 動作 |
+|--------|------|------|
+| Critical | CONST-001, 002, 003, 005, 009 | ワークフローをブロック |
+| Advisory | CONST-004, 006, 007 | 警告のみ |
+| Flexible | CONST-008 | 提案として表示 |
+
+#### プロジェクト設定（Phase 4）
+
+- **`musubi-config`**: 設定管理用新CLI
+- **スキーマ検証**: AJVによるv2.0スキーマ検証
+- **自動マイグレーション**: v1.0設定をv2.0に自動アップグレード
+
+```bash
+musubi-config validate  # project.yml を検証
+musubi-config migrate   # v2.0 にマイグレーション
+musubi-config show      # 有効な設定を表示
+```
+
+#### オーケストレーター統合
+
+プログラムアクセス用の5つの組み込みスキル：
+
+| スキル | カテゴリ | 用途 |
+|--------|----------|------|
+| `release-manager` | release | CHANGELOG生成 |
+| `workflow-mode-manager` | workflow | モード検出・管理 |
+| `package-manager` | configuration | パッケージ・依存関係分析 |
+| `constitution-level-manager` | validation | レベル別検証 |
+| `project-config-manager` | configuration | 設定検証・マイグレーション |
+
+```javascript
+const { workflowModeSkill } = require('musubi-sdd/src/orchestration');
+
+const result = await workflowModeSkill.execute({
+  action: 'detect',
+  featureName: 'fix: 軽微なバグ'
+});
+console.log(result.detectedMode); // 'small'
+```
+
+---
+
 ## 📊 v5.6.0 の新機能
 
 ### エンタープライズスケール分析 & Rustマイグレーション支援 🏢🦀
@@ -166,8 +240,8 @@ musubi init -r owner/repo@develop
 - 🤖 **マルチエージェント対応** - 7つのAIコーディングエージェントに対応（Claude Code、GitHub Copilot、Cursor、Gemini CLI、Codex CLI、Qwen Code、Windsurf）
 - 🔌 **MCPサーバー統合** - 高度なコード分析のためのCodeGraphMCPServer（v2.0.0で追加）
 - 📄 **柔軟なコマンド形式** - Markdown、TOML、AGENTS.md形式に対応
-- 🎯 **25の専門エージェント（全プラットフォーム対応）** - オーケストレーター、ステアリング、要件、アーキテクチャ、開発、品質、セキュリティ、インフラ
-  - Claude Code: Skills API（25スキル）
+- 🎯 **27の専門スキル（全プラットフォーム対応）** - 25プラットフォームエージェント + 5オーケストレーター組み込みスキル（v5.9.0）
+  - Claude Code: Skills API（25スキル + 5組み込み）
   - GitHub Copilot & Cursor: AGENTS.md（公式サポート）
   - その他4エージェント: AGENTS.md（互換形式）
 - 📋 **憲法ガバナンス** - 9つの不変条項 + フェーズ-1ゲートによる品質保証
@@ -188,9 +262,9 @@ musubi init -r owner/repo@develop
 
 MUSUBIは7つのAIコーディングエージェントに対応し、それぞれに最適化された設定を提供します。
 
-| エージェント       | スキルAPI     | 25エージェント | コマンド形式     | コマンドファイル形式 | インストールディレクトリ                      |
+| エージェント       | スキルAPI     | 27スキル | コマンド形式     | コマンドファイル形式 | インストールディレクトリ                      |
 | ------------------ | ------------- | -------------- | ---------------- | -------------------- | --------------------------------------------- |
-| **Claude Code**    | ✅ (25スキル) | ✅             | `/sdd-*`         | Markdown             | `.claude/skills/`, `.claude/commands/`        |
+| **Claude Code**    | ✅ (27スキル) | ✅             | `/sdd-*`         | Markdown             | `.claude/skills/`, `.claude/commands/`        |
 | **GitHub Copilot** | ❌            | ✅ (AGENTS.md) | `#sdd-*`         | Markdown + AGENTS.md | `.github/prompts/`, `.github/AGENTS.md`       |
 | **Cursor IDE**     | ❌            | ✅ (AGENTS.md) | `/sdd-*`         | Markdown + AGENTS.md | `.cursor/commands/`, `.cursor/AGENTS.md`      |
 | **Gemini CLI**     | ❌            | ✅ (GEMINI.md) | `/sdd-*`         | TOML + GEMINI.md     | `.gemini/commands/`, `GEMINI.md`              |
@@ -201,7 +275,8 @@ MUSUBIは7つのAIコーディングエージェントに対応し、それぞ�
 **注意事項**：
 
 - スキルAPIはClaude Code専用です
-- **全7プラットフォームが25エージェントに対応**（Skills APIまたはAGENTS.md経由）
+- **全7プラットフォームが27スキルに対応**（Skills APIまたはAGENTS.md経由）
+- v5.9.0で5つの組み込みオーケストレータースキルを追加（release, workflow, package, constitution-level, project-config）
 - AGENTS.md: OpenAI仕様、GitHub Copilot & Cursorが公式サポート
 - Gemini CLIはTOML形式 + GEMINI.md統合を使用
 - その他のエージェントはMarkdown形式 + AGENTS.mdを使用
