@@ -5,7 +5,7 @@
  */
 
 const {
-  releaseSkill,
+  releaseSkill: _releaseSkill,
   workflowModeSkill,
   packageManagerSkill,
   constitutionLevelSkill,

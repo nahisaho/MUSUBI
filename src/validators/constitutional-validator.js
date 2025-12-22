@@ -15,7 +15,7 @@ const glob = require('glob');
 const {
   ConstitutionLevelManager,
   ArticleId,
-  EnforcementLevel,
+  EnforcementLevel: _EnforcementLevel,
 } = require('./constitution-level-manager');
 
 class ConstitutionalValidator {
