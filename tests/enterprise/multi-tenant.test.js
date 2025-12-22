@@ -317,7 +317,8 @@ describe('Multi-Tenant Module', () => {
 
     it('should track duration', async () => {
       const context = new TenantContext(tenant, user);
-      await new Promise(r => setTimeout(r, 10));
+      // Use 15ms wait to account for timer precision issues
+      await new Promise(r => setTimeout(r, 15));
       expect(context.getDuration()).toBeGreaterThanOrEqual(10);
     });
 
