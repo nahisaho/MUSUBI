@@ -26,12 +26,17 @@ describe('Server', () => {
       os.tmpdir(),
       `musubi-test-${Date.now()}-${Math.random().toString(36).substring(7)}`
     );
+    // Create all required directories
     await fs.ensureDir(path.join(tempDir, 'steering', 'rules'));
     await fs.ensureDir(path.join(tempDir, 'storage', 'specs'));
+    await fs.ensureDir(path.join(tempDir, 'storage', 'features'));
+    await fs.ensureDir(path.join(tempDir, 'storage', 'changes'));
     await fs.writeFile(
       path.join(tempDir, 'steering', 'rules', 'constitution.md'),
       '# Constitution\n\n## Article 1: Purpose\nTest'
     );
+    // Verify directories exist
+    await fs.access(path.join(tempDir, 'storage', 'specs'));
   });
 
   afterEach(async () => {
