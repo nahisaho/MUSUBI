@@ -53,39 +53,78 @@ steering/tech.md         # Technology stack
 
 ### 2. Interactive True Purpose Discovery (1-on-1 Dialogue)
 
-**CRITICAL**: Conduct a 1-question-at-a-time dialogue to uncover the TRUE PURPOSE.
+**CRITICAL RULE**: You MUST ask exactly ONE question, then STOP and WAIT for the user's response. Do NOT ask multiple questions at once. Do NOT list all questions. Do NOT proceed until the user answers.
+
+#### Dialogue Rules (MANDATORY)
+
+1. **ONE QUESTION ONLY**: Ask a single question per turn
+2. **STOP AND WAIT**: After asking, end your response immediately
+3. **NO QUESTION LISTS**: Never show "Q1, Q2, Q3..." format
+4. **SEQUENTIAL FLOW**: Move to next question only after receiving an answer
 
 #### Phase 1: Surface Purpose → True Purpose Discovery
 
-**Ask ONE question at a time. Wait for the user's response before proceeding.**
+**Question Sequence** (Ask ONE at a time, wait for answer before next):
 
-**Question Flow**:
+**Turn 1**: Start with the WHY question
+```
+この機能で解決したい『本当の課題』は何ですか？
+```
+→ STOP HERE. Wait for user response.
 
-1. **Why Question** (Dig deeper into purpose)
-   - "この機能で解決したい『本当の課題』は何ですか？"
-   - "この機能がないと、誰がどのように困りますか？"
+**Turn 2**: Based on answer, ask WHO question
+```
+この機能を最も必要としているのは誰ですか？
+```
+→ STOP HERE. Wait for user response.
 
-2. **Who Question** (Identify stakeholders)
-   - "この機能を最も必要としているのは誰ですか？"
-   - "この機能の成功を判断する人は誰ですか？"
+**Turn 3**: Ask WHAT-IF question
+```
+もしこの機能が完璧に動作したら、何が変わりますか？
+```
+→ STOP HERE. Wait for user response.
 
-3. **What-If Question** (Validate assumptions)
-   - "もしこの機能が完璧に動作したら、何が変わりますか？"
-   - "この機能なしで、代替手段はありますか？"
+**Turn 4**: Ask CONSTRAINT question
+```
+この機能で『絶対にやってはいけないこと』はありますか？
+```
+→ STOP HERE. Wait for user response.
 
-4. **Constraint Question** (Uncover hidden limits)
-   - "この機能で『絶対にやってはいけないこと』はありますか？"
-   - "技術的・ビジネス的な制約はありますか？"
+**Turn 5**: Ask SUCCESS CRITERIA question
+```
+この機能が『成功した』と言えるのはどんな状態ですか？
+```
+→ STOP HERE. Wait for user response.
 
-5. **Success Criteria Question** (Define done)
-   - "この機能が『成功した』と言えるのはどんな状態ですか？"
-   - "具体的な数値目標（KPI）はありますか？"
+**After 5+ turns**: Summarize and confirm
+```
+ここまでの理解を確認させてください：
+[Summary]
+この理解で正しいですか？
+```
 
-**IMPORTANT**:
-- Ask only ONE question and wait for response
-- Based on the answer, ask follow-up questions
-- Continue until the TRUE PURPOSE is clear
-- Summarize understanding and confirm with user
+#### Example Dialogue Flow
+
+**AI Turn 1**:
+> まず、この機能について教えてください。
+> 
+> **この機能で解決したい『本当の課題』は何ですか？**
+
+**User**: "CSVから社員データをインポートしたい"
+
+**AI Turn 2**:
+> なるほど、社員データのCSVインポートですね。
+> 
+> **このインポート機能を最も必要としているのは誰ですか？**（人事部？IT管理者？）
+
+**User**: "人事部です"
+
+**AI Turn 3**:
+> 人事部の方が使うのですね。
+> 
+> **もしこの機能が完璧に動作したら、人事部の業務はどう変わりますか？**
+
+...(continues one question at a time)
 
 ---
 
