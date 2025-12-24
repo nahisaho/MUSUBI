@@ -336,8 +336,8 @@ musubi requirements --feature login
 musubi requirements --interactive
 
 # 3. 出力先確認
-musubi requirements --feature login --output ./storage/features/
-ls storage/features/
+musubi requirements --feature login --output ./storage/specs/
+ls storage/specs/
 ```
 
 ---

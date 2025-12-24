@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.1.0] - 2025-12-25
+
+### Changed
+
+- **Directory structure unified**: `storage/features/` → `storage/specs/`
+  - All spec files now use flat naming: `{feature}-requirements.md`, `{feature}-design.md`, `{feature}-tasks.md`
+  - Follows Article VIII Anti-Abstraction principle
+  - Simpler, more intuitive file structure
+
+### Enhanced
+
+- **Requirements definition workflow** (`/sdd-requirements`):
+  - Added **Interactive Dialogue Phase**: 1-on-1 Q&A to discover "true purpose" behind user requests
+  - 5 question types: Goal Clarification, Background/Context, Scope Definition, Success Criteria, Constraints
+  - Added **MECE Analysis**: Comprehensive requirement coverage using 4 dimensions (User Journey, Data Flow, System States, Edge Cases)
+
+### Updated
+
+- **Documentation unified** to use `storage/specs/` path:
+  - All `.claude/skills/` files (7 files)
+  - All `src/templates/agents/claude-code/skills/` templates (7 files)
+  - User guides, tutorials, and examples
+  - `bin/musubi-init.js` now creates `storage/archive/` instead of `storage/features/`
+
+### Fixed
+
+- Consistent directory references across all agents and skills
+
 ## [6.0.0] - 2025-12-24
 
 ### Changed - **BREAKING**

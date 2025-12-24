@@ -154,12 +154,12 @@ npx musubi-sdd init --copilot
 ### 3.2 CLIで要件生成
 
 ```bash
-npx musubi-sdd requirements --feature todo-management --output storage/features/
+npx musubi-sdd requirements --feature todo-management --output storage/specs/
 ```
 
 ### 3.3 生成される要件書
 
-`storage/features/todo-management.md`:
+`storage/specs/todo-management.md`:
 
 ```markdown
 # Feature: ToDo Management

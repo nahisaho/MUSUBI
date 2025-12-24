@@ -101,9 +101,9 @@ Test Suite (tests/auth/service.test.ts)
 
 ### Phase 1: Collect Artifacts
 
-1. Read `storage/features/[feature]/requirements.md`
-2. Read `storage/features/[feature]/design.md`
-3. Read `storage/features/[feature]/tasks.md`
+1. Read `storage/specs/[feature]-requirements.md`
+2. Read `storage/specs/[feature]-design.md`
+3. Read `storage/specs/[feature]-tasks.md`
 4. Scan source code for implementation
 5. Scan test files for test cases
 
@@ -290,7 +290,7 @@ coverage_test = (requirements_with_tests / requirements_total) * 100
 - **After**:
   - If gaps found → orchestrator triggers missing skills
   - If complete → quality-assurance approves release
-- **Uses**: All spec files in `storage/features/` and `storage/changes/`
+- **Uses**: All spec files in `storage/specs/` and `storage/changes/`
 
 ## Gap Detection Rules
 

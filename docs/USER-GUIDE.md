@@ -1,6 +1,6 @@
 # MUSUBI User Guide
 
-**Version 5.6.1** | Complete Reference for Specification Driven Development
+**Version 6.0.0** | Complete Reference for Specification Driven Development
 
 ---
 
@@ -26,12 +26,13 @@ MUSUBI (結び - "binding/connection") is a Specification Driven Development (SD
 
 ### Key Features
 
-- **25 Specialized Skills** - AI-powered development roles
+- **27 Specialized Agents** - AI-powered development roles
 - **9 Orchestration Patterns** - Multi-agent workflow management
 - **Constitutional Governance** - 9 articles ensuring quality
 - **Delta Specifications** - Brownfield change management
 - **Full Traceability** - Requirement ↔ Code ↔ Test mapping
-- **13+ Platform Support** - Works with any AI coding assistant
+- **7 Platform Support** - Claude Code, GitHub Copilot, Cursor, Gemini CLI, Codex CLI, Qwen Code, Windsurf
+- **8 Language Support** - en, ja, zh, ko, de, fr, es, id
 
 ### Philosophy
 
@@ -241,17 +242,19 @@ musubi orchestrate workflow \
 
 ## Multi-Platform Support
 
-### Supported Platforms
+### Supported Platforms (v6.0.0)
 
-| Platform       | Config File       | Command Syntax   |
-| -------------- | ----------------- | ---------------- |
-| Claude Code    | `CLAUDE.md`       | `/command`       |
-| GitHub Copilot | `AGENTS.md`       | `#command`       |
-| Cursor         | `.cursor/rules`   | Natural language |
-| Windsurf       | `.windsurf/rules` | Natural language |
-| Gemini CLI     | `AGENTS.md`       | `#command`       |
-| Codex CLI      | `AGENTS.md`       | `#command`       |
-| Others         | `AGENTS.md`       | Universal        |
+| Platform       | Config File          | Extension       | Command Syntax   |
+| -------------- | -------------------- | --------------- | ---------------- |
+| Claude Code    | `CLAUDE.md`          | `.md`           | `/command`       |
+| GitHub Copilot | `.github/prompts/`   | `.prompt.md`    | `#command`       |
+| Cursor         | `.cursor/rules/`     | `.md`           | Natural language |
+| Gemini CLI     | `GEMINI.md`          | `.md`           | `#command`       |
+| Codex CLI      | `CODEX.md`           | `.md`           | `#command`       |
+| Qwen Code      | `QWEN.md`            | `.md`           | `#command`       |
+| Windsurf       | `.windsurf/rules/`   | `.md`           | Natural language |
+
+> **Note (v6.0.0 Breaking Change)**: GitHub Copilot prompt files now use `.prompt.md` extension per VS Code official documentation. This is a breaking change from previous versions.
 
 ### Platform-Specific Setup
 
@@ -568,6 +571,6 @@ const report = reporter.generateReport(analysis);
 
 ---
 
-**MUSUBI v5.6.1** - Specification Driven Development for the AI Age
+**MUSUBI v6.0.0** - Specification Driven Development for the AI Age
 
 [GitHub](https://github.com/nahisaho/musubi) | [npm](https://www.npmjs.com/package/musubi-sdd) | [Documentation](https://nahisaho.github.io/musubi)

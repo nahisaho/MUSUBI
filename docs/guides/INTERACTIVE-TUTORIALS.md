@@ -147,7 +147,7 @@ musubi validate
 musubi requirements "ユーザー認証機能"
 ```
 
-**生成される出力 (`storage/features/user-authentication/requirements.md`):**
+**生成される出力 (`storage/specs/user-authentication-requirements.md`):**
 
 ```markdown
 # User Authentication Requirements
@@ -174,7 +174,7 @@ a minimum cost factor of 12.
 
 ```bash
 # EARS形式の検証
-musubi validate --requirements storage/features/user-authentication/requirements.md
+musubi validate --requirements storage/specs/user-authentication-requirements.md
 ```
 
 **検証結果:**
@@ -230,7 +230,7 @@ Coverage: 0% → Next step: Generate design documents
 musubi design "ユーザー認証機能"
 ```
 
-**生成される出力 (`storage/features/user-authentication/design.md`):**
+**生成される出力 (`storage/specs/user-authentication-design.md`):**
 
 ```markdown
 # User Authentication Design
@@ -282,7 +282,7 @@ C4Container
 
 ```bash
 # 設計の妥当性チェック
-musubi validate --design storage/features/user-authentication/design.md
+musubi validate --design storage/specs/user-authentication-design.md
 ```
 
 ### ステップ 3: トレーサビリティ更新
@@ -326,7 +326,7 @@ Coverage: 33% → Next step: Generate tasks
 musubi tasks "ユーザー認証機能"
 ```
 
-**生成される出力 (`storage/features/user-authentication/tasks.md`):**
+**生成される出力 (`storage/specs/user-authentication-tasks.md`):**
 
 ```markdown
 # User Authentication Tasks
@@ -386,7 +386,7 @@ You are implementing the database schema for user authentication.
 - REQ-AUTH-002: Password security (bcrypt)
 
 ### Design Reference
-- See: storage/features/user-authentication/design.md
+- See: storage/specs/user-authentication-design.md
 - Database: PostgreSQL
 - Schema conventions: snake_case
 
@@ -567,7 +567,7 @@ name: MUSUBI Validation
 on:
   pull_request:
     paths:
-      - 'storage/features/**'
+      - 'storage/specs/**'
       - 'steering/**'
 
 jobs:

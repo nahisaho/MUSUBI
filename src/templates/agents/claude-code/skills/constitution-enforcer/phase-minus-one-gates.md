@@ -192,9 +192,9 @@ def validate_traceability_setup(feature_name):
     Verify traceability chain is ready.
     """
     required_artifacts = {
-        "requirements": f"storage/features/{feature_name}/requirements.md",
-        "design": f"storage/features/{feature_name}/design.md",
-        "tasks": f"storage/features/{feature_name}/tasks.md",
+        "requirements": f"storage/specs/{feature_name}/requirements.md",
+        "design": f"storage/specs/{feature_name}/design.md",
+        "tasks": f"storage/specs/{feature_name}/tasks.md",
     }
 
     for artifact, path in required_artifacts.items():

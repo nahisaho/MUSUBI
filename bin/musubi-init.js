@@ -1253,7 +1253,7 @@ async function main(agent, agentKey, options = {}) {
     'templates',
     'storage/specs',
     'storage/changes',
-    'storage/features',
+    'storage/archive',
   ];
 
   // Add agent-specific directories

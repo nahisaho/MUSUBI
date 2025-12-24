@@ -768,7 +768,7 @@ constitution-enforcer skill (validation gate)
   ↓
 Validates constitutional compliance
   ↓
-Output: storage/features/[feature]/requirements.md
+Output: storage/specs/[feature]-requirements.md
 ```
 
 ### 4.3 Technology Stack

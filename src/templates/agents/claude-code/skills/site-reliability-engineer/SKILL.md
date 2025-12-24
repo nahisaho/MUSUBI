@@ -318,7 +318,7 @@ app.get('/health/live', (req, res) => {
 
 ### Phase 1: SLO Definition (Based on Requirements)
 
-1. Read `storage/features/[feature]/requirements.md`
+1. Read `storage/specs/[feature]-requirements.md`
 2. Identify non-functional requirements (performance, availability)
 3. Define SLIs and SLOs
 4. Calculate error budgets

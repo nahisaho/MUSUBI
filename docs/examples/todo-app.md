@@ -96,7 +96,7 @@ the system shall display only non-completed todos.
 
 ## 🏗️ C4 Design
 
-**File**: `storage/features/todo-feature.md`
+**File**: `storage/specs/todo-feature.md`
 
 ```markdown
 # Todo Feature Design

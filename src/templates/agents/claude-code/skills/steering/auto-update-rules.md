@@ -107,7 +107,7 @@ git diff --name-only | grep -E "(webpack|vite|rollup|esbuild)\.config\."
 
 ```bash
 # New feature directories
-git diff --name-only --diff-filter=A | grep "storage/features/"
+git diff --name-only --diff-filter=A | grep "storage/specs/"
 
 # New requirement files
 git diff --name-only --diff-filter=A | grep "requirements\.md"
@@ -154,7 +154,7 @@ git diff --name-only --diff-filter=A | grep "requirements\.md"
 
 ### memories/architecture_decisions.md
 
-**Trigger**: New ADR created in `storage/features/*/design.md`
+**Trigger**: New ADR created in `storage/specs/*/design.md`
 
 **Action**:
 
@@ -245,8 +245,8 @@ diff <(grep "dependencies" steering/tech.md) <(cat package.json | jq '.dependenc
 # 2. Check if structure.md directories match actual structure
 diff <(grep -E "^-\s+" steering/structure.md | cut -d' ' -f2) <(find src -type d -maxdepth 2)
 
-# 3. Check if product.md features match storage/features/
-diff <(grep "Feature" steering/product.md) <(ls storage/features/)
+# 3. Check if product.md features match storage/specs/
+diff <(grep "Feature" steering/product.md) <(ls storage/specs/)
 ```
 
 ### Report Divergence
@@ -268,7 +268,7 @@ diff <(grep "Feature" steering/product.md) <(ls storage/features/)
 
 ### product.md
 
-- ⚠️ Missing feature: payment-integration (in storage/features/)
+- ⚠️ Missing feature: payment-integration (in storage/specs/)
 
 ## Recommendations
 
@@ -310,7 +310,7 @@ on:
     paths:
       - 'package.json'
       - 'src/**'
-      - 'storage/features/**'
+      - 'storage/specs/**'
 
 jobs:
   check-steering:

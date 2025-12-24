@@ -121,7 +121,7 @@ npx musubi-sdd onboard
 ### 4.2 CLIで要件生成
 
 ```bash
-npx musubi-sdd requirements --feature login --output storage/features/
+npx musubi-sdd requirements --feature login --output storage/specs/
 ```
 
 ### 4.3 生成される要件書（EARS形式）

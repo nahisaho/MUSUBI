@@ -402,7 +402,7 @@ Based on gap analysis, here are **5 critical skills** to add to MUSUBI for compr
 **Integration with Other Skills**:
 - **Before**: After requirements-analyst, system-architect, software-developer, test-engineer complete work
 - **After**: Identifies gaps → triggers requirements-analyst or test-engineer to address
-- **Uses**: All spec files in `storage/features/` and `storage/changes/`
+- **Uses**: All spec files in `storage/specs/` and `storage/changes/`
 
 **allowed-tools**: `[Read, Glob, Grep]`
 

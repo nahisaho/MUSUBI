@@ -1,10 +1,10 @@
 # SDD Requirements Command
 
-Create EARS-format requirements specification.
+Create EARS-format requirements specification through interactive dialogue.
 
 ---
 
-## Instructions for Claude
+## Instructions for AI Agent
 
 You are executing the `/sdd-requirements [feature-name]` command to create a requirements specification.
 
@@ -18,7 +18,14 @@ You are executing the `/sdd-requirements [feature-name]` command to create a req
 
 ### Your Task
 
-Generate a comprehensive requirements specification in EARS format for the specified feature.
+**CRITICAL**: Before generating requirements, you MUST engage in an interactive 1-on-1 dialogue with the user to uncover the TRUE PURPOSE behind their request. Surface-level requirements often hide deeper needs.
+
+### Output Directory
+
+**Requirements documents are saved to**: `storage/specs/`
+
+- English: `storage/specs/{{feature-name}}-requirements.md`
+- Japanese: `storage/specs/{{feature-name}}-requirements.ja.md`
 
 ---
 
@@ -44,28 +51,103 @@ steering/tech.md         # Technology stack
 
 ---
 
-### 2. Gather Requirements
+### 2. Interactive True Purpose Discovery (1-on-1 Dialogue)
 
-**Methods** (use as appropriate):
+**CRITICAL**: Conduct a 1-question-at-a-time dialogue to uncover the TRUE PURPOSE.
 
-#### A. Stakeholder Interview (if user is available)
+#### Phase 1: Surface Purpose → True Purpose Discovery
 
-Use `AskUserQuestion` tool to ask:
+**Ask ONE question at a time. Wait for the user's response before proceeding.**
 
-- Who are the users of this feature?
-- What problem does this solve?
-- What are the critical workflows?
-- What are the acceptance criteria?
-- Are there any constraints (performance, security, compliance)?
+**Question Flow**:
 
-#### B. Research Existing System (brownfield)
+1. **Why Question** (Dig deeper into purpose)
+   - "この機能で解決したい『本当の課題』は何ですか？"
+   - "この機能がないと、誰がどのように困りますか？"
+
+2. **Who Question** (Identify stakeholders)
+   - "この機能を最も必要としているのは誰ですか？"
+   - "この機能の成功を判断する人は誰ですか？"
+
+3. **What-If Question** (Validate assumptions)
+   - "もしこの機能が完璧に動作したら、何が変わりますか？"
+   - "この機能なしで、代替手段はありますか？"
+
+4. **Constraint Question** (Uncover hidden limits)
+   - "この機能で『絶対にやってはいけないこと』はありますか？"
+   - "技術的・ビジネス的な制約はありますか？"
+
+5. **Success Criteria Question** (Define done)
+   - "この機能が『成功した』と言えるのはどんな状態ですか？"
+   - "具体的な数値目標（KPI）はありますか？"
+
+**IMPORTANT**:
+- Ask only ONE question and wait for response
+- Based on the answer, ask follow-up questions
+- Continue until the TRUE PURPOSE is clear
+- Summarize understanding and confirm with user
+
+---
+
+### 3. MECE Analysis (Comprehensive Coverage)
+
+**After understanding the TRUE PURPOSE, apply MECE to ensure completeness.**
+
+#### MECE Dimensions for Requirements
+
+**Dimension 1: User Journey (Who × When × Where)**
+| Stage | Questions to Cover |
+|-------|--------------------|
+| Before | How do users discover/access this feature? |
+| During | What is the core interaction flow? |
+| After | What happens after completion? Notifications? |
+| Error | What happens when something goes wrong? |
+
+**Dimension 2: Data Lifecycle (CRUD)**
+| Operation | Check |
+|-----------|-------|
+| Create | What data is created? By whom? |
+| Read | Who can view? What format? |
+| Update | What can be modified? By whom? |
+| Delete | Soft delete? Hard delete? Retention? |
+
+**Dimension 3: Cross-Cutting Concerns**
+| Concern | Requirements |
+|---------|-------------|
+| Security | Authentication, Authorization, Encryption |
+| Performance | Response time, Throughput, Concurrency |
+| Reliability | Error handling, Recovery, Failover |
+| Scalability | Load limits, Growth capacity |
+| Compliance | GDPR, SOC2, PCI-DSS (if applicable) |
+
+**Dimension 4: Integration Points**
+| Integration | Check |
+|-------------|-------|
+| Upstream | What systems feed data to this feature? |
+| Downstream | What systems consume this feature's output? |
+| External | Any third-party APIs or services? |
+
+**MECE Completeness Check**:
+- [ ] All user types covered?
+- [ ] All states (normal, edge, error) covered?
+- [ ] All data flows covered?
+- [ ] All integration points covered?
+- [ ] No overlapping requirements?
+
+---
+
+### 4. Research Existing System (Brownfield)
+
+**If modifying existing functionality**:
 
 - Search for existing implementation: `grep -r "{{feature}}" src/`
 - Read related code
 - Identify current behavior
 - Document what needs to change (delta spec)
 
-#### C. Infer from Context
+---
+
+### 5. Contextual Research
 
 - Analyze steering/product.md for user types
 - Review existing requirements docs
@@ -73,7 +155,9 @@ Use `AskUserQuestion` tool to ask:
 
 ---
 
-### 3. Generate Requirements Document
+### 6. Generate Requirements Document
+
+**Output Directory**: `storage/specs/`
 
 Use template from `templates/requirements.md`:
 
@@ -84,19 +168,49 @@ Use template from `templates/requirements.md`:
 
 ## Overview
 
-- Purpose
+- Purpose (True Purpose discovered through dialogue)
 - Scope (in/out)
 - Business context (from steering/product.md)
 
+## True Purpose Statement
+
+[Summary of TRUE PURPOSE uncovered through dialogue]
+
+- Surface Request: [What user initially asked for]
+- True Purpose: [What user actually needs]
+- Key Insight: [Critical understanding gained]
+
 ## Stakeholders
 
-[Table of roles]
+[Table of roles identified through dialogue]
+
+## MECE Coverage Summary
+
+### User Journey Coverage
+- [ ] Before: Entry/Discovery
+- [ ] During: Core Flow
+- [ ] After: Completion
+- [ ] Error: Exception Handling
+
+### Data Lifecycle Coverage
+- [ ] Create
+- [ ] Read
+- [ ] Update
+- [ ] Delete
+
+### Cross-Cutting Concerns
+- [ ] Security
+- [ ] Performance
+- [ ] Reliability
+- [ ] Scalability
 
 ## Functional Requirements
 
 ### REQ-{{COMPONENT}}-001: [Title]
 
 [EARS Pattern - choose appropriate pattern]
+
+**MECE Category**: [User Journey Stage | Data Operation | etc.]
 
 **Acceptance Criteria**:
 
@@ -119,6 +233,10 @@ Use template from `templates/requirements.md`:
 
 ### REQ-AVAIL-001: Availability
 
+## MECE Gap Analysis
+
+[List any gaps identified during MECE analysis]
+
 ## Requirements Coverage Matrix
 
 [Initial table - will be filled during design/implementation]
@@ -126,7 +244,7 @@ Use template from `templates/requirements.md`:
 
 ---
 
-### 4. Apply EARS Format (Article IV)
+### 7. Apply EARS Format (Article IV)
 
 **CRITICAL**: All requirements MUST use one of 5 EARS patterns.
 
@@ -150,10 +268,11 @@ Each requirement MUST have:
 - [ ] Testable acceptance criteria
 - [ ] Priority (P0/P1/P2/P3)
 - [ ] Status (Draft initially)
+- [ ] MECE Category (for traceability)
 
 ---
 
-### 5. Assign Requirement IDs
+### 8. Assign Requirement IDs
 
 **Format**: `REQ-[COMPONENT]-[NUMBER]`
 
@@ -172,7 +291,7 @@ Each requirement MUST have:
 
 ---
 
-### 6. Add Non-Functional Requirements
+### 9. Add Non-Functional Requirements (from MECE Cross-Cutting Concerns)
 
 Always include these categories:
 
@@ -221,7 +340,7 @@ The {{COMPONENT}} SHALL maintain 99.9% uptime.
 
 ---
 
-### 7. Brownfield: Create Delta Specification
+### 10. Brownfield: Create Delta Specification
 
 If this is a change to existing system, add delta sections:
 
@@ -266,7 +385,7 @@ The authentication system SHALL hash passwords using bcrypt cost 12.
 
 ---
 
-### 8. Constitutional Validation
+### 11. Constitutional Validation
 
 Validate requirements against constitutional articles:
 
@@ -290,9 +409,11 @@ Run validation:
 
 ---
 
-### 9. Save Document (Bilingual)
+### 12. Save Document (Bilingual)
 
 **IMPORTANT**: Create BOTH English and Japanese versions.
+
+**Output Directory**: `storage/specs/`
 
 **English version (Primary/Reference)**:
 Save to: `storage/specs/{{feature-name}}-requirements.md`
@@ -323,7 +444,7 @@ Save to: `storage/specs/{{feature-name}}-requirements.ja.md`
 
 ---
 
-### 10. Generate Summary
+### 13. Generate Summary
 
 Present summary to user:
 
@@ -331,10 +452,24 @@ Present summary to user:
 ## ✅ Requirements Specification Complete
 
 **Feature**: {{FEATURE_NAME}}
+**Output Directory**: `storage/specs/`
 **Files**:
 
 - English: storage/specs/{{feature-name}}-requirements.md
 - Japanese: storage/specs/{{feature-name}}-requirements.ja.md
+
+### True Purpose Discovery:
+
+- Surface Request: [What user initially asked]
+- True Purpose: [What user actually needs]
+- Key Insight: [Critical understanding gained]
+
+### MECE Coverage:
+
+- User Journey: ✅ All stages covered
+- Data Lifecycle: ✅ CRUD covered
+- Cross-Cutting: ✅ Security/Performance/Reliability/Scalability
+- Integrations: ✅ Upstream/Downstream/External
 
 ### Summary:
 
@@ -381,28 +516,54 @@ Present summary to user:
 ### User Command:
 
 ```bash
-/sdd-requirements authentication
+#sdd-requirements authentication
 ```
 
-### Claude Actions:
+### AI Agent Actions:
 
 1. **Read Steering**:
    - `steering/product.md` → Target users: B2B SaaS companies
    - `steering/tech.md` → Stack: Next.js, PostgreSQL, Prisma
    - `steering/structure.md` → Pattern: Library-first
 
-2. **Ask User** (if needed):
+2. **Interactive Dialogue (1-on-1)**:
 
-   ```
-   Questions about authentication feature:
-   1. Authentication methods: Email/password, OAuth, SSO, or all?
-   2. Required features: 2FA, password reset, session management?
-   3. Security: Any compliance requirements (SOC2, HIPAA)?
-   ```
+   **AI**: 「認証機能について、この機能で解決したい『本当の課題』は何ですか？」
 
-3. **Generate Requirements**:
+   **User**: 「ユーザーがログインできるようにしたい」
+
+   **AI**: 「なるほど。では、この機能がないと、誰がどのように困りますか？」
+
+   **User**: 「顧客がサービスを使えない。また、管理者が顧客データを保護できない」
+
+   **AI**: 「顧客データの保護が重要なのですね。この機能で『絶対にやってはいけないこと』はありますか？」
+
+   **User**: 「データ漏洩。SOC2準拠が必要」
+
+   **AI**: 「SOC2準拠が必要とのこと。この機能が『成功した』と言えるのはどんな状態ですか？」
+
+   **User**: 「ログイン成功率99%以上、不正アクセスゼロ」
+
+   **AI**: 「理解しました。確認させてください：
+   - **表面的要求**: ユーザーがログインできること
+   - **真の目的**: SOC2準拠でセキュアな顧客データ保護
+   - **成功基準**: ログイン成功率99%以上、不正アクセスゼロ
+   この理解で正しいですか？」
+
+3. **MECE Analysis**:
+   - User Journey: Login → Session → Logout → Error handling
+   - Data: Credentials(C), Session(RUD), Audit Log(CR)
+   - Security: Authentication, Authorization, Encryption, Audit
+
+4. **Generate Requirements**:
 
    ```markdown
+   ## True Purpose Statement
+
+   - Surface Request: ユーザーログイン機能
+   - True Purpose: SOC2準拠のセキュアな顧客データ保護基盤
+   - Key Insight: 単なるログインではなく、コンプライアンス要件が重要
+
    ### REQ-AUTH-001: User Login
 
    WHEN a user provides valid credentials,
@@ -410,19 +571,19 @@ Present summary to user:
    AND the system SHALL create a session
    AND the system SHALL redirect to dashboard.
 
-   ### REQ-AUTH-002: Password Strength
+   **MECE Category**: User Journey - During
 
-   The authentication system SHALL enforce password requirements:
+   ### REQ-AUTH-002: Audit Logging (SOC2)
 
-   - Minimum 12 characters
-   - At least 1 uppercase, 1 lowercase, 1 number, 1 special char
+   The authentication system SHALL log all authentication events
+   with timestamp, user ID, IP address, and result.
 
-   [... more requirements ...]
+   **MECE Category**: Cross-Cutting - Security/Compliance
    ```
 
-4. **Save**: `storage/specs/authentication-requirements.md`
+5. **Save to Output Directory**: `storage/specs/authentication-requirements.md`
 
-5. **Summarize**: Present summary to user
+6. **Summarize**: Present summary with MECE coverage report
 
 ---
 
@@ -446,15 +607,18 @@ Present summary to user:
 
 Before completing, verify:
 
+- [ ] Interactive dialogue conducted (TRUE PURPOSE discovered)
+- [ ] MECE analysis completed (all dimensions covered)
 - [ ] Steering context read and applied
 - [ ] All requirements in EARS format
 - [ ] Requirement IDs assigned (REQ-XXX-NNN)
+- [ ] MECE category assigned to each requirement
 - [ ] Acceptance criteria defined for each requirement
 - [ ] Priority assigned (P0/P1/P2/P3)
 - [ ] Non-functional requirements included
 - [ ] Constitutional validation passed
 - [ ] Document saved to storage/specs/
-- [ ] Summary presented to user
+- [ ] Summary with MECE coverage presented to user
 
 ---
 
@@ -483,6 +647,16 @@ If `storage/specs/{{feature-name}}-requirements.md` exists:
 - Read existing file
 - Ask user: Update existing or create new version?
 - If update: Create delta specification (ADDED/MODIFIED/REMOVED)
+
+---
+
+**Output Directory Summary**:
+- Requirements documents: `storage/specs/{{feature-name}}-requirements.md`
+- Japanese version: `storage/specs/{{feature-name}}-requirements.ja.md`
+
+---
+
+**Execution**: Begin interactive dialogue now for the specified feature.
 
 ---
 

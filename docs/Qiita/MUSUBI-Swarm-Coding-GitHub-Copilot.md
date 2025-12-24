@@ -562,7 +562,7 @@ MUSUBIはこの指示を受けて、以下のSDDワークフローを自動的�
   Created templates/
   Created storage/specs/
   Created storage/changes/
-  Created storage/features/
+  Created storage/specs/
   Installed prompts
   Installed 25 agent definitions (AGENTS.md)
   Generated steering context

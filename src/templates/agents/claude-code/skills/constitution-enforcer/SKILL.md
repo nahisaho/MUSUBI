@@ -616,4 +616,4 @@ Before finishing:
 - [ ] Failures documented with severity
 - [ ] Remediation plan provided
 - [ ] Overall status determined (APPROVED/BLOCKED)
-- [ ] Report saved to `storage/features/[feature]/constitutional-compliance.md`
+- [ ] Report saved to `storage/specs/[feature]/constitutional-compliance.md`
