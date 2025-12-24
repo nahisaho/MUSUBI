@@ -29,8 +29,8 @@ describe('Server', () => {
     // Create all required directories
     await fs.ensureDir(path.join(tempDir, 'steering', 'rules'));
     await fs.ensureDir(path.join(tempDir, 'storage', 'specs'));
-    await fs.ensureDir(path.join(tempDir, 'storage', 'features'));
     await fs.ensureDir(path.join(tempDir, 'storage', 'changes'));
+    await fs.ensureDir(path.join(tempDir, 'storage', 'archive'));
     await fs.writeFile(
       path.join(tempDir, 'steering', 'rules', 'constitution.md'),
       '# Constitution\n\n## Article 1: Purpose\nTest'
@@ -207,6 +207,8 @@ describe('Server', () => {
     it('should accept WebSocket connections', async () => {
       // Ensure directories exist for this test
       await fs.ensureDir(path.join(tempDir, 'storage', 'specs'));
+      await fs.ensureDir(path.join(tempDir, 'storage', 'changes'));
+      await fs.ensureDir(path.join(tempDir, 'storage', 'archive'));
 
       const wsPort = getNextPort();
       server = new Server(tempDir, { port: wsPort });
@@ -227,6 +229,8 @@ describe('Server', () => {
     it('should broadcast to all clients', async () => {
       // Ensure directories exist for this test
       await fs.ensureDir(path.join(tempDir, 'storage', 'specs'));
+      await fs.ensureDir(path.join(tempDir, 'storage', 'changes'));
+      await fs.ensureDir(path.join(tempDir, 'storage', 'archive'));
 
       const wsPort = getNextPort();
       server = new Server(tempDir, { port: wsPort });

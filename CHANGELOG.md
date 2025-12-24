@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.1.2] - 2025-12-25
+
+### Fixed
+
+- **GUI Server test reliability**: Fixed WebSocket test that failed due to missing `storage/archive` directory
+  - Updated `beforeEach` to create `storage/archive` instead of deprecated `storage/features`
+  - Added directory creation to WebSocket tests for test isolation
+
 ## [6.1.1] - 2025-12-25
 
 ### Fixed
