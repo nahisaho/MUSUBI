@@ -288,8 +288,8 @@ All agents share:
 ```
 .github/
 ├── prompts/          # 6 prompts (no skills - Copilot doesn't support skills)
-│   ├── sdd-steering.md
-│   ├── sdd-requirements.md
+│   ├── sdd-steering.prompt.md
+│   ├── sdd-requirements.prompt.md
 │   └── ... (4 more)
 └── AGENTS.md
 ```

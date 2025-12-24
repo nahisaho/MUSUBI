@@ -262,10 +262,10 @@ musubi init -r owner/repo@develop
 
 MUSUBIは7つのAIコーディングエージェントに対応し、それぞれに最適化された設定を提供します。
 
-| エージェント       | スキルAPI     | 27スキル | コマンド形式     | コマンドファイル形式 | インストールディレクトリ                      |
-| ------------------ | ------------- | -------------- | ---------------- | -------------------- | --------------------------------------------- |
-| **Claude Code**    | ✅ (27スキル) | ✅             | `/sdd-*`         | Markdown             | `.claude/skills/`, `.claude/commands/`        |
-| **GitHub Copilot** | ❌            | ✅ (AGENTS.md) | `#sdd-*`         | Markdown + AGENTS.md | `.github/prompts/`, `.github/AGENTS.md`       |
+| エージェント       | スキルAPI     | 27スキル | コマンド形式     | コマンドファイル形式       | インストールディレクトリ                      |
+| ------------------ | ------------- | -------------- | ---------------- | ------------------------- | --------------------------------------------- |
+| **Claude Code**    | ✅ (27スキル) | ✅             | `/sdd-*`         | Markdown (.md)            | `.claude/skills/`, `.claude/commands/`        |
+| **GitHub Copilot** | ❌            | ✅ (AGENTS.md) | `/sdd-*`         | プロンプトファイル (.prompt.md) | `.github/prompts/`, `.github/AGENTS.md`       |
 | **Cursor IDE**     | ❌            | ✅ (AGENTS.md) | `/sdd-*`         | Markdown + AGENTS.md | `.cursor/commands/`, `.cursor/AGENTS.md`      |
 | **Gemini CLI**     | ❌            | ✅ (GEMINI.md) | `/sdd-*`         | TOML + GEMINI.md     | `.gemini/commands/`, `GEMINI.md`              |
 | **Codex CLI**      | ❌            | ✅ (AGENTS.md) | `/prompts:sdd-*` | Markdown + AGENTS.md | `.codex/prompts/`, `.codex/AGENTS.md`         |
@@ -277,6 +277,7 @@ MUSUBIは7つのAIコーディングエージェントに対応し、それぞ�
 - スキルAPIはClaude Code専用です
 - **全7プラットフォームが27スキルに対応**（Skills APIまたはAGENTS.md経由）
 - v5.9.0で5つの組み込みオーケストレータースキルを追加（release, workflow, package, constitution-level, project-config）
+- **GitHub CopilotはVS Code公式ドキュメントに従い `.prompt.md` 拡張子を使用**
 - AGENTS.md: OpenAI仕様、GitHub Copilot & Cursorが公式サポート
 - Gemini CLIはTOML形式 + GEMINI.md統合を使用
 - その他のエージェントはMarkdown形式 + AGENTS.mdを使用
@@ -535,8 +536,11 @@ your-project/
 
 ```text
 your-project/
-├── .github/prompts/         # GitHub Copilot用（#sdd-*、Markdown）
-│   ├── AGENTS.md             # 25エージェント定義（公式サポート）
+├── .github/prompts/         # GitHub Copilot用（/sdd-*、.prompt.md）
+│   ├── sdd-steering.prompt.md    # プロンプトファイルは .prompt.md 拡張子
+│   ├── sdd-requirements.prompt.md
+│   ├── ... (9つのプロンプトファイル)
+│   └── AGENTS.md             # 27エージェント定義（公式サポート）
 │   または
 ├── .cursor/commands/        # Cursor用（/sdd-*、Markdown）
 │   ├── AGENTS.md             # 25エージェント定義（公式サポート）
@@ -563,11 +567,12 @@ your-project/
 
 **主な違い**：
 
-- **Claude Code**: 25 Skills API（専用） + コマンド（Markdown）
-- **GitHub Copilot & Cursor**: AGENTS.md（公式サポート） + コマンド（Markdown）
-- **Gemini CLI**: GEMINI.md統合（25エージェント） + TOMLコマンド（ユニーク）
+- **Claude Code**: 27 Skills API（専用） + コマンド（Markdown）
+- **GitHub Copilot**: AGENTS.md（公式サポート） + プロンプトファイル (`.prompt.md`)
+- **Cursor**: AGENTS.md（公式サポート） + コマンド（Markdown）
+- **Gemini CLI**: GEMINI.md統合（27エージェント） + TOMLコマンド（ユニーク）
 - **その他**: AGENTS.md（互換） + Markdownコマンド
-- **全プラットフォーム**: 同じ25エージェント、異なる実装形式
+- **全プラットフォーム**: 同じ27エージェント、異なる実装形式
 
 ## 使用方法
 

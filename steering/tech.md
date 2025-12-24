@@ -1,39 +1,47 @@
 # Technology Stack
 
+**Project**: musubi
+**Last Updated**: 2025-12-24
+**Version**: 5.9.6
+
+---
+
 ## Languages
 
-- javascript
-- typescript
-- python
-- rust
-- go
-- java
-- php
-- csharp
-- c
-- cpp
-- hcl
-- ruby
-- kotlin
-- swift
-- scala
-- lua
-- markdown
-- yaml
-- json
+- JavaScript (Main)
+- TypeScript (Type definitions)
+- Markdown (Documentation)
+- YAML (Configuration)
+- JSON (Schemas)
 
 ## Frameworks
 
-- **Jest** (^29.0.0) - testing
-- **CodeGraph MCP** (0.8.0) - code graph analysis with 16 language support
-- **AJV** (^8.12.0) - JSON Schema validation
-- **ajv-formats** (^2.1.1) - Format validation for AJV
+| Framework | Version | Purpose |
+|-----------|---------|---------|
+| Jest | ^29.0.0 | Testing |
+| Commander.js | ^12.0.0 | CLI framework |
+| AJV | ^8.12.0 | JSON Schema validation |
+| ajv-formats | ^2.1.1 | Format validation |
+| js-yaml | ^4.1.0 | YAML parsing |
+| CodeGraph MCP | 0.8.0 | Code graph analysis |
 
 ## Tools
 
-- **ESLint** (^8.50.0) - linting
-- **Prettier** (^3.0.0) - formatting
-- **CodeGraph MCP Server** - GraphRAG-powered code analysis
+- **ESLint** (^8.50.0) - Linting
+- **Prettier** (^3.0.0) - Formatting
+- **CodeGraph MCP Server** - GraphRAG code analysis
+
+## AI Agent Platforms (7 Supported)
+
+| Platform | Prompt Extension | Notes |
+|----------|------------------|-------|
+| Claude Code | `.md` | Skills API support |
+| GitHub Copilot | `.prompt.md` | VS Code official format |
+| Cursor | `.md` | Commands directory |
+| Gemini CLI | `.toml` | TOML format |
+| Codex CLI | `.md` | Prompts directory |
+| Qwen Code | `.md` | Commands directory |
+| Windsurf | `.md` | Workflows directory |
 
 ## CodeGraph MCP v0.8.0 Features
 
@@ -44,28 +52,38 @@
 - Community detection (Louvain algorithm)
 - Global/Local GraphRAG search
 
-## MUSUBI v5.9.0 Features
+## MUSUBI v5.9.6 Features
 
 ### Enterprise Features (Phase 1-4)
 
-- **Workflow Modes** - small/medium/large project workflows
-- **Monorepo Support** - packages.yml, PackageManager
-- **Constitution Levels** - critical/advisory/flexible enforcement
-- **project.yml v2.0** - Schema validation with migration support
+| Feature | Description |
+|---------|-------------|
+| **Workflow Modes** | small (5 stages), medium (6 stages), large (8 stages) |
+| **Monorepo Support** | packages.yml, PackageManager |
+| **Constitution Levels** | critical (required), advisory (recommended), flexible |
+| **project.yml v2.0** | JSON Schema validation, migration support |
 
-### New CLI Commands
+### CLI Commands (24)
 
-- `musubi-release` - Release management with workflow modes
-- `musubi-config` - Project configuration management (validate/migrate/show/init)
+- `musubi-init` - Project initialization
+- `musubi-steering` - Steering management
+- `musubi-requirements` - Requirements generation
+- `musubi-design` - Design generation
+- `musubi-tasks` - Task breakdown
+- `musubi-validate` - Constitutional validation
+- `musubi-workflow` - Workflow management
+- `musubi-release` - Release management
+- `musubi-config` - Configuration management
+- ... (and 15 more)
 
-### Orchestrator Built-in Skills
+### Built-in Skills
 
-- `release-manager` - リリース管理スキル
-- `workflow-mode-manager` - ワークフローモード管理
-- `package-manager` - モノレポパッケージ管理
-- `constitution-level-manager` - Constitution レベル管理
-- `project-config-manager` - プロジェクト設定管理
+- `release-manager` - Release management skill
+- `workflow-mode-manager` - Workflow mode management
+- `package-manager` - Monorepo package management
+- `constitution-level-manager` - Constitution level management
+- `project-config-manager` - Project configuration management
 
 ---
 
-*Updated: 2025-12-12 - MUSUBI v5.9.0 Enterprise Features*
+*Updated: 2025-12-24 - MUSUBI v5.9.6*

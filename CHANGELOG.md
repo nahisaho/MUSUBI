@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.0] - 2025-12-24
+
+### Changed - **BREAKING**
+
+- **GitHub Copilot prompt file extension**: `.md` → `.prompt.md`
+  - Per VS Code official documentation, GitHub Copilot prompt files now use `.prompt.md` extension
+  - All prompt files in `.github/prompts/` renamed to `*.prompt.md`
+  - Template files in `src/templates/agents/github-copilot/commands/` updated
+  - Test file `tests/init-platforms.test.js` updated for new extension detection
+
+### Updated
+
+- **Documentation updates for `.prompt.md`**:
+  - `steering/structure.md` / `steering/structure.ja.md` - Added 7 platform support table with file extensions
+  - `steering/tech.md` / `steering/tech.ja.md` - Updated AI platform extension information
+  - `MULTI-AGENT-DESIGN.md` - Updated directory structure example
+  - `README.md` / `README.ja.md` - Updated platform comparison tables and notes
+
+### Technical Details
+
+- **Files renamed** (19 files total):
+  - `.github/prompts/*.md` → `*.prompt.md` (10 files)
+  - `src/templates/agents/github-copilot/commands/*.md` → `*.prompt.md` (9 files)
+
+- **Test updates**:
+  - Extension detection logic now handles 3 cases: `.toml` (Gemini), `.prompt.md` (GitHub Copilot), `.md` (others)
+
+### Migration Guide
+
+If you have existing projects initialized with MUSUBI for GitHub Copilot:
+
+```bash
+# Rename prompt files to use .prompt.md extension
+cd .github/prompts/
+for f in *.md; do [ "$f" != "AGENTS.md" ] && mv "$f" "${f%.md}.prompt.md"; done
+```
+
 ## [5.9.1] - 2025-12-22
 
 ### Added

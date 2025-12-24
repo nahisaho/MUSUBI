@@ -365,10 +365,10 @@ const result = await validator.validateAll(projectPath);
 
 MUSUBI supports 7 AI coding agents, each with tailored configurations:
 
-| Agent              | Skills API     | 27 Skills      | Command Format   | Command File Format  | Installation Directory                        |
-| ------------------ | -------------- | -------------- | ---------------- | -------------------- | --------------------------------------------- |
-| **Claude Code**    | ✅ (27 skills) | ✅             | `/sdd-*`         | Markdown             | `.claude/skills/`, `.claude/commands/`        |
-| **GitHub Copilot** | ❌             | ✅ (AGENTS.md) | `#sdd-*`         | Markdown + AGENTS.md | `.github/prompts/`, `.github/AGENTS.md`       |
+| Agent              | Skills API     | 27 Skills      | Command Format   | Command File Format       | Installation Directory                        |
+| ------------------ | -------------- | -------------- | ---------------- | ------------------------- | --------------------------------------------- |
+| **Claude Code**    | ✅ (27 skills) | ✅             | `/sdd-*`         | Markdown (.md)            | `.claude/skills/`, `.claude/commands/`        |
+| **GitHub Copilot** | ❌             | ✅ (AGENTS.md) | `/sdd-*`         | Prompt File (.prompt.md)  | `.github/prompts/`, `.github/AGENTS.md`       |
 | **Cursor IDE**     | ❌             | ✅ (AGENTS.md) | `/sdd-*`         | Markdown + AGENTS.md | `.cursor/commands/`, `.cursor/AGENTS.md`      |
 | **Gemini CLI**     | ❌             | ✅ (GEMINI.md) | `/sdd-*`         | TOML + GEMINI.md     | `.gemini/commands/`, `GEMINI.md`              |
 | **Codex CLI**      | ❌             | ✅ (AGENTS.md) | `/prompts:sdd-*` | Markdown + AGENTS.md | `.codex/prompts/`, `.codex/AGENTS.md`         |
@@ -380,6 +380,7 @@ MUSUBI supports 7 AI coding agents, each with tailored configurations:
 - Skills API is exclusive to Claude Code
 - **All 7 platforms now support 27 skills** via Skills API (Claude Code) or AGENTS.md (others)
 - v5.9.0 added 5 built-in orchestrator skills (release, workflow, package, constitution-level, project-config)
+- **GitHub Copilot uses `.prompt.md` extension** per VS Code official documentation
 - AGENTS.md: OpenAI specification, officially supported by GitHub Copilot & Cursor
 - Gemini CLI uses TOML format + GEMINI.md integration
 
@@ -646,8 +647,11 @@ your-project/
 
 ```text
 your-project/
-├── .github/prompts/         # For GitHub Copilot (#sdd-*, Markdown)
-│   ├── AGENTS.md             # 27 skills definition (official support)
+├── .github/prompts/         # For GitHub Copilot (/sdd-*, .prompt.md)
+│   ├── sdd-steering.prompt.md    # Prompt files use .prompt.md extension
+│   ├── sdd-requirements.prompt.md
+│   ├── ... (9 prompt files)
+│   └── AGENTS.md             # 27 skills definition (official support)
 │   OR
 ├── .cursor/commands/        # For Cursor (/sdd-*, Markdown)
 │   ├── AGENTS.md             # 27 skills definition (official support)
@@ -684,7 +688,8 @@ your-project/
 **Key Differences**:
 
 - **Claude Code**: 27 Skills (25 + 5 built-in) + commands (Markdown)
-- **GitHub Copilot & Cursor**: AGENTS.md (official support) + commands (Markdown)
+- **GitHub Copilot**: AGENTS.md (official support) + prompt files (`.prompt.md`)
+- **Cursor**: AGENTS.md (official support) + commands (Markdown)
 - **Gemini CLI**: GEMINI.md integration (27 skills) + TOML commands (unique)
 - **Others**: AGENTS.md (compatible) + Markdown commands
 - **All platforms**: Same 27 skills, different implementation formats

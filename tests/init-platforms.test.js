@@ -39,7 +39,13 @@ describe('Platform Initialization Tests', () => {
 
     test(`should have ${platform} required SDD commands`, () => {
       const commandsPath = path.join(TEMPLATE_DIR, platform, 'commands');
-      const extension = platform === 'gemini-cli' ? '.toml' : '.md';
+      // GitHub Copilot uses .prompt.md, Gemini uses .toml, others use .md
+      let extension = '.md';
+      if (platform === 'gemini-cli') {
+        extension = '.toml';
+      } else if (platform === 'github-copilot') {
+        extension = '.prompt.md';
+      }
       const requiredCommands = [
         `sdd-steering${extension}`,
         `sdd-requirements${extension}`,

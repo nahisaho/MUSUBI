@@ -1,8 +1,8 @@
 # 技術スタック
 
 **プロジェクト**: musubi
-**最終更新**: 2025-12-12
-**バージョン**: 5.9.0
+**最終更新**: 2025-12-24
+**バージョン**: 5.9.6
 
 ---
 
@@ -35,6 +35,18 @@ MUSUBI は Node.js/JavaScript で構築された仕様駆動開発 (SDD) ツー�
 - **Prettier** (^3.0.0) - フォーマッティング
 - **CodeGraph MCP Server** - GraphRAG コード分析
 
+## AI エージェントプラットフォーム (7種対応)
+
+| プラットフォーム | プロンプト拡張子 | 備考 |
+|----------------|----------------|------|
+| Claude Code | `.md` | Skills API 対応 |
+| GitHub Copilot | `.prompt.md` | VS Code 公式形式 |
+| Cursor | `.md` | Commands ディレクトリ |
+| Gemini CLI | `.toml` | TOML 形式 |
+| Codex CLI | `.md` | Prompts ディレクトリ |
+| Qwen Code | `.md` | Commands ディレクトリ |
+| Windsurf | `.md` | Workflows ディレクトリ |
+
 ## CodeGraph MCP v0.8.0 機能
 
 - 14 MCP ツール (query, dependencies, callers, callees など)
@@ -44,7 +56,7 @@ MUSUBI は Node.js/JavaScript で構築された仕様駆動開発 (SDD) ツー�
 - コミュニティ検出 (Louvain アルゴリズム)
 - Global/Local GraphRAG 検索
 
-## MUSUBI v5.9.0 機能
+## MUSUBI v5.9.6 機能
 
 ### エンタープライズ機能 (Phase 1-4)
 
@@ -55,10 +67,18 @@ MUSUBI は Node.js/JavaScript で構築された仕様駆動開発 (SDD) ツー�
 | **Constitution レベル** | critical (必須), advisory (推奨), flexible (柔軟) |
 | **project.yml v2.0** | JSON Schema 検証、マイグレーションサポート |
 
-### 新規 CLI コマンド
+### CLI コマンド (24種)
 
+- `musubi-init` - プロジェクト初期化
+- `musubi-steering` - ステアリング管理
+- `musubi-requirements` - 要件生成
+- `musubi-design` - 設計生成
+- `musubi-tasks` - タスク分解
+- `musubi-validate` - Constitution 検証
+- `musubi-workflow` - ワークフロー管理
 - `musubi-release` - リリース管理
-- `musubi-config` - プロジェクト設定管理 (validate/migrate/show/init)
+- `musubi-config` - 設定管理
+- ... (他15種)
 
 ### 組み込みスキル
 
@@ -70,4 +90,4 @@ MUSUBI は Node.js/JavaScript で構築された仕様駆動開発 (SDD) ツー�
 
 ---
 
-*更新: 2025-12-12 - MUSUBI v5.9.0 エンタープライズ機能*
+*更新: 2025-12-24 - MUSUBI v5.9.6*

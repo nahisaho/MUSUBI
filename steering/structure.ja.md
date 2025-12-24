@@ -1,8 +1,8 @@
 # プロジェクト構造
 
 **プロジェクト**: musubi
-**最終更新**: 2025-12-12
-**バージョン**: 5.9.0
+**最終更新**: 2025-12-24
+**バージョン**: 5.9.6
 
 ---
 
@@ -10,7 +10,7 @@
 
 ```
 musubi/
-├── bin/                    # CLI エントリポイント (22 コマンド)
+├── bin/                    # CLI エントリポイント (24 コマンド)
 ├── src/
 │   ├── agents/             # AI エージェント (browser, agentic, function-tool)
 │   ├── ai/                 # 高度な AI 統合
@@ -20,7 +20,7 @@ musubi/
 │   ├── generators/         # ドキュメント生成 (design, requirements, tasks)
 │   ├── gui/                # Web GUI サーバー
 │   ├── integrations/       # 外部統合 (CI/CD, MCP, GitHub)
-│   ├── llm-providers/      # LLM プロバイダー (Anthropic, OpenAI, Ollama)
+│   ├── llm-providers/      # LLM プロバイダー (Anthropic, OpenAI, Ollama, Copilot)
 │   ├── managers/           # コアマネージャー (workflow, package, checkpoint)
 │   ├── monitoring/         # モニタリング (コスト, インシデント, 可観測性)
 │   ├── orchestration/      # マルチエージェントオーケストレーション
@@ -41,7 +41,38 @@ musubi/
 └── packages/               # サブパッケージ (VSCode 拡張機能)
 ```
 
-## 主要コンポーネント (v5.9.0)
+## サポートする AI エージェントプラットフォーム (7種)
+
+| プラットフォーム | ディレクトリ | コマンド形式 | プロンプト拡張子 |
+|----------------|------------|--------------|----------------|
+| **Claude Code** | `.claude/` | `/sdd-*` | `.md` |
+| **GitHub Copilot** | `.github/prompts/` | `/sdd-*` | `.prompt.md` |
+| **Cursor** | `.cursor/commands/` | `/sdd-*` | `.md` |
+| **Gemini CLI** | `.gemini/commands/` | `/sdd-*` | `.toml` |
+| **Codex CLI** | `.codex/prompts/` | `/prompts:sdd-*` | `.md` |
+| **Qwen Code** | `.qwen/commands/` | `/sdd-*` | `.md` |
+| **Windsurf** | `.windsurf/workflows/` | `/sdd-*` | `.md` |
+
+### GitHub Copilot プロンプトファイル
+
+GitHub Copilot は VS Code 公式ドキュメントに従い `.prompt.md` 拡張子を使用:
+
+```
+.github/
+├── prompts/
+│   ├── sdd-steering.prompt.md
+│   ├── sdd-requirements.prompt.md
+│   ├── sdd-design.prompt.md
+│   ├── sdd-tasks.prompt.md
+│   ├── sdd-implement.prompt.md
+│   ├── sdd-validate.prompt.md
+│   ├── sdd-change-init.prompt.md
+│   ├── sdd-change-apply.prompt.md
+│   └── sdd-change-archive.prompt.md
+└── AGENTS.md
+```
+
+## 主要コンポーネント (v5.9.6)
 
 ### マネージャー
 
