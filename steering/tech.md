@@ -1,8 +1,8 @@
 # Technology Stack
 
 **Project**: musubi
-**Last Updated**: 2025-12-24
-**Version**: 5.9.6
+**Last Updated**: 2025-12-31
+**Version**: 6.2.0
 
 ---
 
@@ -52,18 +52,46 @@
 - Community detection (Louvain algorithm)
 - Global/Local GraphRAG search
 
-## MUSUBI v5.9.6 Features
+## MUSUBI v6.2.0 Features
 
-### Enterprise Features (Phase 1-4)
+### Review Gate Engine (New in v6.2.0)
+
+| Feature | Description |
+|---------|-------------|
+| **Requirements Gate** | EARS format, priority, acceptance criteria validation |
+| **Design Gate** | C4 model, ADR, component design validation |
+| **Implementation Gate** | Code quality, test coverage, naming convention validation |
+| **Review Prompts** | `#sdd-review-requirements`, `#sdd-review-design`, etc. |
+
+### Workflow Dashboard (New in v6.2.0)
+
+| Feature | Description |
+|---------|-------------|
+| **Progress Visualization** | Real-time progress across 5 stages |
+| **Blocker Management** | Add, resolve, and track blockers |
+| **Transition Recording** | Record and analyze stage transitions |
+| **Sprint Planning** | Task prioritization and velocity management |
+
+### Traceability System (New in v6.2.0)
+
+| Feature | Description |
+|---------|-------------|
+| **Auto-Extraction** | Automatic ID extraction from code/tests/commits |
+| **Gap Detection** | Detect missing design/implementation/tests |
+| **Matrix Storage** | YAML-based traceability matrix |
+
+### Enterprise Features
 
 | Feature | Description |
 |---------|-------------|
 | **Workflow Modes** | small (5 stages), medium (6 stages), large (8 stages) |
 | **Monorepo Support** | packages.yml, PackageManager |
 | **Constitution Levels** | critical (required), advisory (recommended), flexible |
-| **project.yml v2.0** | JSON Schema validation, migration support |
+| **Error Recovery** | Auto error analysis and remediation |
+| **Rollback Manager** | File/commit/stage/sprint level rollback |
+| **CI Reporter** | GitHub Actions integration |
 
-### CLI Commands (24)
+### CLI Commands (25+)
 
 - `musubi-init` - Project initialization
 - `musubi-steering` - Steering management
@@ -74,10 +102,14 @@
 - `musubi-workflow` - Workflow management
 - `musubi-release` - Release management
 - `musubi-config` - Configuration management
+- `musubi-dashboard` - Workflow dashboard (v6.2.0)
 - ... (and 15 more)
 
-### Built-in Skills
+### Built-in Skills (31 Agents)
 
+- `review-gate-engine` - Review gate validation (v6.2.0)
+- `workflow-dashboard` - Progress visualization (v6.2.0)
+- `traceability-manager` - Auto-extraction and gap detection (v6.2.0)
 - `release-manager` - Release management skill
 - `workflow-mode-manager` - Workflow mode management
 - `package-manager` - Monorepo package management
@@ -86,4 +118,4 @@
 
 ---
 
-*Updated: 2025-12-24 - MUSUBI v5.9.6*
+*Updated: 2025-12-31 - MUSUBI v6.2.0*

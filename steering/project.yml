@@ -1,9 +1,10 @@
 # MUSUBI Project Configuration
 name: musubi
-description: A software project using MUSUBI SDD
+description: Ultimate Specification Driven Development Tool with Review Gate Engine
 locale: ja
-version: "0.1.0"
+version: "6.2.0"
 created: 2025-12-12
+updated: 2025-12-31
 
 # Technology Stack
 tech_stack:
