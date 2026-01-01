@@ -5,7 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [6.2.0] - 2025-12-31
+## [6.2.0] - 2026-01-01
+
+### Changed
+
+- **Code Refactoring for Constitutional Compliance**:
+  - Extracted helper functions from `bin/musubi-init.js` to `src/cli/init-helpers.js` (~750 lines)
+  - Extracted generator functions to `src/cli/init-generators.js` (~400 lines)
+  - Reduced `bin/musubi-init.js` from 2404 to 1107 lines (under 1500 line limit)
+  - All modules now comply with Article complexity limits
+
+- **Complexity Validation Improvements**:
+  - Excluded `node_modules` directories from complexity checks
+  - Fixed false positives for bundled dependencies in `lib/` directory
+
+- **Test Updates**:
+  - Updated `tests/github-reference.test.js` to use new module structure
+  - Updated `tests/language-recommendation.test.js` to import from helpers module
+  - All 4827 tests passing
+
+### Fixed
+
+- Removed unused imports in `bin/musubi-init.js` (lint errors)
+
+## [6.1.0] - 2025-12-31
 
 ### Added
 

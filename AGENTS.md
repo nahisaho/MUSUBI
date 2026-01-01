@@ -16,6 +16,14 @@ This project uses **MUSUBI** (Ultimate Specification Driven Development).
 - `#sdd-implement <feature>` - Execute implementation
 - `#sdd-validate <feature>` - Validate constitutional compliance
 
+
+### Review Gate Prompts (v6.2.0)
+
+- `#sdd-review-requirements <feature>` - Review requirements (EARS, stakeholders, acceptance criteria)
+- `#sdd-review-design <feature>` - Review design (C4, ADR, Constitutional Articles)
+- `#sdd-review-implementation <feature>` - Review implementation (coverage, lint, traceability)
+- `#sdd-review-all <feature>` - Full review cycle for all phases
+
 ### Project Memory
 
 - `steering/structure.md` - Architecture patterns

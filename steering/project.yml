@@ -11,3 +11,29 @@ tech_stack:
   approach: undecided
   languages:
     - undecided  # To be determined
+
+
+# Review Gate Settings (v6.2.0)
+reviewGate:
+  requirements:
+    earsCheck: true
+    stakeholderCoverage: true
+    acceptanceCriteriaRequired: true
+  design:
+    c4Required: ['context', 'container', 'component']
+    adrRequired: true
+    constitutionalArticles: [1, 2, 7, 8]
+  implementation:
+    minCoverage: 80
+    coverageType: 'line'
+    lintStrict: true
+
+# Traceability Settings (v6.2.0)
+traceability:
+  patterns:
+    - 'REQ-[A-Z0-9]+-\\d{3}'
+    - 'IMP-\\d+\\.\\d+-\\d{3}(?:-\\d{2})?'
+  extractFrom:
+    - 'src/**/*.{ts,js}'
+    - 'tests/**/*.test.{ts,js}'
+  outputPath: 'storage/traceability/matrix.yml'
