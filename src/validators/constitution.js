@@ -567,12 +567,15 @@ class ConstitutionValidator {
       files: [],
     };
 
-    // Find all source files
+    // Find all source files (excluding node_modules)
     const sourcePatterns = ['src/**/*.js', 'lib/**/*.js', 'bin/**/*.js'];
 
     const files = [];
     for (const pattern of sourcePatterns) {
-      const matches = await glob(pattern, { cwd: this.projectRoot });
+      const matches = await glob(pattern, {
+        cwd: this.projectRoot,
+        ignore: ['**/node_modules/**'],
+      });
       files.push(...matches.map(f => path.join(this.projectRoot, f)));
     }
 

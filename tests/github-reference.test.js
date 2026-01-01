@@ -14,10 +14,12 @@ jest.mock('https');
 const _fs = require('fs-extra'); // Mocked, kept for potential future use
 const _https = require('https'); // Mocked, kept for potential future use
 
-// Extract functions from musubi-init.js for testing
-// We need to read the file and eval specific functions
+// Read both the init script and helpers module for testing
 const initPath = path.join(__dirname, '..', 'bin', 'musubi-init.js');
+const helpersPath = path.join(__dirname, '..', 'src', 'cli', 'init-helpers.js');
 const initContent = require('fs').readFileSync(initPath, 'utf8');
+const helpersContent = require('fs').readFileSync(helpersPath, 'utf8');
+const allContent = initContent + '\n' + helpersContent;
 
 // Helper to extract and create function from source
 function _extractFunction(name) {
@@ -49,175 +51,175 @@ describe('GitHub Reference Feature', () => {
     ]; // Kept for documentation of expected patterns
 
     it('should have parseGitHubRepo function defined', () => {
-      expect(initContent).toContain('function parseGitHubRepo');
+      expect(allContent).toContain('function parseGitHubRepo');
     });
 
     it('should handle owner/repo format', () => {
-      expect(initContent).toContain('simpleMatch = repoRef.match');
+      expect(allContent).toContain('simpleMatch = repoRef.match');
     });
 
     it('should handle https://github.com format', () => {
-      expect(initContent).toContain('httpsMatch = repoRef.match');
+      expect(allContent).toContain('httpsMatch = repoRef.match');
     });
 
     it('should handle git@github.com format', () => {
-      expect(initContent).toContain('sshMatch = repoRef.match');
+      expect(allContent).toContain('sshMatch = repoRef.match');
     });
 
     it('should support branch specification with @', () => {
-      expect(initContent).toContain("branch = simpleMatch[3] || 'main'");
+      expect(allContent).toContain("branch = simpleMatch[3] || 'main'");
     });
 
     it('should support path specification with #', () => {
-      expect(initContent).toContain("path = simpleMatch[4] || ''");
+      expect(allContent).toContain("repoPath = simpleMatch[4] || ''");
     });
   });
 
   describe('fetchGitHubRepo', () => {
     it('should have fetchGitHubRepo function defined', () => {
-      expect(initContent).toContain('async function fetchGitHubRepo');
+      expect(allContent).toContain('async function fetchGitHubRepo');
     });
 
     it('should fetch repository metadata from GitHub API', () => {
-      expect(initContent).toContain('fetchGitHubAPI(`/repos/${owner}/${repo}`)');
+      expect(allContent).toContain('fetchGitHubAPI(`/repos/${owner}/${repo}`)');
     });
 
     it('should support GITHUB_TOKEN environment variable', () => {
-      expect(initContent).toContain('process.env.GITHUB_TOKEN');
+      expect(allContent).toContain('process.env.GITHUB_TOKEN');
     });
 
     it('should fetch key files like README.md and package.json', () => {
-      expect(initContent).toContain("'README.md'");
-      expect(initContent).toContain("'package.json'");
-      expect(initContent).toContain("'Cargo.toml'");
+      expect(allContent).toContain("'README.md'");
+      expect(allContent).toContain("'package.json'");
+      expect(allContent).toContain("'Cargo.toml'");
     });
 
     it('should handle rate limit errors gracefully', () => {
-      expect(initContent).toContain('GitHub API rate limit exceeded');
+      expect(allContent).toContain('GitHub API rate limit exceeded');
     });
 
     it('should handle repository not found errors', () => {
-      expect(initContent).toContain('Repository not found');
+      expect(allContent).toContain('Repository not found');
     });
   });
 
   describe('fetchGitHubRepos', () => {
     it('should have fetchGitHubRepos function defined', () => {
-      expect(initContent).toContain('async function fetchGitHubRepos');
+      expect(allContent).toContain('async function fetchGitHubRepos');
     });
 
     it('should iterate over multiple repositories', () => {
-      expect(initContent).toContain('for (const repoRef of repos)');
+      expect(allContent).toContain('for (const repoRef of repos)');
     });
 
     it('should log progress for each repository', () => {
-      expect(initContent).toContain('Fetching ${repoRef}');
+      expect(allContent).toContain('Fetching ${repoRef}');
     });
   });
 
   describe('analyzeReposForImprovements', () => {
     it('should have analyzeReposForImprovements function defined', () => {
-      expect(initContent).toContain('function analyzeReposForImprovements');
+      expect(allContent).toContain('function analyzeReposForImprovements');
     });
 
     it('should detect Clean Architecture pattern', () => {
-      expect(initContent).toContain("pattern: 'clean-architecture'");
+      expect(allContent).toContain("pattern: 'clean-architecture'");
     });
 
     it('should detect Hexagonal Architecture pattern', () => {
-      expect(initContent).toContain("pattern: 'hexagonal'");
+      expect(allContent).toContain("pattern: 'hexagonal'");
     });
 
     it('should detect DDD patterns', () => {
-      expect(initContent).toContain("pattern: 'domain-driven-design'");
+      expect(allContent).toContain("pattern: 'domain-driven-design'");
     });
 
     it('should detect monorepo patterns', () => {
-      expect(initContent).toContain("pattern: 'monorepo'");
+      expect(allContent).toContain("pattern: 'monorepo'");
     });
 
     it('should analyze package.json for technologies', () => {
-      expect(initContent).toContain("JSON.parse(repo.files['package.json'])");
+      expect(allContent).toContain("JSON.parse(repo.files['package.json'])");
     });
 
     it('should detect React framework', () => {
-      expect(initContent).toContain("tech: 'react'");
+      expect(allContent).toContain("tech: 'react'");
     });
 
     it('should detect Vue framework', () => {
-      expect(initContent).toContain("tech: 'vue'");
+      expect(allContent).toContain("tech: 'vue'");
     });
 
     it('should detect Next.js framework', () => {
-      expect(initContent).toContain("tech: 'nextjs'");
+      expect(allContent).toContain("tech: 'nextjs'");
     });
 
     it('should detect TypeScript', () => {
-      expect(initContent).toContain("tech: 'typescript'");
+      expect(allContent).toContain("tech: 'typescript'");
     });
 
     it('should detect testing frameworks', () => {
-      expect(initContent).toContain("config: 'jest'");
-      expect(initContent).toContain("config: 'vitest'");
+      expect(allContent).toContain("config: 'jest'");
+      expect(allContent).toContain("config: 'vitest'");
     });
 
     it('should detect linting tools', () => {
-      expect(initContent).toContain("config: 'eslint'");
-      expect(initContent).toContain("config: 'prettier'");
+      expect(allContent).toContain("config: 'eslint'");
+      expect(allContent).toContain("config: 'prettier'");
     });
 
     it('should analyze Cargo.toml for Rust patterns', () => {
-      expect(initContent).toContain("pattern: 'rust-workspace'");
+      expect(allContent).toContain("pattern: 'rust-workspace'");
     });
 
     it('should detect Rust frameworks', () => {
-      expect(initContent).toContain("tech: 'tokio'");
-      expect(initContent).toContain("tech: 'axum'");
+      expect(allContent).toContain("tech: 'tokio'");
+      expect(allContent).toContain("tech: 'axum'");
     });
 
     it('should analyze pyproject.toml for Python patterns', () => {
-      expect(initContent).toContain("tech: 'fastapi'");
-      expect(initContent).toContain("tech: 'django'");
+      expect(allContent).toContain("tech: 'fastapi'");
+      expect(allContent).toContain("tech: 'django'");
     });
 
     it('should generate architecture suggestions', () => {
-      expect(initContent).toContain("type: 'architecture'");
+      expect(allContent).toContain("type: 'architecture'");
     });
 
     it('should generate technology suggestions', () => {
-      expect(initContent).toContain("type: 'technology'");
+      expect(allContent).toContain("type: 'technology'");
     });
   });
 
   describe('saveReferenceRepos', () => {
     it('should have saveReferenceRepos function defined', () => {
-      expect(initContent).toContain('async function saveReferenceRepos');
+      expect(allContent).toContain('async function saveReferenceRepos');
     });
 
     it('should create steering/references directory', () => {
-      expect(initContent).toContain("steering', 'references'");
+      expect(allContent).toContain("steering', 'references'");
     });
 
     it('should generate markdown file with timestamp', () => {
-      expect(initContent).toContain('github-references-${timestamp}.md');
+      expect(allContent).toContain('github-references-${timestamp}.md');
     });
 
     it('should include repository metadata in output', () => {
-      expect(initContent).toContain('repo.metadata.name');
-      expect(initContent).toContain('repo.metadata.language');
-      expect(initContent).toContain('repo.metadata.stars');
+      expect(allContent).toContain('repo.metadata.name');
+      expect(allContent).toContain('repo.metadata.language');
+      expect(allContent).toContain('repo.metadata.stars');
     });
 
     it('should include directory structure in output', () => {
-      expect(initContent).toContain('Directory Structure');
+      expect(allContent).toContain('Directory Structure');
     });
 
     it('should include architecture patterns section', () => {
-      expect(initContent).toContain('Architecture Patterns Detected');
+      expect(allContent).toContain('Architecture Patterns Detected');
     });
 
     it('should include improvement suggestions section', () => {
-      expect(initContent).toContain('Improvement Suggestions');
+      expect(allContent).toContain('Improvement Suggestions');
     });
   });
 
@@ -256,23 +258,23 @@ describe('GitHub Reference Feature', () => {
 
   describe('Init Integration', () => {
     it('should handle GitHub references in main function', () => {
-      expect(initContent).toContain('options.references');
+      expect(allContent).toContain('options.references');
     });
 
     it('should call fetchGitHubRepos when references provided', () => {
-      expect(initContent).toContain('fetchGitHubRepos(options.references)');
+      expect(allContent).toContain('fetchGitHubRepos(options.references)');
     });
 
     it('should call analyzeReposForImprovements', () => {
-      expect(initContent).toContain('analyzeReposForImprovements(validRepos)');
+      expect(allContent).toContain('analyzeReposForImprovements(validRepos)');
     });
 
     it('should display improvement suggestions during init', () => {
-      expect(initContent).toContain('improvement suggestion(s)');
+      expect(allContent).toContain('improvement suggestion(s)');
     });
 
     it('should save reference analysis to file', () => {
-      expect(initContent).toContain('saveReferenceRepos(referenceRepos, repoAnalysis');
+      expect(allContent).toContain('saveReferenceRepos(referenceRepos, repoAnalysis');
     });
   });
 });
@@ -282,55 +284,55 @@ describe('Pattern Detection', () => {
     it('should detect clean architecture by directory names', () => {
       // Clean architecture directories
       const _cleanArchDirs = ['domain', 'application', 'infrastructure', 'interface']; // Reference docs
-      expect(initContent).toContain("['domain', 'application', 'infrastructure', 'interface']");
+      expect(allContent).toContain("['domain', 'application', 'infrastructure', 'interface']");
     });
 
     it('should detect hexagonal architecture by directory names', () => {
       // Hexagonal architecture directories
       const _hexDirs = ['adapters', 'ports', 'core', 'hexagon']; // Reference docs
-      expect(initContent).toContain("['adapters', 'ports', 'core', 'hexagon']");
+      expect(allContent).toContain("['adapters', 'ports', 'core', 'hexagon']");
     });
 
     it('should detect DDD by directory names', () => {
       // DDD directories
-      expect(initContent).toContain("'aggregates'");
-      expect(initContent).toContain("'entities'");
-      expect(initContent).toContain("'valueobjects'");
+      expect(allContent).toContain("'aggregates'");
+      expect(allContent).toContain("'entities'");
+      expect(allContent).toContain("'valueobjects'");
     });
   });
 
   describe('Technology Detection Rules', () => {
     it('should detect frontend frameworks', () => {
-      expect(initContent).toContain("deps['react']");
-      expect(initContent).toContain("deps['vue']");
-      expect(initContent).toContain("deps['@angular/core']");
+      expect(allContent).toContain("deps['react']");
+      expect(allContent).toContain("deps['vue']");
+      expect(allContent).toContain("deps['@angular/core']");
     });
 
     it('should detect backend frameworks', () => {
-      expect(initContent).toContain("deps['express']");
-      expect(initContent).toContain("deps['fastify']");
+      expect(allContent).toContain("deps['express']");
+      expect(allContent).toContain("deps['fastify']");
     });
 
     it('should detect meta-frameworks', () => {
-      expect(initContent).toContain("deps['next']");
+      expect(allContent).toContain("deps['next']");
     });
   });
 });
 
 describe('Error Handling', () => {
   it('should handle invalid repository format', () => {
-    expect(initContent).toContain('Invalid GitHub repository format');
+    expect(allContent).toContain('Invalid GitHub repository format');
   });
 
   it('should handle API errors gracefully', () => {
-    expect(initContent).toContain('GitHub API error');
+    expect(allContent).toContain('GitHub API error');
   });
 
   it('should continue on individual file fetch errors', () => {
-    expect(initContent).toContain('Ignore individual file fetch errors');
+    expect(allContent).toContain('Ignore individual file fetch errors');
   });
 
   it('should filter out repos with errors before analysis', () => {
-    expect(initContent).toContain('referenceRepos.filter(r => !r.error)');
+    expect(allContent).toContain('referenceRepos.filter(r => !r.error)');
   });
 });

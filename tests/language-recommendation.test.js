@@ -1,26 +1,11 @@
 /**
  * Language Recommendation Tests
  *
- * Tests for the language recommendation engine in musubi-init.js
+ * Tests for the language recommendation engine
  */
 
-const path = require('path');
-
-// Extract recommendLanguages function for testing
-// We need to load the module in a way that exposes the internal function
-const initScript = require('fs').readFileSync(
-  path.join(__dirname, '..', 'bin', 'musubi-init.js'),
-  'utf8'
-);
-
-// Extract the function using regex (since it's not exported)
-const functionMatch = initScript.match(/function recommendLanguages\(requirements\) \{[\s\S]*?^}/m);
-let recommendLanguages;
-
-if (functionMatch) {
-  // Create the function dynamically
-  eval(`recommendLanguages = ${functionMatch[0]}`);
-}
+// Import the recommendLanguages function from the helpers module
+const { recommendLanguages } = require('../src/cli/init-helpers');
 
 describe('Language Recommendation Engine', () => {
   beforeAll(() => {
