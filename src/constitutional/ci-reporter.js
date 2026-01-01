@@ -218,11 +218,13 @@ class CIReporter {
       }
     }
 
-    // Set output
+    // Set output using Environment Files (GITHUB_OUTPUT)
+    // Note: In GitHub Actions, these would be written to $GITHUB_OUTPUT file
+    // Format: echo "name=value" >> $GITHUB_OUTPUT
     lines.push('');
-    lines.push(`::set-output name=violations::${results.summary.totalViolations}`);
-    lines.push(`::set-output name=blocked::${blockDecision.shouldBlock}`);
-    lines.push(`::set-output name=phase_minus_one::${blockDecision.requiresPhaseMinusOne}`);
+    lines.push(`violations=${results.summary.totalViolations}`);
+    lines.push(`blocked=${blockDecision.shouldBlock}`);
+    lines.push(`phase_minus_one=${blockDecision.requiresPhaseMinusOne}`);
 
     return lines.join('\n');
   }

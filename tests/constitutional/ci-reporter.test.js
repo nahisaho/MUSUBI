@@ -241,7 +241,8 @@ describe('CIReporter', () => {
       const report = reporter.formatGitHub(results, blockDecision);
 
       expect(report).toContain('::group::');
-      expect(report).toContain('::set-output');
+      // Environment Files format (GITHUB_OUTPUT)
+      expect(report).toContain('violations=');
     });
 
     it('should create error annotations for violations', () => {
