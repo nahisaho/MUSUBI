@@ -37,7 +37,7 @@ describe('GapDetector', () => {
       const links = [
         {
           requirementId: 'REQ-001-002',
-          design: [{ path: 'docs/design.md' }],
+          design: [{ path: 'storage/design.md' }],
           code: [], // No code
           tests: [{ path: 'tests/feature.test.js' }],
           commits: [],
@@ -55,7 +55,7 @@ describe('GapDetector', () => {
       const links = [
         {
           requirementId: 'REQ-001-003',
-          design: [{ path: 'docs/design.md' }],
+          design: [{ path: 'storage/design.md' }],
           code: [{ path: 'src/feature.js' }],
           tests: [], // No tests
           commits: [],
@@ -73,7 +73,7 @@ describe('GapDetector', () => {
       const links = [
         {
           requirementId: 'REQ-001-004',
-          design: [{ path: 'docs/design.md' }],
+          design: [{ path: 'storage/design.md' }],
           code: [{ path: 'src/feature.js' }],
           tests: [{ path: 'tests/feature.test.js' }],
           commits: [{ hash: 'abc123', message: 'feat', date: '2025-12-31' }],
@@ -108,7 +108,7 @@ describe('GapDetector', () => {
       const links = [
         {
           requirementId: 'REQ-001-001',
-          design: [{ path: 'docs/design.md' }],
+          design: [{ path: 'storage/design.md' }],
           code: [{ path: 'src/auth.js' }],
           tests: [],
           commits: [],
@@ -125,7 +125,7 @@ describe('GapDetector', () => {
       const links = [
         {
           requirementId: 'REQ-001-001',
-          design: [{ path: 'docs/design.md' }],
+          design: [{ path: 'storage/design.md' }],
           code: [],
           tests: [{ path: 'tests/auth.test.js' }],
           commits: [],
@@ -161,7 +161,7 @@ describe('GapDetector', () => {
       const links = [
         {
           requirementId: 'REQ-001-001',
-          design: [{ path: 'docs/design.md' }],
+          design: [{ path: 'storage/design.md' }],
           code: [{ path: 'src/auth.js' }],
           tests: [],
           commits: [],
@@ -178,7 +178,7 @@ describe('GapDetector', () => {
       const links = [
         {
           requirementId: 'REQ-001-001',
-          design: [{ path: 'docs/design.md' }],
+          design: [{ path: 'storage/design.md' }],
           code: [],
           tests: [{ path: 'tests/auth.test.js' }],
           commits: [],
@@ -200,7 +200,7 @@ describe('GapDetector', () => {
         requirements: {
           'REQ-001-001': {
             requirementId: 'REQ-001-001',
-            design: [{ path: 'docs/design.md' }],
+            design: [{ path: 'storage/design.md' }],
             code: [{ path: 'src/auth.js' }],
             tests: [],
             commits: [],
@@ -238,7 +238,7 @@ describe('GapDetector', () => {
       const links = [
         {
           requirementId: 'REQ-001-001',
-          design: [{ path: 'docs/design.md' }],
+          design: [{ path: 'storage/design.md' }],
           code: [{ path: 'src/auth.js' }],
           tests: [],
           commits: [],
@@ -307,7 +307,7 @@ describe('GapDetector', () => {
       const links = [
         {
           requirementId: 'REQ-001-001',
-          design: [{ path: 'docs/design.md' }],
+          design: [{ path: 'storage/design.md' }],
           code: [{ path: 'src/auth.js' }],
           tests: [{ path: 'tests/auth.test.js' }],
           commits: [],
@@ -333,7 +333,7 @@ describe('GapDetector', () => {
         },
         {
           requirementId: 'REQ-001-002',
-          design: [{ path: 'docs/design.md' }],
+          design: [{ path: 'storage/design.md' }],
           code: [{ path: 'src/feature.js' }],
           tests: [{ path: 'tests/feature.test.js' }],
           commits: [],
@@ -351,7 +351,7 @@ describe('GapDetector', () => {
     it('should return true when no tests', () => {
       const link = {
         requirementId: 'REQ-001-001',
-        design: [{ path: 'docs/design.md' }],
+        design: [{ path: 'storage/design.md' }],
         code: [{ path: 'src/auth.js' }],
         tests: [],
         commits: [],
@@ -383,7 +383,7 @@ describe('GapDetector', () => {
       const links = [
         {
           requirementId: 'REQ-001-001',
-          design: [{ path: 'docs/design.md' }],
+          design: [{ path: 'storage/design.md' }],
           code: [{ path: 'src/auth.js' }],
           tests: [{ path: 'tests/auth.test.js' }],
           commits: [],

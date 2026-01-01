@@ -211,7 +211,7 @@ class RequirementsCritic extends BaseCritic {
    */
   checkEarsFormat(context) {
     const content =
-      context.content || this.readFile('docs/requirements/srs/srs-musubi-v3.0.0.ja.md') || '';
+      context.content || this.readFile('storage/specs/srs/srs-musubi-v3.0.0.ja.md') || '';
 
     // EARS キーワードパターン
     const earsPatterns = [
@@ -241,7 +241,7 @@ class RequirementsCritic extends BaseCritic {
    */
   checkCompleteness(context) {
     const content =
-      context.content || this.readFile('docs/requirements/srs/srs-musubi-v3.0.0.ja.md') || '';
+      context.content || this.readFile('storage/specs/srs/srs-musubi-v3.0.0.ja.md') || '';
 
     const requiredSections = [
       /## 機能要件|## Functional Requirements/i,
@@ -258,7 +258,7 @@ class RequirementsCritic extends BaseCritic {
    */
   checkTestability(context) {
     const content =
-      context.content || this.readFile('docs/requirements/srs/srs-musubi-v3.0.0.ja.md') || '';
+      context.content || this.readFile('storage/specs/srs/srs-musubi-v3.0.0.ja.md') || '';
 
     // 数値目標や測定可能な基準があるかチェック
     const measurablePatterns = [

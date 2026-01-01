@@ -49,7 +49,7 @@ describe('MatrixStorage', () => {
         requirements: {
           'REQ-001-001': {
             requirementId: 'REQ-001-001',
-            design: [{ path: 'docs/design.md' }],
+            design: [{ path: 'storage/design.md' }],
             code: [{ path: 'src/auth.js' }],
             tests: [{ path: 'tests/auth.test.js' }],
             commits: [],
@@ -113,7 +113,7 @@ describe('MatrixStorage', () => {
         requirements: {
           'REQ-001-001': {
             requirementId: 'REQ-001-001',
-            design: [{ path: 'docs/design.md' }],
+            design: [{ path: 'storage/design.md' }],
             code: [{ path: 'src/auth.js' }],
             tests: [{ path: 'tests/auth.test.js' }],
             commits: [],
@@ -245,7 +245,7 @@ describe('MatrixStorage', () => {
         requirements: {
           'REQ-001-001': {
             requirementId: 'REQ-001-001',
-            design: [{ path: 'docs/design.md' }],
+            design: [{ path: 'storage/design.md' }],
             code: [],
             tests: [],
             commits: [],
@@ -283,7 +283,7 @@ describe('MatrixStorage', () => {
         requirements: {
           'REQ-001-001': {
             requirementId: 'REQ-001-001',
-            design: [{ path: 'docs/design.md' }],
+            design: [{ path: 'storage/design.md' }],
             code: [],
             tests: [],
             commits: [],
@@ -319,7 +319,7 @@ describe('MatrixStorage', () => {
       const requirements = {
         'REQ-001-001': {
           requirementId: 'REQ-001-001',
-          design: [{ path: 'docs/design.md' }],
+          design: [{ path: 'storage/design.md' }],
           code: [{ path: 'src/auth.js' }],
           tests: [{ path: 'tests/auth.test.js' }],
           commits: [],
@@ -382,7 +382,7 @@ describe('MatrixStorage', () => {
         requirements: {
           'REQ-001-001': {
             requirementId: 'REQ-001-001',
-            design: [{ path: 'docs/design.md' }],
+            design: [{ path: 'storage/design.md' }],
             code: [{ path: 'src/auth.js' }],
             tests: [{ path: 'tests/auth.test.js' }],
             commits: [],

@@ -19,9 +19,9 @@ program
 program
   .command('detect')
   .description('Detect all gaps (requirements, code, tests)')
-  .option('--requirements <dir>', 'Requirements directory', 'docs/requirements')
-  .option('--design <dir>', 'Design directory', 'docs/design')
-  .option('--tasks <dir>', 'Tasks directory', 'docs/tasks')
+  .option('--requirements <dir>', 'Requirements directory', 'storage/specs')
+  .option('--design <dir>', 'Design directory', 'storage/design')
+  .option('--tasks <dir>', 'Tasks directory', 'storage/tasks')
   .option('--src <dir>', 'Source code directory', 'src')
   .option('--tests <dir>', 'Test directory', 'tests')
   .option('--format <format>', 'Output format (table|json|markdown)', 'table')
@@ -70,9 +70,9 @@ program
 program
   .command('requirements')
   .description('Detect orphaned requirements (no design/code)')
-  .option('--requirements <dir>', 'Requirements directory', 'docs/requirements')
-  .option('--design <dir>', 'Design directory', 'docs/design')
-  .option('--tasks <dir>', 'Tasks directory', 'docs/tasks')
+  .option('--requirements <dir>', 'Requirements directory', 'storage/specs')
+  .option('--design <dir>', 'Design directory', 'storage/design')
+  .option('--tasks <dir>', 'Tasks directory', 'storage/tasks')
   .option('--format <format>', 'Output format (table|json|markdown)', 'table')
   .action(async options => {
     try {
@@ -148,9 +148,9 @@ program
 program
   .command('coverage')
   .description('Calculate coverage statistics')
-  .option('--requirements <dir>', 'Requirements directory', 'docs/requirements')
-  .option('--design <dir>', 'Design directory', 'docs/design')
-  .option('--tasks <dir>', 'Tasks directory', 'docs/tasks')
+  .option('--requirements <dir>', 'Requirements directory', 'storage/specs')
+  .option('--design <dir>', 'Design directory', 'storage/design')
+  .option('--tasks <dir>', 'Tasks directory', 'storage/tasks')
   .option('--src <dir>', 'Source code directory', 'src')
   .option('--tests <dir>', 'Test directory', 'tests')
   .option('--min-coverage <percent>', 'Minimum required coverage', '100')

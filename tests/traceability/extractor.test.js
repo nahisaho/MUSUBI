@@ -186,7 +186,7 @@ This section describes REQ-001-001 implementation.
       mockFs.access.mockResolvedValue(undefined);
       mockFs.readFile.mockResolvedValue(docContent);
 
-      const refs = await extractor.extractFromFile('docs/design.md', 'document');
+      const refs = await extractor.extractFromFile('storage/design.md', 'document');
 
       expect(refs.length).toBeGreaterThanOrEqual(3);
       expect(refs[0].sourceType).toBe('document');

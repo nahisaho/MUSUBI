@@ -14,9 +14,9 @@ describe('CoverageReporter', () => {
     await fs.ensureDir(testDir);
 
     // Create minimal test structure
-    await fs.ensureDir(path.join(testDir, 'docs/requirements'));
-    await fs.ensureDir(path.join(testDir, 'docs/design'));
-    await fs.ensureDir(path.join(testDir, 'docs/tasks'));
+    await fs.ensureDir(path.join(testDir, 'storage/specs'));
+    await fs.ensureDir(path.join(testDir, 'storage/design'));
+    await fs.ensureDir(path.join(testDir, 'storage/tasks'));
     await fs.ensureDir(path.join(testDir, 'src'));
     await fs.ensureDir(path.join(testDir, 'tests'));
   });

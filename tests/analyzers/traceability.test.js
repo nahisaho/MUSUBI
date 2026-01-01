@@ -13,9 +13,9 @@ describe('TraceabilityAnalyzer', () => {
     analyzer = new TraceabilityAnalyzer(tmpDir);
 
     // Create directory structure
-    await fs.mkdirp(path.join(tmpDir, 'docs/requirements'));
-    await fs.mkdirp(path.join(tmpDir, 'docs/design'));
-    await fs.mkdirp(path.join(tmpDir, 'docs/tasks'));
+    await fs.mkdirp(path.join(tmpDir, 'storage/specs'));
+    await fs.mkdirp(path.join(tmpDir, 'storage/design'));
+    await fs.mkdirp(path.join(tmpDir, 'storage/tasks'));
     await fs.mkdirp(path.join(tmpDir, 'src'));
     await fs.mkdirp(path.join(tmpDir, 'tests'));
   });
@@ -29,7 +29,7 @@ describe('TraceabilityAnalyzer', () => {
     test('generates basic matrix', async () => {
       // Create requirement
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
 
@@ -44,19 +44,19 @@ describe('TraceabilityAnalyzer', () => {
     test('generates matrix with full coverage', async () => {
       // Create requirement
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
 
       // Create design
       await fs.writeFile(
-        path.join(tmpDir, 'docs/design/auth.md'),
+        path.join(tmpDir, 'storage/design/auth.md'),
         '### ADR-001: Authentication\n\nImplements REQ-AUTH-001 using JWT.'
       );
 
       // Create task
       await fs.writeFile(
-        path.join(tmpDir, 'docs/tasks/auth.md'),
+        path.join(tmpDir, 'storage/tasks/auth.md'),
         '### TASK-001: Implement login\n\n**Status**: Complete\n\nImplements REQ-AUTH-001.'
       );
 
@@ -93,17 +93,17 @@ describe('TraceabilityAnalyzer', () => {
     test('calculates 100% coverage', async () => {
       // Create requirement
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
 
       // Create full coverage
       await fs.writeFile(
-        path.join(tmpDir, 'docs/design/auth.md'),
+        path.join(tmpDir, 'storage/design/auth.md'),
         '### ADR-001: Auth\n\nREQ-AUTH-001'
       );
       await fs.writeFile(
-        path.join(tmpDir, 'docs/tasks/auth.md'),
+        path.join(tmpDir, 'storage/tasks/auth.md'),
         '### TASK-001: Login\n\n**Status**: Complete\n\nREQ-AUTH-001'
       );
       await fs.writeFile(path.join(tmpDir, 'src/auth.js'), '// REQ-AUTH-001\nfunction login() {}');
@@ -121,13 +121,13 @@ describe('TraceabilityAnalyzer', () => {
     test('calculates partial coverage', async () => {
       // Create requirement
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
 
       // Only design coverage
       await fs.writeFile(
-        path.join(tmpDir, 'docs/design/auth.md'),
+        path.join(tmpDir, 'storage/design/auth.md'),
         '### ADR-001: Auth\n\nREQ-AUTH-001'
       );
 
@@ -143,7 +143,7 @@ describe('TraceabilityAnalyzer', () => {
     test('calculates 0% coverage', async () => {
       // Create requirement only
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
 
@@ -157,15 +157,15 @@ describe('TraceabilityAnalyzer', () => {
     test('detects no gaps with full coverage', async () => {
       // Create full coverage
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
       await fs.writeFile(
-        path.join(tmpDir, 'docs/design/auth.md'),
+        path.join(tmpDir, 'storage/design/auth.md'),
         '### ADR-001: Auth\n\nREQ-AUTH-001'
       );
       await fs.writeFile(
-        path.join(tmpDir, 'docs/tasks/auth.md'),
+        path.join(tmpDir, 'storage/tasks/auth.md'),
         '### TASK-001: Login\n\n**Status**: Complete\n\nREQ-AUTH-001'
       );
       await fs.writeFile(path.join(tmpDir, 'src/auth.js'), '// REQ-AUTH-001\nfunction login() {}');
@@ -183,7 +183,7 @@ describe('TraceabilityAnalyzer', () => {
     test('detects orphaned requirements', async () => {
       // Create requirement without design or tasks
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
 
@@ -196,7 +196,7 @@ describe('TraceabilityAnalyzer', () => {
     test('detects orphaned design', async () => {
       // Create design without requirement
       await fs.writeFile(
-        path.join(tmpDir, 'docs/design/auth.md'),
+        path.join(tmpDir, 'storage/design/auth.md'),
         '### ADR-001: Authentication\n\nSome design without requirement reference.'
       );
 
@@ -208,7 +208,7 @@ describe('TraceabilityAnalyzer', () => {
     test('detects orphaned tasks', async () => {
       // Create task without requirement
       await fs.writeFile(
-        path.join(tmpDir, 'docs/tasks/auth.md'),
+        path.join(tmpDir, 'storage/tasks/auth.md'),
         '### TASK-001: Implement something\n\n**Status**: Todo\n\nNo requirement reference.'
       );
 
@@ -220,7 +220,7 @@ describe('TraceabilityAnalyzer', () => {
     test('detects missing tests', async () => {
       // Create requirement without tests
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
 
@@ -244,15 +244,15 @@ describe('TraceabilityAnalyzer', () => {
     test('traces requirement through all stages', async () => {
       // Create full chain
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
       await fs.writeFile(
-        path.join(tmpDir, 'docs/design/auth.md'),
+        path.join(tmpDir, 'storage/design/auth.md'),
         '### ADR-001: Auth\n\nREQ-AUTH-001'
       );
       await fs.writeFile(
-        path.join(tmpDir, 'docs/tasks/auth.md'),
+        path.join(tmpDir, 'storage/tasks/auth.md'),
         '### TASK-001: Login\n\n**Status**: Complete\n\nREQ-AUTH-001'
       );
       await fs.writeFile(path.join(tmpDir, 'src/auth.js'), '// REQ-AUTH-001\nfunction login() {}');
@@ -279,7 +279,7 @@ describe('TraceabilityAnalyzer', () => {
     test('traces requirement with missing stages', async () => {
       // Create requirement without design
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
 
@@ -297,15 +297,15 @@ describe('TraceabilityAnalyzer', () => {
     test('passes validation with 100% coverage', async () => {
       // Create full coverage
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
       await fs.writeFile(
-        path.join(tmpDir, 'docs/design/auth.md'),
+        path.join(tmpDir, 'storage/design/auth.md'),
         '### ADR-001: Auth\n\nREQ-AUTH-001'
       );
       await fs.writeFile(
-        path.join(tmpDir, 'docs/tasks/auth.md'),
+        path.join(tmpDir, 'storage/tasks/auth.md'),
         '### TASK-001: Login\n\n**Status**: Complete\n\nREQ-AUTH-001'
       );
       await fs.writeFile(path.join(tmpDir, 'src/auth.js'), '// REQ-AUTH-001\nfunction login() {}');
@@ -320,7 +320,7 @@ describe('TraceabilityAnalyzer', () => {
     test('fails validation with gaps', async () => {
       // Create requirement without full coverage
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
 
@@ -333,7 +333,7 @@ describe('TraceabilityAnalyzer', () => {
   describe('formatMatrix', () => {
     test('formats matrix as JSON', async () => {
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
 
@@ -348,7 +348,7 @@ describe('TraceabilityAnalyzer', () => {
 
     test('formats matrix as markdown', async () => {
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
 
@@ -362,7 +362,7 @@ describe('TraceabilityAnalyzer', () => {
 
     test('formats matrix as HTML', async () => {
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
 
@@ -376,7 +376,7 @@ describe('TraceabilityAnalyzer', () => {
 
     test('formats matrix as table (default)', async () => {
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\nUser must be able to log in.'
       );
 
@@ -391,11 +391,11 @@ describe('TraceabilityAnalyzer', () => {
   describe('file parsing', () => {
     test('parses requirements correctly', async () => {
       await fs.writeFile(
-        path.join(tmpDir, 'docs/requirements/auth.md'),
+        path.join(tmpDir, 'storage/specs/auth.md'),
         '### REQ-AUTH-001: User login\n\n### REQ-AUTH-002: User logout'
       );
 
-      const requirements = await analyzer.findRequirements('docs/requirements');
+      const requirements = await analyzer.findRequirements('storage/specs');
 
       expect(requirements.length).toBe(2);
       expect(requirements[0].id).toBe('REQ-AUTH-001');
@@ -404,11 +404,11 @@ describe('TraceabilityAnalyzer', () => {
 
     test('parses design documents correctly', async () => {
       await fs.writeFile(
-        path.join(tmpDir, 'docs/design/auth.md'),
+        path.join(tmpDir, 'storage/design/auth.md'),
         '### ADR-001: Authentication\n\n### Level 1: System Context'
       );
 
-      const design = await analyzer.findDesign('docs/design');
+      const design = await analyzer.findDesign('storage/design');
 
       expect(design.length).toBe(2);
       expect(design.some(d => d.type === 'ADR')).toBe(true);
@@ -417,11 +417,11 @@ describe('TraceabilityAnalyzer', () => {
 
     test('parses tasks correctly', async () => {
       await fs.writeFile(
-        path.join(tmpDir, 'docs/tasks/auth.md'),
+        path.join(tmpDir, 'storage/tasks/auth.md'),
         '### TASK-001: Implement login\n\n**Status**: Complete'
       );
 
-      const tasks = await analyzer.findTasks('docs/tasks');
+      const tasks = await analyzer.findTasks('storage/tasks');
 
       expect(tasks.length).toBe(1);
       expect(tasks[0].id).toBe('TASK-001');

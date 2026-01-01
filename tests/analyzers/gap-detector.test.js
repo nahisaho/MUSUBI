@@ -9,9 +9,9 @@ describe('GapDetector', () => {
   beforeEach(async () => {
     tempDir = await fs.mkdtemp(path.join(require('os').tmpdir(), 'gap-detector-test-'));
     detector = new GapDetector({
-      requirementsDir: path.join(tempDir, 'docs/requirements'),
-      designDir: path.join(tempDir, 'docs/design'),
-      tasksDir: path.join(tempDir, 'docs/tasks'),
+      requirementsDir: path.join(tempDir, 'storage/specs'),
+      designDir: path.join(tempDir, 'storage/design'),
+      tasksDir: path.join(tempDir, 'storage/tasks'),
       srcDir: path.join(tempDir, 'src'),
       testsDir: path.join(tempDir, 'tests'),
     });

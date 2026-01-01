@@ -18,9 +18,9 @@ class TraceabilityAnalyzer {
    * Generate full traceability matrix
    */
   async generateMatrix(options = {}) {
-    const requirements = await this.findRequirements(options.requirements || 'docs/requirements');
-    const design = await this.findDesign(options.design || 'docs/design');
-    const tasks = await this.findTasks(options.tasks || 'docs/tasks');
+    const requirements = await this.findRequirements(options.requirements || 'storage/specs');
+    const design = await this.findDesign(options.design || 'storage/design');
+    const tasks = await this.findTasks(options.tasks || 'storage/tasks');
     const code = await this.findCode(options.code || 'src');
     const tests = await this.findTests(options.tests || 'tests');
 
@@ -84,9 +84,9 @@ class TraceabilityAnalyzer {
    * Detect gaps in traceability
    */
   async detectGaps(options = {}) {
-    const requirements = await this.findRequirements(options.requirements || 'docs/requirements');
-    const design = await this.findDesign(options.design || 'docs/design');
-    const tasks = await this.findTasks(options.tasks || 'docs/tasks');
+    const requirements = await this.findRequirements(options.requirements || 'storage/specs');
+    const design = await this.findDesign(options.design || 'storage/design');
+    const tasks = await this.findTasks(options.tasks || 'storage/tasks');
     const code = await this.findCode(options.code || 'src');
     const tests = await this.findTests(options.tests || 'tests');
 
@@ -149,9 +149,9 @@ class TraceabilityAnalyzer {
    * Trace specific requirement
    */
   async traceRequirement(requirementId, options = {}) {
-    const requirements = await this.findRequirements(options.requirements || 'docs/requirements');
-    const design = await this.findDesign(options.design || 'docs/design');
-    const tasks = await this.findTasks(options.tasks || 'docs/tasks');
+    const requirements = await this.findRequirements(options.requirements || 'storage/specs');
+    const design = await this.findDesign(options.design || 'storage/design');
+    const tasks = await this.findTasks(options.tasks || 'storage/tasks');
     const code = await this.findCode(options.code || 'src');
     const tests = await this.findTests(options.tests || 'tests');
 
@@ -199,9 +199,9 @@ class TraceabilityAnalyzer {
    * Traces both forward (req->design->tasks->code->tests) and backward (tests->code->tasks->design->req)
    */
   async analyzeBidirectional(options = {}) {
-    const requirements = await this.findRequirements(options.requirements || 'docs/requirements');
-    const design = await this.findDesign(options.design || 'docs/design');
-    const tasks = await this.findTasks(options.tasks || 'docs/tasks');
+    const requirements = await this.findRequirements(options.requirements || 'storage/specs');
+    const design = await this.findDesign(options.design || 'storage/design');
+    const tasks = await this.findTasks(options.tasks || 'storage/tasks');
     const code = await this.findCode(options.code || 'src');
     const tests = await this.findTests(options.tests || 'tests');
 
@@ -302,8 +302,8 @@ class TraceabilityAnalyzer {
    * Analyze impact of requirement changes
    */
   async analyzeImpact(requirementId, options = {}) {
-    const design = await this.findDesign(options.design || 'docs/design');
-    const tasks = await this.findTasks(options.tasks || 'docs/tasks');
+    const design = await this.findDesign(options.design || 'storage/design');
+    const tasks = await this.findTasks(options.tasks || 'storage/tasks');
     const code = await this.findCode(options.code || 'src');
     const tests = await this.findTests(options.tests || 'tests');
 
@@ -350,9 +350,9 @@ class TraceabilityAnalyzer {
    * Generate detailed statistics
    */
   async generateStatistics(options = {}) {
-    const requirements = await this.findRequirements(options.requirements || 'docs/requirements');
-    const design = await this.findDesign(options.design || 'docs/design');
-    const tasks = await this.findTasks(options.tasks || 'docs/tasks');
+    const requirements = await this.findRequirements(options.requirements || 'storage/specs');
+    const design = await this.findDesign(options.design || 'storage/design');
+    const tasks = await this.findTasks(options.tasks || 'storage/tasks');
     const code = await this.findCode(options.code || 'src');
     const tests = await this.findTests(options.tests || 'tests');
 
