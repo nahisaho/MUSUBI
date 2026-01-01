@@ -393,6 +393,21 @@ program
   });
 
 // ============================================================================
+// Command: upgrade
+// ============================================================================
+program
+  .command('upgrade')
+  .description('Upgrade MUSUBI project to a newer version')
+  .option('--to <version>', 'Target version to upgrade to', 'latest')
+  .option('--dry-run', 'Preview changes without applying')
+  .option('--force', 'Force upgrade even if already at target version')
+  .action(async options => {
+    // Delegate to musubi-upgrade.js
+    process.argv = ['node', 'musubi-upgrade', ...process.argv.slice(3)];
+    require('./musubi-upgrade.js');
+  });
+
+// ============================================================================
 // Command: info
 // ============================================================================
 program

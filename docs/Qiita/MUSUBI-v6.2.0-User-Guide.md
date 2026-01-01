@@ -393,15 +393,21 @@ v6.2.0 は **4,827 テスト** でカバレッジを確保しています。
 既存プロジェクトをv6.2.0にアップグレード：
 
 ```bash
-npm update musubi-sdd@latest
-npx musubi-sdd upgrade --to 6.2.0
+# 最新版でアップグレード（推奨）
+npx musubi-sdd@latest upgrade
+
+# 特定バージョンを指定
+npx musubi-sdd@latest upgrade --to 6.2.0
+
+# 変更内容をプレビュー（適用しない）
+npx musubi-sdd upgrade --dry-run
 ```
 
-または手動で：
+ローカルインストールの場合：
 
 ```bash
-# AGENTS.mdにレビュープロンプトを追加
-npx musubi-sdd init --update-agents
+npm install musubi-sdd@latest
+npx musubi-sdd upgrade
 ```
 
 ---
