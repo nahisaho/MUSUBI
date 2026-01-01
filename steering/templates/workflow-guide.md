@@ -118,7 +118,7 @@ musubi-gaps --verbose
 # Create requirements file
 musubi-requirements init "User Login"
 
-# Edit docs/requirements/user-login.md
+# Edit storage/specs/user-login.md
 # Add EARS-format requirements:
 # - WHEN user submits credentials, System SHALL validate
 # - IF validation fails, THEN System SHALL display error
@@ -128,7 +128,7 @@ musubi-requirements init "User Login"
 
 ```bash
 # Check EARS compliance
-musubi-requirements validate --file docs/requirements/user-login.md
+musubi-requirements validate --file storage/specs/user-login.md
 
 # Use checklist: steering/templates/requirements-checklist.md
 ```
@@ -139,7 +139,7 @@ musubi-requirements validate --file docs/requirements/user-login.md
 # Create design document
 musubi-design init "User Login"
 
-# Edit docs/design/user-login.md
+# Edit storage/design/user-login.md
 # - Add C4 diagrams
 # - Map requirements to components
 # - Create ADRs for key decisions
@@ -149,7 +149,7 @@ musubi-design init "User Login"
 
 ```bash
 # Validate design
-musubi-design validate --file docs/design/user-login.md
+musubi-design validate --file storage/design/user-login.md
 
 # Use checklist: steering/templates/design-checklist.md
 ```
@@ -160,7 +160,7 @@ musubi-design validate --file docs/design/user-login.md
 # Generate task breakdown
 musubi-tasks init "User Login"
 
-# Edit docs/tasks/user-login.md
+# Edit storage/tasks/user-login.md
 # - Map tasks to requirements
 # - Set priorities and dependencies
 ```

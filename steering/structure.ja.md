@@ -122,6 +122,12 @@ Domain レイヤーは依存なし
 
 ## 変更履歴
 
+### 2026-01-01 (v6.2.0)
+- SDDドキュメントパス統一: storage/specs, storage/design, storage/tasks
+- 要件定義書 → storage/specs
+- 設計書 → storage/design  
+- タスク → storage/tasks
+
 ### 2025-12-12 (v5.9.0)
 - Phase 1: ワークフローモード (small/medium/large)
 - Phase 2: モノレポサポート (packages.yml)
