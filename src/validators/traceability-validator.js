@@ -67,9 +67,9 @@ const defaultConfig = {
 
   // Paths configuration
   paths: {
-    requirements: 'docs/requirements',
-    design: 'docs/design',
-    tasks: 'docs/tasks',
+    requirements: 'storage/specs',
+    design: 'storage/design',
+    tasks: 'storage/tasks',
     code: 'src',
     tests: 'tests',
   },

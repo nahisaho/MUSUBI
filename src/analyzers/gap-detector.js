@@ -8,9 +8,9 @@ const chalk = require('chalk');
  */
 class GapDetector {
   constructor(options = {}) {
-    this.requirementsDir = options.requirementsDir || 'docs/requirements';
-    this.designDir = options.designDir || 'docs/design';
-    this.tasksDir = options.tasksDir || 'docs/tasks';
+    this.requirementsDir = options.requirementsDir || 'storage/specs';
+    this.designDir = options.designDir || 'storage/design';
+    this.tasksDir = options.tasksDir || 'storage/tasks';
     this.srcDir = options.srcDir || 'src';
     this.testsDir = options.testsDir || 'tests';
   }

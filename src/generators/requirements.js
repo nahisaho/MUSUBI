@@ -89,8 +89,8 @@ class RequirementsGenerator {
     const patterns = [
       'storage/specs/**/*-requirements.md',
       'storage/specs/*-requirements.md',
-      'docs/requirements/**/*.md',
-      'docs/requirements/*.md',
+      'storage/specs/**/*.md',
+      'storage/specs/*.md',
       'requirements/**/*.md',
       'requirements/*.md',
     ];

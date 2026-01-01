@@ -340,7 +340,7 @@ class DesignCritic extends BaseCritic {
    * C4モデル準拠チェック
    */
   checkC4Format(_context) {
-    const designDir = path.join(this.projectRoot, 'docs/design');
+    const designDir = path.join(this.projectRoot, 'storage/design');
     if (!fs.existsSync(designDir)) return 0;
 
     // C4レベルのキーワードをチェック
@@ -362,7 +362,7 @@ class DesignCritic extends BaseCritic {
    * ADR存在チェック
    */
   checkAdrPresence(_context) {
-    const adrDir = path.join(this.projectRoot, 'docs/design/adr');
+    const adrDir = path.join(this.projectRoot, 'storage/design/adr');
     if (!fs.existsSync(adrDir)) return 0;
 
     const adrFiles = fs.readdirSync(adrDir).filter(f => f.startsWith('ADR-') && f.endsWith('.md'));
@@ -375,7 +375,7 @@ class DesignCritic extends BaseCritic {
    * 要件カバレッジチェック
    */
   checkRequirementCoverage(_context) {
-    const designDir = path.join(this.projectRoot, 'docs/design');
+    const designDir = path.join(this.projectRoot, 'storage/design');
     if (!fs.existsSync(designDir)) return 0;
 
     const files = fs.readdirSync(designDir).filter(f => f.endsWith('.md'));

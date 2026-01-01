@@ -219,9 +219,9 @@ describe('DesignCritic', () => {
 
   describe('checkC4Format', () => {
     it('should detect C4 keywords', () => {
-      fs.mkdirSync(path.join(tempDir, 'docs/design'), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, 'storage/design'), { recursive: true });
       fs.writeFileSync(
-        path.join(tempDir, 'docs/design/architecture.md'),
+        path.join(tempDir, 'storage/design/architecture.md'),
         '# System Context\n\n## Container Diagram\n\n### Component View\n\nCode details.'
       );
 
@@ -237,10 +237,10 @@ describe('DesignCritic', () => {
 
   describe('checkAdrPresence', () => {
     it('should detect ADR files', () => {
-      fs.mkdirSync(path.join(tempDir, 'docs/design/adr'), { recursive: true });
-      fs.writeFileSync(path.join(tempDir, 'docs/design/adr/ADR-001.md'), '# ADR 1');
-      fs.writeFileSync(path.join(tempDir, 'docs/design/adr/ADR-002.md'), '# ADR 2');
-      fs.writeFileSync(path.join(tempDir, 'docs/design/adr/ADR-003.md'), '# ADR 3');
+      fs.mkdirSync(path.join(tempDir, 'storage/design/adr'), { recursive: true });
+      fs.writeFileSync(path.join(tempDir, 'storage/design/adr/ADR-001.md'), '# ADR 1');
+      fs.writeFileSync(path.join(tempDir, 'storage/design/adr/ADR-002.md'), '# ADR 2');
+      fs.writeFileSync(path.join(tempDir, 'storage/design/adr/ADR-003.md'), '# ADR 3');
 
       const score = critic.checkAdrPresence({});
       expect(score).toBe(1);
@@ -254,12 +254,12 @@ describe('DesignCritic', () => {
 
   describe('evaluate', () => {
     it('should evaluate design', () => {
-      fs.mkdirSync(path.join(tempDir, 'docs/design/adr'), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, 'storage/design/adr'), { recursive: true });
       fs.writeFileSync(
-        path.join(tempDir, 'docs/design/main.md'),
+        path.join(tempDir, 'storage/design/main.md'),
         '# Design\n\nContext: REQ-001, REQ-002'
       );
-      fs.writeFileSync(path.join(tempDir, 'docs/design/adr/ADR-001.md'), '# ADR');
+      fs.writeFileSync(path.join(tempDir, 'storage/design/adr/ADR-001.md'), '# ADR');
 
       const result = critic.evaluate({});
       expect(result).toBeInstanceOf(CriticResult);
