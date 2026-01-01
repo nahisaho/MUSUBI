@@ -36,7 +36,7 @@ class DesignGenerator {
    * @returns {Promise<object>} Result with path
    */
   async init(feature, options = {}) {
-    const outputDir = path.join(this.rootDir, options.output || 'docs/design');
+    const outputDir = path.join(this.rootDir, options.output || 'storage/design');
     await fs.ensureDir(outputDir);
 
     const fileName = `${this.slugify(feature)}.md`;
@@ -605,7 +605,7 @@ Service --> Repository
     const matrix = [];
 
     // Find requirement files
-    const reqFiles = await glob('docs/requirements/**/*.md', {
+    const reqFiles = await glob('storage/specs/**/*.md', {
       cwd: this.rootDir,
       absolute: true,
     });

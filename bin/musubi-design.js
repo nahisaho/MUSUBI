@@ -41,10 +41,10 @@ program
 program
   .command('init <feature>')
   .description('Initialize design document for a feature')
-  .option('-o, --output <path>', 'Output directory', 'docs/design')
+  .option('-o, --output <path>', 'Output directory', 'storage/design')
   .option('-a, --author <name>', 'Author name')
   .option('--project <name>', 'Project name')
-  .option('-r, --requirements <path>', 'Requirements file path')
+  .option('-r, --requirements <path>', 'Requirements directory path', 'storage/specs')
   .option('--dry-run', 'Show what would be created without writing files')
   .option('--verbose', 'Show detailed output')
   .option('--json', 'Output result as JSON')
@@ -59,7 +59,7 @@ program
         console.log(chalk.dim(`  Output: ${options.output}`));
         console.log(chalk.dim(`  Author: ${options.author || 'Not specified'}`));
         console.log(chalk.dim(`  Project: ${options.project || 'Not specified'}`));
-        console.log(chalk.dim(`  Requirements: ${options.requirements || 'Not specified'}`));
+        console.log(chalk.dim(`  Requirements: ${options.requirements}`));
         console.log(chalk.dim(`  Dry run: ${options.dryRun || false}`));
         console.log();
       }
