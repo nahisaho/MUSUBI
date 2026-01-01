@@ -90,7 +90,12 @@ class DesignGenerator {
    * @returns {Promise<string[]>} List of design file paths
    */
   async findDesignFiles() {
-    const patterns = ['storage/design/**/*.md', 'storage/design/*.md', 'design/**/*.md', 'design/*.md'];
+    const patterns = [
+      'storage/design/**/*.md',
+      'storage/design/*.md',
+      'design/**/*.md',
+      'design/*.md',
+    ];
 
     const files = [];
     for (const pattern of patterns) {
