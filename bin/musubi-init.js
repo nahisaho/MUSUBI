@@ -25,22 +25,14 @@ const chalk = require('chalk');
 // Import helpers from separate modules to reduce file size
 const {
   fetchExternalSpec,
-  parseGitHubRepo,
-  fetchGitHubRepo,
   fetchGitHubRepos,
   analyzeReposForImprovements,
   saveReferenceRepos,
-  detectSpecFormat,
-  extractSpecSummary,
   saveSpecReference,
   recommendLanguages,
 } = require('../src/cli/init-helpers');
 
-const {
-  generateDependencyFiles,
-  generateTechMd,
-  LANG_INFO,
-} = require('../src/cli/init-generators');
+const { generateDependencyFiles, generateTechMd } = require('../src/cli/init-generators');
 
 const TEMPLATE_DIR = path.join(__dirname, '..', 'src', 'templates');
 const SHARED_TEMPLATE_DIR = path.join(TEMPLATE_DIR, 'shared');
