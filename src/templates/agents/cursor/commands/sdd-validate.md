@@ -37,8 +37,8 @@ Perform comprehensive validation of the feature implementation against:
 ```bash
 # Requirements and Design (English versions)
 storage/specs/{{feature-name}}-requirements.md
-storage/specs/{{feature-name}}-design.md
-storage/specs/{{feature-name}}-tasks.md
+storage/design/{{feature-name}}-design.md
+storage/tasks/{{feature-name}}-tasks.md
 
 # Steering Context (English versions)
 steering/structure.md

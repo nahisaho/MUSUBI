@@ -112,7 +112,7 @@ npx musubi-requirements "ユーザー認証機能"
 npx musubi-design user-auth
 ```
 
-生成されるファイル: `storage/specs/user-auth-design.md`
+生成されるファイル: `storage/design/user-auth-design.md`
 
 # Step 4: タスク分解
 
@@ -121,7 +121,7 @@ npx musubi-design user-auth
 npx musubi-tasks user-auth
 ```
 
-生成されるファイル: `storage/specs/user-auth-tasks.md`
+生成されるファイル: `storage/tasks/user-auth-tasks.md`
 
 # Step 5: 検証
 

@@ -57,7 +57,7 @@ grep -r "{{related-feature}}" lib/
 ls storage/specs/*requirements.md
 
 # Check existing design documents
-ls storage/specs/*design.md
+ls storage/design/*design.md
 ```
 
 **Document Current State**:
@@ -334,7 +334,7 @@ Use template from `templates/change-proposal.md`:
 ### References
 
 - Original requirements: `storage/specs/{{feature}}-requirements.md`
-- Current design: `storage/specs/{{feature}}-design.md`
+- Current design: `storage/design/{{feature}}-design.md`
 - Related issues: #123, #456
 
 ### Change History

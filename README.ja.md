@@ -71,6 +71,45 @@ musubi init --windsurf  # Windsurf IDE
 
 ---
 
+## 📊 v6.3.0 の新機能
+
+### SDD ドキュメントパス統一 📂
+
+ドキュメント種別の完全な分離による整理と明確化。
+
+#### ストレージ構造
+
+| ドキュメント種別 | 保存先 | ファイル名パターン |
+|----------------|--------|-------------------|
+| **要件定義書** | `storage/specs/` | `{feature}-requirements.md` |
+| **設計書** | `storage/design/` | `{feature}-design.md` |
+| **タスク** | `storage/tasks/` | `{feature}-tasks.md` |
+| **検証レポート** | `storage/validation/` | `{feature}-validation-report.md` |
+
+```
+storage/
+├── specs/          # 要件定義書のみ
+│   └── auth-requirements.md
+├── design/         # 設計書のみ
+│   └── auth-design.md
+├── tasks/          # タスクのみ
+│   └── auth-tasks.md
+└── validation/     # 検証レポート
+    └── auth-validation-report.md
+```
+
+#### 全7エージェントプラットフォーム更新
+
+全プロンプト・テンプレートを正しい保存先パスに更新:
+- Claude Code, GitHub Copilot, Cursor, Gemini CLI, Codex CLI, Qwen Code, Windsurf
+
+#### テスト結果
+
+- **単体テスト**: 4,827件パス ✅
+- **統合テスト**: 660件パス ✅
+
+---
+
 ## 📊 v6.2.0 の新機能
 
 ### Review Gate Engine 🛡️
@@ -907,8 +946,8 @@ AND システムSHALLセッションを作成する。
 **仕様**：
 
 - `storage/specs/auth-requirements.md` + `storage/specs/auth-requirements.ja.md`
-- `storage/specs/auth-design.md` + `storage/specs/auth-design.ja.md`
-- `storage/specs/auth-tasks.md` + `storage/specs/auth-tasks.ja.md`
+- `storage/design/auth-design.md` + `storage/design/auth-design.ja.md`
+- `storage/tasks/auth-tasks.md` + `storage/tasks/auth-tasks.ja.md`
 
 ### 生成順序
 

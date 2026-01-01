@@ -29,8 +29,8 @@ Validate that the implementation follows all Constitutional Articles and meets r
 
 3. **Feature Documentation**:
    - `storage/specs/{{feature-name}}-requirements.md`
-   - `storage/specs/{{feature-name}}-design.md`
-   - `storage/specs/{{feature-name}}-tasks.md`
+   - `storage/design/{{feature-name}}-design.md`
+   - `storage/tasks/{{feature-name}}-tasks.md`
 
 4. **Implementation**:
    - Read lib/{{feature-name}}/ directory

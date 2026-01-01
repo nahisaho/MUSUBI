@@ -29,10 +29,10 @@ Implement the feature by executing tasks in the task breakdown document, followi
    - `storage/specs/{{feature-name}}-requirements.md`
 
 3. **Design**:
-   - `storage/specs/{{feature-name}}-design.md`
+   - `storage/design/{{feature-name}}-design.md`
 
 4. **Tasks**:
-   - `storage/specs/{{feature-name}}-tasks.md`
+   - `storage/tasks/{{feature-name}}-tasks.md`
 
 **Note**: Always read English versions (.md), not Japanese translations (.ja.md)
 

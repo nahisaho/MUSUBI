@@ -68,8 +68,8 @@ GitHub Actions CI workflowの実装と動作検証 (Phase 1)
 
 ### 設計文書
 - `storage/specs/github-actions-requirements.md`
-- `storage/specs/github-actions-design.md`
-- `storage/specs/github-actions-tasks.md`
+- `storage/design/github-actions-design.md`
+- `storage/tasks/github-actions-tasks.md`
 
 ## 🔄 次のステップ
 

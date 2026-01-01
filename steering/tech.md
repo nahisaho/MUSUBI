@@ -1,8 +1,8 @@
 # Technology Stack
 
 **Project**: musubi
-**Last Updated**: 2025-12-31
-**Version**: 6.2.0
+**Last Updated**: 2026-01-02
+**Version**: 6.3.0
 
 ---
 
@@ -52,9 +52,18 @@
 - Community detection (Louvain algorithm)
 - Global/Local GraphRAG search
 
-## MUSUBI v6.2.0 Features
+## MUSUBI v6.3.0 Features
 
-### Review Gate Engine (New in v6.2.0)
+### SDD Document Path Unification (New in v6.3.0)
+
+| Document Type | Storage Path | Purpose |
+|---------------|--------------|---------|
+| Requirements | `storage/specs/` | EARS format requirements |
+| Design | `storage/design/` | C4 + ADR design documents |
+| Tasks | `storage/tasks/` | Task breakdown documents |
+| Validation | `storage/validation/` | Validation reports |
+
+### Review Gate Engine (v6.2.0)
 
 | Feature | Description |
 |---------|-------------|
@@ -118,4 +127,4 @@
 
 ---
 
-*Updated: 2025-12-31 - MUSUBI v6.2.0*
+*Updated: 2026-01-02 - MUSUBI v6.3.0*

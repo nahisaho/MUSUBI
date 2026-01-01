@@ -205,9 +205,11 @@ your-project/
 │   ├── memories/           # 機能別メモリ
 │   └── templates/          # カスタムテンプレート
 ├── storage/
-│   ├── specs/              # 生成された仕様
-│   ├── features/           # 機能別ドキュメント
-│   └── changes/            # 変更履歴
+│   ├── specs/              # 要件定義書（v6.3.0）
+│   ├── design/             # 設計書（v6.3.0）
+│   ├── tasks/              # タスク（v6.3.0）
+│   ├── validation/         # 検証レポート
+│   └── changes/            # 変更仕様
 └── src/                    # ソースコード
 ```
 

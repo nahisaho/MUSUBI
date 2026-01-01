@@ -184,8 +184,8 @@ def validate_traceability_setup(feature_name):
     """
     required_artifacts = {
         "requirements": f"storage/specs/{feature_name}-requirements.md",
-        "design": f"storage/specs/{feature_name}-design.md",
-        "tasks": f"storage/specs/{feature_name}-tasks.md",
+        "design": f"storage/design/{feature_name}-design.md",
+        "tasks": f"storage/tasks/{feature_name}-tasks.md",
     }
     
     for artifact, path in required_artifacts.items():

@@ -1,6 +1,6 @@
 # MUSUBI ユーザーガイド
 
-**バージョン 6.0.0** | 仕様駆動開発の完全リファレンス
+**バージョン 6.3.0** | 仕様駆動開発の完全リファレンス
 
 ---
 
@@ -88,8 +88,10 @@ project/
 │   └── rules/
 │       └── constitution.md  # 9つの条項
 ├── storage/
-│   ├── specs/            # EARS要件
-│   ├── features/         # C4設計
+│   ├── specs/            # 要件定義書（EARS形式）
+│   ├── design/           # 設計書（C4 + ADR）
+│   ├── tasks/            # タスク分解
+│   ├── validation/       # 検証レポート
 │   └── changes/          # デルタ仕様
 └── .github/
     └── workflows/        # CI/CD自動化

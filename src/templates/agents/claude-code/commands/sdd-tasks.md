@@ -30,7 +30,7 @@ Generate a comprehensive task breakdown that transforms the design into actionab
 
 ```bash
 # Design and Requirements
-storage/specs/{{feature-name}}-design.md
+storage/design/{{feature-name}}-design.md
 storage/specs/{{feature-name}}-requirements.md
 
 # Steering Context
@@ -48,7 +48,7 @@ steering/product.md
 ```markdown
 ❌ **Error**: Design document not found
 
-Expected: storage/specs/{{feature-name}}-design.md
+Expected: storage/design/{{feature-name}}-design.md
 
 Please run `/sdd-design {{feature-name}}` first.
 
@@ -487,10 +487,10 @@ Before marking feature complete, verify:
 **IMPORTANT**: Create BOTH English and Japanese versions.
 
 **English version (Primary/Reference)**:
-`storage/specs/{{feature-name}}-tasks.md`
+`storage/tasks/{{feature-name}}-tasks.md`
 
 **Japanese version (Translation)**:
-`storage/specs/{{feature-name}}-tasks.ja.md`
+`storage/tasks/{{feature-name}}-tasks.ja.md`
 
 **File Naming**:
 - Match requirements and design files
@@ -512,8 +512,8 @@ Before marking feature complete, verify:
 
 **Feature**: {{FEATURE_NAME}}
 **Files**:
-- English: storage/specs/{{feature-name}}-tasks.md
-- Japanese: storage/specs/{{feature-name}}-tasks.ja.md
+- English: storage/tasks/{{feature-name}}-tasks.md
+- Japanese: storage/tasks/{{feature-name}}-tasks.ja.md
 
 ### Summary:
 - **Total Tasks**: [N]
@@ -597,7 +597,7 @@ Before completing:
 ```markdown
 ❌ **Error**: Design document not found
 
-Expected: storage/specs/{{feature-name}}-design.md
+Expected: storage/design/{{feature-name}}-design.md
 
 Please run `/sdd-design {{feature-name}}` first.
 ```

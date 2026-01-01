@@ -102,8 +102,8 @@ Test Suite (tests/auth/service.test.ts)
 ### Phase 1: Collect Artifacts
 
 1. Read `storage/specs/[feature]-requirements.md`
-2. Read `storage/specs/[feature]-design.md`
-3. Read `storage/specs/[feature]-tasks.md`
+2. Read `storage/design/[feature]-design.md`
+3. Read `storage/tasks/[feature]-tasks.md`
 4. Scan source code for implementation
 5. Scan test files for test cases
 

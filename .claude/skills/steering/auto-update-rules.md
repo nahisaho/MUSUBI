@@ -143,7 +143,7 @@ git diff --name-only --diff-filter=A | grep "requirements\.md"
 
 ### memories/architecture_decisions.md
 
-**Trigger**: New ADR created in `storage/specs/*-design.md`
+**Trigger**: New ADR created in `storage/design/*-design.md`
 
 **Action**:
 ```markdown

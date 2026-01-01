@@ -291,10 +291,10 @@ Verify alignment with Constitutional Articles:
 **IMPORTANT**: Create BOTH English and Japanese versions.
 
 **English version (Primary/Reference)**:
-Save to: `storage/specs/{{feature-name}}-design.md`
+Save to: `storage/design/{{feature-name}}-design.md`
 
 **Japanese version (Translation)**:
-Save to: `storage/specs/{{feature-name}}-design.ja.md`
+Save to: `storage/design/{{feature-name}}-design.ja.md`
 
 Translation rules:
 - Keep technical terms in English (API, JWT, bcrypt, etc.)

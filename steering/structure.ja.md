@@ -1,8 +1,8 @@
 # プロジェクト構造
 
 **プロジェクト**: musubi
-**最終更新**: 2025-12-24
-**バージョン**: 5.9.6
+**最終更新**: 2026-01-02
+**バージョン**: 6.3.0
 
 ---
 
@@ -37,7 +37,7 @@ musubi/
 │   └── validators/         # Constitution & 検証
 ├── steering/               # プロジェクトステアリングファイル
 ├── docs/                   # ドキュメント
-├── tests/                  # テストスイート (4,408 テスト)
+├── tests/                  # テストスイート (4,827+ テスト)
 └── packages/               # サブパッケージ (VSCode 拡張機能)
 ```
 
@@ -121,6 +121,15 @@ Domain レイヤーは依存なし
 ```
 
 ## 変更履歴
+
+### 2026-01-02 (v6.3.0)
+- SDDドキュメントパス統一完了
+- 要件定義書 → storage/specs
+- 設計書 → storage/design  
+- タスク → storage/tasks
+- 全エージェントテンプレート更新 (7プラットフォーム)
+- 単体テスト: 4,827件パス
+- 統合テスト: 660件パス
 
 ### 2026-01-01 (v6.2.0)
 - SDDドキュメントパス統一: storage/specs, storage/design, storage/tasks
@@ -329,11 +338,15 @@ docs/
 
 ```
 storage/
-├── specs/                # Specifications
+├── specs/                # 要件定義書のみ
 │   ├── auth-requirements.md
-│   ├── auth-design.md
-│   ├── auth-tasks.md
 │   └── payment-requirements.md
+├── design/               # 設計書のみ
+│   ├── auth-design.md
+│   └── payment-design.md
+├── tasks/                # タスクのみ
+│   ├── auth-tasks.md
+│   └── payment-tasks.md
 ├── changes/              # Delta specifications (brownfield)
 │   ├── add-2fa.md
 │   └── upgrade-jwt.md
@@ -344,6 +357,16 @@ storage/
     ├── auth-validation-report.md
     └── payment-validation-report.md
 ```
+
+### パス規則 (v6.3.0)
+
+| ドキュメント種別 | 保存先 | ファイル名パターン |
+|----------------|--------|-------------------|
+| 要件定義書 | `storage/specs/` | `{feature}-requirements.md` |
+| 設計書 | `storage/design/` | `{feature}-design.md` |
+| タスク | `storage/tasks/` | `{feature}-tasks.md` |
+| 検証レポート | `storage/validation/` | `{feature}-validation-report.md` |
+| 変更仕様 | `storage/changes/` | `{change-name}.md` |
 
 ---
 

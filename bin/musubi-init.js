@@ -403,6 +403,8 @@ async function main(agent, agentKey, options = {}) {
     'steering/rules',
     'templates',
     'storage/specs',
+    'storage/design',
+    'storage/tasks',
     'storage/changes',
     'storage/archive',
   ];

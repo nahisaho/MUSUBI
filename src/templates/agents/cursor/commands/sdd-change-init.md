@@ -334,7 +334,7 @@ Use template from `templates/change-proposal.md`:
 ### References
 
 - Original requirements: `storage/specs/{{feature}}-requirements.md`
-- Current design: `storage/specs/{{feature}}-design.md`
+- Current design: `storage/design/{{feature}}-design.md`
 - Related issues: #123, #456
 
 ### Change History

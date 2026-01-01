@@ -1,8 +1,8 @@
 # 技術スタック
 
 **プロジェクト**: musubi
-**最終更新**: 2025-12-24
-**バージョン**: 5.9.6
+**最終更新**: 2026-01-02
+**バージョン**: 6.3.0
 
 ---
 
@@ -56,9 +56,27 @@ MUSUBI は Node.js/JavaScript で構築された仕様駆動開発 (SDD) ツー�
 - コミュニティ検出 (Louvain アルゴリズム)
 - Global/Local GraphRAG 検索
 
-## MUSUBI v5.9.6 機能
+## MUSUBI v6.3.0 機能
 
-### エンタープライズ機能 (Phase 1-4)
+### SDD ドキュメントパス統一 (v6.3.0 新規)
+
+| ドキュメント種別 | 保存先 | 用途 |
+|----------------|--------|------|
+| 要件定義書 | `storage/specs/` | EARS 形式要件 |
+| 設計書 | `storage/design/` | C4 + ADR 設計 |
+| タスク | `storage/tasks/` | タスク分解 |
+| 検証レポート | `storage/validation/` | 検証レポート |
+
+### Review Gate Engine (v6.2.0)
+
+| 機能 | 説明 |
+|------|------|
+| **Requirements Gate** | EARS形式、優先度、受入基準の検証 |
+| **Design Gate** | C4モデル、ADR、コンポーネント設計の検証 |
+| **Implementation Gate** | コード品質、テストカバレッジ、命名規則の検証 |
+| **Review Prompts** | `#sdd-review-requirements`, `#sdd-review-design` など |
+
+### エンタープライズ機能
 
 | 機能 | 説明 |
 |------|------|
@@ -67,7 +85,7 @@ MUSUBI は Node.js/JavaScript で構築された仕様駆動開発 (SDD) ツー�
 | **Constitution レベル** | critical (必須), advisory (推奨), flexible (柔軟) |
 | **project.yml v2.0** | JSON Schema 検証、マイグレーションサポート |
 
-### CLI コマンド (24種)
+### CLI コマンド (25種)
 
 - `musubi-init` - プロジェクト初期化
 - `musubi-steering` - ステアリング管理
@@ -78,10 +96,14 @@ MUSUBI は Node.js/JavaScript で構築された仕様駆動開発 (SDD) ツー�
 - `musubi-workflow` - ワークフロー管理
 - `musubi-release` - リリース管理
 - `musubi-config` - 設定管理
+- `musubi-dashboard` - ワークフローダッシュボード
 - ... (他15種)
 
-### 組み込みスキル
+### 組み込みスキル (31 エージェント)
 
+- `review-gate-engine` - Review Gate 検証 (v6.2.0)
+- `workflow-dashboard` - 進捗可視化 (v6.2.0)
+- `traceability-manager` - 自動抽出とギャップ検出 (v6.2.0)
 - `release-manager` - リリース管理スキル
 - `workflow-mode-manager` - ワークフローモード管理
 - `package-manager` - モノレポパッケージ管理
@@ -90,4 +112,4 @@ MUSUBI は Node.js/JavaScript で構築された仕様駆動開発 (SDD) ツー�
 
 ---
 
-*更新: 2025-12-24 - MUSUBI v5.9.6*
+*更新: 2026-01-02 - MUSUBI v6.3.0*

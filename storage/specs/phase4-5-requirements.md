@@ -31,7 +31,7 @@ including file structure, dependencies, and symbol definitions.
 - [x] Export to JSON/Markdown format
 
 **Traceability**:
-- Design: `storage/specs/phase4-5-design.md#3.1`
+- Design: `storage/design/phase4-5-design.md#3.1`
 - Implementation: `src/analyzers/repository-map.js`
 - Test: `tests/analyzers/repository-map.test.js`
 
@@ -58,7 +58,7 @@ for JavaScript, TypeScript, and Python files.
 - [x] Complexity metrics calculation
 
 **Traceability**:
-- Design: `storage/specs/phase4-5-design.md#3.2`
+- Design: `storage/design/phase4-5-design.md#3.2`
 - Implementation: `src/analyzers/ast-extractor.js`
 - Test: `tests/analyzers/ast-extractor.test.js`
 
@@ -83,7 +83,7 @@ by filtering and prioritizing relevant code sections.
 - [x] Priority-based selection
 
 **Traceability**:
-- Design: `storage/specs/phase4-5-design.md#3.3`
+- Design: `storage/design/phase4-5-design.md#3.3`
 - Implementation: `src/analyzers/context-optimizer.js`
 - Test: `tests/analyzers/context-optimizer.test.js`
 
@@ -110,7 +110,7 @@ displaying code coverage, complexity trends, and constitutional compliance.
 - [x] Historical data tracking
 
 **Traceability**:
-- Design: `storage/specs/phase4-5-design.md#3.4`
+- Design: `storage/design/phase4-5-design.md#3.4`
 - Implementation: `src/monitoring/quality-dashboard.js`
 - Test: `tests/monitoring/quality-dashboard.test.js`
 
@@ -136,7 +136,7 @@ with appropriate severity levels.
 - [x] Incident history and audit log
 
 **Traceability**:
-- Design: `storage/specs/phase4-5-design.md#3.5`
+- Design: `storage/design/phase4-5-design.md#3.5`
 - Implementation: `src/monitoring/incident-manager.js`
 - Test: `tests/monitoring/incident-manager.test.js`
 
@@ -161,7 +161,7 @@ THEN the system SHALL automate version bumping, changelog generation, and npm pu
 - [x] GitHub release creation
 
 **Traceability**:
-- Design: `storage/specs/phase4-5-design.md#3.6`
+- Design: `storage/design/phase4-5-design.md#3.6`
 - Implementation: `src/monitoring/release-manager.js`
 - Test: `tests/monitoring/release-manager.test.js`
 
@@ -186,7 +186,7 @@ the system SHALL provide metrics, logging, and tracing capabilities.
 - [x] OpenTelemetry compatibility
 
 **Traceability**:
-- Design: `storage/specs/phase4-5-design.md#3.7`
+- Design: `storage/design/phase4-5-design.md#3.7`
 - Implementation: `src/monitoring/observability.js`
 - Test: `tests/monitoring/observability.test.js`
 
@@ -211,7 +211,7 @@ for all LLM interactions.
 - [x] Cost alert thresholds
 
 **Traceability**:
-- Design: `storage/specs/phase4-5-design.md#3.8`
+- Design: `storage/design/phase4-5-design.md#3.8`
 - Implementation: `src/monitoring/cost-tracker.js`
 - Test: `tests/monitoring/cost-tracker.test.js`
 

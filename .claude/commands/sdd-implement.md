@@ -32,10 +32,10 @@ Implement the feature by executing tasks from the task breakdown document, follo
 
 ```bash
 # Task Breakdown (English version)
-storage/specs/{{feature-name}}-tasks.md
+storage/tasks/{{feature-name}}-tasks.md
 
 # Design (English version)
-storage/specs/{{feature-name}}-design.md
+storage/design/{{feature-name}}-design.md
 
 # Requirements (English version)
 storage/specs/{{feature-name}}-requirements.md
@@ -57,7 +57,7 @@ steering/product.md
 ```markdown
 ❌ **Error**: Task breakdown not found
 
-Expected: storage/specs/{{feature-name}}-tasks.md
+Expected: storage/tasks/{{feature-name}}-tasks.md
 
 Please run `/sdd-tasks {{feature-name}}` first.
 
@@ -69,7 +69,7 @@ Implementation requires task breakdown.
 ```markdown
 ❌ **Error**: Design document not found
 
-Expected: storage/specs/{{feature-name}}-design.md
+Expected: storage/design/{{feature-name}}-design.md
 
 Implementation requires design document.
 ```

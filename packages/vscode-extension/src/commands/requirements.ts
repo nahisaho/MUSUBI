@@ -43,7 +43,7 @@ export async function generateRequirements(): Promise<void> {
       const possiblePaths = [
         `storage/specs/REQ-${feature}.md`,
         `storage/specs/requirements/${feature}.md`,
-        `docs/requirements/${feature}.md`,
+        `storage/specs/${feature}.md`,
       ];
 
       for (const relativePath of possiblePaths) {

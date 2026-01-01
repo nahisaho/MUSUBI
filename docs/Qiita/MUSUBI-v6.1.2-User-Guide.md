@@ -417,7 +417,7 @@ graph TB
 
 ### 設計フェーズの成果物
 
-設計が完了すると、`storage/specs/roster-api-design.md` に以下が生成されます。
+設計が完了すると、`storage/design/roster-api-design.md` に以下が生成されます。
 
 - C4モデル（4レベルの設計図）
 - データベース設計（ER図、テーブル定義）
@@ -560,7 +560,7 @@ OneRoster API プロジェクトは MUSUBI SDD ワークフローに従い、5�
 
 ### タスク分解フェーズの成果物
 
-タスク分解が完了すると、`storage/specs/roster-api-tasks.md` に以下が生成されます。
+タスク分解が完了すると、`storage/tasks/roster-api-tasks.md` に以下が生成されます。
 
 - 全タスク一覧（25件）とP-ラベル分類
 - 各タスクの詳細（目的、タスク内容、成果物、見積もり、依存関係）

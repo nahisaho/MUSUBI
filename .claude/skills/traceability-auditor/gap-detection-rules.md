@@ -90,7 +90,7 @@ for ref in all_references:
 # find-orphaned-requirements.sh
 
 REQ_FILE="storage/specs/$1-requirements.md"
-DESIGN_FILE="storage/specs/$1-design.md"
+DESIGN_FILE="storage/design/$1-design.md"
 
 # Extract requirement IDs
 grep -oP 'REQ-[\w-]+' "$REQ_FILE" | sort -u > /tmp/reqs.txt

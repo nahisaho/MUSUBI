@@ -71,6 +71,45 @@ musubi init --windsurf  # Windsurf IDE
 
 ---
 
+## 📊 What's New in v6.3.0
+
+### SDD Document Path Unification 📂
+
+Complete separation of document types for better organization and clarity.
+
+#### Storage Structure
+
+| Document Type | Storage Path | Naming Pattern |
+|---------------|--------------|----------------|
+| **Requirements** | `storage/specs/` | `{feature}-requirements.md` |
+| **Design** | `storage/design/` | `{feature}-design.md` |
+| **Tasks** | `storage/tasks/` | `{feature}-tasks.md` |
+| **Validation** | `storage/validation/` | `{feature}-validation-report.md` |
+
+```
+storage/
+├── specs/          # Requirements only
+│   └── auth-requirements.md
+├── design/         # Design documents only
+│   └── auth-design.md
+├── tasks/          # Tasks only
+│   └── auth-tasks.md
+└── validation/     # Validation reports
+    └── auth-validation-report.md
+```
+
+#### Updated All 7 Agent Platforms
+
+All prompts and templates updated with correct storage paths:
+- Claude Code, GitHub Copilot, Cursor, Gemini CLI, Codex CLI, Qwen Code, Windsurf
+
+#### Test Results
+
+- **Unit Tests**: 4,827 passing ✅
+- **Integration Tests**: 660 passing ✅
+
+---
+
 ## 📊 What's New in v6.2.0
 
 ### Review Gate Engine 🛡️
@@ -1187,8 +1226,8 @@ AND the system SHALL create a session.
 **Specifications**:
 
 - `storage/specs/auth-requirements.md` + `storage/specs/auth-requirements.ja.md`
-- `storage/specs/auth-design.md` + `storage/specs/auth-design.ja.md`
-- `storage/specs/auth-tasks.md` + `storage/specs/auth-tasks.ja.md`
+- `storage/design/auth-design.md` + `storage/design/auth-design.ja.md`
+- `storage/tasks/auth-tasks.md` + `storage/tasks/auth-tasks.ja.md`
 
 ### Generation Order
 

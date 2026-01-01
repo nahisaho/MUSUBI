@@ -78,29 +78,6 @@ export class RequirementsTreeProvider implements vscode.TreeDataProvider<Require
         // Subdirectory doesn't exist
       }
 
-      // Also check docs/requirements
-      const docsReqPath = path.join(workspaceRoot, 'docs', 'requirements');
-      try {
-        const docsEntries = await vscode.workspace.fs.readDirectory(vscode.Uri.file(docsReqPath));
-        for (const [name, type] of docsEntries) {
-          if (type === vscode.FileType.File && name.endsWith('.md')) {
-            const filePath = path.join(docsReqPath, name);
-            const priority = this.extractPriority(name);
-            items.push(
-              new RequirementItem(
-                name.replace('.md', ''),
-                vscode.TreeItemCollapsibleState.None,
-                'requirement',
-                vscode.Uri.file(filePath),
-                priority
-              )
-            );
-          }
-        }
-      } catch {
-        // docs/requirements doesn't exist
-      }
-
     } catch {
       items.push(
         new RequirementItem(

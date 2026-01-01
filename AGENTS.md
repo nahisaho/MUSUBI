@@ -24,6 +24,15 @@ This project uses **MUSUBI** (Ultimate Specification Driven Development).
 - `#sdd-review-implementation <feature>` - Review implementation (coverage, lint, traceability)
 - `#sdd-review-all <feature>` - Full review cycle for all phases
 
+### Storage Paths (v6.3.0)
+
+| Document | Path |
+|----------|------|
+| Requirements | `storage/specs/{feature}-requirements.md` |
+| Design | `storage/design/{feature}-design.md` |
+| Tasks | `storage/tasks/{feature}-tasks.md` |
+| Validation | `storage/validation/{feature}-validation-report.md` |
+
 ### Project Memory
 
 - `steering/structure.md` - Architecture patterns
@@ -40,5 +49,5 @@ This project uses **MUSUBI** (Ultimate Specification Driven Development).
 ---
 
 **Agent**: GitHub Copilot
-**Initialized**: 2026-01-01
-**MUSUBI Version**: 0.1.0
+**Initialized**: 2026-01-02
+**MUSUBI Version**: 6.3.0

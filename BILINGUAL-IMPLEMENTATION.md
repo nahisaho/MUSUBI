@@ -141,10 +141,10 @@ steering/product.ja.md     (Japanese - Translation)
 ```
 storage/specs/auth-requirements.md      (English - Reference)
 storage/specs/auth-requirements.ja.md   (Japanese - Translation)
-storage/specs/auth-design.md            (English - Reference)
-storage/specs/auth-design.ja.md         (Japanese - Translation)
-storage/specs/auth-tasks.md             (English - Reference)
-storage/specs/auth-tasks.ja.md          (Japanese - Translation)
+storage/design/auth-design.md            (English - Reference)
+storage/design/auth-design.ja.md         (Japanese - Translation)
+storage/tasks/auth-tasks.md             (English - Reference)
+storage/tasks/auth-tasks.ja.md          (Japanese - Translation)
 ```
 
 ## Generation Workflow
@@ -173,16 +173,16 @@ storage/specs/auth-tasks.ja.md          (Japanese - Translation)
 ```
 1. Read storage/specs/[feature]-requirements.md (English)
 2. Read steering context (English versions)
-3. Generate storage/specs/[feature]-design.md (English)
-4. Generate storage/specs/[feature]-design.ja.md (Japanese translation)
+3. Generate storage/design/[feature]-design.md (English)
+4. Generate storage/design/[feature]-design.ja.md (Japanese translation)
 ```
 
 ### 4. Tasks Generation (/sdd-tasks [feature])
 ```
-1. Read storage/specs/[feature]-design.md (English)
+1. Read storage/design/[feature]-design.md (English)
 2. Read storage/specs/[feature]-requirements.md (English)
-3. Generate storage/specs/[feature]-tasks.md (English)
-4. Generate storage/specs/[feature]-tasks.ja.md (Japanese translation)
+3. Generate storage/tasks/[feature]-tasks.md (English)
+4. Generate storage/tasks/[feature]-tasks.ja.md (Japanese translation)
 ```
 
 ## Technical Term Handling

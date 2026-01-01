@@ -162,8 +162,8 @@ MUSUBI enforces 9 immutable constitutional articles:
 **Specifications**:
 
 - `storage/specs/[feature]-requirements.md` + `.ja.md`
-- `storage/specs/[feature]-design.md` + `.ja.md`
-- `storage/specs/[feature]-tasks.md` + `.ja.md`
+- `storage/design/[feature]-design.md` + `.ja.md`
+- `storage/tasks/[feature]-tasks.md` + `.ja.md`
 
 ## Quick Start
 

@@ -17,9 +17,18 @@ MUSUBI は、仕様駆動開発 (SDD) を通じて AI コーディングエー�
 - **MCP Integration**: CodeGraph MCP による高度なコード分析
 - **Traceability**: 要件からテストまでの完全な追跡可能性
 
-## v6.2.0 Features (New)
+## v6.3.0 Features (New)
 
-### Review Gate Engine
+### SDD Document Path Unification
+
+| Document Type | Storage Path | Purpose |
+|---------------|--------------|---------|
+| Requirements | `storage/specs/` | EARS format requirements |
+| Design | `storage/design/` | C4 + ADR design documents |
+| Tasks | `storage/tasks/` | Task breakdown documents |
+| Validation | `storage/validation/` | Validation reports |
+
+### Review Gate Engine (v6.2.0)
 
 | Feature | Description |
 |---------|-------------|
@@ -86,4 +95,4 @@ MUSUBI は、仕様駆動開発 (SDD) を通じて AI コーディングエー�
 
 ---
 
-*Updated: 2025-12-31 - MUSUBI v6.2.0*
+*Updated: 2026-01-02 - MUSUBI v6.3.0*

@@ -97,8 +97,8 @@ def generate_traceability_matrix(feature_name):
     """Generate traceability matrix for a feature."""
     
     requirements = parse_requirements(f"storage/specs/{feature_name}-requirements.md")
-    design = parse_design(f"storage/specs/{feature_name}-design.md")
-    tasks = parse_tasks(f"storage/specs/{feature_name}-tasks.md")
+    design = parse_design(f"storage/design/{feature_name}-design.md")
+    tasks = parse_tasks(f"storage/tasks/{feature_name}-tasks.md")
     code_files = find_code_files(f"src/{feature_name}/")
     test_files = find_test_files(f"tests/{feature_name}/")
     

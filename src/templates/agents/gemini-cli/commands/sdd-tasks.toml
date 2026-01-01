@@ -28,7 +28,7 @@ Create a detailed implementation task breakdown following test-first development
    - `storage/specs/{{feature-name}}-requirements.md`
 
 3. **Design**:
-   - `storage/specs/{{feature-name}}-design.md`
+   - `storage/design/{{feature-name}}-design.md`
 
 **Note**: Always read English versions (.md), not Japanese translations (.ja.md)
 
@@ -390,10 +390,10 @@ TASK-002 (Env Config) ──> All tasks
 **IMPORTANT**: Create BOTH English and Japanese versions.
 
 **English version (Primary/Reference)**:
-Save to: `storage/specs/{{feature-name}}-tasks.md`
+Save to: `storage/tasks/{{feature-name}}-tasks.md`
 
 **Japanese version (Translation)**:
-Save to: `storage/specs/{{feature-name}}-tasks.ja.md`
+Save to: `storage/tasks/{{feature-name}}-tasks.ja.md`
 
 Translation rules:
 - Keep task IDs in English (TASK-001)

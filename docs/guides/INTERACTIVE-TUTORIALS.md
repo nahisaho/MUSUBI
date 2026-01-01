@@ -230,7 +230,7 @@ Coverage: 0% → Next step: Generate design documents
 musubi design "ユーザー認証機能"
 ```
 
-**生成される出力 (`storage/specs/user-authentication-design.md`):**
+**生成される出力 (`storage/design/user-authentication-design.md`):**
 
 ```markdown
 # User Authentication Design
@@ -282,7 +282,7 @@ C4Container
 
 ```bash
 # 設計の妥当性チェック
-musubi validate --design storage/specs/user-authentication-design.md
+musubi validate --design storage/design/user-authentication-design.md
 ```
 
 ### ステップ 3: トレーサビリティ更新
@@ -326,7 +326,7 @@ Coverage: 33% → Next step: Generate tasks
 musubi tasks "ユーザー認証機能"
 ```
 
-**生成される出力 (`storage/specs/user-authentication-tasks.md`):**
+**生成される出力 (`storage/tasks/user-authentication-tasks.md`):**
 
 ```markdown
 # User Authentication Tasks
@@ -386,7 +386,7 @@ You are implementing the database schema for user authentication.
 - REQ-AUTH-002: Password security (bcrypt)
 
 ### Design Reference
-- See: storage/specs/user-authentication-design.md
+- See: storage/design/user-authentication-design.md
 - Database: PostgreSQL
 - Schema conventions: snake_case
 

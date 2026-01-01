@@ -5,24 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [6.3.0] - 2026-01-01
+## [6.3.0] - 2026-01-02
+
+### Added
+
+- **SDD Document Path Unification**:
+  - Requirements → `storage/specs/`
+  - Design documents → `storage/design/`
+  - Task documents → `storage/tasks/`
+  - Validation reports → `storage/validation/`
+  - Clear separation of document types for better organization
+
+- **musubi-init Directory Creation**:
+  - `storage/design/` directory now created during initialization
+  - `storage/tasks/` directory now created during initialization
 
 ### Changed
 
-- **Document Path Unification**:
-  - Unified all document paths to `storage/` directory structure
-  - Requirements documents now save to `storage/specs/`
-  - Design documents now save to `storage/design/`
-  - Task documents now save to `storage/tasks/`
-  - Updated all internal references to use new storage paths
+- **All Agent Templates Updated** (7 platforms):
+  - Claude Code (`.claude/`)
+  - GitHub Copilot (`.github/prompts/`)
+  - Cursor (`.cursor/commands/`)
+  - Gemini CLI (`.gemini/commands/`)
+  - Codex CLI (`.codex/prompts/`)
+  - Qwen Code (`.qwen/commands/`)
+  - Windsurf (`.windsurf/workflows/`)
 
-- **Steering Files Updates**:
-  - Updated steering files with new `storage/` document paths
-  - Improved consistency across documentation
+- **Steering Files Updated**:
+  - `structure.md` - Complete structure documentation with path rules
+  - `structure.ja.md` - Updated with v6.3.0 path rules
+  - `tech.md` / `tech.ja.md` - Updated to v6.3.0
+  - `product.md` / `product.ja.md` - Updated with path unification feature
+
+- **Documentation Updates**:
+  - All prompt files updated with correct storage paths
+  - All skill templates updated with correct storage paths
 
 ### Fixed
 
-- Updated remaining `docs/` paths to `storage/` structure for consistency
+- Design documents no longer save to `storage/specs/` (now correctly save to `storage/design/`)
+- Task documents no longer save to `storage/specs/` (now correctly save to `storage/tasks/`)
+
+### Testing
+
+- **Unit Tests**: 4,827 tests passing (159 suites)
+- **Integration Tests**: 660 tests passing (16 suites)
+- **Virtual Project Verification**: Generator output paths verified
 
 ## [6.2.0] - 2026-01-01
 

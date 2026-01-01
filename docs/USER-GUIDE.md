@@ -1,6 +1,6 @@
 # MUSUBI User Guide
 
-**Version 6.0.0** | Complete Reference for Specification Driven Development
+**Version 6.3.0** | Complete Reference for Specification Driven Development
 
 ---
 
@@ -88,8 +88,10 @@ project/
 │   └── rules/
 │       └── constitution.md  # 9 Articles
 ├── storage/
-│   ├── specs/            # EARS requirements
-│   ├── features/         # C4 designs
+│   ├── specs/            # Requirements (EARS format)
+│   ├── design/           # Design documents (C4 + ADR)
+│   ├── tasks/            # Task breakdowns
+│   ├── validation/       # Validation reports
 │   └── changes/          # Delta specifications
 └── .github/
     └── workflows/        # CI/CD automation

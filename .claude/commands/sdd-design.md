@@ -531,10 +531,10 @@ Document ADRs for:
 **IMPORTANT**: Create BOTH English and Japanese versions.
 
 **English version (Primary/Reference)**:
-`storage/specs/{{feature-name}}-design.md`
+`storage/design/{{feature-name}}-design.md`
 
 **Japanese version (Translation)**:
-`storage/specs/{{feature-name}}-design.ja.md`
+`storage/design/{{feature-name}}-design.ja.md`
 
 **File Naming**:
 
@@ -545,10 +545,10 @@ Document ADRs for:
 
 **Examples**:
 
-- `storage/specs/authentication-design.md` (English)
-- `storage/specs/authentication-design.ja.md` (Japanese)
-- `storage/specs/payment-processing-design.md` (English)
-- `storage/specs/payment-processing-design.ja.md` (Japanese)
+- `storage/design/authentication-design.md` (English)
+- `storage/design/authentication-design.ja.md` (Japanese)
+- `storage/design/payment-processing-design.md` (English)
+- `storage/design/payment-processing-design.ja.md` (Japanese)
 
 **Generation Order**:
 
@@ -565,7 +565,7 @@ Document ADRs for:
 Run constitutional validation:
 
 ```bash
-@constitution-enforcer validate storage/specs/{{feature-name}}-design.md
+@constitution-enforcer validate storage/design/{{feature-name}}-design.md
 ```
 
 **Checks**:
@@ -584,7 +584,7 @@ Run constitutional validation:
 ## ✅ Technical Design Complete
 
 **Feature**: {{FEATURE_NAME}}
-**File**: storage/specs/{{feature-name}}-design.md
+**File**: storage/design/{{feature-name}}-design.md
 
 ### Architecture Summary:
 
